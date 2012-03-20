@@ -1,0 +1,11 @@
+
+# WWW - PHP micro-framework
+# 
+# This script is simply used to test whether mod_rewrite works for compatibility script
+# 
+# Author and support: Kristo Vaher - kristo@waher.net
+
+# Adding a GET variable to compatibility.php request
+RewriteEngine on
+RewriteCond %{QUERY_STRING} !=mod_rewrite_enabled
+RewriteRule (compatibility\.php)$ ./compatibility.php?mod_rewrite_enabled [L]

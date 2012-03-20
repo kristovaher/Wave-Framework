@@ -1,0 +1,38 @@
+
+# WWW - PHP micro-framework
+# 
+# Apache commands are stored in this file, including the loading of RewriteEngine, which is 
+# used to filter requests to certain file extensions and direct certain files to /index.php 
+# for parsing, including loading all URL's that it cannot find that WWW_controller_url can 
+# solve. These commands are required if you wish to use /index.php for website building with 
+# WWW framework.
+# 
+# Author and support: Kristo Vaher - kristo@waher.net
+
+# Required for Rewrite Engine security, but should be removed if errors appear
+Options +FollowSymlinks
+
+# All requests, except some static files, are redirected to index.php gateway file.
+RewriteEngine on
+
+# This hides a number of files from public access, including certificates, temporary and log fyles and database files
+RewriteRule (.*\.(tmp|log|ht|htaccess|pem|crt|db|sql))$ ./index.php?403 [L]
+
+# Redirecting existing image file to gateway
+RewriteRule (.*\.(jpeg|jpg|png|ico|gif|bmp))$ ./index.php?image [L]
+
+# Redirecting existing css file to gateway
+RewriteRule (.*\.(css|js|txt|csv|xml|html|htm|rss|ini|vcard))$ ./index.php?resource [L]
+
+# Redirecting API requests to gateway
+RewriteRule (.*\.api)$ ./index.php?api [L]
+
+# Requests that seem to have an extension are directed to File handler
+RewriteCond %{REQUEST_FILENAME} !(.*\.php)$
+RewriteRule (.*\.([a-zA-Z]{2,4}))$ ./index.php?file [L]
+
+# Redirecting anything that is not a file to gateway
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule .* ./index.php?data [L]
+
+# Every other file is handled by Apache as necessary

@@ -46,7 +46,7 @@ class WWW_State	{
 			'api-key'=>'',
 			'api-profile'=>'public',
 			'api-hash'=>'',
-			'api-serializer'=>'serialize',
+			'api-serializer'=>'json',
 			'api-return-data-type'=>'php',
 			'api-output'=>0,
 			'api-command'=>'',

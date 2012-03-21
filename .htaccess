@@ -18,6 +18,12 @@ RewriteEngine on
 # This hides a number of files from public access, including certificates, temporary and log fyles and database files
 RewriteRule (.*\.(tmp|log|ht|htaccess|pem|crt|db|sql))$ ./index.php?403 [L]
 
+# Redirecting sitemap requests to gateway
+RewriteRule sitemap.xml ./index.php?sitemap [L]
+
+# Redirecting robots requests to gateway
+RewriteRule robots.txt ./index.php?robots [L]
+
 # Redirecting existing image file to gateway
 RewriteRule (.*\.(jpeg|jpg|png|ico|gif|bmp))$ ./index.php?image [L]
 

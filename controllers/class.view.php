@@ -20,13 +20,47 @@ class WWW_controller_view extends WWW_Factory {
 	// This is called by index.php gateway when initializing view
 	public function load($input){
 	
-		// Based on request data the system gets current view and language identifiers
+		// Getting current view and creating view object
 		$view=$input['www-view-data']['view'];
-		$subView=$input['www-view-data']['subview'];
+		$viewObject=$this->getView($view);
+		
+		// Current language identifier
 		$language=$input['www-view-data']['language'];
-		$unsolved=$input['www-view-data']['unsolved-url'];
+		
+		// Root addresses for file and link handling
 		$webRoot=$input['www-view-data']['web-root'];
 		$systemRoot=$input['www-view-data']['system-root'];
+		
+		// Getting author and copyright, if set in configuration
+		$author=$this->getState('author');
+		$copyright=$this->getState('copyright');
+		
+		// If robots command string was defined by Sitemap then it is used here
+		if(isset($input['www-view-data']['robots'])){
+			$robots=$input['www-view-data']['robots'];
+		} else {
+			$robots=false;
+		}
+		
+		// Meta title can be set in Sitemap and can also be different based on 
+		if(isset($input['www-view-data']['meta-title'])){
+			$title=$input['www-view-data']['meta-title'];
+			// Here you should add your custom meta title loading, if necessary
+			if(method_exists($viewObject,'getTitle')){
+				$appendTitle=$viewObject->getTitle($input['www-view-data']);
+				// Title is only appended if it exists and is not empty
+				if($appendTitle && $appendTitle!=''){
+					$title.=$appendTitle.' - '.$title;
+				}
+			}
+		} else {
+			$title=false;
+		}
+		
+		// Writing robots data to header
+		if($robots!=''){
+			header('X-Robots-Tag: '.$robots, true);
+		}
 		
 		// If view file is found as non-existent, cache is turned off and 404 view file loadedinstead
 		if($view=='404'){
@@ -46,6 +80,7 @@ class WWW_controller_view extends WWW_Factory {
 		// Module-specific Stylesheets is can also be loaded
 		$moduleStylesheet=array();
 		
+		// Module specific stylesheets can also be loaded
 		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$view.'.style.css')){
 			$moduleStylesheet[]=$view.'.style.css';
 		}
@@ -79,13 +114,27 @@ class WWW_controller_view extends WWW_Factory {
 			<!DOCTYPE html>
 			<html lang="<?=$language?>">
 				<head>
-					<title><?=(isset($translations['meta-title-'.$view]))?$translations['meta-title-'.$view].' - ':''?>WWW Framework</title>
+					<title><?=(($title)?$title.' - ':'')?>WWW Framework</title>
+					<!-- UTF-8 -->
 					<meta charset="utf-8">
 					<!-- Useful for mobile applications -->
 					<meta name="viewport" content="width=device-width"/> 
-					<?php if($this->getState('allow-crawlers')==true){ ?>
-						<meta content="noindex,nofollow,noarchive,nosnippet" name="robots"/>
-						<meta content="noindex,nofollow,noarchive,nosnippet" name="googlebot"/>
+					<?php if(!$robots){ ?>
+						<!-- Robots -->
+						<meta content="noindex,nocache,nofollow,noarchive,noimageindex,nosnippet" name="robots"/>
+					<?php } ?>
+					<!-- Content information -->
+					<?php if(isset($input['www-view-data']['meta-keywords'])){ ?>
+						<meta name="Keywords" content="<?=$input['www-view-data']['meta-keywords']?>"/>
+					<?php } ?>
+					<?php if(isset($input['www-view-data']['meta-description'])){ ?>
+						<meta name="Description" content="<?=$input['www-view-data']['meta-description']?>"/>
+					<?php } ?>
+					<?php if($author){ ?>
+						<meta name="Author" content="<?=$author?>"/>
+					<?php } ?>
+					<?php if($copyright){ ?>
+						<meta name="Copyright" content="<?=$copyright?>"/>
 					<?php } ?>
 					<!-- Stylesheets -->
 					<link type="text/css" href="<?=$webRoot?>resources/<?=implode('&',$coreStyleSheet)?>" rel="stylesheet" media="all"/>
@@ -114,8 +163,7 @@ class WWW_controller_view extends WWW_Factory {
 				</head>
 				<body>
 				<?php
-					// View object is returned and then rendered, if exists
-					$viewObject=$this->getView($view);
+					// View object is rendered					
 					$viewObject->render($input['www-view-data']);
 				?>
 				</body>

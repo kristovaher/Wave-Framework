@@ -127,17 +127,17 @@ class WWW_Imager {
 			// Different file types have different compression levels for quality
 			switch($extension){
 				case 'jpg':
-					header('Content-type: image/jpeg');
+					header('Content-Type: image/jpeg');
 					// Second parameter of null means that image is pushed to output buffer instead of stored in file
 					imagejpeg($this->resource,null,$quality);
 					break;
 				case 'png':
-					header('Content-type: image/png');
+					header('Content-Type: image/png');
 					// PNG format has compression from 0-9 with 0 being the best, so quality is updated accordingly
 					imagepng($this->resource,null,(10-round($quality/10)));
 					break;
 				case 'gif':
-					header('Content-type: image/gif');
+					header('Content-Type: image/gif');
 					// Second parameter not used means that image is pushed to output buffer instead of stored in file
 					imagegif($this->resource);
 					break;

@@ -11,6 +11,5 @@ Author and support: Kristo Vaher - kristo@waher.net
 */
 
 $translations['hello-world']='Hello WWW!'; // Key is translation keyword and value is the translation
-$translations['meta-title-home']='Home!'; // This is currently used by WWW_controllers_view for meta-title in meta-title-[view] format
 	
 ?>

@@ -75,7 +75,7 @@ class WWW_State	{
 			'enforce-first-language-url'=>true,
 			'languages'=>array('en'),
 			'language'=>'en',
-			'allow-crawlers'=>true,
+			'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 			'client-user-agent'=>((isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:''),
 			'client-ip'=>$_SERVER['REMOTE_ADDR'],
 			'true-client-ip'=>$_SERVER['REMOTE_ADDR'],

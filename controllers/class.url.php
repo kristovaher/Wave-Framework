@@ -5,8 +5,8 @@ WWW - PHP micro-framework
 MVC Controller class
 
 This class is used by index.php gateway to solve current URL request. It uses the URL string 
-of the request to calculate what view must be loaded and it uses an internal URL map that it 
-maps itself against, stored in /resources/{language-code}.urlmap.php where language code is 
+of the request to calculate what view must be loaded and it uses an internal sitemap that it 
+maps itself against, stored in /resources/{language-code}.sitemap.php where language code is 
 the language that WWW_controller_url detects is being used. This class also deals with things 
 such as slashes at the end of URL's and whether first language of the sytem needs to have a 
 URL node in the request string or not. It also redirects the client in case URL is incorrectly 
@@ -25,6 +25,8 @@ class WWW_controller_url extends WWW_Factory {
 	private $languages;
 	private $webRoot;
 	private $homeView;
+	private $siteMap;
+	private $siteMapInfo;
 
 	// This is called by index.php gateway when trying to solve request URL to view
 	public function solve($input){
@@ -43,6 +45,9 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// System root is the base directory of files on web server
 		$this->systemRoot=$this->getState('system-root');
+		
+		// System root is the base directory of files on web server
+		$this->robots=$this->getState('robots');
 		
 		// This setting will force that even the first language (first in languages array) has to be represented in URL
 		$enforceSlash=$this->getState('enforce-url-end-slash');
@@ -75,9 +80,9 @@ class WWW_controller_url extends WWW_Factory {
 			if($this->enforceLanguageUrl==true){
 				// Client is redirected to URL that has just the language node set
 				if(isset($requestNodesRaw[1])){
-					header('Location: '.$this->webRoot.$language.'/?'.$requestNodesRaw[1],TRUE,302);
+					header('Location: '.$this->webRoot.$language.'/?'.$requestNodesRaw[1],TRUE,301);
 				} else {
-					header('Location: '.$this->webRoot.$language.'/',TRUE,302);
+					header('Location: '.$this->webRoot.$language.'/',TRUE,301);
 				}
 				die();
 			} else {
@@ -97,9 +102,9 @@ class WWW_controller_url extends WWW_Factory {
 			if($enforceSlash==true && end($requestNodes)!=''){
 				// If GET variables were set, system redirects to proper URL that has a slash in the end and appends the GET variables
 				if(isset($requestNodesRaw[1])){
-					header('Location: '.$this->webRoot.$requestNodesRaw[0].'/?'.$requestNodesRaw[1],TRUE,302);
+					header('Location: '.$this->webRoot.$requestNodesRaw[0].'/?'.$requestNodesRaw[1],TRUE,301);
 				} else {
-					header('Location: '.$this->webRoot.$requestNodesRaw[0].'/',TRUE,302);
+					header('Location: '.$this->webRoot.$requestNodesRaw[0].'/',TRUE,301);
 				}
 				die();
 			}
@@ -123,9 +128,9 @@ class WWW_controller_url extends WWW_Factory {
 							unset($requestNodes[$nodeKey]);
 							// If GET variables were set, system redirects to URL without the language and appends the GET variables
 							if(isset($requestNodesRaw[1])){
-								header('Location: '.$this->webRoot.implode('/',$requestNodes).'/?'.$requestNodesRaw[1],TRUE,302);
+								header('Location: '.$this->webRoot.implode('/',$requestNodes).'/?'.$requestNodesRaw[1],TRUE,301);
 							} else {
-								header('Location: '.$this->webRoot.implode('/',$requestNodes).'/',TRUE,302);
+								header('Location: '.$this->webRoot.implode('/',$requestNodes).'/',TRUE,301);
 							}
 							die();
 							
@@ -138,9 +143,9 @@ class WWW_controller_url extends WWW_Factory {
 						
 							// Client is redirected to the same URL as before, but with the default language node added
 							if(isset($requestNodesRaw[1])){
-								header('Location: '.$this->webRoot.$language.'/'.$requestFormatted.'/?'.$requestNodesRaw[1],TRUE,302);
+								header('Location: '.$this->webRoot.$language.'/'.$requestFormatted.'/?'.$requestNodesRaw[1],TRUE,301);
 							} else {
-								header('Location: '.$this->webRoot.$language.'/'.$requestFormatted,TRUE,302);
+								header('Location: '.$this->webRoot.$language.'/'.$requestFormatted,TRUE,301);
 							}
 							die();
 							
@@ -170,9 +175,6 @@ class WWW_controller_url extends WWW_Factory {
 			
 		}
 		
-		// Subview is a sub-category name from URL-map for a module
-		$subView='';
-		
 		// This flag checks if unsolved URL is allowed or not, only URL's with aterisk parameter from URL map allow unsolved URL's
 		$unsolvedUrlAllowed=false;
 		
@@ -183,51 +185,51 @@ class WWW_controller_url extends WWW_Factory {
 		$this->systemRoot=$this->getState('system-root');
 		
 		// URL Map is stored in this array
-		$urlMap=array();
+		$siteMap=array();
 		
 		// Checking for existence of URL Map file, if it does not exist a 404 error is returned
-		if(file_exists($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.urlmap.php')){
+		if(file_exists($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php')){
 			// Overrides can be used if they are stored in /overrides/resources/ subfolder
-			require($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.urlmap.php');
-		} else if(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.urlmap.php')){
+			require($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php');
+		} else if(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php')){
 			// If there was no override, the URL Map is loaded from /resources/
-			require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.urlmap.php');
+			require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php');
 		} else {
 			// Formatting and returning the expected result array
 			return $this->returnViewData(array('view'=>'404','subview'=>'','language'=>$language,'unsolved-url'=>array()));
 		}
+		
+		// Storing sitemap for later use
+		$this->siteMap=$siteMap;
 		
 		// System loops through URL nodes and attempts to find a match in URL Map
 		while(!empty($urlNodes) && $view==$this->homeView){
 		
 			// This string is used to find a match
 			$search=implode('/',$urlNodes);
-			// String is matched against URL Map, if match is found the value from URL Map is assigned as view
-			if(isset($urlMap[$search])){
 			
-				// Match was found from URL Map, so the value in URL map is exploded to only include view name
-				$viewBits=explode('/',$urlMap[$search]);
-				$view=$viewBits[0];
+			// String is matched against URL Map, if match is found the value from URL Map is assigned as view
+			if(isset($this->siteMap[$search])){
+			
+				// Setting current page information
+				$this->siteMapInfo=$this->siteMap[$search];
+			
+				// Match was found from URL Map, so view is defined
+				$view=$this->siteMap[$search]['view'];
 				
-				// If additional value is stored, then it is assigned to subView variable
-				if(isset($viewBits[1])){
-				
-					// If additional parameter is an aterisk, then this means that unsolved URL's are allowed and 404 will not be returned if present
-					if($viewBits[1]=='*'){
-						$unsolvedUrlAllowed=true;
-					} else {
-						// Subview is stored as a single parameter
-						$subView=$viewBits[1];
-					}
-					
+				// If unsolved URL's are allowed
+				if(isset($this->siteMap[$search]['unsolved-url-nodes']) && $this->siteMap[$search]['unsolved-url-nodes']==true){
+					$unsolvedUrlAllowed=true;
 				}
 				
-				// URL can be unsolved even in case where subview is defined
-				if(isset($viewBits[2])){
-					// If additional parameter is an aterisk, then this means that unsolved URL's are allowed and 404 will not be returned if present
-					if($viewBits[2]=='*'){
-						$unsolvedUrlAllowed=true;
-					}
+				// It is possible to overwrite the default robots setting
+				if(isset($this->siteMap[$search]['permanent-redirect']) && $this->siteMap[$search]['permanent-redirect']!=''){
+					header('Location: '.$this->siteMap[$search]['permanent-redirect'],TRUE,301);
+				}
+				
+				// It is possible to overwrite the default robots setting, this causes 302 redirect which is considered temporary
+				if(isset($this->siteMap[$search]['temporary-redirect']) && $this->siteMap[$search]['temporary-redirect']!=''){
+					header('Location: '.$this->siteMap[$search]['temporary-redirect'],TRUE,302);
 				}
 				
 			} else {
@@ -250,59 +252,81 @@ class WWW_controller_url extends WWW_Factory {
 			
 			// 404 is returned if unsolved URL's were not permitted
 			if($unsolvedUrlAllowed==false){
-				return $this->returnViewData(array('view'=>'404','subview'=>$subView,'language'=>$language,'unsolved-url'=>$unsolvedUrlNodes));
+				return $this->returnViewData(array('view'=>'404','language'=>$language,'unsolved-url'=>$unsolvedUrlNodes));
 			}
 			
 		}
 			
 		// Formatting and returning the expected result array
-		return $this->returnViewData(array('view'=>$view,'subview'=>$subView,'language'=>$language,'unsolved-url'=>$unsolvedUrlNodes));
+		return $this->returnViewData(array('view'=>$view,'language'=>$language,'unsolved-url'=>$unsolvedUrlNodes));
 		
 	}
 	
 	// This function returns view data
 	private function returnViewData($data){
 		
-		// Checking for existence of URL Map file, if it does not exist a 404 error is returned
-		if(file_exists($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.urlmap.php')){
-			// Overrides can be used if they are stored in /overrides/resources/ subfolder
-			require($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.urlmap.php');
-		} else if(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.urlmap.php')){
-			// If there was no override, the URL Map is loaded from /resources/
-			require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.urlmap.php');
-		} else {
-			// Formatting and returning the expected result array
-			return $this->returnViewData(array('view'=>'404','subview'=>'','language'=>$data['language'],'unsolved-url'=>array()));
+		// This will be returned to view and can be used there for building links
+		$siteMapReference=array();
+		
+		// If sitemap has not been defined then it has to be loaded
+		if(empty($this->siteMap)){
+			// Checking for existence of URL Map file, if it does not exist a 404 error is returned
+			if(file_exists($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php')){
+				// Overrides can be used if they are stored in /overrides/resources/ subfolder
+				require($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php');
+			} else if(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php')){
+				// If there was no override, the URL Map is loaded from /resources/
+				require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php');
+			} else {
+				// Formatting and returning the expected result array
+				return $this->returnViewData(array('view'=>'404','language'=>$data['language'],'unsolved-url'=>array()));
+			}
+			$this->siteMap=$siteMap;
 		}
 		
 		// System builds usable URL map for views
-		$urlMap=array_flip($urlMap);
-		foreach($urlMap as $key=>$node){
+		foreach($this->siteMap as $key=>$node){
+		
+			// Since the same view can be referenced in multiple locations
+			if(isset($node['subview'])){
+				$node['view']=$node['view'].'/'.$node['subview'];
+			} 
+			
+			// This is used only if view has not yet been defined
+			if(!isset($siteMapReference[$node['view']])){
+				$siteMapReference[$node['view']]=$key;
+			}
 		
 			// Home views do not need a URL node
-			if($node!=$this->homeView){
-				$node.='/';
+			if($node['view']!=$this->homeView){
+				$url=$key.'/';
 			} else {
-				$node='';
+				$url='';
 			}
+			
+			// Storing data from Sitemap file
+			$siteMapReference[$node['view']]=$this->siteMap[$key];
 			
 			// If first language URL is not enforced, then this is taken into account
 			if($data['language']==$this->languages[0] && $this->enforceLanguageUrl==false){
-				$urlMap[$key]=$this->webRoot.$node;
+				$siteMapReference[$node['view']]['url']=$this->webRoot.$url;
 			} else {
-				$urlMap[$key]=$this->webRoot.$data['language'].'/'.$node;
+				$siteMapReference[$node['view']]['url']=$this->webRoot.$data['language'].'/'.$url;
 			}
 			
 		}
 		
 		// This stores flipped array (for reverse access in views and objects) as a state
-		$data['url-map']=$urlMap;
+		$data['url-map']=$siteMapReference;
 		
 		// Web root will also be returned
 		$data['web-root']=$this->webRoot;
 		
 		// Web root will also be returned
 		$data['system-root']=$this->systemRoot;
+		
+		// Appending the data from Sitemap file
+		$data+=$this->siteMapInfo;
 		
 		// Translations are stored in an array
 		$translations=array();

@@ -599,9 +599,9 @@ class WWW_API {
 			
 			// last modified date can come from cache file, or current request time, if cache was not used
 			if(isset($lastModified)){
-				header('Last-modified: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT');
+				header('Last-Modified: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT');
 			} else {
-				header('Last-modified: '.gmdate('D, d M Y H:i:s',$this->state->data['request-time']).' GMT');
+				header('Last-Modified: '.gmdate('D, d M Y H:i:s',$this->state->data['request-time']).' GMT');
 			}
 			
 			// Pragma header is removed, if server has set that header
@@ -685,7 +685,9 @@ class WWW_API {
 				$f=create_function('$f,$c,$apiResult','
 						foreach($apiResult as $k=>$v) {
 							if(is_array($v)) {
-								if(is_numeric($k)){ $k=\'node\'; }
+								if(is_numeric($k)){ 
+									$k=\'node\'; 
+								}
 								$ch=$c->addChild($k);
 								$f($f,$ch,$v);
 							} else {

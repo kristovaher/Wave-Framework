@@ -15,7 +15,7 @@ be useful if you store something else in that part of URL, such as product code.
 Author and support: Kristo Vaher - kristo@waher.net
 */
 
-$siteMap['home']=array('view'=>'home');  // URL is the element key and view is the view assigned to be loaded
+$siteMap['home']=array('view'=>'home','meta-title'=>'Home!');  // URL is the element key and view is the view assigned to be loaded
 $siteMap['example']=array('view'=>'example','unsolved-url-nodes'=>true);  // If unsolved URL nodes are enabled, then 404 is not thrown when URL has further nodes
 $siteMap['example/subview']=array('view'=>'example','subview'=>'alt'); // It is possible to have two different URL's use the same view with a 'slash' making it unique, 'alt' will be stored as 'subview'
 $siteMap['example/robots']=array('view'=>'example','robots'=>''); // This allows to overwrite the default robots setting

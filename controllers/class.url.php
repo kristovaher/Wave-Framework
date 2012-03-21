@@ -26,7 +26,7 @@ class WWW_controller_url extends WWW_Factory {
 	private $webRoot;
 	private $homeView;
 	private $siteMap;
-	private $siteMapInfo;
+	private $siteMapInfo=array();
 
 	// This is called by index.php gateway when trying to solve request URL to view
 	public function solve($input){
@@ -73,6 +73,9 @@ class WWW_controller_url extends WWW_Factory {
 		// Finding URL map match and module from the request
 		$urlNodes=array();
 		
+		// This is used for testing if the returned URL should be home or not
+		$returnHome=false;
+		
 		// If there is no request URL set
 		if($requestNodesRaw[0]=='' || $requestNodesRaw[0]=='/'){
 		
@@ -86,8 +89,8 @@ class WWW_controller_url extends WWW_Factory {
 				}
 				die();
 			} else {
-				// Formatting and returning the expected result array
-				return $this->returnViewData(array('view'=>$view,'subview'=>'','language'=>$language,'unsolved-url'=>array()));
+				// Expecting to return Home view
+				$returnHome=true;
 			}
 			
 		} else {
@@ -153,8 +156,8 @@ class WWW_controller_url extends WWW_Factory {
 						
 							// If language node is set in request, but has no second URL node set, it is also assumed that it is default view
 							if($nodeKey==1 && (!isset($requestNodes[1]) || $requestNodes[1]=='')){
-								// Formatting and returning the expected result array
-								return $this->returnViewData(array('view'=>$view,'subview'=>'','language'=>$language,'unsolved-url'=>array()));
+								// Expecting to return Home view
+								$returnHome=true;
 							} else {
 								// Every other request node is added to the array that looks for matching URL from URL Map
 								if($node!=''){
@@ -202,46 +205,81 @@ class WWW_controller_url extends WWW_Factory {
 		// Storing sitemap for later use
 		$this->siteMap=$siteMap;
 		
-		// System loops through URL nodes and attempts to find a match in URL Map
-		while(!empty($urlNodes) && $view==$this->homeView){
+		// If home is not expected to be returned
+		if(!$returnHome){
 		
-			// This string is used to find a match
-			$search=implode('/',$urlNodes);
+			// System loops through URL nodes and attempts to find a match in URL Map
+			while(!empty($urlNodes)){
 			
-			// String is matched against URL Map, if match is found the value from URL Map is assigned as view
-			if(isset($this->siteMap[$search])){
-			
-				// Setting current page information
-				$this->siteMapInfo=$this->siteMap[$search];
-			
-				// Match was found from URL Map, so view is defined
-				$view=$this->siteMap[$search]['view'];
+				// This string is used to find a match
+				$search=implode('/',$urlNodes);
 				
-				// If unsolved URL's are allowed
-				if(isset($this->siteMap[$search]['unsolved-url-nodes']) && $this->siteMap[$search]['unsolved-url-nodes']==true){
-					$unsolvedUrlAllowed=true;
-				}
+				// String is matched against URL Map, if match is found the value from URL Map is assigned as view
+				if(isset($this->siteMap[$search])){
 				
-				// It is possible to overwrite the default robots setting
-				if(isset($this->siteMap[$search]['permanent-redirect']) && $this->siteMap[$search]['permanent-redirect']!=''){
-					header('Location: '.$this->siteMap[$search]['permanent-redirect'],TRUE,301);
-				}
+					// Setting current page information
+					$this->siteMapInfo=$this->siteMap[$search];
 				
-				// It is possible to overwrite the default robots setting, this causes 302 redirect which is considered temporary
-				if(isset($this->siteMap[$search]['temporary-redirect']) && $this->siteMap[$search]['temporary-redirect']!=''){
-					header('Location: '.$this->siteMap[$search]['temporary-redirect'],TRUE,302);
-				}
+					// Match was found from URL Map, so view is defined
+					$view=$this->siteMap[$search]['view'];
+					
+					// Page has been found
+					break;
+					
+				} else {
 				
-			} else {
-			
-				// Last element from the array is removed and inserted to unsolved nodes array
-				$bit=array_pop($urlNodes);
-				if($bit!=''){
-					$unsolvedUrlNodes[]=$bit;
+					// Last element from the array is removed and inserted to unsolved nodes array
+					$bit=array_pop($urlNodes);
+					if($bit!=''){
+						$unsolvedUrlNodes[]=$bit;
+					}
+					
 				}
 				
 			}
 			
+			// If the found view is home view, then we simply redirect to home view without the long url
+			if($view==$this->homeView){
+			
+				// If first language is used and it is not needed to use language URL in first language
+				if($this->enforceLanguageUrl==false && $language==$this->languages[0]){
+					if(isset($requestNodesRaw[1])){
+						header('Location: '.$this->webRoot.'?'.$requestNodesRaw[1],TRUE,301);
+					} else {
+						header('Location: '.$this->webRoot,TRUE,301);
+					}
+				} else {
+					// In every other case the redirection will be set with the language URL
+					if(isset($requestNodesRaw[1])){
+						header('Location: '.$this->webRoot.$language.'/?'.$requestNodesRaw[1],TRUE,301);
+					} else {
+						header('Location: '.$this->webRoot.$language.'/',TRUE,301);
+					}
+				}
+				die();
+			
+			}
+		
+		} else {
+		
+			// Setting current page information when returning Home view
+			$this->siteMapInfo=$this->siteMap[$this->homeView];
+		
+		}
+		
+		// If unsolved URL's are allowed
+		if(isset($this->siteMapInfo['unsolved-url-nodes']) && $this->siteMapInfo['unsolved-url-nodes']==true){
+			$unsolvedUrlAllowed=true;
+		}
+		
+		// It is possible to overwrite the default robots setting
+		if(isset($this->siteMapInfo['permanent-redirect']) && $this->siteMapInfo['permanent-redirect']!=''){
+			header('Location: '.$this->siteMapInfo['permanent-redirect'],TRUE,301);
+		}
+		
+		// It is possible to overwrite the default robots setting, this causes 302 redirect which is considered temporary
+		if(isset($this->siteMapInfo['temporary-redirect']) && $this->siteMapInfo['temporary-redirect']!=''){
+			header('Location: '.$this->siteMapInfo['temporary-redirect'],TRUE,302);
 		}
 		
 		// Array of unsolved URL nodes is reversed if it is not empty

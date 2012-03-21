@@ -24,6 +24,9 @@ class WWW_API {
 	// This stores WWW_State object
 	private $state=false;
 	
+	// This stores API command results in a buffer
+	private $buffer=array();
+	
 	// Simple flag to keep track whether cache has been used by this object
 	public $cacheUsed=false;
 			
@@ -50,9 +53,19 @@ class WWW_API {
 	// The main function of API
 	// * command - string command for the API
 	// * data - array of input data
+	// * disableBuffer - This turns off internal buffer that is used when the same API call is executed many times
 	// * apiCheck - internally called API does not need to be hash validated, unless necessary
 	// Returns the result of the API call, depending on command and classes it loads
-	public function command($command='',$input=array(),$apiCheck=true){
+	public function command($command='',$input=array(),$disableBuffer=true,$apiCheck=true){
+	
+		// If buffer is not disabled, response is checked from buffer
+		if(!$disableBuffer){
+			$bufferAddress=md5($command.json_encode($input));
+			// If result already exists in buffer then it is simply returned
+			if(isset($this->buffer[$bufferAddress])){
+				return $this->buffer[$bufferAddress];
+			}
+		}
 	
 		// Result of the API call is stored in this variable
 		$apiResult=false;
@@ -439,8 +452,17 @@ class WWW_API {
 			}
 		}
 		
-		// System returns correctly formatted output data
-		return $this->output($apiResult);
+		// If buffer is not disabled, response is checked from buffer
+		if(!$disableBuffer){
+			$bufferAddress=md5($command.json_encode($input));
+			// Storing result in buffer
+			$this->buffer[$bufferAddress]=$this->output($apiResult);
+			// Returning result from newly created buffer
+			return $this->buffer[$bufferAddress];
+		} else {
+			// System returns correctly formatted output data
+			return $this->output($apiResult);
+		}
 	}
 	
 	// This function returns the data, whether final data or the one returned with error messages

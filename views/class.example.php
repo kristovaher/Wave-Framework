@@ -15,14 +15,23 @@ class WWW_view_example extends WWW_Factory {
 	// WWW_controller_url calls this function as output for page content
 	public function render($input){
 	
-		// This is a simple example view with printed content
-		echo 'This is an example view! Data sent to this view is as follows:';
+		// Showing how to make an API call within the view
+		$apiCall=$this->api('example-get',array());
 		
-		// This shows all the input variables sent to this view
-		// If you just installed WWW Framework then go to URL /example/ to see the output
-		echo '<pre>';
-			print_r($input);
-		echo '</pre>';		
+		?>
+			<div style="padding:30px;width:600px;margin-left:auto;margin-right:auto;">
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">An example API response:</h1>
+				<pre>
+					<!-- This shows an example API call response -->
+					<?=print_r($apiCall,true)?>
+				</pre>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Data sent to view:</h1>
+				<pre>
+					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
+					<?=print_r($input,true)?>
+				</pre>
+			</div>
+		<?php
 		
 		// It is always recommended to return a value from a function
 		return true;

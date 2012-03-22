@@ -24,22 +24,26 @@ FEATURES
 --------
 
  * Modern API-focused framework
- * Full range cache control for all different type of requests and static files
+ * Secure API requests with input and token and key-based authentication
  * Dynamically loaded Hierarchical MVC objects through Factory pattern
- * Compressed output with Deflate and Gzip
- * Input and output data is fully UTF-8 compatible
- * API returns XML, CSV, JSON, HTML, INI, binary, text, JavaScript, CSS, serialized array and native PHP
- * Built around Apache-driven smart index gateway with request handling for files, API and URL's
- * Includes a PDO-specific database controller for general use database calls
- * Includes optional View and URL controllers that support multiple languages and clean URL's for building a website
- * Includes optional jQuery based front-end UI controller
- * Includes a Limiter that can block requests under various conditions, such as for blacklisted IP's
- * Includes a Logger that can be used for detailed performance grading of requests
- * Includes dynamic image resizer and resource minifier
- * Supports install-specific file overrides
+ * API returns XML, CSV, JSON, HTML, native PHP and other data formats
+ * Compressed data output with Deflate and Gzip
+ * Input and output data is fully UTF-8
+ * PDO-specific database controller for general-use database connections
+ * Apache-driven smart Index gateway that handles all HTTP requests
+ * Full cache control for all types of dynamic and static requests
+ * View and URL controllers that support multiple languages and clean URL's
+ * jQuery based front-end UI controller with smart AJAX functionality
+ * On-demand dynamic image resizer and basic image editor
+ * On-demand resource compressing, unifying and minifying
  * Automatic sitemap.xml and robots.txt generation
+ * Installation-specific MVC class and resource overrides
+ * Request limiter that can block HTTP requests under various conditions
+ * Request logger that can be used for detailed performance grading of HTTP requests
+ * Backup, update and filesystem maintenance tools
+ * Compatibility script that tests support for server setup
  * Supports Linux and Windows servers, LAMP and WAMP setups
- * GNU Lesser General Public License Version 3
+ * Licensed under GNU Lesser General Public License Version 3
  
 INSTALLATION
 ------------

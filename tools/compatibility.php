@@ -112,6 +112,13 @@ $log[]='';
 		$log[]='WARNING: Zip PHP extension is not supported, this is required by automatic update script, this warning can be ignored if update script is not used';
 	}
 	
+// FTP
+	if(extension_loaded('ftp')){
+		$log[]='SUCCESS: FTP is supported';
+	} else {
+		$log[]='WARNING: FTP PHP extension is not supported, this is required by automatic update script, this warning can be ignored if update script is not used';
+	}
+	
 // GD LIBRARY
 	if(extension_loaded('gd')){
 		$log[]='SUCCESS: GD Graphics Library is supported';

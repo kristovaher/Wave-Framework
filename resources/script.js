@@ -1,6 +1,7 @@
 	
 /*
 WWW - PHP micro-framework
+General JavaScript
 
 Javascript front end controller that is loaded by WWW_controller_view and should be used for 
 general Javascript functionality. This controller adds some useful functionality for modern 

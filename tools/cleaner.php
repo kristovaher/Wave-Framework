@@ -29,6 +29,12 @@ if(!isset($config['http-authentication-username']) || !isset($config['http-authe
 	die();
 }
 
+// Error reporting is turned off in this script
+error_reporting(0);
+
+// Requiring some maintenance functions
+require('.'.DIRECTORY_SEPARATOR.'functions.php');
+
 // If cleaner has no GET variables sent, then error is thrown
 if(!isset($_GET) || empty($_GET)){
 	header('HTTP/1.1 501 Not Implemented');
@@ -37,55 +43,7 @@ if(!isset($_GET) || empty($_GET)){
 	die();
 }
 
-// This function clears a folder and all of its subfolders
-function dirCleaner($directory){
-
-	// Log will be stored in this array
-	$log=array();
-	
-	// Scanning the current directory
-	$files=scandir($directory);
-	
-	// This will loop over all the files if files were found in this directory
-	if(!empty($files)){
-		foreach($files as $f){
-		
-			// Current file address
-			$file=$directory.$f;
-			
-			// As long as the current file is not the current or parent directory
-			if($f!='.' && $f!='..'){
-			
-				// If file is another directory then this is parsed recursively
-				if(is_dir($file)){
-				
-					// Log data from recursive parsing is merged with current log
-					$log=array_merge($log,dirCleaner($file.DIRECTORY_SEPARATOR));
-					// Directory is removed after parsing
-					if(rmdir($file)){
-						$log[]='DELETED '.$file.DIRECTORY_SEPARATOR;
-					} else {
-						// Log entry is posted if file removal fails
-						$log[]='FAILED '.$file.DIRECTORY_SEPARATOR;
-					}
-					
-				} else if(unlink($file)){
-					// File is removed
-					$log[]='DELETED '.$file;
-				} else {
-					// Log entry is posted if file removal fails
-					$log[]='FAILED '.$file;
-				}
-				
-			}
-		}
-	}
-	
-	// Log is returned
-	return $log;
-	
-}
-
+// Log is returned in plain text
 header('Content-Type: text/plain;charset=utf-8');
 
 // Log will be stored in this array

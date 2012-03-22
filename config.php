@@ -31,7 +31,7 @@ $config['http-authentication-password']='hellowww';
 $config['languages']=array('en');
 
 // This can set the PHP error-reporting state
-$config['error-reporting']=E_ALL;
+$config['error-reporting']=0;
 
 // This turns on Index gateway performance logging
 // 'all' means that all data is logged, other values should be comma-separated values of logged array

@@ -21,6 +21,13 @@ define('__ROOT__',__DIR__);
 // Including the configuration
 require(__ROOT__.DIRECTORY_SEPARATOR.'config.php');
 
+// Error reporting is turned off by default
+if(isset($config['error-reporting'])){
+	error_reporting($config['error-reporting']);
+} else {
+	error_reporting(0);
+}
+
 // Logger file is used for performance logging for later review
 // Configuration file can set what type of logging is used
 if(isset($config['logger']) && $config['logger']!='' && $config['logger']!=false){

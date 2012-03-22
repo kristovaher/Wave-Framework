@@ -25,6 +25,9 @@ if(!isset($config['http-authentication-username']) || !isset($config['http-authe
 	die();
 }
 
+// Error reporting is turned off in this script
+error_reporting(0);
+
 // Log reader can access any log file created by the system
 if(isset($_GET['log'])){
 	// Client-input URL is validated against hostile characters

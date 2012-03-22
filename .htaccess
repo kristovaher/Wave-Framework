@@ -9,14 +9,11 @@
 # 
 # Author and support: Kristo Vaher - kristo@waher.net
 
-# Required for Rewrite Engine security, but should be removed if errors appear
-Options +FollowSymlinks
-
 # All requests, except some static files, are redirected to index.php gateway file.
 RewriteEngine on
 
 # This hides a number of files from public access, including certificates, temporary and log fyles and database files
-RewriteRule (.*\.(tmp|log|ht|htaccess|pem|crt|db|sql))$ ./index.php?403 [L]
+RewriteRule (.*\.(tmp|log|ht|htaccess|pem|crt|db|sql|version))$ ./index.php?403 [L]
 
 # Redirecting sitemap requests to gateway
 RewriteRule sitemap.xml ./index.php?sitemap [L]

@@ -239,7 +239,7 @@ class WWW_controller_url extends WWW_Factory {
 			}
 			
 			// If the found view is home view, then we simply redirect to home view without the long url
-			if($view==$this->homeView){
+			if(empty($unsolvedUrlNodes) && $view==$this->homeView){
 			
 				// If first language is used and it is not needed to use language URL in first language
 				if($this->enforceLanguageUrl==false && $language==$this->languages[0]){

@@ -68,7 +68,7 @@ class WWW_Limiter {
 			}
 			
 			// If file exists, then the amount of requests are checked, if file does not exist then it is created
-			if(file_exists($this->logDir.$_SERVER['REMOTE_ADDR'].'.tmp')){
+			if(file_exists($this->logDir.$logFilename.'.tmp')){
 			
 				// Loading current contents of the file
 				$data=file_get_contents($this->logDir.$logFilename.'.tmp');

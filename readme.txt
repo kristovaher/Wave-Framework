@@ -52,7 +52,8 @@ INSTALLATION
  2. Configuration file in root directory /config.php of the archive should be configured according to your needs. Read more about configuration from Wiki.
  3. Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writeable by PHP, for example with command chmod 0777 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 777) or with any other FTP software. This is not required on Windows server.
  4. There is a tool script for checking if your system is compatible for WWW Framework or not. After you have uploaded scripts to server, run the script /tools/compatibility.php. If this script shows any errors, then WWW Framework might not work properly.
- 5. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
+ 5. In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again.
+ 6. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
  
 HELP AND DOCUMENTATION
 ----------------------

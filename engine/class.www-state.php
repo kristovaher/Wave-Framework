@@ -69,8 +69,8 @@ class WWW_State	{
 			'http-authentication-username'=>'',
 			'http-authentication-password'=>'',
 			'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
-			'system-root'=>str_replace(DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'class.www-state.php',DIRECTORY_SEPARATOR,__FILE__),
-			'web-root'=>'',
+			'system-root'=>str_replace('index.php','',$_SERVER['SCRIPT_FILENAME']),
+			'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 			'enforce-url-end-slash'=>true,
 			'enforce-first-language-url'=>true,
 			'languages'=>array('en'),
@@ -94,17 +94,6 @@ class WWW_State	{
 		// If array of configuration data is set during object creation, it is used
 		if(!empty($config)){
 			$this->setState($config);
-		}
-		
-		// If web root was not set then system automatically calculates the web root
-		if($this->data['web-root']==''){
-			// Linux and windows machines behave differently with directory separator
-			if(DIRECTORY_SEPARATOR=='/'){
-				$this->data['web-root']='/'.str_replace(DIRECTORY_SEPARATOR.'engine/class.www-state.php',DIRECTORY_SEPARATOR,str_replace($_SERVER['DOCUMENT_ROOT'],'',__FILE__));
-			} else {
-				$this->data['web-root']=str_replace('\\','/',str_replace('engine\\class.www-state.php','',str_replace(str_replace('/','\\',$_SERVER['DOCUMENT_ROOT']),'',__FILE__)));
-			}
-			$this->data['web-root']=str_replace('//','/',$this->data['web-root']);
 		}
 		
 		// Sessions are started only if sessions are not already started and auto-start is not disabled

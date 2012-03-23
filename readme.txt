@@ -72,17 +72,17 @@ Google Code - http://code.google.com/p/www-framework/
 BitBucket - https://bitbucket.org/kristovaher/www-framework
 GitHub - https://github.com/kristovaher/WWW-Framework
 
-LICENSE
--------
-
-This framework is released as open source and its components (with the exception of external components included in this package and detailed in the next section) are released under GNU Lesser General Public License Version 3. Full license document is included in the archive as license.txt file.
-
 AUTHOR
 ------
 
 Kristo Vaher
 kristo@waher.net
 http://www.waher.net/+
+
+LICENSE
+-------
+
+This framework is released as open source and its components (with the exception of external components included in this package and detailed in the next section) are released under GNU Lesser General Public License Version 3. Full license document is included in the archive as license.txt file.
 
 AUTHORS OF ADDITIONAL COMPONENTS
 --------------------------------

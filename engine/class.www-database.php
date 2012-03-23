@@ -24,7 +24,7 @@ class WWW_Database {
 	// Flag for checking whether database connection is active or not
 	private $connected=0;
 	
-	// All database access related variables
+	// All database authentication and connection related variables
 	public $type='mysql';
 	public $username='';
 	public $password='';

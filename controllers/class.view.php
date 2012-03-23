@@ -79,7 +79,6 @@ class WWW_controller_view extends WWW_Factory {
 		
 		// Module-specific Stylesheets is can also be loaded
 		$moduleStylesheet=array();
-		
 		// Module specific stylesheets can also be loaded
 		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$view.'.style.css')){
 			$moduleStylesheet[]=$view.'.style.css';
@@ -93,17 +92,14 @@ class WWW_controller_view extends WWW_Factory {
 		
 		// Module-specific JavaScript is can also be loaded
 		$moduleJavaScript=array();
-		
 		// Module specific translations are also possible
 		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$view.'.script.js')){
 			$moduleJavaScript[]=$view.'.script.js';
 		}
-		
 		// It is possible to also load JavaScript-specific translations
 		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.js')){
 			$moduleJavaScript[]=$language.'.translations.js';
 		}
-		
 		// Translations could also be related to the current view
 		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.'.$view.'.translations.js')){
 			$moduleJavaScript[]=$language.'.'.$view.'.translations.js';

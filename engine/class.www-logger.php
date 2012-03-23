@@ -22,14 +22,14 @@ class WWW_Logger {
 	// Request execution time
 	private $requestMicrotime=false;
 	
-	// Database connection for database performance logging
-	private $databaseConnection=false;
-	
 	// Directory of log files
 	private $logDir;
 	
 	// Data types setting, comma separated list of keywords of data to be logged
 	private $loggedData='all';
+	
+	// Database connection for database performance logging
+	public $databaseConnection=false;
 	
 	// If cache was used
 	public $cacheUsed=false;
@@ -58,17 +58,6 @@ class WWW_Logger {
 			trigger_error('Assigned log folder does not exist',E_USER_ERROR);
 		}
 		
-	}
-	
-	// Sets database connection object
-	// * databaseConnection - WWW_Database class
-	// Always returns true
-	public function setDatabaseConnection($databaseConnection){
-	
-		// This should be instance of WWW_Database class or its equivalent
-		$this->databaseConnection=$databaseConnection;
-		
-		return true;
 	}
 	
 	// Writes log entry to file system

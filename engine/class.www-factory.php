@@ -17,7 +17,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 
 class WWW_Factory {
 
-	// API and State connections are stored here
+	// API and State objects are stored here
 	private $WWW_API=false;
 	private $WWW_State=false;
 
@@ -79,7 +79,7 @@ class WWW_Factory {
 			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php')){
 				// Requiring override file
 				require($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php');
-			} else if(file_exists($this->WWW_State->data['system-root'].'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php')){
+			} elseif(file_exists($this->WWW_State->data['system-root'].'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php')){
 				// Requiring original file
 				require($this->WWW_State->data['system-root'].'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php');
 			} else {
@@ -128,7 +128,7 @@ class WWW_Factory {
 			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php')){
 				// Requiring override file
 				require($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php');
-			} else if(file_exists($this->WWW_State->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php')){
+			} elseif(file_exists($this->WWW_State->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php')){
 				// Requiring original file
 				require($this->WWW_State->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php');
 			} else {
@@ -177,7 +177,7 @@ class WWW_Factory {
 			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php')){
 				// Requiring override file
 				require($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php');
-			} else if(file_exists($this->WWW_State->data['system-root'].'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php')){
+			} elseif(file_exists($this->WWW_State->data['system-root'].'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php')){
 				// Requiring original file
 				require($this->WWW_State->data['system-root'].'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php');
 			} else {

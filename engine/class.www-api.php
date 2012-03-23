@@ -114,6 +114,7 @@ class WWW_API {
 		if(isset($this->state->data['api-input-data']['www-cache-timeout'])){
 			$this->state->data['api-cache-timeout']=$this->state->data['api-input-data']['www-cache-timeout'];
 		} else {
+			// This is set to 0 if timeout is not assigned, this setting can never be set in configuration
 			$this->state->data['api-cache-timeout']=0;
 		}
 		
@@ -139,7 +140,7 @@ class WWW_API {
 			// If client provided hash, then this is used, otherwise hash is loaded from State
 			if(isset($this->state->data['api-input-data']['www-hash'])){
 				$apiHash=$this->state->data['api-input-data']['www-hash'];
-			} else if(isset($this->state->data['api-hash'])){
+			} elseif(isset($this->state->data['api-hash'])){
 				$apiHash=$this->state->data['api-hash'];
 			} else {
 				// Since an error was detected, system pushes for output immediately
@@ -266,7 +267,7 @@ class WWW_API {
 					}
 				}
 				
-			} else if(isset($this->state->data['api-input-data']['www-create-token']) || isset($this->state->data['api-input-data']['www-destroy-token']) || isset($this->state->data['api-input-data']['www-validate-token'])){
+			} elseif(isset($this->state->data['api-input-data']['www-create-token']) || isset($this->state->data['api-input-data']['www-destroy-token']) || isset($this->state->data['api-input-data']['www-validate-token'])){
 				// Since an error was detected, system pushes for output immediately
 				return $this->output(array('www-error'=>'Token-based validation is turned off'),'HTTP/1.1 403 Forbidden');
 			}
@@ -350,7 +351,7 @@ class WWW_API {
 					// System loads the result from cache file based on return data type
 					if($this->state->data['api-return-data-type']=='html'){
 						$apiResult=file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp');
-					} else if($this->state->data['api-return-data-type']=='php'){
+					} elseif($this->state->data['api-return-data-type']=='php'){
 						$apiResult=unserialize(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp'));
 					} else {
 						$apiResult=json_decode(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp'),true);
@@ -388,7 +389,7 @@ class WWW_API {
 				// Overrides can be used for controllers
 				if(file_exists($this->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php')){
 					require($this->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
-				} else if(file_exists($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php')){
+				} elseif(file_exists($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php')){
 					require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
 				} else {
 					// Since an error was detected, system pushes for output immediately
@@ -440,7 +441,7 @@ class WWW_API {
 					if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp',$apiResult)){
 						trigger_error('Cannot write cache file',E_USER_ERROR);
 					}
-				} else if($this->state->data['api-return-data-type']=='php'){
+				} elseif($this->state->data['api-return-data-type']=='php'){
 					if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp',serialize($apiResult))){
 						trigger_error('Cannot write cache file',E_USER_ERROR);
 					}
@@ -473,7 +474,17 @@ class WWW_API {
 	
 		// Data is custom-formatted based on request
 		switch($this->state->data['api-return-data-type']){
-		
+				
+			case 'json':
+				// Encodes the resulting array in JSON
+				$apiResult=json_encode($apiResult);
+				break;
+				
+			case 'binary':
+				// If the result is empty string or empty array or false, then binary returns a 0, otherwise it returns 1
+				$apiResult=$this->toBinary($apiResult);
+				break;
+				
 			case 'xml':
 				// Result array is turned into an XML string with SimpleXML
 				$apiResult=$this->toXML($apiResult);
@@ -490,19 +501,9 @@ class WWW_API {
 				$apiResult=$this->toCSV($apiResult);
 				break;
 				
-			case 'json':
-				// Encodes the resulting array in JSON
-				$apiResult=json_encode($apiResult);
-				break;
-				
 			case 'serializedarray':
 				// Array is simply serialized
 				$apiResult=serialize($apiResult);
-				break;
-				
-			case 'binary':
-				// If the result is empty string or empty array or false, then binary returns a 0, otherwise it returns 1
-				$apiResult=$this->toBinary($apiResult);
 				break;
 				
 			case 'ini':
@@ -523,6 +524,16 @@ class WWW_API {
 			// Minification is based on the type of class
 			switch($this->state->data['api-return-data-type']){
 			
+				case 'xml':
+					// XML minification eliminates extra spaces and newlines and other formatting
+					$apiResult=WWW_Minifier::minifyXML($apiResult);
+					break;
+					
+				case 'html':
+					// HTML minification eliminates extra spaces and newlines and other formatting
+					$apiResult=WWW_Minifier::minifyHTML($apiResult);
+					break;
+					
 				case 'js':
 					// JavaScript minification eliminates extra spaces and newlines and other formatting
 					$apiResult=WWW_Minifier::minifyJS($apiResult);
@@ -531,16 +542,6 @@ class WWW_API {
 				case 'css':
 					// CSS minification eliminates extra spaces and newlines and other formatting
 					$apiResult=WWW_Minifier::minifyCSS($apiResult);
-					break;
-					
-				case 'html':
-					// HTML minification eliminates extra spaces and newlines and other formatting
-					$apiResult=WWW_Minifier::minifyHTML($apiResult);
-					break;
-					
-				case 'xml':
-					// XML minification eliminates extra spaces and newlines and other formatting
-					$apiResult=WWW_Minifier::minifyXML($apiResult);
 					break;
 					
 				case 'rss':
@@ -587,20 +588,20 @@ class WWW_API {
 				// Data is echoed/printed based on return data type formatting with the proper header
 				switch($this->state->data['api-return-data-type']){
 				
+					case 'json':
+						header('Content-Type:application/json;charset=utf-8;');
+						break;
 					case 'xml':
 						header('Content-Type:text/xml;charset=utf-8;');
+						break;
+					case 'html':
+						header('Content-Type: text/html;charset=utf-8');
 						break;
 					case 'rss':
 						header('Content-Type:application/rss+xml;charset=utf-8;');
 						break;
 					case 'csv':
 						header('Content-Type:text/csv;charset=utf-8;');
-						break;
-					case 'json':
-						header('Content-Type:application/json;charset=utf-8;');
-						break;
-					case 'html':
-						header('Content-Type: text/html;charset=utf-8');
 						break;
 					case 'js':
 						header('Content-Type: application/javascript;charset=utf-8');
@@ -700,7 +701,7 @@ class WWW_API {
 				// Different XML header is used based on whether it is an RSS or not
 				if(!$type){
 					$xml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><www></www>');
-				} else if($type=='rss'){
+				} elseif($type=='rss'){
 					$xml=new SimpleXMLElement('<?xml version="1.0" encoding="utf-8"?><rss version="2.0"></rss>');
 				}
 				
@@ -729,7 +730,7 @@ class WWW_API {
 				// System returns a simple XML string since the result was not an array
 				if(!$type){
 					return '<?xml version="1.0" encoding="utf-8"?><www><![CDATA['.$apiResult.']]></www>';
-				} else if($type=='rss'){
+				} elseif($type=='rss'){
 					return '<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><![CDATA['.$apiResult.']]></rss>';
 				}
 				

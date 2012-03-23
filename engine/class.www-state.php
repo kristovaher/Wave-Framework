@@ -24,16 +24,7 @@ class WWW_State	{
 	public $data=array();
 	
 	// Database connection is stored in this variable, if set
-	private $databaseConnection=false;
-	
-	// Assigns WWW_Database object to databaseConnection
-	public function setDatabaseConnection($databaseConnection){
-	
-		// Database class should be an instance of WWW_Database
-		$this->databaseConnection=$databaseConnection;
-		return true;
-		
-	}
+	public $databaseConnection=false;
 	
 	// When state file is initiated, it populates data with default values from system and PHP settings
 	// * config - If set, State file has additional data loaded from provided configuration array
@@ -57,7 +48,7 @@ class WWW_State	{
 			'resource-cache-timeout'=>31536000,
 			'home-view'=>'home',
 			'error-reporting'=>0,
-			'timezone'=>date_default_timezone_get(),
+			'timezone'=>false,
 			'disable-session-start'=>false,
 			'output-compression'=>'deflate',
 			'http-host'=>$_SERVER['HTTP_HOST'],
@@ -74,7 +65,7 @@ class WWW_State	{
 			'enforce-url-end-slash'=>true,
 			'enforce-first-language-url'=>true,
 			'languages'=>array('en'),
-			'language'=>'en',
+			'language'=>false,
 			'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 			'client-user-agent'=>((isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:''),
 			'client-ip'=>$_SERVER['REMOTE_ADDR'],
@@ -88,23 +79,31 @@ class WWW_State	{
 			'current-cache-timeout'=>$_SERVER['REQUEST_TIME']
 		);
 		
-		// Some systems throw a deprecated warning without setting default timezone
-		date_default_timezone_set($this->data['timezone']);
-		
 		// If array of configuration data is set during object creation, it is used
 		if(!empty($config)){
 			$this->setState($config);
 		}
 		
+		// If timezone is still set to false
+		if($this->data['timezone']==false){
+			// Some systems throw a deprecated warning without implicitly re-setting default timezone
+			date_default_timezone_set(date_default_timezone_get());
+		}
+		
+		// If first language is not defined then first node from languages array is used
+		if($this->data['langauge']==false){
+			$this->data['language']=$this->data['languages'][0];
+		}
+		
 		// Sessions are started only if sessions are not already started and auto-start is not disabled
 		if($this->data['disable-session-start']==false){
 			if(!session_id()){
-				// Starting sessions
-				session_start();
 				// Assigning current session name to session-cookie variable
 				if(!isset($config['session-cookie'])){
 					$this->data['session-cookie']=session_name();
 				}
+				// Starting sessions
+				session_start();
 			}
 		}
 		
@@ -124,7 +123,7 @@ class WWW_State	{
 		// IP may be forwarded, this can check for such an occasion
 		if(!empty($_SERVER['HTTP_CLIENT_IP'])){
 			$this->data['true-client-ip']=$_SERVER['HTTP_CLIENT_IP'];
-		} else if(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+		} elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
 			$this->data['true-client-ip']=$_SERVER['HTTP_X_FORWARDED_FOR'];
 		}
 		
@@ -158,7 +157,7 @@ class WWW_State	{
 				return false;
 			}
 			
-		} else if($variable){
+		} elseif($variable){
 		
 			// If variable is defined and data exists
 			if(isset($this->data[$variable])){

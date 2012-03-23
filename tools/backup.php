@@ -53,7 +53,7 @@ if(isset($_GET['all'])){
 		echo 'Cannot create backup!';
 	}
 	
-} else if(isset($_GET['system'])){
+} elseif(isset($_GET['system'])){
 
 	// This calls the backup function with the filesystem flag undefined (thus 'false')
 	if(systemBackup('../','..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'backups'.DIRECTORY_SEPARATOR.$backupFilename)){

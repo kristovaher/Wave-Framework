@@ -21,11 +21,23 @@ class WWW_controller_url extends WWW_Factory {
 
 	// Variables that are used by both methods, solve() and returnViewData()
 	private $enforceLanguageUrl;
+	
+	// This stores system work directory
 	private $systemRoot;
-	private $languages;
+	
+	// This stores web relative directory
 	private $webRoot;
+	
+	// This stores defined system languages
+	private $languages;
+	
+	// This stores detected home view
 	private $homeView;
+	
+	// This stores current language Sitemap
 	private $siteMap;
+	
+	// This stores sitemap information of detected URL from Sitemap file
 	private $siteMapInfo=array();
 
 	// This is called by index.php gateway when trying to solve request URL to view
@@ -194,7 +206,7 @@ class WWW_controller_url extends WWW_Factory {
 		if(file_exists($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php')){
 			// Overrides can be used if they are stored in /overrides/resources/ subfolder
 			require($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php');
-		} else if(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php')){
+		} elseif(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php')){
 			// If there was no override, the URL Map is loaded from /resources/
 			require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php');
 		} else {
@@ -312,7 +324,7 @@ class WWW_controller_url extends WWW_Factory {
 			if(file_exists($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php')){
 				// Overrides can be used if they are stored in /overrides/resources/ subfolder
 				require($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php');
-			} else if(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php')){
+			} elseif(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php')){
 				// If there was no override, the URL Map is loaded from /resources/
 				require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php');
 			} else {
@@ -373,7 +385,7 @@ class WWW_controller_url extends WWW_Factory {
 		// Translations file is first looked for from /overrides/resources/ folder, then /resources/ folder
 		if(file_exists($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.translations.php')){
 			require($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.translations.php');
-		} else if(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.translations.php')){
+		} elseif(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.translations.php')){
 			require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.translations.php');
 		}
 		
@@ -381,7 +393,7 @@ class WWW_controller_url extends WWW_Factory {
 		// Translations file is first looked for from /overrides/resources/ folder, then /resources/ folder
 		if(file_exists($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.'.$data['view'].'.translations.php')){
 			require($this->systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.'.$data['view'].'.translations.php');
-		} else if(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.'.$data['view'].'.translations.php')){
+		} elseif(file_exists($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.'.$data['view'].'.translations.php')){
 			require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.'.$data['view'].'.translations.php');
 		}
 		

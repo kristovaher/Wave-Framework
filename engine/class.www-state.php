@@ -84,7 +84,7 @@ class WWW_State	{
 			'request-time'=>$_SERVER['REQUEST_TIME'],
 			'request'=>false,
 			'fingerprint'=>'',
-			'session-cookie'=>session_name(),
+			'session-cookie'=>false,
 			'current-cache-timeout'=>$_SERVER['REQUEST_TIME']
 		);
 		
@@ -99,7 +99,12 @@ class WWW_State	{
 		// Sessions are started only if sessions are not already started and auto-start is not disabled
 		if($this->data['disable-session-start']==false){
 			if(!session_id()){
+				// Starting sessions
 				session_start();
+				// Assigning current session name to session-cookie variable
+				if(!isset($config['session-cookie'])){
+					$this->data['session-cookie']=session_name();
+				}
 			}
 		}
 		
@@ -222,6 +227,13 @@ class WWW_State	{
 			case 'timezone':
 				// Attempting to set default timezone
 				date_default_timezone_set($value);
+				break;
+				
+			case 'session-cookie':
+				// If session cookie name is set
+				if(!$value){
+					session_name($value);
+				}
 				break;
 				
 			case 'output-compression':

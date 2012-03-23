@@ -121,7 +121,7 @@ class WWW_controller_view extends WWW_Factory {
 					<meta name="viewport" content="width=device-width"/> 
 					<?php if(!$robots){ ?>
 						<!-- Robots -->
-						<meta content="noindex,nocache,nofollow,noarchive,noimageindex,nosnippet" name="robots"/>
+						<meta content="<?=$robots?>" name="robots"/>
 					<?php } ?>
 					<!-- Content information -->
 					<?php if(isset($input['www-view-data']['meta-keywords'])){ ?>

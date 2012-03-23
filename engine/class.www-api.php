@@ -176,8 +176,8 @@ class WWW_API {
 					$sessionSubfolder=substr($sessionFile,0,2);
 					
 					// If cache subdirectory does not exist, it is created
-					if(!is_dir($this->state->data['system-root'].'filesystem/sessions/'.$sessionSubfolder.'/')){
-						if(!mkdir($this->state->data['system-root'].'filesystem/sessions/'.$sessionSubfolder.'/',0777)){
+					if(!is_dir($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR)){
+						if(!mkdir($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR,0777)){
 							trigger_error('Cannot create sessions folder',E_USER_ERROR);
 						}
 					}
@@ -186,7 +186,7 @@ class WWW_API {
 					$apiToken=md5($apiProfile.$this->state->data['api-request-time'].$this->state->data['fingerprint']);
 					
 					// Session token file is created and returned to the client as a successful request
-					if(!file_put_contents($apiToken,$this->state->data['system-root'].'filesystem/sessions/'.$sessionSubfolder.'/'.$sessionFile.'.tmp')){
+					if(!file_put_contents($apiToken,$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp')){
 						// Result is output immediately
 						return $this->output(array('www-result'=>$apiToken));
 					} else {
@@ -338,9 +338,10 @@ class WWW_API {
 			$cacheSubfolder=substr($cacheFile,0,2);
 			
 			// If cache file exists, it will be parsed and set as API value
-			if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp')){
+			if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp')){
+			
 				// Current cache timeout is used to return to browser information about how long browser should store this result
-				$lastModified=filemtime($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/'.$cacheFile.'.tmp');
+				$lastModified=filemtime($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp');
 				if($lastModified>=$this->state->data['request-time']-$this->state->data['api-cache-timeout']){
 				
 					// The moment cache was created gets cache timeout added to it and returned to browser as 'expires' timestamp
@@ -348,13 +349,12 @@ class WWW_API {
 					
 					// System loads the result from cache file based on return data type
 					if($this->state->data['api-return-data-type']=='html'){
-						$apiResult=file_get_contents($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/'.$cacheFile.'.tmp');
+						$apiResult=file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp');
 					} else if($this->state->data['api-return-data-type']=='php'){
-						$apiResult=unserialize(file_get_contents($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/'.$cacheFile.'.tmp'));
+						$apiResult=unserialize(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp'));
 					} else {
-						$apiResult=json_decode(file_get_contents($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/'.$cacheFile.'.tmp'),true);
+						$apiResult=json_decode(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp'),true);
 					}
-					
 					// Flag is set to true, since cache is being used
 					$this->cacheUsed=true;
 					
@@ -362,6 +362,7 @@ class WWW_API {
 					// Current cache timeout is used to return to browser information about how long browser should store this result
 					$this->state->data['current-cache-timeout']=$this->state->data['request-time']+$this->state->data['api-cache-timeout'];
 				}
+				
 			} else {
 				// Current cache timeout is used to return to browser information about how long browser should store this result
 				$this->state->data['current-cache-timeout']=$this->state->data['request-time']+$this->state->data['api-cache-timeout'];
@@ -427,8 +428,8 @@ class WWW_API {
 			if($this->state->data['api-cache-timeout']!=0){
 			
 				// If cache subdirectory does not exist, it is created
-				if(!is_dir($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/')){
-					if(!mkdir($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/',0777)){
+				if(!is_dir($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR)){
+					if(!mkdir($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR,0777)){
 						trigger_error('Cannot create cache folder',E_USER_ERROR);
 					}
 				}
@@ -436,15 +437,15 @@ class WWW_API {
 				// If returned data is HTML or text, it is simply written into cache file
 				// Other results are serialized before being written to cache
 				if($this->state->data['api-return-data-type']=='html' || $this->state->data['api-return-data-type']=='text'){
-					if(!file_put_contents($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/'.$cacheFile.'.tmp',$apiResult)){
+					if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp',$apiResult)){
 						trigger_error('Cannot write cache file',E_USER_ERROR);
 					}
 				} else if($this->state->data['api-return-data-type']=='php'){
-					if(!file_put_contents($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/'.$cacheFile.'.tmp',serialize($apiResult))){
+					if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp',serialize($apiResult))){
 						trigger_error('Cannot write cache file',E_USER_ERROR);
 					}
 				} else {
-					if(!file_put_contents($this->state->data['system-root'].'filesystem/cache/output/'.$cacheSubfolder.'/'.$cacheFile.'.tmp',json_encode($apiResult))){
+					if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp',json_encode($apiResult))){
 						trigger_error('Cannot write cache file',E_USER_ERROR);
 					}
 				}

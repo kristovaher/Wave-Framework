@@ -198,7 +198,7 @@ function systemBackup($source,$target,$filesystemBackup=false){
 				$archivePath=str_replace($root,'',$f);
 				
 				// Checking for directory filtering
-				$dir=explode('/',$archivePath);
+				$dir=explode(DIRECTORY_SEPARATOR,$archivePath);
 				
 				// Backup ignores filesystem scripts entirely if it is not enabled
 				if($filesystemBackup || $dir[0]!='filesystem'){

@@ -53,6 +53,13 @@ $log[]='';
 	} else {
 		$log[]='WARNING: Zlib PHP extension is not supported, this is needed if output compression is used, but system turns it off automatically if extension is not present';
 	}
+	
+// APC
+	if(extension_loaded('apc')){
+		$log[]='SUCCESS: APC is supported';
+	} else {
+		$log[]='WARNING: APC PHP extension is not supported, this is not required by WWW Framework, but can improve performance, if supported';
+	}
 
 // PDO
 

@@ -31,11 +31,17 @@ class WWW_controller_url extends WWW_Factory {
 	// This stores defined system languages
 	private $languages;
 	
-	// This stores detected home view
-	private $homeView;
+	// This stores default home view
+	private $viewHome;
+	
+	// This stores default 404 view
+	private $view404;
 	
 	// This stores current language Sitemap
 	private $siteMap;
+	
+	// Stores current robots string
+	private $robots;
 	
 	// This stores sitemap information of detected URL from Sitemap file
 	private $siteMapInfo=array();
@@ -43,13 +49,19 @@ class WWW_controller_url extends WWW_Factory {
 	// This is called by index.php gateway when trying to solve request URL to view
 	public function solve($input){
 		
+		// Default view is loaded from State (this is loaded when no URL is defined)
+		$this->view404=$this->getState('404-view');
+		
+		// System root is the base directory of files on web server
+		$this->robots=$this->getState('robots');
+		
 		// Custom request URL can be used, this is required
 		if(isset($input['www-request'])){
 			// Request string is loaded from input
 			$request=$input['www-request'];
 		} else {
 			// Formatting and returning the expected result array
-			return $this->returnViewData(array('view'=>'404','subview'=>'','language'=>$this->getState('language'),'unsolved-url'=>array()));
+			return $this->returnViewData(array('view'=>$this->view404,'subview'=>'','language'=>$this->getState('language'),'unsolved-url'=>array()));
 		}
 		
 		// Web root is the base directory of the website
@@ -57,9 +69,6 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// System root is the base directory of files on web server
 		$this->systemRoot=$this->getState('system-root');
-		
-		// System root is the base directory of files on web server
-		$this->robots=$this->getState('robots');
 		
 		// This setting will force that even the first language (first in languages array) has to be represented in URL
 		$enforceSlash=$this->getState('enforce-url-end-slash');
@@ -74,10 +83,10 @@ class WWW_controller_url extends WWW_Factory {
 		$this->languages=$this->getState('languages');
 		
 		// Default view is loaded from State (this is loaded when no URL is defined)
-		$this->homeView=$this->getState('home-view');
+		$this->viewHome=$this->getState('home-view');
 		
 		// By default it is assumed that home view is used
-		$view=$this->homeView;
+		$view=$this->viewHome;
 		
 		// To solve the request GET is separated from URL nodes
 		$requestNodesRaw=explode('?',$request,2);
@@ -183,7 +192,7 @@ class WWW_controller_url extends WWW_Factory {
 					
 				} else {
 					// Formatting and returning the expected result array
-					return $this->returnViewData(array('view'=>'404','subview'=>'','language'=>$language,'unsolved-url'=>array()));
+					return $this->returnViewData(array('view'=>$this->view404,'subview'=>'','language'=>$language,'unsolved-url'=>array()));
 				}
 
 			}
@@ -211,7 +220,7 @@ class WWW_controller_url extends WWW_Factory {
 			require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.php');
 		} else {
 			// Formatting and returning the expected result array
-			return $this->returnViewData(array('view'=>'404','subview'=>'','language'=>$language,'unsolved-url'=>array()));
+			return $this->returnViewData(array('view'=>$this->view404,'subview'=>'','language'=>$language,'unsolved-url'=>array()));
 		}
 		
 		// Storing sitemap for later use
@@ -251,7 +260,7 @@ class WWW_controller_url extends WWW_Factory {
 			}
 			
 			// If the found view is home view, then we simply redirect to home view without the long url
-			if(empty($unsolvedUrlNodes) && $view==$this->homeView){
+			if(empty($unsolvedUrlNodes) && $view==$this->viewHome){
 			
 				// If first language is used and it is not needed to use language URL in first language
 				if($this->enforceLanguageUrl==false && $language==$this->languages[0]){
@@ -275,7 +284,7 @@ class WWW_controller_url extends WWW_Factory {
 		} else {
 		
 			// Setting current page information when returning Home view
-			$this->siteMapInfo=$this->siteMap[$this->homeView];
+			$this->siteMapInfo=$this->siteMap[$this->viewHome];
 		
 		}
 		
@@ -284,14 +293,16 @@ class WWW_controller_url extends WWW_Factory {
 			$unsolvedUrlAllowed=true;
 		}
 		
-		// It is possible to overwrite the default robots setting
-		if(isset($this->siteMapInfo['permanent-redirect']) && $this->siteMapInfo['permanent-redirect']!=''){
+		// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
+		if(isset($this->siteMapInfo['temporary-redirect']) && $this->siteMapInfo['temporary-redirect']!=''){
+			header('Location: '.$this->siteMapInfo['temporary-redirect'],TRUE,302);
+		} elseif(isset($this->siteMapInfo['permanent-redirect']) && $this->siteMapInfo['permanent-redirect']!=''){
 			header('Location: '.$this->siteMapInfo['permanent-redirect'],TRUE,301);
 		}
 		
-		// It is possible to overwrite the default robots setting, this causes 302 redirect which is considered temporary
-		if(isset($this->siteMapInfo['temporary-redirect']) && $this->siteMapInfo['temporary-redirect']!=''){
-			header('Location: '.$this->siteMapInfo['temporary-redirect'],TRUE,302);
+		// It is possible to overwrite the default robots setting
+		if(isset($this->siteMapInfo['robots'])){
+			$this->robots=$this->siteMapInfo['robots'];
 		}
 		
 		// Array of unsolved URL nodes is reversed if it is not empty
@@ -302,7 +313,7 @@ class WWW_controller_url extends WWW_Factory {
 			
 			// 404 is returned if unsolved URL's were not permitted
 			if($unsolvedUrlAllowed==false){
-				return $this->returnViewData(array('view'=>'404','language'=>$language,'unsolved-url'=>$unsolvedUrlNodes));
+				return $this->returnViewData(array('view'=>$this->view404,'language'=>$language,'unsolved-url'=>$unsolvedUrlNodes));
 			}
 			
 		}
@@ -329,7 +340,7 @@ class WWW_controller_url extends WWW_Factory {
 				require($this->systemRoot.'resources'.DIRECTORY_SEPARATOR.$data['language'].'.sitemap.php');
 			} else {
 				// Formatting and returning the expected result array
-				return $this->returnViewData(array('view'=>'404','language'=>$data['language'],'unsolved-url'=>array()));
+				return $this->returnViewData(array('view'=>$this->view404,'language'=>$data['language'],'unsolved-url'=>array()));
 			}
 			$this->siteMap=$siteMap;
 		}
@@ -348,7 +359,7 @@ class WWW_controller_url extends WWW_Factory {
 			}
 		
 			// Home views do not need a URL node
-			if($node['view']!=$this->homeView){
+			if($node['view']!=$this->viewHome){
 				$url=$key.'/';
 			} else {
 				$url='';
@@ -377,6 +388,19 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// Appending the data from Sitemap file
 		$data+=$this->siteMapInfo;
+		
+		// If view file is found as non-existent, a proper header is added
+		if($data['view']==$this->view404){
+			header('HTTP/1.1 404 Not Found');
+		}
+		
+		// Writing robots data to header
+		if($this->robots!=''){
+			header('X-Robots-Tag: '.$this->robots, true);
+		}
+		
+		// Robots data is also returned to views
+		$data['robots']=$this->robots;
 		
 		// Translations are stored in an array
 		$translations=array();

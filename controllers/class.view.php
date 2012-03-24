@@ -35,13 +35,6 @@ class WWW_controller_view extends WWW_Factory {
 		$author=$this->getState('author');
 		$copyright=$this->getState('copyright');
 		
-		// If robots command string was defined by Sitemap then it is used here
-		if(isset($input['www-view-data']['robots'])){
-			$robots=$input['www-view-data']['robots'];
-		} else {
-			$robots=false;
-		}
-		
 		// Meta title can be set in Sitemap and can also be different based on 
 		if(isset($input['www-view-data']['meta-title'])){
 			$title=$input['www-view-data']['meta-title'];
@@ -55,17 +48,6 @@ class WWW_controller_view extends WWW_Factory {
 			}
 		} else {
 			$title=false;
-		}
-		
-		// Writing robots data to header
-		if($robots!=''){
-			header('X-Robots-Tag: '.$robots, true);
-		}
-		
-		// If view file is found as non-existent, cache is turned off and 404 view file loadedinstead
-		if($view=='404'){
-			header('HTTP/1.1 404 Not Found');
-			$this->setState('cache-timeout',0);
 		}
 		
 		// Current translations are loaded
@@ -115,9 +97,9 @@ class WWW_controller_view extends WWW_Factory {
 					<meta charset="utf-8">
 					<!-- Useful for mobile applications -->
 					<meta name="viewport" content="width=device-width"/> 
-					<?php if(!$robots){ ?>
+					<?php if($input['www-view-data']['robots']!=''){ ?>
 						<!-- Robots -->
-						<meta content="<?=$robots?>" name="robots"/>
+						<meta content="<?=$input['www-view-data']['robots']?>" name="robots"/>
 					<?php } ?>
 					<!-- Content information -->
 					<?php if(isset($input['www-view-data']['meta-keywords'])){ ?>

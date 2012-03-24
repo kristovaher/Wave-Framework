@@ -20,7 +20,7 @@ $siteMap['example']=array('view'=>'example','unsolved-url-nodes'=>true);  // If 
 $siteMap['example/subview']=array('view'=>'example','subview'=>'alt'); // It is possible to have two different URL's use the same view with a 'slash' making it unique, 'alt' will be stored as 'subview'
 $siteMap['example/robots']=array('view'=>'example','robots'=>''); // This allows to overwrite the default robots setting
 $siteMap['example/redirect']=array('view'=>'example','temporary-redirect'=>'http://www.google.com'); // It is also possible to redirect URL's
-$siteMap['example/hide']=array('view'=>'example','hidden'=>true); // This means that the URL is hidden from sitemap
+$siteMap['example/hide']=array('view'=>'example','hidden'=>true,'cache-timeout'=>0); // This means that the URL is hidden from sitemap as well as that cache is not used for this view
 $siteMap['example/meta']=array('view'=>'example','meta-title'=>'My custom title!','meta-description'=>'Meta description here','meta-keywords'=>'www,framework'); // Meta information can also be listed for page
 	
 ?>

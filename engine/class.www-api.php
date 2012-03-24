@@ -329,6 +329,7 @@ class WWW_API {
 				
 		}
 		
+		
 		// If cache timeout is not 0, that is if cache should be checked for and used, if it exists
 		if($this->state->data['api-cache-timeout']!=0){
 
@@ -368,6 +369,9 @@ class WWW_API {
 				// Current cache timeout is used to return to browser information about how long browser should store this result
 				$this->state->data['current-cache-timeout']=$this->state->data['request-time']+$this->state->data['api-cache-timeout'];
 			}
+		} else {
+			// Flag is set to false, since cache is not being used
+			$this->cacheUsed=false;
 		}
 		
 		// If cache was not used and command result is not yet defined, system will execute the API command
@@ -547,6 +551,11 @@ class WWW_API {
 				case 'rss':
 					// RSS minification eliminates extra spaces and newlines and other formatting
 					$apiResult=WWW_Minifier::minifyXML($apiResult);
+					break;
+					
+				case 'php':
+					// If PHP is used, then it can not be 'echoed' out due to being a variable
+					$this->state->data['api-output']=0;
 					break;
 			}
 			

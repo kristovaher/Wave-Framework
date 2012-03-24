@@ -62,6 +62,12 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// This is detected by default based on server value if not set here
 	// $config['timezone']='Europe/London';
 
+	// 404 view name
+	// This is what Index gateway considers as the 404 'view' in case URL does not exist
+	// This view must exist as a /views/class.{home-view}.php file
+	// Default value is '404'
+	// $config['404-view']='404';
+	
 	// Home view name
 	// This is what Index gateway considers as the default 'view' in case URL is set to root
 	// This view must exist as a /views/class.{home-view}.php file

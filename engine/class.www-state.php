@@ -47,6 +47,7 @@ class WWW_State	{
 			'api-input-data'=>array(),
 			'resource-cache-timeout'=>31536000,
 			'home-view'=>'home',
+			'404-view'=>'404',
 			'error-reporting'=>0,
 			'timezone'=>false,
 			'disable-session-start'=>false,
@@ -91,7 +92,7 @@ class WWW_State	{
 		}
 		
 		// If first language is not defined then first node from languages array is used
-		if($this->data['langauge']==false){
+		if($this->data['language']==false){
 			$this->data['language']=$this->data['languages'][0];
 		}
 		

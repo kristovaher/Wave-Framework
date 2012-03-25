@@ -32,6 +32,7 @@ class WWW_State	{
 	
 		// A lot of default State variables are loaded from PHP settings, others are simply pre-defined
 		$this->data=array(
+			'project-title'=>'WWW Framework',
 			'api-keys'=>array(),
 			'api-profile'=>'public',
 			'api-token-timeout'=>0,

@@ -43,6 +43,11 @@ Author and support: Kristo Vaher - kristo@waher.net
 
 // SERVER AND CONTENT
 
+	// Project title
+	// This value, if defined, is shown by View controller at the end of page meta title
+	// This value is set as 'WWW Framework' by default, if not defined here
+	// $config['project-title']='WWW Framework';
+
 	// Host name
 	// This value is the host name of the server
 	// If left undefined then server will solve this setting by itself

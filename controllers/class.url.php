@@ -152,9 +152,9 @@ class WWW_controller_url extends WWW_Factory {
 							unset($requestNodes[$nodeKey]);
 							// If GET variables were set, system redirects to URL without the language and appends the GET variables
 							if(isset($requestNodesRaw[1])){
-								header('Location: '.$this->webRoot.implode('/',$requestNodes).'/?'.$requestNodesRaw[1],TRUE,301);
+								header('Location: '.$this->webRoot.implode('/',$requestNodes).'?'.$requestNodesRaw[1],TRUE,301);
 							} else {
-								header('Location: '.$this->webRoot.implode('/',$requestNodes).'/',TRUE,301);
+								header('Location: '.$this->webRoot.implode('/',$requestNodes),TRUE,301);
 							}
 							die();
 							
@@ -176,7 +176,7 @@ class WWW_controller_url extends WWW_Factory {
 						} else {
 						
 							// If language node is set in request, but has no second URL node set, it is also assumed that it is default view
-							if($nodeKey==1 && (!isset($requestNodes[1]) || $requestNodes[1]=='')){
+							if($requestNodes[0]==$language && $nodeKey==1 && (!isset($requestNodes[1]) || $requestNodes[1]=='')){
 								// Expecting to return Home view
 								$returnHome=true;
 							} else {
@@ -378,7 +378,7 @@ class WWW_controller_url extends WWW_Factory {
 		}
 		
 		// This stores flipped array (for reverse access in views and objects) as a state
-		$data['url-map']=$siteMapReference;
+		$data['sitemap']=$siteMapReference;
 		
 		// Web root will also be returned
 		$data['web-root']=$this->webRoot;
@@ -394,13 +394,26 @@ class WWW_controller_url extends WWW_Factory {
 			header('HTTP/1.1 404 Not Found');
 		}
 		
-		// Writing robots data to header
-		if($this->robots!=''){
-			header('X-Robots-Tag: '.$this->robots, true);
+		// If project title is not set by Sitemap, system defines the State project title as the value
+		if(!isset($data['project-title'])){
+			$data['project-title']=$this->getState('project-title');
 		}
 		
-		// Robots data is also returned to views
-		$data['robots']=$this->robots;
+		// Writing robots data to header
+		if(isset($data['robots']) && $data['robots']!=''){
+		
+			// This header is not 'official HTTP header', but is widely supported by Google and others
+			header('X-Robots-Tag: '.$data['robots'], true);
+			
+		} elseif($this->robots!=''){
+		
+			// This will be set from State default value, if Sitemap did not define robots
+			header('X-Robots-Tag: '.$this->robots, true);
+			
+			// Robots data is also returned to views
+			$data['robots']=$this->robots;
+			
+		}
 		
 		// Translations are stored in an array
 		$translations=array();

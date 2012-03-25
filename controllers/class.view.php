@@ -37,17 +37,27 @@ class WWW_controller_view extends WWW_Factory {
 		
 		// Meta title can be set in Sitemap and can also be different based on 
 		if(isset($input['www-view-data']['meta-title'])){
-			$title=$input['www-view-data']['meta-title'];
+			$metaTitle=$input['www-view-data']['meta-title'];
 			// Here you should add your custom meta title loading, if necessary
 			if(method_exists($viewObject,'getTitle')){
 				$appendTitle=$viewObject->getTitle($input['www-view-data']);
 				// Title is only appended if it exists and is not empty
 				if($appendTitle && $appendTitle!=''){
-					$title.=$appendTitle.' - '.$title;
+					$metaTitle.=$appendTitle.' - '.$metaTitle;
 				}
 			}
 		} else {
-			$title=false;
+			// Project title is an empty string, if it was not defined
+			$metaTitle='';
+		}
+		
+		// Project title will be added to the end, if it is set
+		if($input['www-view-data']['project-title']!=''){
+			if($metaTitle!=''){
+				$metaTitle.=' - '.$input['www-view-data']['project-title'];
+			} else {
+				$metaTitle=$input['www-view-data']['project-title'];
+			}
 		}
 		
 		// Current translations are loaded
@@ -92,7 +102,7 @@ class WWW_controller_view extends WWW_Factory {
 			<!DOCTYPE html>
 			<html lang="<?=$language?>">
 				<head>
-					<title><?=(($title)?$title.' - ':'')?>WWW Framework</title>
+					<title><?=$metaTitle?></title>
 					<!-- UTF-8 -->
 					<meta charset="utf-8">
 					<!-- Useful for mobile applications -->
@@ -142,7 +152,7 @@ class WWW_controller_view extends WWW_Factory {
 				<body>
 				<?php
 					// View object is rendered					
-					$viewObject->render($input['www-view-data']);
+					$viewObject->render($input);
 				?>
 				</body>
 			</html>

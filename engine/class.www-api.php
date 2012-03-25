@@ -27,8 +27,8 @@ class WWW_API {
 	// This stores API command results in a buffer
 	private $buffer=array();
 	
-	// Simple flag to keep track whether cache has been used by this object
-	public $cacheUsed=false;
+	// An array that stores the flags for each API command about whether cache was used with them
+	public $cacheUsed=array();
 			
 	// API requires State object for majority of functionality
 	public function __construct($state=false){
@@ -56,11 +56,11 @@ class WWW_API {
 	// * disableBuffer - This turns off internal buffer that is used when the same API call is executed many times
 	// * apiCheck - internally called API does not need to be hash validated, unless necessary
 	// Returns the result of the API call, depending on command and classes it loads
-	public function command($command='',$input=array(),$disableBuffer=true,$apiCheck=true){
+	public function command($apiCommand='',$apiInputData=array(),$disableBuffer=true,$apiCheck=true){
 	
 		// If buffer is not disabled, response is checked from buffer
 		if(!$disableBuffer){
-			$bufferAddress=md5($command.json_encode($input));
+			$bufferAddress=md5($apiCommand.json_encode($apiInputData));
 			// If result already exists in buffer then it is simply returned
 			if(isset($this->buffer[$bufferAddress])){
 				return $this->buffer[$bufferAddress];
@@ -70,57 +70,65 @@ class WWW_API {
 		// Result of the API call is stored in this variable
 		$apiResult=false;
 		
-		// API command is written into state
-		$this->state->data['api-command']=$command; 
-
-		// Input data is stored in the state
-		$this->state->data['api-input-data']=$input;
+		// By default system assumes that cache is not used
+		$this->cacheUsed[$apiCommand]=false;
+		
+		// Setting input data to State as well
+		$this->state->data['api-input-data']=$apiInputData;
 		
 		// If session cookie is defined, it is removed from input data for cache and hash validation reasons
-		if(isset($this->state->data['api-input-data'][$this->state->data['session-cookie']])){
-			unset($this->state->data['api-input-data'][$this->state->data['session-cookie']]);
+		if(isset($apiInputData[$this->state->data['session-cookie']])){
+			unset($apiInputData[$this->state->data['session-cookie']]);
 		}
 		
 		// By default the API command returns a PHP variable, but another type can be used
-		if(isset($this->state->data['api-input-data']['www-return-data-type'])){
-			$this->state->data['api-return-data-type']=$this->state->data['api-input-data']['www-return-data-type'];
+		if(isset($apiInputData['www-return-data-type'])){
+			$returnDataType=$apiInputData['www-return-data-type'];
 		} else {
-			$this->state->data['api-return-data-type']='php';
+			$returnDataType='php';
 		}
 		
 		// By default the API assumes that the result is not 'echoed/printed' out, so it does return result with content type headers
-		if(isset($this->state->data['api-input-data']['www-output']) && $this->state->data['api-input-data']['www-output']!=0){
-			$this->state->data['api-output']=1;
+		if(isset($apiInputData['www-output']) && $apiInputData['www-output']!=0){
+			$apiOutput=1;
 		} else {
-			$this->state->data['api-output']=0;
+			$apiOutput=0;
 		}
 		
 		// In some cases it is required to set content type that is returned, such as the case when using script.js form() function to disable browser formatting of returned data
-		if(isset($this->state->data['api-input-data']['www-content-type']) && $this->state->data['api-input-data']['www-content-type']!=''){
-			$this->state->data['api-content-type']=$this->state->data['api-input-data']['www-content-type'];
-		} 
+		if(isset($apiInputData['www-content-type']) && $apiInputData['www-content-type']!=''){
+			$apiContentType=$apiInputData['www-content-type'];
+		} else {
+			// This set to empty string means that content type header depends on return data type
+			$apiContentType='';
+		}
 		
 		// If minification is requested from output
-		if(isset($this->state->data['api-input-data']['www-minify']) && $this->state->data['api-input-data']['www-minify']!=0){
-			$this->state->data['api-minify']=$this->state->data['api-input-data']['www-minify'];
+		if(isset($apiInputData['www-minify']) && $apiInputData['www-minify']!=0){
+			$apiMinify=$apiInputData['www-minify'];
+		} else {
+			$apiMinify=false;
 		}
 		
 		// If custom hash serializer function is defined then that is used for serialization
-		if(isset($this->state->data['api-input-data']['www-serializer'])){
-			$this->state->data['api-serializer']=$this->state->data['api-input-data']['www-serializer'];
+		if(isset($apiInputData['www-serializer'])){
+			$apiSerializer=$apiInputData['www-serializer'];
 		}
 		
 		// By default the API does not use cache, but if cache timeout is set then this is taken into account
-		if(isset($this->state->data['api-input-data']['www-cache-timeout'])){
-			$this->state->data['api-cache-timeout']=$this->state->data['api-input-data']['www-cache-timeout'];
+		if(isset($apiInputData['www-cache-timeout'])){
+			$cacheTimeout=$apiInputData['www-cache-timeout'];
 		} else {
 			// This is set to 0 if timeout is not assigned, this setting can never be set in configuration
-			$this->state->data['api-cache-timeout']=0;
+			$cacheTimeout=0;
 		}
 		
+		// Last modified time of this request, used for caching purposes
+		$lastModified=$_SERVER['REQUEST_TIME'];
+		
 		// Profile name used is defined either from input variables or State
-		if(isset($this->state->data['api-input-data']['www-profile'])){
-			$apiProfile=$this->state->data['api-input-data']['www-profile'];
+		if(isset($apiInputData['www-profile'])){
+			$apiProfile=$apiInputData['www-profile'];
 		} else {
 			$apiProfile=$this->state->data['api-profile'];
 		} 
@@ -134,41 +142,41 @@ class WWW_API {
 				$this->state->data['api-key']=$this->state->data['api-keys'][$apiProfile];
 			} else {
 				// Since an error was detected, system pushes for output immediately
-				return $this->output(array('www-error'=>'API key not found'),'HTTP/1.1 403 Forbidden');
+				return $this->output(array('www-error'=>'API key not found'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 			}
 		
 			// If client provided hash, then this is used, otherwise hash is loaded from State
-			if(isset($this->state->data['api-input-data']['www-hash'])){
-				$apiHash=$this->state->data['api-input-data']['www-hash'];
+			if(isset($apiInputData['www-hash'])){
+				$apiHash=$apiInputData['www-hash'];
 			} elseif(isset($this->state->data['api-hash'])){
 				$apiHash=$this->state->data['api-hash'];
 			} else {
 				// Since an error was detected, system pushes for output immediately
-				return $this->output(array('www-error'=>'API hash is not provided'),'HTTP/1.1 403 Forbidden');
+				return $this->output(array('www-error'=>'API hash is not provided'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 			}
 			
 			// Token-based validation is only created if tokens are enabled
-			if($this->state->data['api-token-timeout']!=0){
+			if($this->state->data['api-token-timeout']!=0 && ($apiCommand=='www-create-token' || $apiCommand=='www-destroy-token' || $apiCommand=='www-validate-token')){
+				
+				// Token actions should never be cached
+				$cacheTimeout=0;
 			
 				// These commands require separate validation methods
-				if($this->state->data['api-command']=='www-create-token' || $this->state->data['api-command']=='www-destroy-token'){
+				if($apiCommand=='www-create-token' || $apiCommand=='www-destroy-token'){
 				
 					// Hash consists of API command, serialized input data and secret API key
-					$checkHash=sha1($this->state->data['api-command'].$this->state->data['api-profile'].$this->state->data['api-key']);
+					$checkHash=sha1($apiCommand.$this->state->data['api-profile'].$this->state->data['api-key']);
 				
 					// If hash validation fails the request is blocked
 					if($checkHash!=$apiHash){
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'API authentication failed'),'HTTP/1.1 403 Forbidden');
+						return $this->output(array('www-error'=>'API authentication failed'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 					}
 					
 				}
 			
 				// This can be used to return a token to use for further API commands without having to validate the entire input each time
-				if($this->state->data['api-command']=='www-create-token'){
-				
-					// This action should never be cached
-					$this->state->data['api-cache-timeout']=0;
+				if($apiCommand=='www-create-token'){
 					
 					// Session filename is a simple hashed API profile name
 					$sessionFile=md5($apiProfile);
@@ -189,7 +197,7 @@ class WWW_API {
 					// Session token file is created and returned to the client as a successful request
 					if(!file_put_contents($apiToken,$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp')){
 						// Result is output immediately
-						return $this->output(array('www-result'=>$apiToken));
+						return $this->output(array('www-result'=>$apiToken),'',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType,$apiMinify);
 					} else {
 						trigger_error('Cannot create session token file',E_USER_ERROR);
 					}
@@ -197,10 +205,7 @@ class WWW_API {
 				}
 				
 				// Tokens generated for API use can also be removed and timed out prior to their natural timeout
-				if($this->state->data['api-command']=='www-destroy-token'){
-				
-					// This action should never be cached
-					$this->state->data['api-cache-timeout']=0;
+				if($apiCommand=='www-destroy-token'){
 				
 					// Session filename is a simple hashed API profile name
 					$sessionFile=md5($apiProfile);
@@ -217,26 +222,23 @@ class WWW_API {
 						
 							unlink($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp');
 							// Result is output immediately
-							return $this->output(array('www-result'=>'Session token destroyed'));
+							return $this->output(array('www-result'=>'Session token destroyed'),'',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType,$apiMinify);
 							
 						} else {
 						
 							// Since an error was detected, system pushes for output immediately
-							return $this->output(array('www-error'=>'Incorrect hash for destroying token'),'HTTP/1.1 403 Forbidden');
+							return $this->output(array('www-error'=>'Incorrect hash for destroying token'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 							
 						}
 						
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'Incorrect hash for destroying token'),'HTTP/1.1 403 Forbidden');
+						return $this->output(array('www-error'=>'Incorrect hash for destroying token'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 					}
 				}
 				
 				// This is used to simply validate whether the token is still active or not
-				if($this->state->data['api-command']=='www-validate-token'){
-				
-					// This action should never be cached
-					$this->state->data['api-cache-timeout']=0;
+				if($apiCommand=='www-validate-token'){
 				
 					// Session filename is a simple hashed API profile name
 					$sessionFile=md5($apiProfile);
@@ -252,24 +254,24 @@ class WWW_API {
 						if($checkHash==$apiHash){
 						
 							// Token was validated successfully
-							return $this->output(array('www-result'=>'Token is active'));
+							return $this->output(array('www-result'=>'Token is active'),'',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType,$apiMinify);
 							
 						} else {
 						
 							// Since an error was detected, token must be invalid
-							return $this->output(array('www-error'=>'Token is not active'));
+							return $this->output(array('www-error'=>'Token is not active'),'',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType,$apiMinify);
 							
 						}
 						
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-result'=>'Token does not exist'));
+						return $this->output(array('www-result'=>'Token does not exist'),'',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType,$apiMinify);
 					}
 				}
 				
-			} elseif(isset($this->state->data['api-input-data']['www-create-token']) || isset($this->state->data['api-input-data']['www-destroy-token']) || isset($this->state->data['api-input-data']['www-validate-token'])){
+			} elseif(isset($apiInputData['www-create-token']) || isset($apiInputData['www-destroy-token']) || isset($apiInputData['www-validate-token'])){
 				// Since an error was detected, system pushes for output immediately
-				return $this->output(array('www-error'=>'Token-based validation is turned off'),'HTTP/1.1 403 Forbidden');
+				return $this->output(array('www-error'=>'Token-based validation is turned off'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 			}
 			
 			// It is possible to have an IP as the API key, in which case only IP is used for validation
@@ -277,7 +279,7 @@ class WWW_API {
 			
 				// In case token is requested then in the future commands only the token needs to be hashed by the secret key
 				// Token method is less secure than input validation method, but can be easier for client to build
-				if(isset($this->state->data['api-input-data']['www-use-token']) && $this->state->data['api-input-data']['www-use-token']==1){
+				if(isset($apiInputData['www-use-token']) && $apiInputData['www-use-token']==1){
 					
 					// Session filename is a simple hashed API profile name
 					$sessionFile=md5($apiProfile);
@@ -290,31 +292,31 @@ class WWW_API {
 					if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp') && ($this->state->data['api-token-timeout']==0 || filemtime($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp')>($this->state->data['request-time']-$this->state->data['api-token-timeout']))){
 						// API validation is done only with the request token and secret key being hashed
 						$checkHash=file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp');
-						$checkHash=sha1($this->state->data['api-command'].$checkHash.$this->state->data['api-key']);
+						$checkHash=sha1($apiCommand.$checkHash.$this->state->data['api-key']);
 						// This sets the modification time of session token, extending its duration
 						touch($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp');
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'API token is outdated or not found'),'HTTP/1.1 403 Forbidden');
+						return $this->output(array('www-error'=>'API token is outdated or not found'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 					}
 					
 				} else {
 				
 					// Hash validation is done when all input data is sorted by keys. This should be also done by client prior to submitting a hash.
-					ksort($this->state->data['api-input-data']);
+					ksort($apiInputData);
 					
 					// Hash is calculated based on hash serializer that is used
 					// Hash consists of API command, serialized input data and secret API key
-					switch($this->state->data['api-serializer']){
+					switch($apiSerializer){
 						case 'json':
-							$checkHash=sha1($this->state->data['api-command'].json_encode($this->state->data['api-input-data']).$this->state->data['api-key']);
+							$checkHash=sha1($apiCommand.json_encode($apiInputData).$this->state->data['api-key']);
 							break;
 						case 'serialize':
-							$checkHash=sha1($this->state->data['api-command'].serialize($this->state->data['api-input-data']).$this->state->data['api-key']);
+							$checkHash=sha1($apiCommand.serialize($apiInputData).$this->state->data['api-key']);
 							break;
 						default:
 							// Since an error was detected, system pushes for output immediately
-							return $this->output(array('www-error'=>'API hash validation serialization method not supported'),'HTTP/1.1 403 Forbidden');
+							return $this->output(array('www-error'=>'API hash validation serialization method not supported'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 					}
 					
 				}
@@ -322,19 +324,18 @@ class WWW_API {
 				// If hash validation fails the request is blocked
 				if($checkHash!=$apiHash){
 					// Since an error was detected, system pushes for output immediately
-					return $this->output(array('www-error'=>'API authentication failed'),'HTTP/1.1 403 Forbidden');
+					return $this->output(array('www-error'=>'API authentication failed'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 				}
 				
 			}
 				
-		}
-		
+		}		
 		
 		// If cache timeout is not 0, that is if cache should be checked for and used, if it exists
-		if($this->state->data['api-cache-timeout']!=0){
+		if($cacheTimeout!=0){
 
 			// Cache filename consists of API command, serialized input data, return type and whether API output is used.
-			$cacheFile=md5($this->state->data['api-command'].json_encode($this->state->data['api-input-data']).$this->state->data['api-return-data-type'].$this->state->data['api-output']);
+			$cacheFile=md5($apiCommand.json_encode($apiInputData).$returnDataType.$apiOutput);
 			
 			// Cache subfolder is taken from first three characters of cache filename
 			$cacheSubfolder=substr($cacheFile,0,2);
@@ -344,46 +345,43 @@ class WWW_API {
 			
 				// Current cache timeout is used to return to browser information about how long browser should store this result
 				$lastModified=filemtime($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp');
-				if($lastModified>=$this->state->data['request-time']-$this->state->data['api-cache-timeout']){
+				if($lastModified>=$this->state->data['request-time']-$cacheTimeout){
 				
 					// The moment cache was created gets cache timeout added to it and returned to browser as 'expires' timestamp
-					$this->state->data['current-cache-timeout']=$lastModified+$this->state->data['api-cache-timeout'];
+					$lastModified+=$cacheTimeout;
 					
 					// System loads the result from cache file based on return data type
-					if($this->state->data['api-return-data-type']=='html'){
+					if($returnDataType=='html'){
 						$apiResult=file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp');
-					} elseif($this->state->data['api-return-data-type']=='php'){
+					} elseif($returnDataType=='php'){
 						$apiResult=unserialize(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp'));
 					} else {
 						$apiResult=json_decode(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp'),true);
 					}
 					// Flag is set to true, since cache is being used
-					$this->cacheUsed=true;
+					$this->cacheUsed[$apiCommand]=true;
 					
 				} else {
 					// Current cache timeout is used to return to browser information about how long browser should store this result
-					$this->state->data['current-cache-timeout']=$this->state->data['request-time']+$this->state->data['api-cache-timeout'];
+					$lastModified=$this->state->data['request-time']+$cacheTimeout;
 				}
 				
 			} else {
 				// Current cache timeout is used to return to browser information about how long browser should store this result
-				$this->state->data['current-cache-timeout']=$this->state->data['request-time']+$this->state->data['api-cache-timeout'];
+				$lastModified=$this->state->data['request-time']+$cacheTimeout;
 			}
-		} else {
-			// Flag is set to false, since cache is not being used
-			$this->cacheUsed=false;
 		}
 		
 		// If cache was not used and command result is not yet defined, system will execute the API command
 		if(!$apiResult){
 		
 			// HTML and text data types can be echoed/printed in their view files, result of this is gathered by output buffer
-			if($this->state->data['api-return-data-type']=='html' || $this->state->data['api-return-data-type']=='text'){
+			if($returnDataType=='html' || $returnDataType=='text'){
 				ob_start();
 			}
 
 			// API command is solved into bits to be parsed
-			$commandBits=explode('-',$this->state->data['api-command'],2);
+			$commandBits=explode('-',$apiCommand,2);
 			
 			// Class name is found based on command
 			$className='WWW_controller_'.$commandBits[0];
@@ -397,7 +395,7 @@ class WWW_API {
 					require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
 				} else {
 					// Since an error was detected, system pushes for output immediately
-					return $this->output(array('www-error'=>'Client request recognized, but unable to handle'),'HTTP/1.1 501 Not Implemented');
+					return $this->output(array('www-error'=>'Client request recognized, but unable to handle'),'HTTP/1.1 501 Not Implemented',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 				}
 			}
 			
@@ -412,25 +410,25 @@ class WWW_API {
 				// If command method does not exist, 501 page is returned or error triggered
 				if(!method_exists($controller,$methodName)){
 					// Since an error was detected, system pushes for output immediately
-					return $this->output(array('www-error'=>'Client request recognized, but unable to handle'),'HTTP/1.1 501 Not Implemented');
+					return $this->output(array('www-error'=>'Client request recognized, but unable to handle'),'HTTP/1.1 501 Not Implemented',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 				}
 				
 				// Result of the command is solved with this call
 				// Input data is also submitted to this function
-				$apiResult=$controller->$methodName($this->state->data['api-input-data']);
+				$apiResult=$controller->$methodName($apiInputData);
 				
 			} else {
 				// Since an error was detected, system pushes for output immediately
-				return $this->output(array('www-error'=>'Client request recognized, but unable to handle'),'HTTP/1.1 501 Not Implemented');
+				return $this->output(array('www-error'=>'Client request recognized, but unable to handle'),'HTTP/1.1 501 Not Implemented',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
 			}
 			
 			// If returned data type was using output buffer, then that is gathered for the result instead
-			if($this->state->data['api-return-data-type']=='html' || $this->state->data['api-return-data-type']=='text'){
+			if($returnDataType=='html' || $returnDataType=='text'){
 				$apiResult=ob_get_clean();
 			}
 			
 			// If cache timeout was set then the result is stored as a cache in the filesystem
-			if($this->state->data['api-cache-timeout']!=0){
+			if($cacheTimeout!=0){
 			
 				// If cache subdirectory does not exist, it is created
 				if(!is_dir($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR)){
@@ -441,11 +439,11 @@ class WWW_API {
 				
 				// If returned data is HTML or text, it is simply written into cache file
 				// Other results are serialized before being written to cache
-				if($this->state->data['api-return-data-type']=='html' || $this->state->data['api-return-data-type']=='text'){
+				if($returnDataType=='html' || $returnDataType=='text'){
 					if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp',$apiResult)){
 						trigger_error('Cannot write cache file',E_USER_ERROR);
 					}
-				} elseif($this->state->data['api-return-data-type']=='php'){
+				} elseif($returnDataType=='php'){
 					if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp',serialize($apiResult))){
 						trigger_error('Cannot write cache file',E_USER_ERROR);
 					}
@@ -460,24 +458,24 @@ class WWW_API {
 		
 		// If buffer is not disabled, response is checked from buffer
 		if(!$disableBuffer){
-			$bufferAddress=md5($command.json_encode($input));
+			$bufferAddress=md5($apiCommand.json_encode($apiInputData));
 			// Storing result in buffer
-			$this->buffer[$bufferAddress]=$this->output($apiResult);
+			$this->buffer[$bufferAddress]=$this->output($apiResult,'',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType,$apiMinify,$lastModified);
 			// Returning result from newly created buffer
 			return $this->buffer[$bufferAddress];
 		} else {
 			// System returns correctly formatted output data
-			return $this->output($apiResult);
+			return $this->output($apiResult,'',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType,$apiMinify,$lastModified);
 		}
 	}
 	
 	// This function returns the data, whether final data or the one returned with error messages
 	// * apiResult - Result of the API call
 	// Returns final-formatted data
-	private function output($apiResult){
+	private function output($apiResult,$customHeader='',$returnDataType='php',$apiOutput=0,$cacheTimeout=0,$apiContentType='',$apiMinify=false,$lastModified=false){
 	
 		// Data is custom-formatted based on request
-		switch($this->state->data['api-return-data-type']){
+		switch($returnDataType){
 				
 			case 'json':
 				// Encodes the resulting array in JSON
@@ -518,7 +516,7 @@ class WWW_API {
 		}
 	
 		// If minification is requested from API
-		if($this->state->data['api-minify']==1){
+		if($apiMinify==1){
 		
 			// Including minification class if it is not yet defined
 			if(!class_exists('WWW_Minify')){
@@ -526,7 +524,7 @@ class WWW_API {
 			}
 			
 			// Minification is based on the type of class
-			switch($this->state->data['api-return-data-type']){
+			switch($returnDataType){
 			
 				case 'xml':
 					// XML minification eliminates extra spaces and newlines and other formatting
@@ -555,25 +553,25 @@ class WWW_API {
 					
 				case 'php':
 					// If PHP is used, then it can not be 'echoed' out due to being a variable
-					$this->state->data['api-output']=0;
+					$apiOutput=0;
 					break;
 			}
 			
 		}
 	
 		// Result is printed out, headers and cache control are returned to the client, if output flag was set for the command
-		if($this->state->data['api-output']==1){
+		if($apiOutput==1){
 		
 			// Cache control settings sent to the client depend on cache timeout settings
-			if($this->state->data['api-cache-timeout']!=0){
+			if($cacheTimeout!=0){
 			
 				// Cache control depends whether HTTP authentication is used or not
 				if($this->state->data['http-authentication']==true){
-					header('Cache-Control: private,max-age='.($this->state->data['current-cache-timeout']-$this->state->data['request-time']).',must-revalidate');
+					header('Cache-Control: private,max-age='.($lastModified-$this->state->data['request-time']).',must-revalidate');
 				} else {
-					header('Cache-Control: public,max-age='.($this->state->data['current-cache-timeout']-$this->state->data['request-time']).',must-revalidate');
+					header('Cache-Control: public,max-age='.($lastModified-$this->state->data['request-time']).',must-revalidate');
 				}
-				header('Expires: '.gmdate('D, d M Y H:i:s',$this->state->data['current-cache-timeout']).' GMT');
+				header('Expires: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT');
 				
 			} else {
 			
@@ -583,19 +581,24 @@ class WWW_API {
 				
 			}
 			
+			// If custom header was assigned, it is added
+			if($customHeader!=''){
+				header($customHeader);
+			}
+			
 			// Gathering output in buffer
 			ob_start();
 			
 			// If content type was set, then that is used for content type
-			if($this->state->data['api-content-type']!=''){
+			if($apiContentType!=''){
 			
 				// UTF-8 is always used for returned data
-				header('Content-Type: '.$this->state->data['api-content-type'].';charset=utf-8',true);
+				header('Content-Type: '.$apiContentType.';charset=utf-8',true);
 				
 			} else {
 			
 				// Data is echoed/printed based on return data type formatting with the proper header
-				switch($this->state->data['api-return-data-type']){
+				switch($returnDataType){
 				
 					case 'json':
 						header('Content-Type:application/json;charset=utf-8;');
@@ -631,7 +634,7 @@ class WWW_API {
 			}
 			
 			// last modified date can come from cache file, or current request time, if cache was not used
-			if(isset($lastModified)){
+			if($lastModified!=false){
 				header('Last-Modified: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT');
 			} else {
 				header('Last-Modified: '.gmdate('D, d M Y H:i:s',$this->state->data['request-time']).' GMT');

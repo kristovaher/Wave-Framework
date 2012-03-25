@@ -32,18 +32,10 @@ class WWW_State	{
 	
 		// A lot of default State variables are loaded from PHP settings, others are simply pre-defined
 		$this->data=array(
-			'api-cache-timeout'=>0,
 			'api-keys'=>array(),
 			'api-key'=>'',
 			'api-profile'=>'public',
-			'api-hash'=>'',
-			'api-serializer'=>'json',
-			'api-return-data-type'=>'php',
-			'api-output'=>0,
-			'api-command'=>'',
-			'api-content-type'=>'',
 			'api-token-timeout'=>0,
-			'api-minify'=>0,
 			'api-input-data'=>array(),
 			'resource-cache-timeout'=>31536000,
 			'home-view'=>'home',
@@ -76,8 +68,7 @@ class WWW_State	{
 			'request-time'=>$_SERVER['REQUEST_TIME'],
 			'request'=>false,
 			'fingerprint'=>'',
-			'session-cookie'=>false,
-			'current-cache-timeout'=>$_SERVER['REQUEST_TIME']
+			'session-cookie'=>false
 		);
 		
 		// If array of configuration data is set during object creation, it is used

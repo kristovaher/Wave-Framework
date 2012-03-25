@@ -53,13 +53,13 @@ class WWW_API {
 	// The main function of API
 	// * command - string command for the API
 	// * data - array of input data
-	// * disableBuffer - This turns off internal buffer that is used when the same API call is executed many times
+	// * useBuffer - This turns off internal buffer that is used when the same API call is executed many times
 	// * apiCheck - internally called API does not need to be hash validated, unless necessary
 	// Returns the result of the API call, depending on command and classes it loads
-	public function command($apiCommand='',$apiInputData=array(),$disableBuffer=true,$apiCheck=true){
+	public function command($apiCommand='',$apiInputData=array(),$useBuffer=false,$apiCheck=true){
 	
 		// If buffer is not disabled, response is checked from buffer
-		if(!$disableBuffer){
+		if(!$useBuffer){
 			$bufferAddress=md5($apiCommand.json_encode($apiInputData));
 			// If result already exists in buffer then it is simply returned
 			if(isset($this->buffer[$bufferAddress])){
@@ -113,6 +113,8 @@ class WWW_API {
 		// If custom hash serializer function is defined then that is used for serialization
 		if(isset($apiInputData['www-serializer'])){
 			$apiSerializer=$apiInputData['www-serializer'];
+		} else {
+			$apiSerializer=$this->state->data['api-serializer'];
 		}
 		
 		// By default the API does not use cache, but if cache timeout is set then this is taken into account
@@ -134,12 +136,12 @@ class WWW_API {
 		} 
 		
 		// API is checked only if API check is enabled and www-profile is set (and is not 'public', which is considered open access profile)
-		if($apiCheck==true && $this->state->data['api-profile']!='public'){
+		if($apiCheck && $apiProfile!='public'){
 			
 			// If this profile has an API key defined, it is assigned for use
 			// API keys should never be transmitted with the input data or they might become compromised
 			if(isset($this->state->data['api-keys'][$apiProfile])){
-				$this->state->data['api-key']=$this->state->data['api-keys'][$apiProfile];
+				$apiKey=$this->state->data['api-keys'][$apiProfile];
 			} else {
 				// Since an error was detected, system pushes for output immediately
 				return $this->output(array('www-error'=>'API key not found'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
@@ -148,8 +150,6 @@ class WWW_API {
 			// If client provided hash, then this is used, otherwise hash is loaded from State
 			if(isset($apiInputData['www-hash'])){
 				$apiHash=$apiInputData['www-hash'];
-			} elseif(isset($this->state->data['api-hash'])){
-				$apiHash=$this->state->data['api-hash'];
 			} else {
 				// Since an error was detected, system pushes for output immediately
 				return $this->output(array('www-error'=>'API hash is not provided'),'HTTP/1.1 403 Forbidden',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType);
@@ -165,7 +165,7 @@ class WWW_API {
 				if($apiCommand=='www-create-token' || $apiCommand=='www-destroy-token'){
 				
 					// Hash consists of API command, serialized input data and secret API key
-					$checkHash=sha1($apiCommand.$this->state->data['api-profile'].$this->state->data['api-key']);
+					$checkHash=sha1($apiCommand.$apiProfile.$apiKey);
 				
 					// If hash validation fails the request is blocked
 					if($checkHash!=$apiHash){
@@ -217,7 +217,7 @@ class WWW_API {
 					if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp')){
 					
 						// To destroy a token, the www-hash has to be correct sha1({token}{secret-key})
-						$checkHash=sha1(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp').$this->state->data['api-key']);
+						$checkHash=sha1(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp').$apiKey);
 						if($checkHash==$apiHash){
 						
 							unlink($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp');
@@ -250,7 +250,7 @@ class WWW_API {
 					if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp')){
 					
 						// To validate a token, the www-hash has to be correct sha1({token}{secret-key})
-						$checkHash=sha1(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp').$this->state->data['api-key']);
+						$checkHash=sha1(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp').$apiKey);
 						if($checkHash==$apiHash){
 						
 							// Token was validated successfully
@@ -275,7 +275,7 @@ class WWW_API {
 			}
 			
 			// It is possible to have an IP as the API key, in which case only IP is used for validation
-			if($this->state->data['api-key']!=$this->state->data['client-ip'] && $this->state->data['api-key']!=$this->state->data['true-client-ip']){
+			if($apiKey!=$this->state->data['client-ip'] && $apiKey!=$this->state->data['true-client-ip']){
 			
 				// In case token is requested then in the future commands only the token needs to be hashed by the secret key
 				// Token method is less secure than input validation method, but can be easier for client to build
@@ -292,7 +292,7 @@ class WWW_API {
 					if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp') && ($this->state->data['api-token-timeout']==0 || filemtime($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp')>($this->state->data['request-time']-$this->state->data['api-token-timeout']))){
 						// API validation is done only with the request token and secret key being hashed
 						$checkHash=file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp');
-						$checkHash=sha1($apiCommand.$checkHash.$this->state->data['api-key']);
+						$checkHash=sha1($apiCommand.$checkHash.$apiKey);
 						// This sets the modification time of session token, extending its duration
 						touch($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.$sessionSubfolder.DIRECTORY_SEPARATOR.$sessionFile.'.tmp');
 					} else {
@@ -309,10 +309,10 @@ class WWW_API {
 					// Hash consists of API command, serialized input data and secret API key
 					switch($apiSerializer){
 						case 'json':
-							$checkHash=sha1($apiCommand.json_encode($apiInputData).$this->state->data['api-key']);
+							$checkHash=sha1($apiCommand.json_encode($apiInputData).$apiKey);
 							break;
 						case 'serialize':
-							$checkHash=sha1($apiCommand.serialize($apiInputData).$this->state->data['api-key']);
+							$checkHash=sha1($apiCommand.serialize($apiInputData).$apiKey);
 							break;
 						default:
 							// Since an error was detected, system pushes for output immediately
@@ -329,7 +329,7 @@ class WWW_API {
 				
 			}
 				
-		}		
+		}	
 		
 		// If cache timeout is not 0, that is if cache should be checked for and used, if it exists
 		if($cacheTimeout!=0){
@@ -457,7 +457,7 @@ class WWW_API {
 		}
 		
 		// If buffer is not disabled, response is checked from buffer
-		if(!$disableBuffer){
+		if($useBuffer){
 			$bufferAddress=md5($apiCommand.json_encode($apiInputData));
 			// Storing result in buffer
 			$this->buffer[$bufferAddress]=$this->output($apiResult,'',$returnDataType,$apiOutput,$cacheTimeout,$apiContentType,$apiMinify,$lastModified);

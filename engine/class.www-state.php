@@ -33,9 +33,9 @@ class WWW_State	{
 		// A lot of default State variables are loaded from PHP settings, others are simply pre-defined
 		$this->data=array(
 			'api-keys'=>array(),
-			'api-key'=>'',
 			'api-profile'=>'public',
 			'api-token-timeout'=>0,
+			'api-serializer'=>'json',
 			'api-input-data'=>array(),
 			'resource-cache-timeout'=>31536000,
 			'home-view'=>'home',

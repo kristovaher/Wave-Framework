@@ -42,8 +42,8 @@ class WWW_Factory {
 	// * inputData - If data is input
 	// * apiCheck - Internal calls do not require API validation, but if it is needed then it can be set here
 	// Returns data based on API call
-	final public function api($command,$inputData=array(),$disableBuffer=false,$apiCheck=false){
-		return $this->WWW_API->command($command,$inputData,$disableBuffer,$apiCheck);
+	final public function api($command,$inputData=array(),$useBuffer=true,$apiCheck=false){
+		return $this->WWW_API->command($command,$inputData,$useBuffer,$apiCheck);
 	}
 	
 	// Returns data from State objects data array

@@ -132,6 +132,16 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// By default this value is set to 31536000, which is one year in seconds.
 	// $config['resource-cache-timeout']=31536000;
 	
+	// Robots cache timeout
+	// This setting states how long robots.txt contents are cached, if robots.txt is dynamically generated
+	// Default value is four hours
+	// $config['robots-cache-timeout']=14400;
+	
+	// Sitemap cache timeout
+	// This setting states how long sitemap.xml contents are cached, if sitemap.xml is dynamically generated
+	// Default value is four hours
+	// $config['sitemap-cache-timeout']=14400;
+	
 // DYNAMIC IMAGES
 	
 	// Dynamic image loading

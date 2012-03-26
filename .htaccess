@@ -26,7 +26,7 @@ RewriteRule sitemap.xml ./index.php?sitemap [L]
 RewriteRule robots.txt ./index.php?robots [L]
 
 # Redirecting existing image file to gateway
-RewriteRule (.*\.(jpeg|jpg|png|ico|gif|bmp))$ ./index.php?image [L]
+RewriteRule (.*\.(jpeg|jpg|png))$ ./index.php?image [L]
 
 # Redirecting existing css file to gateway
 RewriteRule (.*\.(css|js|txt|csv|xml|html|htm|rss|ini|vcard))$ ./index.php?resource [L]

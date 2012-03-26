@@ -94,9 +94,10 @@ class WWW_Limiter {
 							
 							// Block file is created and 403 page thrown to the client
 							file_put_contents($this->logDir.$logFilename.'.tmp','BLOCKED');
+							
+							// Returning proper header
 							header('HTTP/1.1 403 Forbidden');
-							echo '<h1>HTTP/1.1 403 Forbidden</h1>';
-							echo '<h2>Client is temporarily blacklisted</h2>';
+							
 							die();
 							
 						}
@@ -121,10 +122,8 @@ class WWW_Limiter {
 							$this->logger->writeLog('403');
 						}
 						
-						// Returning 403 data
+						// Returning 403 header
 						header('HTTP/1.1 403 Forbidden');
-						echo '<h1>HTTP/1.1 403 Forbidden</h1>';
-						echo '<h2>Client is temporarily blacklisted</h2>';
 						die();
 						
 					}
@@ -163,10 +162,8 @@ class WWW_Limiter {
 					$this->logger->writeLog('503');
 				}
 				
-				// Returning 503 data
+				// Returning 503 header
 				header('HTTP/1.1 503 Service Unavailable');
-				echo '<h1>HTTP/1.1 503 Service Unavailable</h1>';
-				echo '<h2>Server load is too high, please try again later</h2>';
 				die();
 				
 			}
@@ -198,8 +195,6 @@ class WWW_Limiter {
 				
 				// Returning 403 data
 				header('HTTP/1.1 403 Forbidden');
-				echo '<h1>HTTP/1.1 403 Forbidden</h1>';
-				echo '<h2>Client is blacklisted</h2>';
 				die();
 				
 			}
@@ -225,11 +220,9 @@ class WWW_Limiter {
 				$this->logger->writeLog('401');
 			}
 			
-			// Returning 401 data
+			// Returning 401 headers
 			header('WWW-Authenticate: Basic realm="Login"');
 			header('HTTP/1.1 401 Unauthorized');
-			echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
-			echo '<h2>Username and password need to be provided by the client</h2>';
 			die();
 			
 		}
@@ -260,10 +253,8 @@ class WWW_Limiter {
 					$this->logger->writeLog('401');
 				}
 				
-				// Returning 401 data
+				// Returning 401 header
 				header('HTTP/1.1 401 Unauthorized');
-				echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
-				echo '<h2>Client needs to connect through HTTPS</h2>';
 				
 			}
 			

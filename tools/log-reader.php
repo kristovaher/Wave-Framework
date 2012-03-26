@@ -37,6 +37,19 @@ if(isset($_GET['log'])){
 	$logFileName=date('Y-m-d-H');
 }
 
+// This stores the array types to print out
+$types=array();
+
+// You can print out only some log information
+if(isset($_GET['types'])){
+	$rawTypes=explode(',',$_GET['types']);
+	foreach($rawTypes as $t){
+		$types[$t]=true;
+	}
+} else {
+	$types['all']=true;
+}
+
 // Every day the logs are stored under different log subfolder
 $logSubfolder=substr($logFileName,0,10);
 
@@ -44,27 +57,51 @@ $logSubfolder=substr($logFileName,0,10);
 if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp')){
 
 	// Log is printed out in plain text format
-	header('Content-Type: text/plain;charset=utf-8');
+	header('Content-Type: text/html;charset=utf-8');
 	
-	// Log files are stored as JSON serialized arrays, separated with line-breaks
-	$log=explode("\n",file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp'));
+	// Some basic styles
+	echo '<div style="font:12px Verdana;">';
 	
-	// Printing out every line from the log file
-	foreach($log as $l){
-	
-		// Log data is deencoded from JSON string
-		$l=json_decode($l,true);
+		// Log files are stored as JSON serialized arrays, separated with line-breaks
+		$log=explode("\n",file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp'));
 		
-		// Log entry should be an array once decoded
-		if(is_array($l)){
-			// Output is a simple human-readable preformatted array output
-			print_r($l);
-		} else {
-			// If by chance the log line was not an array, then it is simply printed out here
-			echo $l."\n";
+		// Printing out every line from the log file
+		foreach($log as $l){
+		
+			// Output buffer allows to increase peformance due to multiple echo's
+			ob_start();
+		
+			// Log data is deencoded from JSON string
+			$l=json_decode($l,true);
+			
+			// Log entry should be an array once decoded
+			if(is_array($l)){
+				// Printing out log data
+				foreach($l as $key=>$entry){
+					if(isset($types['all']) || isset($types[$key])){
+						if(!is_array($entry)){
+							echo '<b>'.$key.':</b> '.$entry.'<br/>';
+						} else {
+							echo '<b>'.$key.':</b>';
+							echo '<pre>';
+							print_r($entry);
+							echo '</pre>';
+						}
+					}
+				}
+				echo '<hr/>';
+			} else {
+				// If by chance the log line was not an array, then it is simply printed out here
+				// echo $l.'<hr/>';
+			}
+			
+			// Output buffer flushed to client
+			ob_end_flush(); 
+			
 		}
-		
-	}
+	
+	// Closing the div
+	echo '</div>';
 	
 } else {
 

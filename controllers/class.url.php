@@ -102,13 +102,19 @@ class WWW_controller_url extends WWW_Factory {
 		
 			// If first language code has to be defined in URL, system redirects to URL that has it, otherwise returns home view data
 			if($this->enforceLanguageUrl==true){
+			
+				// Adding log entry
+				$this->writeLog(301);
+			
 				// Client is redirected to URL that has just the language node set
 				if(isset($requestNodesRaw[1])){
 					header('Location: '.$this->webRoot.$language.'/?'.$requestNodesRaw[1],TRUE,301);
 				} else {
 					header('Location: '.$this->webRoot.$language.'/',TRUE,301);
 				}
+				
 				die();
+				
 			} else {
 				// Expecting to return Home view
 				$returnHome=true;
@@ -124,13 +130,19 @@ class WWW_controller_url extends WWW_Factory {
 			
 			// If slash is enforced at the end of the URL then client is redirected to such an URL
 			if($enforceSlash==true && end($requestNodes)!=''){
+			
+				// Adding log entry
+				$this->writeLog(301);
+			
 				// If GET variables were set, system redirects to proper URL that has a slash in the end and appends the GET variables
 				if(isset($requestNodesRaw[1])){
 					header('Location: '.$this->webRoot.$requestNodesRaw[0].'/?'.$requestNodesRaw[1],TRUE,301);
 				} else {
 					header('Location: '.$this->webRoot.$requestNodesRaw[0].'/',TRUE,301);
 				}
+				
 				die();
+				
 			}
 			
 			// Looping through all the URL nodes from the request
@@ -148,14 +160,19 @@ class WWW_controller_url extends WWW_Factory {
 						// If this is the first language and language node is not required in URL, client is redirected to a URL without it
 						if($this->enforceLanguageUrl==false && $language==$this->languages[0]){
 						
+							// Adding log entry
+							$this->writeLog(301);
+						
 							// We unset the first node, as it was not required
 							unset($requestNodes[$nodeKey]);
+							
 							// If GET variables were set, system redirects to URL without the language and appends the GET variables
 							if(isset($requestNodesRaw[1])){
 								header('Location: '.$this->webRoot.implode('/',$requestNodes).'?'.$requestNodesRaw[1],TRUE,301);
 							} else {
 								header('Location: '.$this->webRoot.implode('/',$requestNodes),TRUE,301);
 							}
+							
 							die();
 							
 						}
@@ -165,12 +182,16 @@ class WWW_controller_url extends WWW_Factory {
 						// If language node is required in URL and the first request node was not a language, it is added and client is redirected
 						if($nodeKey==0 && $this->enforceLanguageUrl==true){
 						
+							// Adding log entry
+							$this->writeLog(301);
+						
 							// Client is redirected to the same URL as before, but with the default language node added
 							if(isset($requestNodesRaw[1])){
 								header('Location: '.$this->webRoot.$language.'/'.$requestFormatted.'/?'.$requestNodesRaw[1],TRUE,301);
 							} else {
 								header('Location: '.$this->webRoot.$language.'/'.$requestFormatted,TRUE,301);
 							}
+							
 							die();
 							
 						} else {
@@ -261,22 +282,31 @@ class WWW_controller_url extends WWW_Factory {
 			
 			// If the found view is home view, then we simply redirect to home view without the long url
 			if(empty($unsolvedUrlNodes) && $view==$this->viewHome){
+				
+				// Adding log entry
+				$this->writeLog(301);
 			
 				// If first language is used and it is not needed to use language URL in first language
 				if($this->enforceLanguageUrl==false && $language==$this->languages[0]){
+					
+					// If request nodes are set in the URL
 					if(isset($requestNodesRaw[1])){
 						header('Location: '.$this->webRoot.'?'.$requestNodesRaw[1],TRUE,301);
 					} else {
 						header('Location: '.$this->webRoot,TRUE,301);
 					}
+					
 				} else {
-					// In every other case the redirection will be set with the language URL
+				
+					// If request nodes are set in the URL
 					if(isset($requestNodesRaw[1])){
 						header('Location: '.$this->webRoot.$language.'/?'.$requestNodesRaw[1],TRUE,301);
 					} else {
 						header('Location: '.$this->webRoot.$language.'/',TRUE,301);
 					}
+					
 				}
+				
 				die();
 			
 			}

@@ -28,11 +28,14 @@ class WWW_Logger {
 	// Data types setting, comma separated list of keywords of data to be logged
 	private $loggedData='all';
 	
-	// Database connection for database performance logging
-	public $databaseConnection=false;
+	// Database request count
+	public $databaseRequests=0;
 	
 	// If cache was used
 	public $cacheUsed=false;
+	
+	// Data transmitted
+	public $contentLength=0;
 	
 	// If cache was used
 	public $profile='public';
@@ -167,8 +170,16 @@ class WWW_Logger {
 		// If set, this stores how many queries were sent to database.
 		// This information is tracked by Database class itself
 		if($this->loggedData=='all' || in_array('database-query-count',$this->loggedData)){ 
-			if($this->databaseConnection!=false){
-				$logData['database-query-count']=$this->databaseConnection->queryCounter;
+			if($this->databaseRequests!=0){
+				$logData['database-query-count']=$this->databaseRequests;
+			}
+		}
+		
+		// If set, this stores how big was the output sent to client
+		// This is not set in all requests
+		if($this->loggedData=='all' || in_array('content-length',$this->loggedData)){ 
+			if($this->contentLength!=0){
+				$logData['content-length']=$this->contentLength;
 			}
 		}
 		

@@ -26,9 +26,6 @@ class WWW_API {
 	
 	// This stores API command results in a buffer
 	private $buffer=array();
-	
-	// An array that stores the flags for each API command about whether cache was used with them
-	public $cacheUsed=array();
 			
 	// API requires State object for majority of functionality
 	public function __construct($state=false){
@@ -70,8 +67,10 @@ class WWW_API {
 		// Result of the API call is stored in this variable
 		$apiResult=false;
 		
-		// By default system assumes that cache is not used
-		$this->cacheUsed[$apiCommand]=false;
+		// Notifying logger of cache being used
+		if($this->state->logger){
+			$this->state->logger->cacheUsed=false;
+		}
 		
 		// Setting input data to State as well
 		$this->state->data['api-input-data']=$apiInputData;
@@ -345,10 +344,21 @@ class WWW_API {
 			
 				// Current cache timeout is used to return to browser information about how long browser should store this result
 				$lastModified=filemtime($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp');
+				
+				// If server detects its cache to still within cache limit
 				if($lastModified>=$this->state->data['request-time']-$cacheTimeout){
 				
-					// The moment cache was created gets cache timeout added to it and returned to browser as 'expires' timestamp
-					$lastModified+=$cacheTimeout;
+					// If this request has already been made and the last-modified timestamp is the same
+					if($apiOutput==1 && $this->state->data['http-if-modified-since'] && $this->state->data['http-if-modified-since']==$lastModified){
+						// Adding log entry	
+						if($this->state->logger){
+							$this->state->logger->cacheUsed=true;
+							$this->state->logger->writeLog('304');
+						}
+						// Returning 304 header
+						header('HTTP/1.1 304 Not Modified');
+						die();
+					}
 					
 					// System loads the result from cache file based on return data type
 					if($returnDataType=='html'){
@@ -358,17 +368,20 @@ class WWW_API {
 					} else {
 						$apiResult=json_decode(file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.$cacheSubfolder.DIRECTORY_SEPARATOR.$cacheFile.'.tmp'),true);
 					}
-					// Flag is set to true, since cache is being used
-					$this->cacheUsed[$apiCommand]=true;
+					
+					// Notifying logger of cache being used
+					if($this->state->logger){
+						$this->state->logger->cacheUsed=true;
+					}
 					
 				} else {
 					// Current cache timeout is used to return to browser information about how long browser should store this result
-					$lastModified=$this->state->data['request-time']+$cacheTimeout;
+					$lastModified=$this->state->data['request-time'];
 				}
 				
 			} else {
 				// Current cache timeout is used to return to browser information about how long browser should store this result
-				$lastModified=$this->state->data['request-time']+$cacheTimeout;
+				$lastModified=$this->state->data['request-time'];
 			}
 		}
 		
@@ -567,9 +580,9 @@ class WWW_API {
 			
 				// Cache control depends whether HTTP authentication is used or not
 				if($this->state->data['http-authentication']==true){
-					header('Cache-Control: private,max-age='.($lastModified-$this->state->data['request-time']).',must-revalidate');
+					header('Cache-Control: private,max-age='.($lastModified+$cacheTimeout-$this->state->data['request-time']).',must-revalidate');
 				} else {
-					header('Cache-Control: public,max-age='.($lastModified-$this->state->data['request-time']).',must-revalidate');
+					header('Cache-Control: public,max-age='.($lastModified+$cacheTimeout-$this->state->data['request-time']).',must-revalidate');
 				}
 				header('Expires: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT');
 				
@@ -681,8 +694,16 @@ class WWW_API {
 				
 			}
 			
+			// Current output content length
+			$contentLength=strlen($content);
+			
 			// Content length is defined that can speed up website requests, letting client to determine file size
-			header('Content-Length: '.strlen($content));  
+			header('Content-Length: '.$contentLength); 
+			
+			// Notifying logger of content length
+			if($this->state->logger){
+				$this->state->logger->contentLength=$contentLength;
+			}
 			
 			// Data is returned to the client
 			echo $content;

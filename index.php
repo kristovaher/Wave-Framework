@@ -80,34 +80,35 @@ if(isset($config['limiter']) && $config['limiter']==true){
 // $_SERVER variable QUERY_STRING defines what type of file was detected by .htaccess and what type of behavior is required
 // Handlers for all different modes are stored under /engine/ subfolder
 if($_SERVER['QUERY_STRING']!='api'){
+	
+	// If mode was not static, then script returns the handler that was requested
 	require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.'.$_SERVER['QUERY_STRING'].'.php');
+	
 } else {
 
 	// If API handler is requested, then it is possible to have multiple different API handlers.
-	$api=array_pop(explode('/',$_SERVER['REDIRECT_URL']));
+	$apiHandler=array_pop(explode('/',$_SERVER['REDIRECT_URL']));
 	
 	// If the file requested is 'www.api' then it loads the default handler, but it is possible to add a custom API handler by requiesting different API
-	if($api=='www.api'){
+	if($apiHandler=='www.api'){
+	
+		// Default API handler
 		require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.api.php');
+		
 	} else {
 	
 		// Replacing the extension
-		$api=str_replace('.api',$api);
+		$apiHandler=str_replace('.api',$apiHandler);
 		
 		// If the file exists then system loads the new API, otherwise 404 is returned
 		if(file_exists()){
-			require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$api.'.php');
+			require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php');
 		} else {
 			require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.404.php');
 		}
 		
 	}
 	
-}
-
-// If Logger is defined then request is logged and can be used for performance review later
-if(isset($logger)){
-	$logger->writeLog($_SERVER['QUERY_STRING']);
 }
 
 ?>

@@ -138,12 +138,14 @@ class WWW_Database {
 	
 	// Disconnects from database, if connected
 	// Returns false if no connection was present
-	public function disconnect(){
+	public function disconnect($resetQueryCounter=false){
 		// This is only executed if existing connection is detected
 		if($this->connected==1 && $this->key!='' && !$this->persistent){
 		
 			// Resetting the query counter
-			$this->queryCounter=0;
+			if($resetQueryCounter){
+				$this->queryCounter=0;
+			}
 			
 			// Closing the database
 			$this->pdo=null;

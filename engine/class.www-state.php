@@ -26,6 +26,9 @@ class WWW_State	{
 	// Database connection is stored in this variable, if set
 	public $databaseConnection=false;
 	
+	// This stores logger information
+	public $logger=false;
+	
 	// When state file is initiated, it populates data with default values from system and PHP settings
 	// * config - If set, State file has additional data loaded from provided configuration array
 	public function __construct($config=array()){
@@ -52,6 +55,7 @@ class WWW_State	{
 			'http-accept-language'=>((isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))?explode(',',$_SERVER['HTTP_ACCEPT_LANGUAGE']):array()),
 			'http-authentication'=>false,
 			'http-authentication-username'=>'',
+			'http-if-modified-since'=>((isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))?strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']):false),
 			'http-authentication-password'=>'',
 			'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
 			'system-root'=>str_replace('index.php','',$_SERVER['SCRIPT_FILENAME']),

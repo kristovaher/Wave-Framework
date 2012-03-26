@@ -209,6 +209,17 @@ class WWW_Factory {
 		
 	}
 	
+	// This function attempts to write a log entry
+	// * category - Simple string that will be useful for categorizin this type of log entries later on
+	// Always returns true
+	final public function writeLog($category){
+		// Making sure that Logger is defined in state
+		if($this->WWW_State->logger){
+			$this->WWW_State->logger->writeLog($category);
+		}
+		return true;
+	}
+	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class
 	// * query - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement

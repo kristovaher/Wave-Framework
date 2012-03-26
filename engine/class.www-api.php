@@ -350,14 +350,26 @@ class WWW_API {
 				
 					// If this request has already been made and the last-modified timestamp is the same
 					if($apiOutput==1 && $this->state->data['http-if-modified-since'] && $this->state->data['http-if-modified-since']==$lastModified){
+					
 						// Adding log entry	
 						if($this->state->logger){
 							$this->state->logger->cacheUsed=true;
 							$this->state->logger->writeLog('304');
 						}
+						
+						// Cache headers (Last modified is never sent with 304 header)
+						if($this->state->data['http-authentication']==true){
+							header('Cache-Control: private,max-age='.($lastModified+$cacheTimeout-$this->state->data['request-time']).',must-revalidate');
+						} else {
+							header('Cache-Control: public,max-age='.($lastModified+$cacheTimeout-$this->state->data['request-time']).',must-revalidate');
+						}
+						header('Expires: '.gmdate('D, d M Y H:i:s',($lastModified+$cacheTimeout)).' GMT');
+						
 						// Returning 304 header
 						header('HTTP/1.1 304 Not Modified');
+						
 						die();
+						
 					}
 					
 					// System loads the result from cache file based on return data type
@@ -487,6 +499,11 @@ class WWW_API {
 	// Returns final-formatted data
 	private function output($apiResult,$customHeader='',$returnDataType='php',$apiOutput=0,$cacheTimeout=0,$apiContentType='',$apiMinify=false,$lastModified=false){
 	
+		// If last modified time is not set, it is defaulted to request time set in state
+		if(!$lastModified){
+			$lastModified=$this->state->data['request-time'];
+		}
+	
 		// Data is custom-formatted based on request
 		switch($returnDataType){
 				
@@ -584,13 +601,15 @@ class WWW_API {
 				} else {
 					header('Cache-Control: public,max-age='.($lastModified+$cacheTimeout-$this->state->data['request-time']).',must-revalidate');
 				}
-				header('Expires: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT');
+				header('Expires: '.gmdate('D, d M Y H:i:s',($lastModified+$cacheTimeout)).' GMT');
+				header('Last-Modified: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT');
 				
 			} else {
 			
 				// When no cache is used, request tells specifically that
 				header('Cache-Control: no-store;');
 				header('Expires: '.gmdate('D, d M Y H:i:s',$this->state->data['request-time']).' GMT');
+				header('Last-Modified: '.$lastModified.' GMT');
 				
 			}
 			
@@ -644,13 +663,6 @@ class WWW_API {
 						
 				}
 			
-			}
-			
-			// last modified date can come from cache file, or current request time, if cache was not used
-			if($lastModified!=false){
-				header('Last-Modified: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT');
-			} else {
-				header('Last-Modified: '.gmdate('D, d M Y H:i:s',$this->state->data['request-time']).' GMT');
 			}
 			
 			// Pragma header is removed, if server has set that header

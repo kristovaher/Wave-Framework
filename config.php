@@ -127,6 +127,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	
 	// Resource cache timeout
 	// This sets how long static files are considered to be 'in cache'
+	// Static files are most commonly CSS, JavaScript and image files
 	// This affects returned max lifetime settings and internal cache duration (though that resets itself if original file is modified)
 	// By default this value is set to 31536000, which is one year in seconds.
 	// $config['resource-cache-timeout']=31536000;

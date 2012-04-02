@@ -189,7 +189,7 @@ function systemBackup($source,$target,$filesystemBackup=false){
 		if($zip->open($target,ZipArchive::CREATE)){
 		
 			// Archive comment notes the creation date and time
-			$zip->setArchiveComment('WWW Framework backup created at '.date('d.m.Y H:i:s').' by script run at '.$_SERVER['SCRIPT_URI']);
+			$zip->setArchiveComment('WWW Framework backup created at '.date('d.m.Y H:i:s').' by script run at '.$_SERVER['REQUEST_URI']);
 			
 			// Each file is added to archive
 			foreach($files as $f){
@@ -207,7 +207,7 @@ function systemBackup($source,$target,$filesystemBackup=false){
 					if(!$zip->addFile($f,$archivePath)){
 					
 						// Error is thrown when one file cannot be added
-						trigger_error('Failed to archive '.$f,E_USER_ERROR);
+						throw new Exception('Failed to archive '.$f.'');
 						
 						// Archive is closed and function returns false
 						$zip->close();

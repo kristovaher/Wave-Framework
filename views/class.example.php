@@ -16,7 +16,7 @@ class WWW_view_example extends WWW_Factory {
 	public function render($input){
 	
 		// Showing how to make an API call within the view
-		$apiCall=$this->api('example-get',array());
+		$apiCall=$this->api('example-get');
 		
 		?>
 			<div style="padding:30px;width:600px;margin-left:auto;margin-right:auto;">

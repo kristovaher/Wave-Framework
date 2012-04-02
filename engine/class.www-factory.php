@@ -26,11 +26,15 @@ class WWW_Factory {
 	// * api - WWW_API object
 	final public function __construct($state=false,$api=false){
 	
-		// State and API are passed to the object, if they are defined
-		if($state){ $this->WWW_State=$state; }
-		if($api){ $this->WWW_API=$api; }
-		
-		// This acts as __construct() for the objects
+		// State is passed to the object, if defined
+		if($state){ 
+			$this->WWW_State=$state; 
+		}
+		// API is passed to the object, if defined
+		if($api){ 
+			$this->WWW_API=$api; 
+		}
+		// This acts as __construct() for the MVC objects
 		if(method_exists($this,'__initialize')){
 			$this->__initialize();
 		}
@@ -40,10 +44,20 @@ class WWW_Factory {
 	// Factory created objects can make API calls
 	// * command - Command string to be processed, just like the one accepted by WWW_API object
 	// * inputData - If data is input
-	// * apiCheck - Internal calls do not require API validation, but if it is needed then it can be set here
+	// * useBuffer - This tells API to use buffer (returns data from memory if the same command with -exact- same input has already been sent)
 	// Returns data based on API call
-	final public function api($command,$inputData=array(),$useBuffer=true,$apiCheck=false){
-		return $this->WWW_API->command($command,$inputData,$useBuffer,$apiCheck);
+	final public function api($command,$inputData=array(),$useBuffer=true){
+		// Setting the set command variable to proper format for API
+		$inputData['www-command']=$command;
+		// This defaults return data type
+		if(!isset($inputData['www-datatype'])){
+			$inputData['www-datatype']='php';
+		}
+		// This defaults whether API command is pushed with headers or not
+		if(!isset($inputData['www-output'])){
+			$inputData['www-output']=false;
+		}
+		return $this->WWW_API->command($inputData,$useBuffer,false);
 	}
 	
 	// Returns data from State objects data array
@@ -74,7 +88,6 @@ class WWW_Factory {
 		
 		// It's made sure that the class has not already been defined
 		if(!class_exists($className)){
-		
 			// Class file can be loaded from /overrides/ directories, if set
 			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php')){
 				// Requiring override file
@@ -84,19 +97,15 @@ class WWW_Factory {
 				require($this->WWW_State->data['system-root'].'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php');
 			} else {
 				// Error is thrown if class was not found
-				trigger_error('Model ['.$model.'] does not exist',E_USER_ERROR);
+				throw new Exception('Model ['.$model.'] does not exist');
 			}
-			
 		}
 		
 		// Object is returned if no specific method name is called
 		if(!$methodName){
-		
 			// If method name was not defined then this function returns the entire class with current State and API set
 			return new $className($this->WWW_State,$this->WWW_API);
-			
 		} else {
-		
 			// If method name was set, then this function creates a new temporary object
 			$tempObject=new $className($this->WWW_State,$this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
@@ -104,9 +113,8 @@ class WWW_Factory {
 				return $tempObject->$methodName($methodData);
 			} else {
 				// Error is thrown if method was not found
-				trigger_error('Model ['.$model.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
+				throw new Exception('Model ['.$model.'] method ['.$methodName.'] does not exist');
 			}
-			
 		}
 		
 	}
@@ -123,7 +131,6 @@ class WWW_Factory {
 		
 		// It's made sure that the class has not already been defined
 		if(!class_exists($className)){
-		
 			// Class file can be loaded from /overrides/ directories, if set
 			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php')){
 				// Requiring override file
@@ -133,19 +140,15 @@ class WWW_Factory {
 				require($this->WWW_State->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php');
 			} else {
 				// Error is thrown if class was not found
-				trigger_error('Controller ['.$controller.'] does not exist',E_USER_ERROR);
+				throw new Exception('Controller ['.$controller.'] does not exist');
 			}
-			
 		}
 		
 		// Object is returned if no specific method name is called
 		if(!$methodName){
-		
 			// If method name was not defined then this function returns the entire class with current State and API set
 			return new $className($this->WWW_State,$this->WWW_API);
-			
 		} else {
-		
 			// If method name was set, then this function creates a new temporary object
 			$tempObject=new $className($this->WWW_State,$this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
@@ -153,9 +156,8 @@ class WWW_Factory {
 				return $tempObject->$methodName($methodData);
 			} else {
 				// Error is thrown if method was not found
-				trigger_error('Controller ['.$model.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
+				throw new Exception('Controller ['.$controller.'] method ['.$methodName.'] does not exist');
 			}
-			
 		}
 		
 	}
@@ -172,7 +174,6 @@ class WWW_Factory {
 		
 		// It's made sure that the class has not already been defined
 		if(!class_exists($className)){
-		
 			// Class file can be loaded from /overrides/ directories, if set
 			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php')){
 				// Requiring override file
@@ -182,19 +183,15 @@ class WWW_Factory {
 				require($this->WWW_State->data['system-root'].'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php');
 			} else {
 				// Error is thrown if class was not found
-				trigger_error('View ['.$view.'] does not exist',E_USER_ERROR);
+				throw new Exception('View ['.$view.'] does not exist');
 			}
-			
 		}
 		
 		// Object is returned if no specific method name is called
 		if(!$methodName){
-		
 			// If method name was not defined then this function returns the entire class with current State and API set
 			return new $className($this->WWW_State,$this->WWW_API);
-			
 		} else {
-		
 			// If method name was set, then this function creates a new temporary object
 			$tempObject=new $className($this->WWW_State,$this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
@@ -202,22 +199,10 @@ class WWW_Factory {
 				return $tempObject->$methodName($methodData);
 			} else {
 				// Error is thrown if method was not found
-				trigger_error('View ['.$view.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
+				throw new Exception('View ['.$view.'] method ['.$methodName.'] does not exist');
 			}
-			
 		}
 		
-	}
-	
-	// This function attempts to write a log entry
-	// * category - Simple string that will be useful for categorizin this type of log entries later on
-	// Always returns true
-	final public function writeLog($category){
-		// Making sure that Logger is defined in state
-		if($this->WWW_State->logger){
-			$this->WWW_State->logger->writeLog($category);
-		}
-		return true;
 	}
 	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class

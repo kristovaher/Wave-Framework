@@ -13,33 +13,10 @@
 # But this can also throw 500 errors on some hosting environments, if it does then remove it
 Options +FollowSymLinks 
 
-# All requests, except some static files, are redirected to index.php gateway file.
+# RewriteEngine is required to make Index gateway work correctly
 RewriteEngine on
 
-# This hides a number of files from public access, including certificates, temporary and log fyles and database files
-RewriteRule (.*\.(tmp|log|ht|htaccess|pem|crt|db|sql|version))$ ./index.php?403 [L]
-
-# Redirecting sitemap requests to gateway
-RewriteRule sitemap.xml ./index.php?sitemap [L]
-
-# Redirecting robots requests to gateway
-RewriteRule robots.txt ./index.php?robots [L]
-
-# Redirecting existing image file to gateway
-RewriteRule (.*\.(jpeg|jpg|png))$ ./index.php?image [L]
-
-# Redirecting existing css file to gateway
-RewriteRule (.*\.(css|js|txt|csv|xml|html|htm|rss|ini|vcard))$ ./index.php?resource [L]
-
-# Redirecting API requests to gateway
-RewriteRule (.*\.api)$ ./index.php?api [L]
-
-# Requests that seem to have an extension are directed to File handler
-RewriteCond %{REQUEST_FILENAME} !(.*\.php)$
-RewriteRule (.*\.([a-zA-Z]{2,4}))$ ./index.php?file [L]
-
-# Redirecting anything that is not a file to gateway
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule .* ./index.php?data [L]
-
-# Every other file is handled by Apache as necessary
+# Everything that is not a PHP file is redirected to index.php
+# If you do not wish to redirect all to index.php, then write different RewriteRules for this reason
+# Everything redirected through Index gateway will make a small hit on performance, but offer better handling and control in PHP
+RewriteRule !^(.*)\.php$ ./index.php [QSA,L]

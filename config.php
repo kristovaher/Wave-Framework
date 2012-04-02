@@ -25,7 +25,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// This turns on Index gateway performance logging
 	// 'all' means that all data is logged, other values should be comma-separated values of logged array
 	// Set this to empty string or false to turn off logging entirely
-	$config['logger']='all';
+	$config['logger']='*';
 
 	// This can set the PHP error-reporting state
 	// This value is 0 by default
@@ -55,14 +55,15 @@ Author and support: Kristo Vaher - kristo@waher.net
 
 	// Comma separated list of languages
 	// These languages here are used for language detection as the first URL node, like http://www.example.com/[language-code]/page
-	// Default value is an array('en')
+	// Default value is an array('en') and the first value in this array is considered as the 'first language' or 'main' language
+	// These values must exist have translations files in resources folders
 	// $config['languages']=array('en');
-	
+
 	// Default language
 	// This is considered the default language that URL controller will consider as the main language if language is not detected in URL
 	// If not defined, this value will be assigned as the first value in 'languages' array setting
 	// $config['language']='en';
-	
+
 	// Setting timezone
 	// This is detected by default based on server value if not set here
 	// $config['timezone']='Europe/London';
@@ -72,7 +73,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// This view must exist as a /views/class.{home-view}.php file
 	// Default value is '404'
 	// $config['404-view']='404';
-	
+
 	// Home view name
 	// This is what Index gateway considers as the default 'view' in case URL is set to root
 	// This view must exist as a /views/class.{home-view}.php file
@@ -107,6 +108,13 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// By default the value is 'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet', but this can be overwritten by Sitemap 'robots' setting per URL
 	// $config['robots']='noindex,nocache,nofollow,noarchive,noimageindex,nosnippet';
 	
+	// Resource specific robots
+	// This sets the default robots setting in the system for resource files
+	// If these are not set, then handlers use 'robots' setting when serving these files
+	// $config['image-robots']='noindex,nocache,nofollow,noarchive,noimageindex,nosnippet';
+	// $config['resource-robots']='noindex,nocache,nofollow,noarchive,noimageindex,nosnippet';
+	// $config['file-robots']='noindex,nocache,nofollow,noarchive,noimageindex,nosnippet';
+	
 // OPTIMIZATIONS
 
 	// Output compression
@@ -117,13 +125,13 @@ Author and support: Kristo Vaher - kristo@waher.net
 	
 	// Index URL controller cache timeout
 	// This is the cache duration for URL solving through URL controller
-	// By default this value is set to 30 seconds
-	// $config['index-url-cache-timeout']=30;
+	// By default this value is set to 0 seconds
+	// $config['index-url-cache-timeout']=0;
 	
 	// Index View controller cache timeout
 	// This is the cache duration for all returned views
-	// By default this value is set to 30 seconds
-	// $config['index-view-cache-timeout']=30;
+	// By default this value is set to 0 seconds
+	// $config['index-view-cache-timeout']=0;
 	
 	// Resource cache timeout
 	// This sets how long static files are considered to be 'in cache'
@@ -202,16 +210,18 @@ Author and support: Kristo Vaher - kristo@waher.net
 	
 	// This sets the API profile that is used
 	// All profile names that are not 'public' require an API key set in /resources/api.keys.php
-	// $config['api-profile']='public';
+	// $config['api-public-profile']='public';
 	
-	// This sets what type of input serializer is used for input validation
-	// Default value is 'json' but 'serialize' can also be used
-	// $config['api-serializer']='json';
-	
-	// This states how long an API profile token is valid
-	// This value is 0 by default. If this is 0 then token based validation is not allowed
+	// This states how long an API profile token is valid by default
+	// This value can be overwritten in /resources/api.keys.php file
+	// This value is 0 by default, which means that API profiles cannot be validated beyond initial validation
 	// If the token has not been accessed for longer than the amount of seconds stored in this variable, then new token needs to be generated
 	// $config['api-token-timeout']=0;
+	
+	// Every API command is generated with timestamp value, this value checks how long ago the request was sent
+	// If API detects the request timestamp to be too long in the past, then that command will fail
+	// This value is set to 10 by default, which means that the server will test if the API command was sent within the last 30 seconds
+	// $config['api-timestamp-timeout']=30;
 	
 // LIMITER
 
@@ -252,7 +262,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 // SESSIONS
 
 	// Disabling automatic session start
-	// If this is set then State will not automatically initialize sessions
+	// If this is set then State will not automatically initialize sessions and you can assign conditional session starts in URL and View controllers
 	// This is turned off by default
 	// $config['disable-session-start']=false;
 	

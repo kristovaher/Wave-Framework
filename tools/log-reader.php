@@ -54,7 +54,7 @@ if(isset($_GET['types'])){
 $logSubfolder=substr($logFileName,0,10);
 
 // All logs are stored in /log/ folder, if a folder does not exist
-if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp')){
+if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp')){
 
 	// Log is printed out in plain text format
 	header('Content-Type: text/html;charset=utf-8');
@@ -63,7 +63,7 @@ if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.D
 	echo '<div style="font:12px Verdana;">';
 	
 		// Log files are stored as JSON serialized arrays, separated with line-breaks
-		$log=explode("\n",file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp'));
+		$log=explode("\n",file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp'));
 		
 		// Printing out every line from the log file
 		foreach($log as $l){

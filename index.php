@@ -1,5 +1,43 @@
 <?php
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+error_reporting(E_ALL);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* 
 WWW - PHP micro-framework
 Index gateway
@@ -12,103 +50,203 @@ be accessed. Handlers for Index gateway are stored in /engine/ subfolder.
 Author and support: Kristo Vaher - kristo@waher.net
 */
 
-//Configuration is stored in this array, it has to be defined even if no configuration is loaded
-$config=array();
+// SOLVING THE HTTP REQUEST
 
-// Defining root directory, this is required by handlers in /engine/ subfolder
-define('__ROOT__',__DIR__);
+	// Getting resource without GET string
+	$resourceAddress=array_shift(explode('?',$_SERVER['REQUEST_URI']));
 
-// Including the configuration
-require(__ROOT__.DIRECTORY_SEPARATOR.'config.php');
-
-// Error reporting is turned off by default
-if(isset($config['error-reporting'])){
-	error_reporting($config['error-reporting']);
-} else {
-	error_reporting(0);
-}
-
-// Logger file is used for performance logging for later review
-// Configuration file can set what type of logging is used
-if(isset($config['logger']) && $config['logger']!='' && $config['logger']!=false){
-	require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'class.www-logger.php');
-	$logger=new WWW_Logger($config['logger'],__ROOT__.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR);
-}
-
-// If limiter is configured to be used
-if(isset($config['limiter']) && $config['limiter']==true){
-
-	// Limiter is used to block requests under specific conditions, like DOS attacks or when server load is too high
-	require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'class.www-limiter.php');
-	$limiter=new WWW_Limiter(__ROOT__.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'limiter'.DIRECTORY_SEPARATOR);
-	
-	// Assigning logger to Limiter
-	// Logger is used to output log data in case Limiter stops the script pre-maturely
-	if(isset($logger)){
-		$limiter->logger=$logger;
-	}
-	
-	// Load limiter blocks access if server load is detected to be too high at the moment of request
-	if(isset($config['load-limiter']) && $config['load-limiter']!=0){
-		$limiter->limitServerLoad($config['load-limiter']);
-	}
-	
-	// Load limiter blocks access to specific blacklist of IP's
-	if(isset($config['blacklist-limiter']) && $config['blacklist-limiter']!=''){
-		$limiter->limitBlacklisted($config['blacklist-limiter']);
-	}
-	
-	// If HTTPS limiter is used, the ststem returns a 401 error if the client attempts to access the site without HTTPS
-	if(isset($config['https-limiter']) && $config['https-limiter']==true){
-		$limiter->limitNonSecureRequests(); // By default the client is redirected to HTTPS address of the same request
-	}
-	
-	// If HTTP authentication is turned on, the system checks for credentials and returns 401 if failed
-	if(isset($config['http-authentication-limiter']) && $config['http-authentication-limiter']==true){
-		$limiter->limitUnauthorized($config['http-authentication-username'],$config['http-authentication-password']);
-	}
-	
-	// Request limiter keeps track of how many requests per minute are allowed on IP.
-	// If limit is exceeded, then IP is blocked for an hour.
-	if(isset($config['request-limiter']) && $config['request-limiter']!=0){
-		$limiter->limitRequestCount($config['request-limiter']);
+	// Stopping all direct requests to Index gateway
+	if($resourceAddress==$_SERVER['SCRIPT_NAME']){
+		header('HTTP/1.1 403 Forbidden');
+		die();
 	}
 
-}
+	// Currently known location of the file in filesystem
+	// Double replacement occurs since some environments give document root with the slash in the end, some don't (like Windows)
+	$resourceRequest=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR,$_SERVER['DOCUMENT_ROOT'].$resourceAddress);
+	// Getting directory, filename and extension information about current resource address
+	$resourceInfo=pathinfo($resourceRequest);
+	// Solving the folder that client is loading resource from
+	$resourceFolder=$resourceInfo['dirname'].DIRECTORY_SEPARATOR;
+	// Assigning file information
+	$resourceFile=$resourceInfo['basename'];
+	// If extension was detected then this too is used
+	if(isset($resourceInfo['extension'])){
+		$resourceExtension=$resourceInfo['extension'];
+	}
+	
+// LOADING CONFIGURATION
 
-// This gateway works differently based on what file is being requested
-// $_SERVER variable QUERY_STRING defines what type of file was detected by .htaccess and what type of behavior is required
-// Handlers for all different modes are stored under /engine/ subfolder
-if($_SERVER['QUERY_STRING']!='api'){
-	
-	// If mode was not static, then script returns the handler that was requested
-	require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.'.$_SERVER['QUERY_STRING'].'.php');
-	
-} else {
+	// Defining root directory, this is required by handlers in /engine/ subfolder
+	define('__ROOT__',__DIR__.DIRECTORY_SEPARATOR);
 
-	// If API handler is requested, then it is possible to have multiple different API handlers.
-	$apiHandler=array_pop(explode('/',$_SERVER['REDIRECT_URL']));
-	
-	// If the file requested is 'www.api' then it loads the default handler, but it is possible to add a custom API handler by requiesting different API
-	if($apiHandler=='www.api'){
-	
-		// Default API handler
-		require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.api.php');
-		
+	//Configuration is stored in this array, it has to be defined even if no configuration is loaded
+	$config=array();
+
+	// Including the configuration
+	require(__ROOT__.'config.php');
+
+	// Error reporting is turned off by default
+	if(isset($config['error-reporting'])){
+		error_reporting($config['error-reporting']);
 	} else {
+		error_reporting(0);
+	}
 	
-		// Replacing the extension
-		$apiHandler=str_replace('.api',$apiHandler);
+// LOADING LOGGER
+
+	// Logger file is used for performance logging for later review
+	// Configuration file can set what type of logging is used
+	if(isset($config['logger']) && $config['logger']!='' && $config['logger']!=false){
+		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-logger.php');
+		$logger=new WWW_Logger($config['logger'],__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR);
+	}
+	
+// LOADING HTTP REQUEST LIMITER
+
+	// If limiter is configured to be used
+	if(isset($config['limiter']) && $config['limiter']==true){
+
+		// Limiter is used to block requests under specific conditions, like DOS attacks or when server load is too high
+		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-limiter.php');
+		$limiter=new WWW_Limiter(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'limiter'.DIRECTORY_SEPARATOR);
 		
-		// If the file exists then system loads the new API, otherwise 404 is returned
-		if(file_exists()){
-			require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php');
+		// Assigning logger to Limiter
+		// Logger is used to output log data in case Limiter stops the script pre-maturely
+		if(isset($logger)){
+			$limiter->logger=$logger;
+		}
+		// Load limiter blocks access if server load is detected to be too high at the moment of request
+		if(isset($config['load-limiter']) && $config['load-limiter']!=0){
+			$limiter->limitServerLoad($config['load-limiter']);
+		}
+		// Load limiter blocks access to specific blacklist of IP's
+		if(isset($config['blacklist-limiter']) && $config['blacklist-limiter']!=''){
+			$limiter->limitBlacklisted($config['blacklist-limiter']);
+		}
+		// If HTTPS limiter is used, the ststem returns a 401 error if the client attempts to access the site without HTTPS
+		if(isset($config['https-limiter']) && $config['https-limiter']==true){
+			$limiter->limitNonSecureRequests(); // By default the client is redirected to HTTPS address of the same request
+		}
+		// If HTTP authentication is turned on, the system checks for credentials and returns 401 if failed
+		if(isset($config['http-authentication-limiter']) && $config['http-authentication-limiter']==true){
+			$limiter->limitUnauthorized($config['http-authentication-username'],$config['http-authentication-password']);
+		}
+		// Request limiter keeps track of how many requests per minute are allowed on IP.
+		// If limit is exceeded, then IP is blocked for an hour.
+		if(isset($config['request-limiter']) && $config['request-limiter']!=0){
+			$limiter->limitRequestCount($config['request-limiter']);
+		}
+
+	}
+	
+// LOADING HANDLERS
+
+	// Index gateway works differently based on what file is being requested
+	// Handlers for all different modes are stored under /engine/ subfolder
+
+	// Errors that are encountered within handlers are all logged, so system starts catching for potential errors
+	try {
+
+		// request has a file extension, then system will attempt to use another handler
+		if(isset($resourceExtension)){
+
+			// Handler is detected based on requested file extension
+			if(in_array($resourceExtension,array('jpeg','jpg','png'))){
+				// Image handler allows for things such as dynamic image loading
+				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.image.php');
+			} elseif(in_array($resourceExtension,array('css','js','txt','csv','xml','html','htm','rss','ini','vcard'))){
+			
+				// Text-based resources are handled by Resource handler, except for two special cases (robots.txt and sitemap.xml)
+				if($resourceFile=='sitemap.xml'){
+					// Sitemap is dynamically generated from sitemap files in /resource/ subfolder
+					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.sitemap.php');
+				} elseif($resourceFile=='robots.txt'){
+					// Robots file is dynamically generated based on 'robots' configuration in config.php file
+					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.robots.php');
+				} else {
+					// In every other case the system loads text based resources with additional options, such as compressions and minifying, with Resource handler
+					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.resource.php');
+				}
+				
+			} elseif(in_array($resourceExtension,array('tmp','log','ht','htaccess','pem','crt','db','sql','version','nginx'))){
+			
+				// These file extensions are not allowed, thus 403 error is returned
+				// Log category is 'file' due to it being a file with an extension
+				if($logger){
+					$logger->setCustomLogData(array('response-code'=>403,'category'=>'file'));
+					$logger->writeLog();
+				}
+				
+				// Returning 403 header
+				header('HTTP/1.1 403 Forbidden');
+				die();
+				
+			} elseif($resourceExtension=='api'){
+				
+				// If the file requested is 'www.api' then it loads the default handler, but it is possible to add a custom API handler by requiesting a different API
+				if($resourceFile=='www.api'){
+					// Default API handler
+					$apiHandler='www';
+					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api.php');
+				} else {
+				
+					// Replacing the extension in the request to find handler filename
+					$apiHandler=str_replace('.api','',$resourceFile);
+					
+					// If the file exists then system loads the new API, otherwise 404 is returned
+					if(file_exists(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php')){
+											
+						// Custom API files need to be placed in engine subfolder
+						// To see how the default API is built, take a look at handler.api.php
+						require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php');
+						
+					} else {
+					
+						// Request is logged and can be used for performance review later
+						if($logger){
+							$logger->setCustomLogData(array('response-code'=>404,'category'=>'file'));
+							$logger->writeLog();
+						}
+						
+						// Returning 404 header
+						header('HTTP/1.1 404 Not Found');
+						die();
+					
+					}
+					
+				}
+				
+			} else {
+				// File handler is loaded for every other file request case
+				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.file.php');
+			}
+			
 		} else {
-			require(__ROOT__.DIRECTORY_SEPARATOR.'engine'.DIRECTORY_SEPARATOR.'handler.404.php');
+			// Every other request is handled by Data handler, which loads URL and View controllers for website views
+			require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.data.php');
 		}
 		
+	} catch (Exception $e){
+
+		// There was an error in code
+		// System returns 500 header even as a server error (possible bug in code)
+		header('HTTP/1.1 500 Internal Server Error');
+
+		// Error-hitting request is logged and can be used for debugging later
+		// This message will still be logged regardless whether the logger is used or not
+		if(!$logger){
+			// Log class
+			require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-logger.php');
+			// All information about the error-creating request is logged
+			$logger=new WWW_Logger('*',__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR);
+		}
+		
+		// 500 Error response code and error message are stored in log file
+		$logger->setCustomLogData(array('response-code'=>500,'category'=>'error','error'=>$e->getMessage().' [FILE:'.$e->getFile().' LINE:'.$e->getLine().']'));
+		// Log is written in 'error' category for easier filtering
+		$logger->writeLog();
+
 	}
-	
-}
 
 ?>

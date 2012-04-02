@@ -74,8 +74,8 @@ if(isset($_GET['all']) || isset($_GET['limiter'])){
 }
 
 // Clears system log
-if(isset($_GET['all']) || isset($_GET['log'])){
-	$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR;
+if(isset($_GET['all']) || isset($_GET['logs'])){
+	$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
 	$log=array_merge($log,dirCleaner($directory));
 }
 

@@ -25,11 +25,15 @@ $log[]='SYSTEM INFORMATION:';
 $log[]='';
 
 // PHP VERSION
-	$phpVersion=explode('.',phpversion());
-	if($phpVersion[0]>=5 && $phpVersion[1]>=3){
-		$log[]='SUCCESS: PHP is running version 5.3 or newer';
+	$phpVersion=phpversion();
+	if($phpVersion){
+		if(version_compare($phpVersion,'5.3.0')>=0){
+			$log[]='SUCCESS: PHP is running version 5.3 or newer';
+		} else {
+			$log[]='FAILURE: PHP is running older version than 5.3, WWW Framework has not been tested on older versions of PHP';
+		}
 	} else {
-		$log[]='FAILURE: PHP is running older version than 5.3, WWW Framework has not been tested on older versions of PHP';
+		$log[]='WARNING: Unable to detect PHP version number, WWW Framework requires PHP version 5.3 or above';
 	}
 	
 // SHORT OPEN TAG
@@ -59,6 +63,17 @@ $log[]='';
 		$log[]='SUCCESS: APC is supported';
 	} else {
 		$log[]='WARNING: APC PHP extension is not supported, this is not required by WWW Framework, but can improve performance, if supported';
+	}
+	
+// CURL AND URL OPEN
+	if(extension_loaded('curl')){
+		$log[]='SUCCESS: cURL is supported';
+	} else {
+		if(ini_get('allow_url_fopen')==1){
+			$log[]='WARNING: cURL PHP extension is not supported, this is not required by WWW Framework, but is useful when making API requests to other systems that include POST data';
+		} else {
+			$log[]='WARNING: cURL PHP extension is not supported and allow_url_fopen setting is also off, these are not required by WWW Framework, but without them you cannot make API requests to other networks';
+		}
 	}
 
 // PDO
@@ -110,6 +125,13 @@ $log[]='';
 		$log[]='SUCCESS: Fileinfo is supported';
 	} else {
 		$log[]='WARNING: Fileinfo PHP extension is not supported, this is used by File handler, if this is not available then system detects all downloadable files as application/octet-stream';
+	}
+	
+// MCRYPT
+	if(extension_loaded('mcrypt')){
+		$log[]='SUCCESS: Mcrypt is supported';
+	} else {
+		$log[]='WARNING: Mcrypt PHP extension is not supported, this is optional and used only when API requests are made with www-crypt-input and www-crypt-output requests';
 	}
 	
 // ZIP

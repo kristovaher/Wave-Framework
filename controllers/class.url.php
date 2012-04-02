@@ -103,17 +103,12 @@ class WWW_controller_url extends WWW_Factory {
 			// If first language code has to be defined in URL, system redirects to URL that has it, otherwise returns home view data
 			if($this->enforceLanguageUrl==true){
 			
-				// Adding log entry
-				$this->writeLog(301);
-			
 				// Client is redirected to URL that has just the language node set
 				if(isset($requestNodesRaw[1])){
-					header('Location: '.$this->webRoot.$language.'/?'.$requestNodesRaw[1],TRUE,301);
+					return array('www-permanent-redirect'=>$this->webRoot.$language.'/?'.$requestNodesRaw[1]);
 				} else {
-					header('Location: '.$this->webRoot.$language.'/',TRUE,301);
+					return array('www-permanent-redirect'=>$this->webRoot.$language.'/');
 				}
-				
-				die();
 				
 			} else {
 				// Expecting to return Home view
@@ -131,17 +126,12 @@ class WWW_controller_url extends WWW_Factory {
 			// If slash is enforced at the end of the URL then client is redirected to such an URL
 			if($enforceSlash==true && end($requestNodes)!=''){
 			
-				// Adding log entry
-				$this->writeLog(301);
-			
 				// If GET variables were set, system redirects to proper URL that has a slash in the end and appends the GET variables
 				if(isset($requestNodesRaw[1])){
-					header('Location: '.$this->webRoot.$requestNodesRaw[0].'/?'.$requestNodesRaw[1],TRUE,301);
+					return array('www-permanent-redirect'=>$this->webRoot.$requestNodesRaw[0].'/?'.$requestNodesRaw[1].'/');
 				} else {
-					header('Location: '.$this->webRoot.$requestNodesRaw[0].'/',TRUE,301);
+					return array('www-permanent-redirect'=>$this->webRoot.$requestNodesRaw[0].'/');
 				}
-				
-				die();
 				
 			}
 			
@@ -160,20 +150,15 @@ class WWW_controller_url extends WWW_Factory {
 						// If this is the first language and language node is not required in URL, client is redirected to a URL without it
 						if($this->enforceLanguageUrl==false && $language==$this->languages[0]){
 						
-							// Adding log entry
-							$this->writeLog(301);
-						
 							// We unset the first node, as it was not required
 							unset($requestNodes[$nodeKey]);
 							
 							// If GET variables were set, system redirects to URL without the language and appends the GET variables
 							if(isset($requestNodesRaw[1])){
-								header('Location: '.$this->webRoot.implode('/',$requestNodes).'?'.$requestNodesRaw[1],TRUE,301);
+								return array('www-permanent-redirect'=>$this->webRoot.implode('/',$requestNodes).'?'.$requestNodesRaw[1]);
 							} else {
-								header('Location: '.$this->webRoot.implode('/',$requestNodes),TRUE,301);
+								return array('www-permanent-redirect'=>$this->webRoot.implode('/',$requestNodes));
 							}
-							
-							die();
 							
 						}
 						
@@ -182,17 +167,12 @@ class WWW_controller_url extends WWW_Factory {
 						// If language node is required in URL and the first request node was not a language, it is added and client is redirected
 						if($nodeKey==0 && $this->enforceLanguageUrl==true){
 						
-							// Adding log entry
-							$this->writeLog(301);
-						
 							// Client is redirected to the same URL as before, but with the default language node added
 							if(isset($requestNodesRaw[1])){
-								header('Location: '.$this->webRoot.$language.'/'.$requestFormatted.'/?'.$requestNodesRaw[1],TRUE,301);
+								return array('www-permanent-redirect'=>$this->webRoot.$language.'/'.$requestFormatted.'/?'.$requestNodesRaw[1]);
 							} else {
-								header('Location: '.$this->webRoot.$language.'/'.$requestFormatted,TRUE,301);
+								return array('www-permanent-redirect'=>$this->webRoot.$language.'/'.$requestFormatted);
 							}
-							
-							die();
 							
 						} else {
 						
@@ -282,32 +262,27 @@ class WWW_controller_url extends WWW_Factory {
 			
 			// If the found view is home view, then we simply redirect to home view without the long url
 			if(empty($unsolvedUrlNodes) && $view==$this->viewHome){
-				
-				// Adding log entry
-				$this->writeLog(301);
 			
 				// If first language is used and it is not needed to use language URL in first language
 				if($this->enforceLanguageUrl==false && $language==$this->languages[0]){
 					
 					// If request nodes are set in the URL
 					if(isset($requestNodesRaw[1])){
-						header('Location: '.$this->webRoot.'?'.$requestNodesRaw[1],TRUE,301);
+						return array('www-permanent-redirect'=>$this->webRoot.'?'.$requestNodesRaw[1]);
 					} else {
-						header('Location: '.$this->webRoot,TRUE,301);
+						return array('www-permanent-redirect'=>$this->webRoot);
 					}
 					
 				} else {
 				
 					// If request nodes are set in the URL
 					if(isset($requestNodesRaw[1])){
-						header('Location: '.$this->webRoot.$language.'/?'.$requestNodesRaw[1],TRUE,301);
+						return array('www-permanent-redirect'=>$this->webRoot.$language.'/?'.$requestNodesRaw[1]);
 					} else {
-						header('Location: '.$this->webRoot.$language.'/',TRUE,301);
+						return array('www-permanent-redirect'=>$this->webRoot.$language.'/');
 					}
 					
 				}
-				
-				die();
 			
 			}
 		
@@ -325,9 +300,9 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
 		if(isset($this->siteMapInfo['temporary-redirect']) && $this->siteMapInfo['temporary-redirect']!=''){
-			header('Location: '.$this->siteMapInfo['temporary-redirect'],TRUE,302);
+			return array('www-temporary-redirect'=>$this->siteMapInfo['temporary-redirect']);
 		} elseif(isset($this->siteMapInfo['permanent-redirect']) && $this->siteMapInfo['permanent-redirect']!=''){
-			header('Location: '.$this->siteMapInfo['permanent-redirect'],TRUE,301);
+			return array('www-permanent-redirect'=>$this->siteMapInfo['permanent-redirect']);
 		}
 		
 		// It is possible to overwrite the default robots setting
@@ -419,9 +394,12 @@ class WWW_controller_url extends WWW_Factory {
 		// Appending the data from Sitemap file
 		$data+=$this->siteMapInfo;
 		
+		// These headers will be set by API
+		$data['www-set-header']=array();
+		
 		// If view file is found as non-existent, a proper header is added
 		if($data['view']==$this->view404){
-			header('HTTP/1.1 404 Not Found');
+			$data['www-set-header'][]='HTTP/1.1 404 Not Found';
 		}
 		
 		// If project title is not set by Sitemap, system defines the State project title as the value
@@ -433,12 +411,12 @@ class WWW_controller_url extends WWW_Factory {
 		if(isset($data['robots']) && $data['robots']!=''){
 		
 			// This header is not 'official HTTP header', but is widely supported by Google and others
-			header('X-Robots-Tag: '.$data['robots'], true);
+			$data['www-set-header'][]='X-Robots-Tag: '.$data['robots'];
 			
 		} elseif($this->robots!=''){
 		
 			// This will be set from State default value, if Sitemap did not define robots
-			header('X-Robots-Tag: '.$this->robots, true);
+			$data['www-set-header'][]='X-Robots-Tag: '.$this->robots;
 			
 			// Robots data is also returned to views
 			$data['robots']=$this->robots;

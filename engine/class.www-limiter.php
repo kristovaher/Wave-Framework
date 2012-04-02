@@ -36,7 +36,7 @@ class WWW_Limiter {
 			$this->logDir=$logDir;
 		} else {
 			// Assigned folder is not detected as being a folder
-			trigger_error('Assigned limiter folder does not exist',E_USER_ERROR);
+			throw new Exception('Assigned limiter folder does not exist');
 		}
 		
 	}
@@ -52,19 +52,16 @@ class WWW_Limiter {
 		
 			// Log filename is hashed clients IP
 			$logFilename=md5($_SERVER['REMOTE_ADDR']);
-			
 			// Subfolder name is derived from log filename
 			$cacheSubfolder=substr($logFilename,0,2);
 			
 			// If log directory does not exist, then it is created
 			$this->logDir.=$cacheSubfolder.DIRECTORY_SEPARATOR;
 			if(!is_dir($this->logDir)){
-			
 				// Error is returned if creating the limiter folder with proper permissions does not work
 				if(!mkdir($this->logDir,0777)){
-					trigger_error('Cannot create limiter folder',E_USER_ERROR);
+					throw new Exception('Cannot create limiter folder');
 				}
-				
 			}
 			
 			// If file exists, then the amount of requests are checked, if file does not exist then it is created
@@ -86,23 +83,20 @@ class WWW_Limiter {
 						
 						// Limit has been reached by all of the requests happening in the same minute
 						if(count($checkData)==1){
-						
 							// Request is logged and can be used for performance review later
 							if($this->logger){
-								$this->logger->writeLog('403');
+								$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter'));
+								$this->logger->writeLog();
 							}
-							
 							// Block file is created and 403 page thrown to the client
 							file_put_contents($this->logDir.$logFilename.'.tmp','BLOCKED');
-							
 							// Returning proper header
 							header('HTTP/1.1 403 Forbidden');
-							
 							die();
-							
 						}
 						
 					}
+					
 					// When limit was not exceeded, file is stored again with new data
 					$limiterData=implode("\n",$data);
 					file_put_contents($this->logDir.$logFilename.'.tmp',$limiterData."\n".date('Y-m-d H:i',$_SERVER['REQUEST_TIME']));
@@ -111,21 +105,17 @@ class WWW_Limiter {
 				
 					// If the file that has blocked the requests is older than the limit duration, then block is deleted, otherwise 403 page is shown
 					if(time()-filemtime($this->logDir.$logFilename.'.tmp')>=$duration){
-					
 						// Block file is removed
 						unlink($this->logDir.$logFilename.'.tmp');
-						
 					} else {
-					
 						// Request is logged and can be used for performance review later
 						if($this->logger){
-							$this->logger->writeLog('403');
+							$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter'));
+							$this->logger->writeLog();
 						}
-						
 						// Returning 403 header
 						header('HTTP/1.1 403 Forbidden');
 						die();
-						
 					}
 					
 				}
@@ -150,22 +140,18 @@ class WWW_Limiter {
 	
 		// System load is checked only if limit is not set
 		if($limit!=0){
-		
 			// Returns system load in the last 1, 5 and 15 minutes.
 			$load=sys_getloadavg();
-			
 			// 503 page is returned if load is above limit
 			if($load[0]>$limit){
-			
 				// Request is logged and can be used for performance review later
 				if($this->logger){
-					$this->logger->writeLog('503');
+					$this->logger->setCustomLogData(array('response-code'=>503,'category'=>'limiter'));
+					$this->logger->writeLog();
 				}
-				
 				// Returning 503 header
 				header('HTTP/1.1 503 Service Unavailable');
 				die();
-				
 			}
 		}
 		
@@ -181,24 +167,19 @@ class WWW_Limiter {
 	
 		// This value should be a comma-separated string of blacklisted IP's
 		if($blackList!=''){
-		
 			// Exploding string of IP's into an array
 			$blackList=explode(',',$blackList);
-
 			// Checking if the client IP is set in blacklist array
 			if(!empty($blackList) && in_array($_SERVER['REMOTE_ADDR'],$blackList)){
-			
 				// Request is logged and can be used for performance review later
 				if($this->logger){
-					$this->logger->writeLog('403');
+					$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter'));
+					$this->logger->writeLog();
 				}
-				
 				// Returning 403 data
 				header('HTTP/1.1 403 Forbidden');
 				die();
-				
 			}
-			
 		}
 		
 		// Blacklist processed
@@ -214,17 +195,15 @@ class WWW_Limiter {
 	
 		// If provided username and password are not correct, then 401 page is displayed to the client
 		if(!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$username || !isset($_SERVER['PHP_AUTH_PW']) || $_SERVER['PHP_AUTH_PW']!=$password){
-		
 			// Request is logged and can be used for performance review later
 			if($this->logger){
-				$this->logger->writeLog('401');
+				$this->logger->setCustomLogData(array('response-code'=>401,'category'=>'limiter'));
+				$this->logger->writeLog();
 			}
-			
 			// Returning 401 headers
 			header('WWW-Authenticate: Basic realm="Login"');
 			header('HTTP/1.1 401 Unauthorized');
 			die();
-			
 		}
 		
 		// HTTP authorization processed
@@ -239,28 +218,21 @@ class WWW_Limiter {
 	
 		// HTTPS is detected from $_SERVER variables
 		if(!isset($_SERVER['HTTPS']) || ($_SERVER['HTTPS']!=1 && $_SERVER['HTTPS']!='on')){
-		
 			// If auto redirect is on, client is forwarded by replacing the http:// protocol with https://
 			if($autoRedirect){
-			
 				// Redirecting to HTTPS address
-				header('Location: '.str_replace('http://','https://',$_SERVER['SCRIPT_URI']));
-				
+				header('Location: https://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
 			} else {
-			
 				// Request is logged and can be used for performance review later
 				if($this->logger){
-					$this->logger->writeLog('401');
+					$this->logger->setCustomLogData(array('response-code'=>401,'category'=>'limiter'));
+					$this->logger->writeLog();
 				}
-				
 				// Returning 401 header
 				header('HTTP/1.1 401 Unauthorized');
-				
 			}
-			
 			// Script is halted
 			die();
-			
 		}
 		
 		// HTTPS check processed

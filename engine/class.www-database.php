@@ -56,7 +56,6 @@ class WWW_Database {
 	public function connect(){
 		// Actions based on database type
 		switch($this->type){
-		
 			case 'mysql':
 				// This mode can only be used if PDO MySQL is loaded as PHP extension
 				if(extension_loaded('pdo_mysql')){
@@ -64,13 +63,12 @@ class WWW_Database {
 					if($this->pdo){
 						$this->connected=1;
 					} else {
-						trigger_error('Cannot connect to database',E_USER_ERROR);
+						throw new Exception('Cannot connect to database');
 					}
 				} else {
-					trigger_error('PDO MySQL extension not enabled',E_USER_ERROR);
+					throw new Exception('PDO MySQL extension not enabled');
 				}
 				break;
-				
 			case 'sqlite':
 				// This mode can only be used if PDO SQLite is loaded as PHP extension
 				if(extension_loaded('pdo_sqlite')){
@@ -78,13 +76,12 @@ class WWW_Database {
 					if($this->pdo){
 						$this->connected=1;
 					} else {
-						trigger_error('Cannot connect to database',E_USER_ERROR);
+						throw new Exception('Cannot connect to database');
 					}
 				} else {
-					trigger_error('PDO MySQL extension not enabled',E_USER_ERROR);
+					throw new Exception('PDO SQLite extension not enabled');
 				}
 				break;
-				
 			case 'postgresql':
 				// This mode can only be used if PDO PostgreSQL is loaded as PHP extension
 				if(extension_loaded('pdo_pgsql')){
@@ -93,13 +90,12 @@ class WWW_Database {
 						$this->pdo->exec('SET NAMES \'UTF8\'');
 						$this->connected=1;
 					} else {
-						trigger_error('Cannot connect to database',E_USER_ERROR);
+						throw new Exception('Cannot connect to database');
 					}
 				} else {
-					trigger_error('PDO MySQL extension not enabled',E_USER_ERROR);
+					throw new Exception('PDO PostgreSQL extension not enabled');
 				}
 				break;
-				
 			case 'oracle':
 				// This mode can only be used if PDO Oracle is loaded as PHP extension
 				if(extension_loaded('pdo_oci')){
@@ -107,13 +103,12 @@ class WWW_Database {
 					if($this->pdo){
 						$this->connected=1;
 					} else {
-						trigger_error('Cannot connect to database',E_USER_ERROR);
+						throw new Exception('Cannot connect to database');
 					}
 				} else {
-					trigger_error('PDO MySQL extension not enabled',E_USER_ERROR);
+					throw new Exception('PDO Oracle extension not enabled');
 				}
 				break;
-				
 			case 'mssql':
 				// This mode can only be used if PDO MSSQL is loaded as PHP extension
 				if(extension_loaded('pdo_mssql')){
@@ -122,38 +117,36 @@ class WWW_Database {
 						$this->pdo->exec('SET NAMES \'UTF8\'');
 						$this->connected=1;
 					} else {
-						trigger_error('Cannot connect to database',E_USER_ERROR);
+						throw new Exception('Cannot connect to database');
 					}
 				} else {
-					trigger_error('PDO MySQL extension not enabled',E_USER_ERROR);
+					throw new Exception('PDO MSSQL extension not enabled');
 				}
 				break;
-				
 			default:
 				// Error is triggered for all other database types
-				trigger_error('This database type is not supported',E_USER_ERROR);
-
+				throw new Exception('This database type is not supported');
+				break;
 		}
 	}
 	
 	// Disconnects from database, if connected
 	// Returns false if no connection was present
 	public function disconnect($resetQueryCounter=false){
+	
 		// This is only executed if existing connection is detected
 		if($this->connected==1 && $this->key!='' && !$this->persistent){
-		
 			// Resetting the query counter
 			if($resetQueryCounter){
 				$this->queryCounter=0;
 			}
-			
 			// Closing the database
 			$this->pdo=null;
 			$this->connected=0;
-			
 		} else {
 			return false;
 		}
+		
 	}
 
 	// Sends query to database and returns associative array of all results
@@ -174,27 +167,21 @@ class WWW_Database {
 			
 			// If there is a result then it is fetched and returned
 			if($result){
-			
 				// All data is returned as associative array
 				$return=$query->fetchAll(PDO::FETCH_ASSOC);
-				
 				// Closing the resource
 				$query->closeCursor();
 				unset($query);
-				
 				// Associative array is returned
 				return $return;
-				
 			} else {
-			
 				// Checking for an error, if there was one
 				$this->checkError($query);
 				return false;
-				
 			}
 					
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			throw new Exception('Database not connected');
 		}
 		
 	}
@@ -217,27 +204,21 @@ class WWW_Database {
 			
 			// If there is a result then it is fetched and returned
 			if($result){
-			
 				// All data is returned as associative array
 				$return=$query->fetch(PDO::FETCH_ASSOC);
-				
 				// Closing the resource
 				$query->closeCursor();
 				unset($query);
-				
 				// Associative array is returned
 				return $return;
-				
 			} else {
-			
 				// Checking for an error, if there was one
 				$this->checkError($query);
 				return false;
-				
 			}
 
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			throw new Exception('Database not connected');
 		}
 		
 	}
@@ -260,31 +241,25 @@ class WWW_Database {
 			
 			// If there is a result then it is fetched and returned
 			if($result){
-			
 				// Result of this query is the amount of rows affected by it
 				$rowCount=$query->rowCount();
-				
 				// Closing the resource
 				$query->closeCursor();
 				unset($query);
-				
 				// If, for some reason, the amount of affected rows was not returned, system simply returns true
 				if($rowCount){
 					return $rowCount;
 				} else {
 					return true;
 				}
-				
 			} else {
-			
 				// Checking for an error, if there was one
 				$this->checkError($query);
 				return false;
-				
 			}
 					
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			throw new Exception('Database not connected');
 		}
 		
 	}
@@ -295,18 +270,14 @@ class WWW_Database {
 	private function checkError($query){
 	
 		if($this->connected==1 && $this->showErrors==1){
-		
 			// Checking if there is error information stored for this request
 			$errors=$query->errorInfo();
 			if($errors && !empty($errors)){
-			
 				// PDO errorInfo carries verbose error as third in the index
-				trigger_error('Query failed: '.$errors[2],E_USER_ERROR);
-				
+				throw new Exception('Query failed: '.$errors[2].'');
 			}
-			
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			throw new Exception('Database not connected');
 		}
 		
 		// Since error was not triggered, it simply returns true
@@ -324,7 +295,6 @@ class WWW_Database {
 
 			// Checks for last existing inserted row's unique ID
 			$lastId=$this->pdo->lastInsertId();
-			
 			// Last ID is found, it is returned, otherwise it returns false
 			if(!$lastId && $lastId!=0){
 				return $lastId;
@@ -333,12 +303,12 @@ class WWW_Database {
 			}
 
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			throw new Exception('Database not connected');
 		}
 	}
 	
 	// Begins transaction if transactions are supported
-	// Always returns true
+	// Returns true if transaction is started
 	public function beginTransaction(){
 		if($this->connected==1){
 		
@@ -346,18 +316,19 @@ class WWW_Database {
 			$this->queryCounter++;
 			
 			// Begins transaction
-			$this->pdo->beginTransaction();
-			
-			// Always returns true
-			return true;
+			if($this->pdo->beginTransaction()){
+				return true;
+			} else {
+				return false;
+			}
 			
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			throw new Exception('Database not connected');
 		}
 	}
 	
 	// Commits transaction if transactions are supported
-	// Always returns true
+	// Returns true if transaction is commited
 	public function commitTransaction(){
 		if($this->connected==1){
 		
@@ -365,18 +336,19 @@ class WWW_Database {
 			$this->queryCounter++;
 			
 			// Commits transaction
-			$this->pdo->commit();
-			
-			// Always returns true
-			return true;
+			if($this->pdo->commit()){
+				return true;
+			} else {
+				return false;
+			}
 			
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			throw new Exception('Database not connected');
 		}
 	}
 	
 	// Rolls back the changes from transaction
-	// Always returns true
+	// Returns true if transaction is rolled back
 	public function rollbackTransaction(){
 		if($this->connected==1){
 		
@@ -384,13 +356,14 @@ class WWW_Database {
 			$this->queryCounter++;
 			
 			// Rolls back transaction
-			$this->pdo->rollBack();
-			
-			// Always returns true
-			return true;
+			if($this->pdo->rollBack()){
+				return true;
+			} else {
+				return false;
+			}
 			
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			throw new Exception('Database not connected');
 		}
 	}
 

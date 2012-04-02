@@ -13,7 +13,7 @@ WWW comes by default with a view controller and a gateway intended for website f
 
 Documentation about how to set up a system and use the API, as well as tutorials are available at https://sourceforge.net/p/www-php/wiki/Home/
 
-Mercurial and Git repository is available for developers who are interested in following the development.
+Mercurial and Git repositories is available for developers who are interested in following the development.
 
 Social networks for latest news: 
 Google+ - http://plus.google.com/106969835456865671988 
@@ -30,19 +30,21 @@ FEATURES
  * Compressed data output with Deflate and Gzip
  * Input and output data is fully UTF-8
  * PDO-specific database controller for general-use database connections
- * Apache-driven smart Index gateway that handles all HTTP requests
+ * Smart Index gateway that handles all HTTP requests
  * Full cache control for all types of dynamic and static requests
  * View and URL controllers that support multiple languages and clean URL's
  * jQuery based front-end UI controller with smart AJAX functionality
  * On-demand dynamic image resizer and basic image editor
  * On-demand resource compressing, unifying and minifying
  * Automatic sitemap.xml and robots.txt generation
+ * API wrapper classes that make server to server API communication easy
+ * Optional 256bit Rijndael CBC data communication encryption
  * Installation-specific MVC class and resource overrides
  * Request limiter that can block HTTP requests under various conditions
  * Request logger that can be used for detailed performance grading of HTTP requests
  * Backup, update and filesystem maintenance tools
  * Compatibility script that tests support for server setup
- * Supports Linux and Windows servers, LAMP and WAMP setups
+ * Supports Apache and Nginx servers in Linux and Windows environments
  * Licensed under GNU Lesser General Public License Version 3
  
 INSTALLATION
@@ -52,8 +54,9 @@ INSTALLATION
  2. Configuration file in root directory /config.php of the archive should be configured according to your needs. Read more about configuration from Wiki.
  3. Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writeable by PHP, for example with command chmod 0777 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 777) or with any other FTP software. This is not required on Windows server.
  4. There is a tool script for checking if your system is compatible for WWW Framework or not. After you have uploaded scripts to server, run the script /tools/compatibility.php. If this script shows any errors, then WWW Framework might not work properly.
- 5. In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again.
- 6. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
+ 5. WWW Framework requires servers ability to redirect all requests to /index.php file. Compatibility script should tell you if there is a problem with your setup.
+ 6. In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again. This only applies to Apache server.
+ 7. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
  
 HELP AND DOCUMENTATION
 ----------------------
@@ -77,23 +80,30 @@ AUTHOR
 
 Kristo Vaher
 kristo@waher.net
-http://www.waher.net/+
+http://www.waher.net
+http://plus.google.com/102632377636999004385/
 
 LICENSE
 -------
 
 This framework is released as open source and its components (with the exception of external components included in this package and detailed in the next section) are released under GNU Lesser General Public License Version 3. Full license document is included in the archive as license.txt file.
 
-AUTHORS OF ADDITIONAL COMPONENTS
---------------------------------
+ADDITIONAL COMPONENTS
+---------------------
+
+WWW also incorporates the following open source components that are not required for the functionality of the framework, but are included for bootstrapping reasons.
 
 jQuery
-http://jquery.com/
-Released under either the MIT License or the GNU General Public License Version 2
+* http://jquery.com/
+* /resources/jquery.js
+* License: Released under either the MIT License or the GNU General Public License Version 2
 
 YUI Reset CSS
-http://yuilibrary.com/yui/docs/cssreset/
-Released by Yahoo! Inc. under BSD License
+* http://yuilibrary.com/yui/docs/cssreset/
+* /resources/reset.css
+* License: Released by Yahoo! Inc. under BSD License
 
 Adminer
-Released by Jakub Vrana under Apache License Version 2 and GNU General Public License Version 2
+* http://www.adminer.org/
+* /tools/adminer.php
+* License: Released by Jakub Vrana under Apache License Version 2 and GNU General Public License Version 2

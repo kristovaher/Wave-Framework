@@ -39,31 +39,30 @@ class WWW_Imager {
 
 			// Creating image resource object based on file type
 			switch($this->type){
-			
 				case IMAGETYPE_JPEG:
 					// Image is created from assumed JPEG file
-					$this->resource=imagecreatefromjpeg($location);
+					if(!$this->resource=imagecreatefromjpeg($location)){
+						return false;
+					}
 					break;
-					
 				case IMAGETYPE_PNG:
 					// Image is created from assumed PNG file
-					$this->resource=imagecreatefrompng($location);
-					
+					if(!$this->resource=imagecreatefrompng($location)){
+						return false;
+					}
 					// This saves the alpha settings of the image
 					imagealphablending($this->resource,false);
 					imagesavealpha($this->resource,true);
-					
 					break;
-					
 				case IMAGETYPE_GIF:
 					// Image is created from assumed GIF file
-					$this->resource=imagecreatefromgif($location);
+					if(!$this->resource=imagecreatefromgif($location)){
+						return false;
+					}
 					break;
-					
 				default:
-					trigger_error('File format not supported',E_USER_ERROR);
+					throw new Exception('File format not supported');
 					break;
-					
 			}
 		
 			// Image has been loaded
@@ -80,6 +79,7 @@ class WWW_Imager {
 	// * location - new file location in file system. If not set, then returns file data to output
 	// * quality - Quality percentage, higher is better
 	// * extension - Output file extension or type
+	// Returns true if successful
 	public function output($location=false,$quality=90,$extension=false){
 	
 		// Making sure quality is between acceptable values
@@ -109,16 +109,28 @@ class WWW_Imager {
 			// Different file types have different compression levels for quality
 			switch($extension){
 				case 'jpg':
-					imagejpeg($this->resource,$location,$quality);
+					if(imagejpeg($this->resource,$location,$quality)){
+						return true;
+					} else {
+						return false;
+					}
 					break;
 				case 'png':
-					imagepng($this->resource,$location,(9-floor($quality/10)));
+					if(imagepng($this->resource,$location,(9-floor($quality/10)))){
+						return true;
+					} else {
+						return false;
+					}
 					break;
 				case 'gif':
-					imagegif($this->resource,$location);
+					if(imagegif($this->resource,$location)){
+						return true;
+					} else {
+						return false;
+					}
 					break;
 				default:
-					trigger_error('This output extension is not supported',E_USER_ERROR);
+					throw new Exception('This output extension is not supported');
 					break;
 			}
 			
@@ -127,22 +139,40 @@ class WWW_Imager {
 			// Different file types have different compression levels for quality
 			switch($extension){
 				case 'jpg':
-					header('Content-Type: image/jpeg');
 					// Second parameter of null means that image is pushed to output buffer instead of stored in file
-					imagejpeg($this->resource,null,$quality);
+					if(imagejpeg($this->resource,null,$quality)){
+						header('Content-Type: image/jpeg');
+						return true;
+					} else {
+						// 500 header is returned if file was not created
+						header('HTTP/1.1 500 Internal Server Error');
+						return false;
+					}
 					break;
 				case 'png':
-					header('Content-Type: image/png');
 					// PNG format has compression from 0-9 with 0 being the best, so quality is updated accordingly
-					imagepng($this->resource,null,(10-round($quality/10)));
+					if(imagepng($this->resource,null,(10-round($quality/10)))){
+						header('Content-Type: image/png');
+						return true;
+					} else {
+						// 500 header is returned if file was not created
+						header('HTTP/1.1 500 Internal Server Error');
+						return false;
+					}
 					break;
 				case 'gif':
-					header('Content-Type: image/gif');
 					// Second parameter not used means that image is pushed to output buffer instead of stored in file
-					imagegif($this->resource);
+					if(imagegif($this->resource)){
+						header('Content-Type: image/gif');
+						return true;
+					} else {
+						// 500 header is returned if file was not created
+						header('HTTP/1.1 500 Internal Server Error');
+						return false;
+					}
 					break;
 				default:
-					trigger_error('This output extension is not supported',E_USER_ERROR);
+					throw new Exception('This output extension is not supported');
 					break;
 			}
 			
@@ -155,7 +185,7 @@ class WWW_Imager {
 	// * height - Height of resulting image
 	// * left - Position from the left edge. Can be 'center', 'left', 'right' or a pixel value.
 	// * top - Position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value.
-	// Always returns true
+	// Returns true if image resize was a success or did not need resizing
 	public function resizeFitCrop($width,$height,$left='center',$top='center'){
 	
 		// Canceling function if resizing is not needed
@@ -165,9 +195,13 @@ class WWW_Imager {
 	
 		// System resizes source image based on which side of the image would be left 'outside' of the frame
 		if(($this->height/$height)<($this->width/$width)){
-			$this->resizeHeight($height);
+			if(!$this->resizeHeight($height)){
+				return false;
+			}
 		} else {
-			$this->resizeWidth($width);
+			if(!$this->resizeWidth($width)){
+				return false;
+			}
 		}
 		
 		// Left position is calculated, if value is a string instead of a number
@@ -188,7 +222,7 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
 				if(!is_numeric($left)){
-					trigger_error('This left position is not supported',E_USER_ERROR);
+					throw new Exception('This left position is not supported');
 				}
 				break;
 		}
@@ -211,18 +245,16 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
 				if(!is_numeric($top)){
-					trigger_error('This top position is not supported',E_USER_ERROR);
+					throw new Exception('This top position is not supported');
 				}
 				break;
 		}
 		
 		// Temporary image is created for the output
 		$tmpImage=imagecreatetruecolor($width,$height);
-		
 		// This preserves alpha maps, if it exists (such as for PNG)
 		imagealphablending($tmpImage,false);
 		imagesavealpha($tmpImage,true);
-		
 		// Current image resource is placed on temporary resource
 		imagecopyresampled($tmpImage,$this->resource,$left,$top,0,0,$this->width,$this->height,$this->width,$this->height);
 		
@@ -244,7 +276,7 @@ class WWW_Imager {
 	// * red - Amount of red color for background, from 0-255
 	// * green - Amount of green color for background, from 0-255
 	// * blue - Amount of blue color for background, from 0-255
-	// Always returns true
+	// Returns true if image resize was a success or did not need resizing
 	public function resizeCrop($width,$height,$left='center',$top='center',$red,$green,$blue){
 	
 		// Canceling function if resizing is not needed
@@ -267,7 +299,6 @@ class WWW_Imager {
 	
 		// Left position is calculated, if value is a string instead of a number
 		switch($left){
-		
 			case 'center':
 				// Calculating image left position based on positioning difference with new dimensions
 				$left=-(round(($this->width-$width)/2));
@@ -283,14 +314,13 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
 				if(!is_numeric($left)){
-					trigger_error('This left position is not supported',E_USER_ERROR);
+					throw new Exception('This left position is not supported');
 				}
 				break;
 		}
 		
 		// Top position is calculated, if value is a string instead of a number
 		switch($top){
-		
 			case 'center':
 				// Calculating image top position based on positioning difference with new dimensions
 				$top=-(round(($this->height-$height)/2));
@@ -306,21 +336,18 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
 				if(!is_numeric($top)){
-					trigger_error('This top position is not supported',E_USER_ERROR);
+					throw new Exception('This top position is not supported');
 				}
 				break;
 		}
 		
 		// Temporary image is created for the output
 		$tmpImage=imagecreatetruecolor($width,$height);
-		
 		// Since the image might have a background color, the temporary image is filled with background color
 		imagefill($tmpImage,0,0,imagecolorallocate($tmpImage,$red,$green,$blue));
-		
 		// This preserves alpha maps, if it exists (such as for PNG)
 		imagealphablending($tmpImage,false);
 		imagesavealpha($tmpImage,true);
-		
 		// Current image resource is placed on temporary resource
 		imagecopyresampled($tmpImage,$this->resource,$left,$top,0,0,$this->width,$this->height,$this->width,$this->height);
 		
@@ -342,7 +369,7 @@ class WWW_Imager {
 	// * red - Amount of red color for background, from 0-255
 	// * green - Amount of green color for background, from 0-255
 	// * blue - Amount of blue color for background, from 0-255
-	// Always returns true
+	// Returns true if image resize was successful
 	public function resizeFit($width,$height,$left='center',$top='center',$red,$green,$blue){
 	
 		// Canceling function if resizing is not needed
@@ -363,16 +390,19 @@ class WWW_Imager {
 			$blue=0; 
 		}
 	
-		// System resizes source image based on which side of the image would be left 'outside' of the frame
+		// System resizes source image based on which side of the image would be left 'outside' of the frame		
 		if(($this->height/$height)>($this->width/$width)){
-			$this->resizeHeight($height);
+			if(!$this->resizeHeight($height)){
+				return false;
+			}
 		} else {
-			$this->resizeWidth($width);
+			if(!$this->resizeWidth($width)){
+				return false;
+			}
 		}
 		
 		// Left position is calculated, if value is a string instead of a number
 		switch($left){
-		
 			case 'center':
 				// Calculating image left position based on positioning difference with new dimensions
 				$left=-(round(($this->width-$width)/2));
@@ -388,14 +418,13 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
 				if(!is_numeric($left)){
-					trigger_error('This left position is not supported',E_USER_ERROR);
+					throw new Exception('This left position is not supported');
 				}
 				break;
 		}
 		
 		// Top position is calculated, if value is a string instead of a number
 		switch($top){
-		
 			case 'center':
 				// Calculating image top position based on positioning difference with new dimensions
 				$top=-(round(($this->height-$height)/2));
@@ -411,21 +440,18 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
 				if(!is_numeric($top)){
-					trigger_error('This top position is not supported',E_USER_ERROR);
+					throw new Exception('This top position is not supported');
 				}
 				break;
 		}
 		
 		// Temporary image is created for the output
 		$tmpImage=imagecreatetruecolor($width,$height);
-		
 		// Since the image might have a background color, the temporary image is filled with background color
 		imagefill($tmpImage,0,0,imagecolorallocate($tmpImage,$red,$green,$blue));
-		
 		// This preserves alpha maps, if it exists (such as for PNG)
 		imagealphablending($tmpImage,false);
 		imagesavealpha($tmpImage,true);
-		
 		// Current image resource is placed on temporary resource
 		imagecopyresampled($tmpImage,$this->resource,$left,$top,0,0,$this->width,$this->height,$this->width,$this->height);
 		
@@ -442,7 +468,7 @@ class WWW_Imager {
 	// This simply places the image into new dimensions, areas left empty won't be filled after resize
 	// * width - Width of resulting image
 	// * height - Height of resulting image
-	// Always returns true
+	// Returns true if image resize was successful
 	public function resizeFitNoBackground($width,$height){
 	
 		// Canceling function if resizing is not needed
@@ -452,9 +478,13 @@ class WWW_Imager {
 	
 		// System resizes source image based on which side of the image would be left 'outside' of the frame
 		if(($this->height/$height)>($this->width/$width)){
-			$this->resizeHeight($height);
+			if(!$this->resizeHeight($height)){
+				return false;
+			}
 		} else {
-			$this->resizeWidth($width);
+			if(!$this->resizeWidth($width)){
+				return false;
+			}
 		}
 		
 		// New dimensions are assigned for this object
@@ -469,7 +499,7 @@ class WWW_Imager {
 	// This simply resizes current resource to new width
 	// * width - Width of resulting image
 	// * height - Height of resulting image
-	// Always returns true
+	// Returns true if image resize was successful
 	public function resizeWidth($width){
 	
 		// Canceling function if resizing is not needed
@@ -479,19 +509,19 @@ class WWW_Imager {
 	
 		// Ratio is used to calculate the ratio which is used to resize the image
 		$ratio=$this->width/$width;
-		
 		// New height is calculated according to ratio
 		$height=round($this->height/$ratio);
 		
 		// Temporary image is created for the output
 		$tmpImage=imagecreatetruecolor($width,$height);
-		
 		// This preserves alpha maps, if it exists (such as for PNG)
 		imagealphablending($tmpImage,false);
 		imagesavealpha($tmpImage,true);
 		
 		// Current image resource is placed on temporary resource
-		imagecopyresampled($tmpImage,$this->resource,0,0,0,0,$width,$height,$this->width,$this->height);
+		if(!imagecopyresampled($tmpImage,$this->resource,0,0,0,0,$width,$height,$this->width,$this->height)){
+			return false;
+		}
 		
 		// New dimensions and temporary image resource is assigned as resource of this object
 		$this->width=$width;
@@ -506,7 +536,7 @@ class WWW_Imager {
 	// This simply resizes current resource to new height
 	// * width - Width of resulting image
 	// * height - Height of resulting image
-	// Always returns true
+	// Returns true if image resize was successful
 	public function resizeHeight($height){
 	
 		// Canceling function if resizing is not needed
@@ -516,19 +546,19 @@ class WWW_Imager {
 	
 		// Ratio is used to calculate the ratio which is used to resize the image
 		$ratio=$this->height/$height;
-		
 		// New width is calculated according to ratio
 		$width=round($this->width/$ratio);
 		
 		// Temporary image is created for the output
 		$tmpImage=imagecreatetruecolor($width,$height);
-		
 		// This preserves alpha maps, if it exists (such as for PNG)
 		imagealphablending($tmpImage,false);
 		imagesavealpha($tmpImage,true);
 		
 		// Current image resource is placed on temporary resource
-		imagecopyresampled($tmpImage,$this->resource,0,0,0,0,$width,$height,$this->width,$this->height);
+		if(!imagecopyresampled($tmpImage,$this->resource,0,0,0,0,$width,$height,$this->width,$this->height)){
+			return false;
+		}
 		
 		// New dimensions and temporary image resource is assigned as resource of this object
 		$this->width=$width;
@@ -544,7 +574,7 @@ class WWW_Imager {
 	// * type - Filtering type
 	// * alpha - Level of alpha layering to use on top of original image
 	// * settings - Filter settings is an array that carries up to three variables
-	// Always returns true
+	// Returns true if filtering was successful
 	public function applyFilter($type,$alpha=100,$settings){
 	
 		// If alpha level is outside the permitted values
@@ -557,7 +587,6 @@ class WWW_Imager {
 	
 		// Type is basically a shortcut to imagefilter() function
 		switch($type){
-		
 			case 'negative':
 				// Reverses all colors of the image
 				$type=IMG_FILTER_NEGATE;
@@ -643,14 +672,13 @@ class WWW_Imager {
 				$settingsRequired=11;
 				break;
 			default:
-				trigger_error($requestedType.' filter is not available',E_USER_ERROR);
+				throw new Exception($requestedType.' filter is not available');
 				break;
-				
 		}
 		
 		// If incorrect number of settings are used then error is thrown
 		if(count($settings)!=$settingsRequired){
-			trigger_error('Incorrect amount of filter settings for '.$requestedType.', '.count($settings).' set but '.$settingsRequired.' required',E_USER_ERROR);
+			throw new Exception('Incorrect amount of filter settings for '.$requestedType.', '.count($settings).' set but '.$settingsRequired.' required');
 		}
 		
 		// If alpha setting is used, then the resulting image will be 'merged'
@@ -658,13 +686,13 @@ class WWW_Imager {
 		
 			// Temporary image is created for the output
 			$tmpImage=imagecreatetruecolor($this->width,$this->height);
-			
 			// This preserves alpha maps, if it exists (such as for PNG)
 			imagealphablending($tmpImage,false);
 			imagesavealpha($tmpImage,true);
-			
 			// Current image resource is placed on temporary resource
-			imagecopyresampled($tmpImage,$this->resource,0,0,0,0,$this->width,$this->height,$this->width,$this->height);
+			if(!imagecopyresampled($tmpImage,$this->resource,0,0,0,0,$this->width,$this->height,$this->width,$this->height)){
+				return false;
+			}
 			
 		}
 		
@@ -678,7 +706,9 @@ class WWW_Imager {
 			$matrix[]=array($settings[6],$settings[7],$settings[8]);
 			
 			// Convulation applied
-			imageconvolution($this->resource, $matrix, $settings[9], $settings[10]);
+			if(!imageconvolution($this->resource, $matrix, $settings[9], $settings[10])){
+				return false;
+			}
 		
 		} else {
 			
@@ -686,33 +716,42 @@ class WWW_Imager {
 			// imagefilter() expects different amount of parameters, this takes all conditions into account
 			switch (count($settings)){
 				case 4:
-					imagefilter($this->resource,$type,$settings[0],$settings[1],$settings[2],$settings[3]);
+					if(!imagefilter($this->resource,$type,$settings[0],$settings[1],$settings[2],$settings[3])){
+						return false;
+					}
 					break;
 				case 3:
-					imagefilter($this->resource,$type,$settings[0],$settings[1],$settings[2]);
+					if(!imagefilter($this->resource,$type,$settings[0],$settings[1],$settings[2])){
+						return false;
+					}
 					break;
 				case 2:
-					imagefilter($this->resource,$type,$settings[0],$settings[1]);
+					if(!imagefilter($this->resource,$type,$settings[0],$settings[1])){
+						return false;
+					}
 					break;
 				case 1:
-					imagefilter($this->resource,$type,$settings[0]);
+					if(!imagefilter($this->resource,$type,$settings[0])){
+						return false;
+					}
 					break;
 				default:
-					imagefilter($this->resource,$type);
+					if(!imagefilter($this->resource,$type)){
+						return false;
+					}
 					break;
 			}
 		
 		}
 		
-		// Filtered image is layered on top of the original
+		// Filtered image is layered on top of the original, if alpha is not 100%
 		if($alpha!=100){
-			
 			// Alpha value in the end does the layering
-			imagecopymerge($tmpImage,$this->resource,0,0,0,0,$this->width,$this->height,$alpha);
-			
+			if(!imagecopymerge($tmpImage,$this->resource,0,0,0,0,$this->width,$this->height,$alpha)){
+				return false;
+			}
 			// New image is set as the resource
 			$this->resource=$tmpImage;
-			
 		}
 		
 		// Processing complete

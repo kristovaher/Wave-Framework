@@ -1,19 +1,19 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 State class
 
-One of the three main files of the framework, this file is always required. WWW_State class is 
-used to keep track of system state, such as relevant PHP settings, changing these settings, 
-system and API configuration and other variables. This class is used by both WWW_API and 
-WWW_Factory (and thus most, if not all, MVC files in models, views and controllers directories). 
-Multiple different states can be used by the same request, but usually just one is used per 
-request. State is only kept for the duration of the request processing and is not stored.
+State is always required by WWW Framework. It is used by API and some handlers. State is used 
+to keep track of system state and its changes, such as relevant PHP settings. It allows changing 
+changing these settings, and thus affecting API or PHP configuration. State is assigned in API 
+and is accessible in MVC objects as well. Multiple different states can be used by the same 
+request, but usually just one is used per request. State is only kept for the duration of the 
+request processing and is not stored beyond its use in the request.
 
-* State file is also used to set specific configuration options that affect PHP
-* State basically stores data and database connection information
-* Multiple state files can be used for requests and the state can be changed request per request
+* /config.php file settings are loaded into State and can overwrite some State values
+* Some state values affect PHP or framework internal settings
+* State also stores database connection information, which is used by MVC objects through Factory
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -37,8 +37,8 @@ class WWW_State	{
 				'project-title'=>'WWW Framework',
 				'api-public-profile'=>'public',
 				'api-profile'=>'public',
-				'api-token-timeout'=>0,
-				'api-timestamp-timeout'=>10,
+				'api-token-timeout'=>30,
+				'api-timestamp-timeout'=>30,
 				'resource-cache-timeout'=>31536000,
 				'home-view'=>'home',
 				'404-view'=>'404',
@@ -117,7 +117,7 @@ class WWW_State	{
 				}
 			}
 			
-			// Compressed output is turned off if the requesting client does not support it
+			// Compressed output is turned off if the requesting user agent does not support it
 			// This is also turned off if PHP does not support Zlib compressions
 			if($this->data['output-compression']!=false){
 				if(!in_array($this->data['output-compression'],$this->data['http-accept-encoding']) || !extension_loaded('Zlib')){
@@ -140,7 +140,7 @@ class WWW_State	{
 		
 		// FINGERPRINTING
 		
-			// Fingerprint is created based on data sent by client, this can be useful for light detection without cookies
+			// Fingerprint is created based on data sent by user agent, this can be useful for light detection without cookies
 			$fingerprint=$this->data['true-client-ip'].$this->data['client-ip'];
 			$fingerprint.=$this->data['client-user-agent'];
 			$fingerprint.=(isset($_SERVER['HTTP_ACCEPT']))?$_SERVER['HTTP_ACCEPT']:'';
@@ -241,9 +241,15 @@ class WWW_State	{
 				}
 				break;
 			case 'output-compression':
-				// If client does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
+				// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
 				if($value==false || !in_array($value,$this->data['http-accept-encoding']) || !extension_loaded('Zlib')){
 					$this->data[$variable]=false;
+				}
+				break;
+			case 'languages':
+				// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
+				if($value!=false && $value!=''){
+					$this->data[$variable]=explode(',',$value);
 				}
 				break;
 		}

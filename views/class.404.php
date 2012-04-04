@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 MVC View class
 
 This view is called by WWW_controller_view if WWW_controller_url could not find a matching 

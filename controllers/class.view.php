@@ -1,15 +1,19 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 MVC Controller class
 
 View class is used by index.php to load view from /views/ folder and output it to the requesting 
-client. View generates typical HTML header, includes various resource files and loads a view 
+user agent. View generates typical HTML header, includes various resource files and loads a view 
 that WWW_controller_url detected being the proper URL that is loaded. WWW_controller_view also 
 loads translations file from /resources/{language-code}.translations.php that can be used for 
 different languages for the same views. This class also loads Javascript and jQuery libraries 
 that include useful user interface development functionality.
+
+* This file can be edited to be suitable based on project
+* This view controller includes majority of required settings for a modern website header
+* Loads view from /views/ subfolder
 
 Author and support: Kristo Vaher - kristo@waher.net
 */

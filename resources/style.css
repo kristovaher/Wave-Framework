@@ -1,10 +1,13 @@
 
 /* 
-WWW - PHP micro-framework
+WWW Framework
 General stylesheet
 
 General use stylesheet that is loaded by WWW_controller_view. All styles can be defined 
-in this file.
+in this file and this file is generally loaded as the first CSS file in the system after 
+reset CSS.
+
+* It is possible to pre-load images based on example in this file
 
 Author and support: Kristo Vaher - kristo@waher.net 
 */

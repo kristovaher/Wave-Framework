@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 MVC View class
 
 Minimal example view for demonstration purposes.

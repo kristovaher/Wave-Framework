@@ -1,18 +1,22 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 Request limiter class
 
-This is an optional class that is used to limit requests based on client by Index gateway. 
+This is an optional class that is used to limit requests based on user agent by Index gateway. 
 WWW_Limiter can be used to block IP's if they make too many requests per minute, block requests 
 if server load is detected as too high, block the request if it comes from blacklist provided 
-by the system, ask for HTTP authentication or force the client to use HTTPS. Note that some 
+by the system, ask for HTTP authentication or force the user agent to use HTTPS. Note that some 
 of this functionality can be achieved by Apache configuration and modules, but it is provided 
 here for cases where the project developer might not have control over server configuration.
 
 * Requires /filesystem/limiter/ folder to be writeable by server
-* Limiter does not work on Windows servers
+* Request rate limiter
+* Server load limiter (does not work on Windows)
+* Blacklisted IP limiter
+* HTTP authentication limiter
+* HTTPS-only limiter
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -41,7 +45,7 @@ class WWW_Limiter {
 		
 	}
 	
-	// Blocks the client if too many requests have been called per minute
+	// Blocks the user agent if too many requests have been called per minute
 	// * limit - Amount of requests that cannot be exceeded per minute
 	// * duration - Duration of how long the IP will be blocked if limit is exceeded
 	// Returns true if not limited, throws 403 page if limit exceeded, throws error if log file cannot be created
@@ -50,7 +54,7 @@ class WWW_Limiter {
 		// Limiter is only used if limit is set higher than 0 and request does not originate from the same server
 		if($limit!=0 && $_SERVER['REMOTE_ADDR']!=$_SERVER['SERVER_ADDR']){
 		
-			// Log filename is hashed clients IP
+			// Log filename is hashed user agents IP
 			$logFilename=md5($_SERVER['REMOTE_ADDR']);
 			// Subfolder name is derived from log filename
 			$cacheSubfolder=substr($logFilename,0,2);
@@ -88,7 +92,7 @@ class WWW_Limiter {
 								$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter'));
 								$this->logger->writeLog();
 							}
-							// Block file is created and 403 page thrown to the client
+							// Block file is created and 403 page thrown to the user agent
 							file_put_contents($this->logDir.$logFilename.'.tmp','BLOCKED');
 							// Returning proper header
 							header('HTTP/1.1 403 Forbidden');
@@ -133,25 +137,30 @@ class WWW_Limiter {
 		
 	}
 	
-	// Blocks clients request if server load is too high
-	// * limit - Server load that, if exceeded, causes the clients request to be blocked
+	// Blocks user agents request if server load is too high
+	// * limit - Server load that, if exceeded, causes the user agents request to be blocked
 	// Returns true if server load below limit, throws 503 page if load above limit
 	public function limitServerLoad($limit=80){
 	
 		// System load is checked only if limit is not set
 		if($limit!=0){
-			// Returns system load in the last 1, 5 and 15 minutes.
-			$load=sys_getloadavg();
-			// 503 page is returned if load is above limit
-			if($load[0]>$limit){
-				// Request is logged and can be used for performance review later
-				if($this->logger){
-					$this->logger->setCustomLogData(array('response-code'=>503,'category'=>'limiter'));
-					$this->logger->writeLog();
+			// This function does not return on Windows servers
+			if(function_exists('sys_getloadavg')){
+				// Returns system load in the last 1, 5 and 15 minutes.
+				$load=sys_getloadavg();
+				// 503 page is returned if load is above limit
+				if($load[0]>$limit){
+					// Request is logged and can be used for performance review later
+					if($this->logger){
+						$this->logger->setCustomLogData(array('response-code'=>503,'category'=>'limiter'));
+						$this->logger->writeLog();
+					}
+					// Returning 503 header
+					header('HTTP/1.1 503 Service Unavailable');
+					die();
 				}
-				// Returning 503 header
-				header('HTTP/1.1 503 Service Unavailable');
-				die();
+			} else {
+				return true;
 			}
 		}
 		
@@ -169,7 +178,7 @@ class WWW_Limiter {
 		if($blackList!=''){
 			// Exploding string of IP's into an array
 			$blackList=explode(',',$blackList);
-			// Checking if the client IP is set in blacklist array
+			// Checking if the user agent IP is set in blacklist array
 			if(!empty($blackList) && in_array($_SERVER['REMOTE_ADDR'],$blackList)){
 				// Request is logged and can be used for performance review later
 				if($this->logger){
@@ -187,13 +196,13 @@ class WWW_Limiter {
 		
 	}
 	
-	// Checks if client is authenticated and has provided HTTP credentials
+	// Checks if user agent is authenticated and has provided HTTP credentials
 	// * username - correct username for the request
 	// * password - correct password for the request
 	// Returns true if authorized, throws 401 error if incorrect credentials
 	public function limitUnauthorized($username,$password){
 	
-		// If provided username and password are not correct, then 401 page is displayed to the client
+		// If provided username and password are not correct, then 401 page is displayed to the user agent
 		if(!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$username || !isset($_SERVER['PHP_AUTH_PW']) || $_SERVER['PHP_AUTH_PW']!=$password){
 			// Request is logged and can be used for performance review later
 			if($this->logger){
@@ -211,17 +220,17 @@ class WWW_Limiter {
 		
 	}
 	
-	// Redirects the client to HTTPS or throws an error if HTTPS is not used
-	// * autoRedirect - If this is set to true, then system redirects client to HTTPS
-	// Returns true if on HTTPS, redirects the client or throws 401 page if not
+	// Redirects the user agent to HTTPS or throws an error if HTTPS is not used
+	// * autoRedirect - If this is set to true, then system redirects user agent to HTTPS
+	// Returns true if on HTTPS, redirects the user agent or throws 401 page if not
 	public function limitNonSecureRequests($autoRedirect=true){
 	
 		// HTTPS is detected from $_SERVER variables
 		if(!isset($_SERVER['HTTPS']) || ($_SERVER['HTTPS']!=1 && $_SERVER['HTTPS']!='on')){
-			// If auto redirect is on, client is forwarded by replacing the http:// protocol with https://
+			// If auto redirect is on, user agent is forwarded by replacing the http:// protocol with https://
 			if($autoRedirect){
 				// Redirecting to HTTPS address
-				header('Location: https://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']);
+				header('Location: https://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 			} else {
 				// Request is logged and can be used for performance review later
 				if($this->logger){

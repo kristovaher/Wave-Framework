@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 Minifier class
 
 Minifier is used to minify text data without breaking functionality of that text. This is useful to be 
@@ -9,6 +9,8 @@ applied to JavaScript, CSS Stylesheets, HTML and other text-based formats for pu
 file size smaller, thus increasing the performance when file is transferred over HTTP. You should be 
 careful when using minifier however, since it might break functionality under some instances, so it 
 is always good to test before deploying minified resources to live systems.
+
+* This class attempts to minify CSS, JavaScript, HTML and XML
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -60,6 +62,7 @@ class WWW_Minifier {
 		$data=preg_replace('/<!--.*?-->/i','',$data);
 		//Returning minified string
 		return $data;
+		
 	}
 	
 	// This function minifies JavaScript string
@@ -73,6 +76,7 @@ class WWW_Minifier {
 		$data=preg_replace('/<!--.*?-->/i','',$data);
 		//Returning minified string
 		return $data;
+		
 	}
 	
 }

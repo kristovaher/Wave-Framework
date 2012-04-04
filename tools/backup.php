@@ -1,12 +1,16 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 System backup creator
 
 This script creates backup of entire system together with filesystem or just a backup of the main core 
 files. The type of backup depends on GET variable. 'all' creates backup of everything, 'system' creates 
 backup of just the system files. Files are stored in /filesystem/backups/ folder.
+
+* Uses Zip extension to archive the files
+* Name of the archive is {Y-m-d-H-i-s}.zip.tmp (tmp forbids access over URL's, since WWW Framework does not allow requesting tmp files)
+* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -19,7 +23,7 @@ if(!isset($config['http-authentication-username']) || !isset($config['http-authe
 	header('WWW-Authenticate: Basic realm="Login"');
 	header('HTTP/1.1 401 Unauthorized');
 	echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
-	echo '<h2>Username and password need to be provided by the client</h2>';
+	echo '<h2>Username and password need to be provided by the user agent</h2>';
 	die();
 }
 

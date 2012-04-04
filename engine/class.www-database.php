@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 Database class
 
 Simple database class that has presently only support for MySQL. It is not required to use 
@@ -12,6 +12,7 @@ arrays as well as get information about last inserted ID and number of rows affe
 last query.
 
 * This currently supports MySQL, but other PDO drivers can be easily supported
+* MySQL, SQLite, PostgreSQL, Oracle, MS SQL supported
 
 Author and support: Kristo Vaher - kristo@waher.net
 */

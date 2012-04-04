@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 General use translations file
 
 This file stores system translations that can be used by view controller. Translations are 

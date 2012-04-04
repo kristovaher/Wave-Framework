@@ -1,13 +1,18 @@
 <?php
 
 /* 
-WWW - PHP micro-framework
+WWW Framework
 Index gateway data handler
 
 Index gateway data handler is in functionality similar to api handler, except it uses API calls that 
-cannot be controlled with direct request. It calls WWW_controller_url to solve a URL request 
-and it calls WWW_controller_view to display data to the client relevant to the request. Data is 
-loaded for every request that does not have a matched and found file as a response.
+cannot be controlled with direct request. It calls WWW_controller_url to solve a URL request and it 
+calls WWW_controller_view to display data to the user agent relevant to the request. This handler is 
+loaded when no other handlers can be used to solve the user agent request.
+
+* Used for web pages
+* Requires /resources/{language-code}.sitemap.php
+* Requires /resources/{language-code}.translations.php
+* Loads State and establishes database connection (if used)
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -22,7 +27,11 @@ Author and support: Kristo Vaher - kristo@waher.net
 
 	// This functions file is not required, but can be used for system wide functions
 	// If you want to include additional libraries, do so here
-	require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'functions.php');
+	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'functions.php')){
+		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'functions.php');
+	} else {
+		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'functions.php');
+	}
 
 	// If index URL cache is not configured, it is turned off by default
 	if(!isset($config['index-url-cache-timeout'])){
@@ -64,10 +73,10 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// If view data includes flags for redirection then the view itself will be ignored
 	if(!isset($viewData['www-temporary-redirect']) && !isset($viewData['www-permanent-redirect'])){
 		
-		// All the data sent by the client is stored in this variable
+		// All the data sent by the user agent is stored in this variable
 		$inputData=array();
 
-		// All the data sent by client is added here and merged into one array
+		// All the data sent by user agent is added here and merged into one array
 		if(isset($_POST) && !empty($_POST)){ 
 			$inputData+=$_POST; 
 		}

@@ -1,6 +1,6 @@
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 Module-specific JavaScript
 
 It is possible to load view specific Javascript, this file is included among HTML resources 

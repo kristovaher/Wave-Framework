@@ -1,12 +1,28 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 Server compatibility script
 
-This script checks if installation is ready for WWW Framework. It checks for PHP version, 
-whether Apache and mod_rewrite RewriteEngine is turned on and whether filesystem can be 
+This script checks if installation is ready for WWW Framework. It checks for PHP version, whether 
+Apache mod_rewrite RewriteEngine or Nginx URL rewriting is turned on and whether filesystem can be 
 written to.
+
+* PHP Version
+* Short Open Tag
+* XML extension
+* Zlib extension
+* APC extension
+* cURL extension or allow_url_fopen
+* PDO and PDO drivers
+* Fileinfo extension
+* Mcrypt extension
+* Zip extension
+* FTP extension
+* GD library extension
+* Apache, URL rewrites and .htaccess presence
+* Nginx and URL rewrites
+* Filesystem folder writability
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -51,7 +67,7 @@ $log[]='';
 		$log[]='WARNING: SimpleXML PHP extension is not supported, this is needed if API returns XML-formatted data, if XML is not used then this warning can be ignored';
 	}
 	
-// COMPRESSIONS
+// ZLIB
 	if(extension_loaded('Zlib')){
 		$log[]='SUCCESS: Zlib is supported';
 	} else {
@@ -158,27 +174,28 @@ $log[]='';
 // APACHE
 	if(strpos($_SERVER['SERVER_SOFTWARE'],'Apache')!==false){
 		$log[]='SUCCESS: Apache server is used';
+		
+		// APACHE URL REWRITES
+			if(file_exists('.htaccess')){
+				// .htaccess in this directory attempts to rewrite compatibility.php into compatibility.php?mod_rewrite_enabled and if this is successful then mod_rewrite must work
+				if(isset($_GET['mod_rewrite_enabled'])){
+					$log[]='SUCCESS: Apache mod_rewrite extension is supported';
+				} else {
+					$log[]='SUCCESS: Apache mod_rewrite extension is not supported, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+				}
+			} else {
+				$log[]='WARNING: Cannot test if mod_rewrite and RewriteEngine are enabled, .htaccess file is missing from /tools/ folder, this warning can be ignored if Index gateway is not used';
+			}
+			
+		// HTACCESS
+			if(file_exists('..'.DIRECTORY_SEPARATOR.'.htaccess')){
+				$log[]='SUCCESS: .htaccess file is present';
+			} else {
+				$log[]='WARNING: .htaccess file is missing from root folder, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+			}
+			
 	} else {
 		$log[]='WARNING: Your server is not Apache, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
-	}
-	
-// MOD_REWRITE
-	if(file_exists('.htaccess')){
-		// .htaccess in this directory attempts to rewrite compatibility.php into compatibility.php?mod_rewrite_enabled and if this is successful then mod_rewrite must work
-		if(isset($_GET['mod_rewrite_enabled'])){
-			$log[]='SUCCESS: Apache mod_rewrite extension is supported';
-		} else {
-			$log[]='SUCCESS: Apache mod_rewrite extension is not supported, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
-		}
-	} else {
-		$log[]='WARNING: Cannot test if mod_rewrite and RewriteEngine are enabled, .htaccess file is missing from /tools/ folder, this warning can be ignored if Index gateway is not used';
-	}
-	
-// HTACCESS
-	if(file_exists('..'.DIRECTORY_SEPARATOR.'.htaccess')){
-		$log[]='SUCCESS: .htaccess file is present';
-	} else {
-		$log[]='WARNING: .htaccess file is missing from root folder, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
 	}
 	
 	

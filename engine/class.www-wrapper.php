@@ -1,14 +1,17 @@
 <?php
 
 /*
-WWW - PHP micro-framework
-WWW API connnection class
+WWW Framework
+WWW API connnection wrapper class
 
 This class should be used when you wish to communicate with WWW Framework that is set up in another 
-server. This class is independent from WWW Framework itself and can be used by other servers alone.
+server. This class is independent from WWW Framework itself and can be used by other servers alone. 
+This class allows sending and receiving encrypted data as well as sending files and creating session 
+tokens in a system set up with WWW Framework.
 
-* Class requires cURL for POST requests, otherwise it falls back on GET requests through file_get_connect().
-* Outside connections must be allowed in server for this to be used.
+* cURL is used for requests by default. POST and file upload requests are only possible with cURL
+* If cURL is not enabled, then system falls back to GET requests only with file_get_contents() and file uploads are not possible
+* Outside connections must be allowed in server for this to be used with file_get_contents()
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -18,428 +21,604 @@ class WWW_Wrapper {
 	// HTTP address of WWW-Framework-based API
 	private $apiAddress;
 	
+	// API profile information
 	private $apiProfile=false;
-	private $secretKey=false;
-	private $apiEncryptionKey=false;
-	private $apiCommand=false;
+	private $apiSecretKey=false;
 	private $apiToken=false;
+	private $apiEncryptionKey=false;
 	
+	// Command to be run
+	private $apiCommand=false;
+	
+	// API settings
 	private $apiMinify=0;
 	private $apiCacheTimeout=0;
 	private $apiReturnDataType='json';
 	private $apiSerializer='json';
+	private $apiRequestReturnHash=false;
+	private $apiReturnValidTimestamp=10;
 	
+	// Input data
 	private $inputData=array();
 	private $cryptedData=array();
+	private $inputFiles=array();
 	
+	// State settings
 	private $curlEnabled=false;
-	private $debugMode=false;
 	private $log=array();
 	private $requestTimeout=10;
-	
-	private $userAgentString='WWWFramework/2.0.0';
 
-	public function __construct($apiAddress,$customUserAgent=false){
+	// API Address and custom user agent are assigned during object creation
+	// * apiAddress - Full URL is required, like http://www.example.com/www.api
+	// Object is created
+	public function __construct($apiAddress){
+		// This should be URL to API of WWW Framework
 		$this->apiAddress=$apiAddress;
+		// This checks for cURL support, which is required for making POST requests
+		// cURL is also faster than file_get_contents() method
 		if(extension_loaded('curl')){
+			// Flag is checked during request creation
 			$this->curlEnabled=true;
 		} elseif(ini_get('allow_url_fopen')!=1){
-			throw new Exception('PHP cannot make outside requests, please enable allow_url_fopen setting');
+			// If cURL is enabled, then file_get_contents() requires PHP setting to make requests to URL's
+			throw new Exception('PHP cannot make URL requests, please enable allow_url_fopen setting');
 		}
+		// Data is encoded with JSON by default, if that is not enabled then serialize() is used
 		if(!function_exists('json_encode')){
 			$this->apiSerializer='serialize';
 		}
-		if($customUserAgent){
-			$this->userAgentString=$customUserAgent;
-		}
 	}
 	
-	public function setDebugMode($flag){
-		if($flag){
-			$this->debugMode=true;
-			$this->log[]='Debug mode started';
-		} else {
-			$this->debugMode=false;
-			if(!empty($log)){
-				$log=array();
-			}
-		}
-	}
+	// SETTINGS
 	
-	public function setRequestTimeout($timeout=10){
-		if(is_numeric($timeout) && $timeout>0){
-			$this->requestTimeout=$timeout;
-			if($this->debugMode){
+		// This sets how long cURL will wait for response before failing with the request
+		// * timeout - Time in seconds
+		// Returns true
+		public function setRequestTimeout($timeout=10){
+			// Timeout value must be a number higher than 0
+			if(is_numeric($timeout) && $timeout>0){
+				$this->requestTimeout=$timeout;
 				$this->log[]='Request timeout set to '.$timeout.' seconds';
+			} else {
+				throw new Exception('Request timeout is not defined correctly, must be a number above 0');
 			}
-		} else {
-			throw new Exception('Request timeout is not defined correctly, must be a number above 0');
+			return true;
 		}
-	}
-	
-	public function returnLog(){
-		if($this->debugMode){
+		
+		// This function simply returns current log
+		// Function returns current log as an array
+		public function returnLog(){
 			$this->log[]='Returning log';
 			return $this->log;
-		} else {
-			throw new Exception('Cannot return log, debug mode is turned off');
 		}
-	}
+		
+		// This function simply clears current log
+		// Function returns true
+		public function clearLog(){
+			$this->log=array();
+			return true;
+		}
 	
 	// AUTHENTICATION
 	
-		public function setAuthentication($apiProfile=false,$apiSecretKey=false,$apiToken=false){
-			if($apiProfile && $apiSecretKey){
+		// This function sets current API profile and secret key
+		// * apiProfile - Current profile name, this must be defined in the receiving system /resources/api.profiles.php file
+		// * apiSecretKey - This is secret key of the used profile
+		// Returns true as long as profile and secret key are set
+		public function setAuthentication($apiProfile=false,$apiSecretKey=false){
+			// Requires non-empty strings
+			if($apiProfile && $apiSecretKey && $apiProfile!='' && $apiSecretKey!=''){
 				$this->apiProfile=$apiProfile;
 				$this->apiSecretKey=$apiSecretKey;
-				if($apiToken){
-					$this->apiToken=$apiToken;
-					if($this->debugMode){
-						$this->log[]='Authentication set to API profile "'.$apiProfile.'" with secret key: '.$apiSecretKey.' and roken:'.$apiToken;
-					}
-				} else {
-					if($this->debugMode){
-						$this->log[]='Authentication set to API profile "'.$apiProfile.'" with secret key: '.$apiSecretKey;
-					}
-				}
+				$this->log[]='Authentication set to API profile "'.$apiProfile.'" with secret key: '.$apiSecretKey;
 			} else {
-				throw new Exception('API profile name and secret key are missing for authentication');
+				throw new Exception('API profile name and secret key are incorrect for authentication');
 			}
+			return true;
 		}
 		
-		public function clearAuthentication(){
-			if(isset($this->inputData['www-profile'])){
-				if($this->debugMode){
-					$this->log[]='API profile, API secret key and API encryption key removed, public profile assumed';
-				}
-				$this->apiProfile=false;
-				$this->apiSecretKey=false;
+		// This sets current session token to be used
+		// * apiToken - Current token
+		// Returns true as long as token value is set
+		public function setToken($apiToken){
+			// Requires non-empty string
+			if($apiToken && $apiToken!=''){
+				$this->apiToken=$apiToken;
+				$this->log[]='API token set to: '.$apiToken;
+			} else {
+				throw new Exception('API token is incorrect for authentication');
 			}
+			return true;
+		}
+		
+		// This sets encryption key for data encryption
+		// * apiToken - Current token
+		// Returns true as long as token value is set
+		public function setEncryptionKey($encryptionKey){
+			// Requires non-empty string
+			if($encryptionKey && $encryptionKey!=''){
+				$this->apiEncryptionKey=$encryptionKey;
+				$this->log[]='API return data encryption key set to: '.$encryptionKey;
+			} else {
+				throw new Exception('Encryption key is incorrect for use');
+			}
+			return true;
+		}
+		
+		// This clears all authentication data
+		// Returns true
+		public function clearAuthentication(){
+			$this->log[]='API profile, API secret key and API token removed, public profile assumed';
+			$this->apiProfile=false;
+			$this->apiSecretKey=false;
+			return true;
+		}
+		
+		// This clears all authentication data
+		// Returns true
+		public function clearToken(){
+			$this->log[]='API token removed';
+			$this->apiToken=false;
+			return true;
+		}
+		
+		// This clears encryption key
+		// Returns true
+		public function clearEncryptionKey(){
+			$this->log[]='API return data encryption key unset';
+			$this->apiEncryptionKey=false;
+			return true;
 		}
 		
 	// INPUT
 		
-		public function setInput($input,$value){
+		// This populates input array either with an array of input or a key and a value
+		// * input - Can be an array or a key value of input
+		// * value - If input value is not an array, then this is what the input key will get as a value
+		public function setInput($input,$value=false){
+			// If this is an array then it populates input array recursively
 			if(is_array($input)){
 				foreach($input as $key=>$val){
-					$this->inputData[$key]=$val;
-					if($this->debugMode){
-						$this->log[]='Input value of "'.$key.'" set to: '.$val;
+					// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
+					$this->inputData[$key]=strval($val);
+					$this->log[]='Input value of "'.$key.'" set to: '.$val;
+				}
+			} else {
+				// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
+				$this->inputData[$input]=strval($value);
+				$this->log[]='Input value of "'.$input.'" set to: '.$value;
+			}
+			return true;
+		}
+		
+		// This populates crypted input array either with an array of input or a key and a value
+		// * input - Can be an array or a key value of input
+		// * value - If input value is not an array, then this is what the input key will get as a value
+		public function setCryptedInput($input,$value=false){
+			// If this is an array then it populates input array recursively
+			if(is_array($input)){
+				foreach($input as $key=>$val){
+					// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
+					$this->cryptedData[$key]=strval($val);
+					$this->log[]='Crypted input value of "'.$key.'" set to: '.$val;
+				}
+			} else {
+				// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
+				$this->cryptedData[$input]=strval($value);
+				$this->log[]='Crypted input value of "'.$input.'" set to: '.$value;
+			}
+			return true;
+		}
+		
+		// This sets file names and locations to be uploaded with the cURL request
+		// * file - Can be an array or a key value of file
+		// * location - If input value is not an array, then this is what the input file address is
+		public function setFile($file,$location=false){
+			// If this is an array then it populates input array recursively
+			if(is_array($file)){
+				foreach($file as $key=>$loc){
+					// File needs to exist in filesystem
+					if($loc && file_exists($loc)){
+						$this->inputFiles[$key]=$loc;
+						$this->log[]='Input file "'.$key.'" location set to: '.$loc;
+					} else {
+						throw new Exception('File location not defined or file does not exist in that location: '.$loc);
 					}
 				}
 			} else {
-				$this->inputData[$input]=$value;
-				if($this->debugMode){
-					$this->log[]='Input value of "'.$input.'" set to: '.$value;
+				// File needs to exist in filesystem
+				if($location && file_exists($location)){
+					$this->inputFiles[$file]=$location;
+					$this->log[]='Input file "'.$file.'" location set to: '.$location;
+				} else {
+					throw new Exception('File location not defined or file does not exist in that location: '.$location);
 				}
 			}
+			return true;
 		}
 		
-		public function setCryptedInput($input,$value){
-			if(is_array($input)){
-				foreach($input as $key=>$val){
-					$this->cryptedData[$key]=$val;
-					if($this->debugMode){
-						$this->log[]='Crypted input value of "'.$key.'" set to: '.$val;
-					}
-				}
-			} else {
-				$this->cryptedData[$input]=$value;
-				if($this->debugMode){
-					$this->log[]='Crypted input value of "'.$input.'" set to: '.$value;
-				}
-			}
-		}
-		
-		public function unsetInput(){
+		// This function simply deletes current input values
+		// Returns true
+		public function clearInput(){
 			$this->inputData=array();
 			$this->cryptedData=array();
-			if($this->debugMode){
-				$this->log[]='Input and crypted input values unset';
-			}
+			$this->inputFiles=array();
+			$this->log[]='Input and crypted input values unset';
+			return true;
 		}
 		
 	// API SETTINGS
 	
+		// This sets current API command
+		// * command - Correctly formed API command, for example 'example-get'
+		// Returns true if command is correctly formated
 		public function setCommand($command=false){
-			$command=strtolower(trim($command));
+			// Command must not be empty
 			if($command && $command!=''){
+				// Command is lowercased just in case
+				$command=strtolower(trim($command));
 				$this->apiCommand=$command;
-				if($this->debugMode){
-					$this->log[]='API command set to: '.$command;
-				}
+				$this->log[]='API command set to: '.$command;
 			} else {
 				throw new Exception('API command is incorrect');
 			}
+			return true;
+		}
+		
+		// This function sets the return type of API request, essentially what type of data is expected to be returned
+		// * type - Return type expected, either json, xml, html, rss, csv, js, css, vcard, ini, serializedarray, text or binary
+		// Returns true if correct type is used.
+		public function setReturnDataType($type){
+			// Making sure that type is lowercased
+			$type=strtolower(trim($type));
+			// Type has to be in supported format
+			if(in_array($type,array('json','xml','html','rss','csv','js','css','vcard','ini','serializedarray','text','binary'))){
+				$this->apiReturnDataType=$type;
+				$this->log[]='Returned data type set to: '.$type;
+			} else {
+				throw new Exception('This return data type is not supported: '.$type);
+			}
+			return true;
 		}
 	
+		// This sets the cache timeout value of API commands, if this is set to 0 then cache is never used
+		// Set this higher than 0 to requests that are expected to change less frequently
+		// * timeout - Time in seconds how old cache is allowed by this request
+		// Returns true if cache is a number
 		public function setCacheTimeout($timeout=0){
+			// Timeout value must be a number
 			if(is_numeric($timeout)){
 				$this->apiCacheTimeout=$timeout;
-				if($this->debugMode){
-					$this->log[]='Cache timeout set to '.$timeout.' seconds';
-				}
+				$this->log[]='Cache timeout set to '.$timeout.' seconds';
 			} else {
 				throw new Exception('API cache timeout is not defined correctly, must be a number');
 			}
+			return true;
 		}
 		
+		// This tells API to return minified results
+		// This only applies when returned data is XML, CSS, HTML or JavaScript
+		// * flag - Either true or false
+		// Returns true
 		public function setMinify($flag){
 			if($flag){
 				$this->apiMinify=1;
-				if($this->debugMode){
-					$this->log[]='API minification request for returned result is turned on';
-				}
+				$this->log[]='API minification request for returned result is turned on';
 			} else {
 				$this->apiMinify=0;
-				if($this->debugMode){
-					$this->log[]='API minification request for returned result is turned off';
-				}
+				$this->log[]='API minification request for returned result is turned off';
 			}
+			return true;
 		}
 		
-		public function setReturnDataType($type){
-			$type=strtolower(trim($type));
-			if(in_array($type,array('json','xml','html','rss','csv','js','css','vcard','ini','serializedarray','text','binary'))){
-				$this->apiReturnDataType=$type;
-				if($this->debugMode){
-					$this->log[]='Returned data type set to: '.$type;
-				}
+		// This tells API to also return a validation hash and timestamp for return data validation
+		// * flag - Either true or false
+		// Returns true
+		public function setRequestReturnHash($flag,$timestamp=10){
+			if($flag && $timestamp>0){
+				$this->apiRequestReturnHash=1;
+				$this->apiReturnValidTimestamp=$timestamp;
+				$this->log[]='API request will require a hash and timestamp validation from API';
 			} else {
-				throw new Exception('This return data type is not supported: '.$type);
-			}	
+				$this->apiRequestReturnHash=0;
+				$this->log[]='API request will not require a hash and timestamp validation from API';
+			}
+			return true;
 		}
 		
 	// SENDING REQUEST
 		
-		public function sendRequest($method='get',$unserialize=true){
+		// This is the main function for making the request
+		// This method builds a request string and then makes a request to API and attempts to fetch and parse the returned result
+		// * unserialize - Whether the result is automatically unserialized or not
+		public function sendRequest($unserialize=true){
 			
-			if($this->debugMode){
-				$this->log[]='Starting to build request';
-			}
+			// Log entry
+			$this->log[]='Starting to build request';
 		
+			// Correct request requires command to be set
 			if($this->apiCommand && $this->apiCommand!=''){
 				$this->inputData['www-command']=$this->apiCommand;
 			} else {
 				throw new Exception('API command is not defined');
 			}
 		
-			if($this->apiCacheTimeout>0){
-				$this->inputData['www-cache-timeout']=$this->apiCacheTimeout;
-			}
-			
-			if($this->apiMinify==1){
-				$this->inputData['www-minify']=1;
-			}
-			
+			// If return data type is anything except JSON, then it is defined in request string
 			if($this->apiReturnDataType!='json'){
 				$this->inputData['www-return-data-type']=$this->apiReturnDataType;
 			}
+			// If cache timeout is set above 0 then it is defined in request string
+			if($this->apiCacheTimeout>0){
+				$this->inputData['www-cache-timeout']=strval($this->apiCacheTimeout);
+			}
+			// If minification is set then it is defined in request string
+			if($this->apiMinify==1){
+				$this->inputData['www-minify']='1';
+			}
+			// If serializer is not JSON, then other serializer is defined in input string
+			if($this->apiSerializer!='json'){
+				$this->inputData['www-serializer']='serialize';
+			}
 		
+			// If API profile and secret key are set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
 			if($this->apiProfile && $this->apiSecretKey){
 			
-				if($this->debugMode){
-					$this->log[]='API profile set, hash authentication will be used';
+				// Log entry
+				$this->log[]='API profile set, hash authentication will be used';
+			
+				// If encryption key is set, then this is sent together with crypted data
+				if($this->apiEncryptionKey){
+					$this->cryptedData['www-crypt-output']=$this->apiEncryptionKey;
+				}
+			
+				// Non-public profile use also has to be defined in request string
+				$this->inputData['www-profile']=$this->apiProfile;
+				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
+				$this->inputData['www-timestamp']=strval(time());
+				
+				// If this is set, then API is requested to also return a timestamp and hash validation
+				if($this->apiRequestReturnHash==1){
+					$this->inputData['www-return-hash']='1';
 				}
 				
-				$this->inputData['www-timestamp']=time();
-				
-				$this->inputData['www-profile']=$this->apiProfile;
-				
+				// Token has to be provided for every request that is not a 'www-create-session' or 'www-destroy-session'
 				if(!$this->apiToken && $this->apiCommand!='www-create-session' && $this->apiCommand!='www-destroy-session'){
 					throw new Exception('Token is required for this request');
-				} else {
-					$apiToken='';
 				}
 		
+				// If crypted data array is populated, then this data is encrypted in www-crypt-input key
 				if(!empty($this->cryptedData)){
-					if(extension_loaded('mcrypt')){
-						if($this->apiSerializer=='json'){
-							$this->inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,$this->apiToken,json_encode($this->cryptedData),MCRYPT_MODE_CBC,md5($this->apiSecretKey)));
-							if($this->debugMode){
-								$this->log[]='Crypted input created using encryption key, JSON encoded input data and secret key';
+					// This is only possible if API token is set
+					if($this->apiToken){
+						// Mcrypt extension is required
+						if(extension_loaded('mcrypt')){
+							// Data is encrypted based on serializer method
+							if($this->apiSerializer=='json'){
+								$this->inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,$this->apiToken,json_encode($this->cryptedData),MCRYPT_MODE_CBC,md5($this->apiSecretKey)));
+								$this->log[]='Crypted input created using JSON encoded input data, token and secret key';
+							} else {
+								$this->inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,$this->apiToken,serialize($this->cryptedData),MCRYPT_MODE_CBC,md5($this->apiSecretKey)));
+								$this->log[]='Crypted input created using serialized input data, token and secret key';
 							}
 						} else {
-							$this->inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,$this->apiToken,serialize($this->cryptedData),MCRYPT_MODE_CBC,md5($this->apiSecretKey)));
-							if($this->debugMode){
-								$this->log[]='Crypted input created using encryption key, serialized input data and secret key';
-							}
-						}
-					} else {
-						if($this->debugMode){
-							$this->log[]='Mcrypt extension is required to use encrypted requests, this extension is not enabled, canceling request';
-						}
-						return false;
-					}
-				}
-				
-				ksort($this->inputData);
-				
-				if($this->apiSerializer=='json'){
-					$this->inputData['www-hash']=sha1(json_encode($this->inputData).$apiToken.$this->apiSecretKey);
-					if($this->debugMode){
-						$this->log[]='Validation hash created using JSON encoded input data and secret key';
-					}
-				} else {
-					$this->inputData['www-hash']=sha1(serialize($this->inputData).$apiToken.$this->apiSecretKey);
-					if($this->debugMode){
-						$this->log[]='Validation hash created using serialized input data and secret key';
-					}
-				}
-				
-			} elseif($this->debugMode){
-				$this->log[]='API profile is not set, using public profile';
-			}
-			
-			switch(strtolower($method)){
-				case 'get':
-					$url=$this->apiAddress.'?'.http_build_query($this->inputData);
-					if(strlen($url<=8192)){
-						if($this->curlEnabled){
-							if($this->debugMode){
-								$this->log[]='Making GET request to API using cURL to URL: '.$url;
-							}
-							$cURL=curl_init();
-							if(isset($_SERVER['SCRIPT_URI'])){
-								curl_setopt($cURL,CURLOPT_REFERER,$_SERVER['SCRIPT_URI']);
-							}
-							curl_setopt($cURL,CURLOPT_URL,$url);
-							curl_setopt($cURL,CURLOPT_HTTPGET,true);
-							curl_setopt($cURL,CURLOPT_TIMEOUT,$this->requestTimeout);
-							if($this->userAgentString!=''){
-								curl_setopt($cURL,CURLOPT_USERAGENT,$this->userAgentString);
-							}
-							curl_setopt($cURL,CURLOPT_HEADER,false);
-							curl_setopt($cURL,CURLOPT_RETURNTRANSFER,true);
-							curl_setopt($cURL,CURLOPT_FOLLOWLOCATION,false);
-							curl_setopt($cURL,CURLOPT_COOKIESESSION,true);
-							curl_setopt($cURL,CURLOPT_SSL_VERIFYPEER,false);
-							$result=curl_exec($cURL);
-							curl_close($cURL);
-							if(!$result){
-								if($this->debugMode){
-									$this->log[]='cURL GET request to failed';
-								}
-								return false;
-							}
-						} else {
-							if($this->debugMode){
-								$this->log[]='Making GET request to API using file-get-contents to URL: '.$url;
-							}
-							if(!$result=file_get_contents($url)){
-								if($this->debugMode){
-									$this->log[]='File-get-contents GET request to failed';
-								}
-								return false;
-							}
-						}
-					} else {
-						if($this->debugMode){
-							$this->log[]='Data sent is too large for a GET request, attempted to send '.strlen($url).' bytes but maximum allowed is 8192 bytes';
-						}
-						return false;
-					}
-					break;
-				case 'post':
-					if($this->curlEnabled){
-						if($this->debugMode){
-							$this->log[]='Making POST request to API using cURL to URL '.$this->apiAddress.' with data: '.serialize($this->inputData);
-						}
-						$cURL=curl_init();
-						if(isset($_SERVER['SCRIPT_URI'])){
-							curl_setopt($cURL,CURLOPT_REFERER,$_SERVER['SCRIPT_URI']);
-						}
-						curl_setopt($cURL,CURLOPT_URL,$this->apiAddress);
-						curl_setopt($cURL,CURLOPT_POST,true);
-						//File upload in POST should be in CURLOPT_POSTFIELDS as "file_box"=>"@/path/to/myfile.jpg"
-						curl_setopt($cURL,CURLOPT_POSTFIELDS,$this->inputData);
-						curl_setopt($cURL,CURLOPT_TIMEOUT,$this->requestTimeout);
-						if($this->userAgentString!=''){
-							curl_setopt($cURL,CURLOPT_USERAGENT,$this->userAgentString);
-						}
-						curl_setopt($cURL,CURLOPT_HEADER,false);
-						curl_setopt($cURL,CURLOPT_RETURNTRANSFER,true);
-						curl_setopt($cURL,CURLOPT_FOLLOWLOCATION,false);
-						curl_setopt($cURL,CURLOPT_COOKIESESSION,true);
-						curl_setopt($cURL,CURLOPT_SSL_VERIFYPEER,false);
-						$result=curl_exec($cURL);
-						curl_close($cURL);
-						if(!$result){
-							if($this->debugMode){
-								$this->log[]='cURL GET request to failed';
-							}
+							throw new Exception('Mcrypt extension is required to use encrypted input');
 							return false;
 						}
-					
 					} else {
-						if($this->debugMode){
-							$this->log[]='POST method requires cURL support in the server, this extension is not enabled';
-						}
+						throw new Exception('API token is required for encrypted input data');
 						return false;
 					}
-					break;
-				default:
-					if($this->debugMode){
-						$this->log[]='This request method is not supported: '.$method;
-					}
-					return false;
-					break;
+				}
+				
+				// Input data has to be sorted based on key
+				ksort($this->inputData);
+				
+				// Validation hash is generated based on current serialization option
+				if($this->apiSerializer=='json'){
+					$this->inputData['www-hash']=sha1(json_encode($this->inputData).$this->apiToken.$this->apiSecretKey);
+					$this->log[]='Validation hash created using JSON encoded input data and secret key';
+				} else {
+					$this->inputData['www-hash']=sha1(serialize($this->inputData).$this->apiToken.$this->apiSecretKey);
+					$this->log[]='Validation hash created using serialized input data and secret key';
+				}
+				
+			} else {
+				$this->log[]='API profile is not set, using public profile';
+			
+				// If encryption key is set, then this is sent together with input data string
+				if($this->apiEncryptionKey){
+					$this->inputData['www-crypt-output']=$this->apiEncryptionKey;
+				}
+				
 			}
 			
-			if($result){
+			// MAKING A REQUEST
 			
-				if($this->debugMode){
-					$this->log[]='Result of request: '.$result;
+				// Building the request URL
+				$requestURL=$this->apiAddress.'?'.http_build_query($this->inputData);
+				
+				// Get request is made if the URL is shorter than 2048 bytes (2KB).
+				// While servers can easily handle 8KB of data, servers are recommended to be vary if the request is longer than 2KB
+				if(strlen($requestURL)<=2048 && empty($this->inputFiles)){
+				
+					// cURL is used unless it is not supported on the server
+					if($this->curlEnabled){
+					
+						// Log entry
+						$this->log[]='Making GET request to API using cURL to URL: '.$requestURL;
+						
+						// Initializing cURL object
+						$cURL=curl_init();
+						// Setting cURL options
+						$requestOptions=array(
+							CURLOPT_URL=>$requestURL,
+							CURLOPT_REFERER=>((!isset($_SERVER['HTTPS']) || ($_SERVER['HTTPS']!=1 && $_SERVER['HTTPS']!='on'))?'http://':'https://').$_SERVER['HTTP_HOST'].'/'.$_SERVER['REQUEST_URI'],
+							CURLOPT_HTTPGET=>true,
+							CURLOPT_TIMEOUT=>$this->requestTimeout,
+							CURLOPT_USERAGENT=>'WWWFramework/2.0.0',
+							CURLOPT_HEADER=>false,
+							CURLOPT_RETURNTRANSFER=>true,
+							CURLOPT_FOLLOWLOCATION=>false,
+							CURLOPT_COOKIESESSION=>true,
+							CURLOPT_SSL_VERIFYPEER=>false
+						);
+						// Assigning options to cURL object
+						curl_setopt_array($cURL,$requestOptions);
+						// Executing the request
+						$result=curl_exec($cURL);
+						
+						// Returning false if the request failed
+						if(!$result){
+							$this->log[]='cURL GET request to failed: '.curl_error($cURL);
+							// Closing the resource
+							curl_close($cURL);
+							return false;
+						}
+						
+						// Closing the resource
+						curl_close($cURL);
+						
+					} else {
+					
+						// GET request an also be made by file_get_contents()
+						$this->log[]='Making GET request to API using file-get-contents to URL: '.$requestURL;
+						if(!$result=file_get_contents($requestURL)){
+							$this->log[]='File-get-contents GET request to failed';
+							return false;
+						}
+						
+					}
+					
+				} else {
+				
+					// cURL is used unless it is not supported on the server
+					if($this->curlEnabled){
+					
+						// Log entry
+						$this->log[]='Making POST request to API using cURL to URL '.$this->apiAddress.' with data: '.serialize($this->inputData);
+						
+						// If files are to be uploaded
+						if(!empty($this->inputFiles)){
+							foreach($this->inputFiles as $file=>$location){
+								$this->log[]='Attaching a file '.$location.' to request';
+								$this->inputData[$file]='@'.$location;
+							}
+						}
+
+						// Initializing cURL object
+						$cURL=curl_init();
+						// Setting cURL options
+						$requestOptions=array(
+							CURLOPT_URL=>$requestURL,
+							CURLOPT_REFERER=>((!isset($_SERVER['HTTPS']) || ($_SERVER['HTTPS']!=1 && $_SERVER['HTTPS']!='on'))?'http://':'https://').$_SERVER['HTTP_HOST'].'/'.$_SERVER['REQUEST_URI'],
+							CURLOPT_POST=>true,
+							CURLOPT_POSTFIELDS=>$this->inputData,
+							CURLOPT_TIMEOUT=>$this->requestTimeout,
+							CURLOPT_USERAGENT=>'WWWFramework/2.0.0',
+							CURLOPT_HEADER=>false,
+							CURLOPT_RETURNTRANSFER=>true,
+							CURLOPT_FOLLOWLOCATION=>false,
+							CURLOPT_COOKIESESSION=>true,
+							CURLOPT_SSL_VERIFYPEER=>false
+						);
+						// Assigning options to cURL object
+						curl_setopt_array($cURL,$requestOptions);
+						// Executing the request
+						$result=curl_exec($cURL);
+						
+						// Returning false if the request failed
+						if(!$result){
+							$this->log[]='cURL GET request to failed: '.curl_error($cURL);
+							// Closing the resource
+							curl_close($cURL);
+							return false;
+						}
+						
+						// Closing the resource
+						curl_close($cURL);
+					
+					} else {
+						$this->log[]='POST method requires cURL support in the server, this extension is not enabled';
+						return false;
+					}
 				}
+				
+			// PARSING REQUEST RESULT
+				
+				// Log entry
+				$this->log[]='Result of request: '.$result;
+				
+				// If requested data was encrypted, then this attempts to decrypt the data
+				if($this->apiEncryptionKey){
+					if($this->apiSecretKey){
+						// If secret key was set, then decryption uses the secret key for initialization vector
+						$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,$this->apiEncryptionKey,base64_decode($result),MCRYPT_MODE_CBC,md5($this->apiSecretKey));
+					} else {
+						// Without secret key the system assumes that public profile is used and decryption is done in ECB mode
+						$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,$this->apiEncryptionKey,base64_decode($result),MCRYPT_MODE_ECB);
+					}
+					if($result){
+						$result=trim($result);
+						$this->log[]='Result of decrypted request: '.$result;
+					} else {
+						$this->log[]='Decryption has failed';
+						return false;
+					}
+				}
+				
+			// PARSING REQUEST RESULT
 			
+				// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
 				if($this->apiReturnDataType=='json' && $unserialize){
+					// JSON supportis required
 					if(function_exists('json_decode')){
 						$return=json_decode($result,true);
 						if($return==null){
-							if($this->debugMode){
-								$this->log[]='Cannot JSON decode data string';
-							}
+							$this->log[]='Cannot JSON decode data string';
 							return false;
 						} else {
-							if($this->debugMode){
-								$this->log[]='Returning JSON decoded result';
-							}
-							return $return;
+							$this->log[]='Returning JSON decoded result';
 						}
 					} else {
-						if($this->debugMode){
-							$this->log[]='JSON is not supported on the server, cannot decode JSON response';
-						}
+						$this->log[]='JSON is not supported on the server, cannot decode JSON response';
 						return false;
 					}
 				} else if($this->apiReturnDataType=='serializedarray' && $unserialize){
+					// Return data is unserialized
 					$return=unserialize($result,true);
 					if(!$return){
-						if($this->debugMode){
-							$this->log[]='Cannot unserialize data string';
-						}
+						$this->log[]='Cannot unserialize data string';
 						return false;
 					} else {
-						if($this->debugMode){
-							$this->log[]='Returning unserialized result';
-						}
-						return $return;
+						$this->log[]='Returning unserialized result';
+					}
+				} else if($this->apiReturnDataType=='querystring' && $unserialize){
+					// Return data is filtered through string parsing and url decoding to create return array
+					$return=parse_str(urldecode($result),$return);
+					if(!$return){
+						$this->log[]='Cannot parse query data string';
+						return false;
+					} else {
+						$this->log[]='Returning parsed query string result';
 					}
 				} else if($unserialize){
-					if($this->debugMode){
-						$this->log[]='Cannot unserialize this return data type: '.$this->apiReturnDataType;
-					}
+					// Every other unserialization attempt fails
+					$this->log[]='Cannot unserialize this return data type: '.$this->apiReturnDataType;
 					return false;
 				} else {
-					if($this->debugMode){
-						$this->log[]='Returning result';
-					}
-					return $result;
+					// Data is simply returned if serialization was not requested
+					$this->log[]='Returning result';
 				}
-			
-			} else {
-				return false;
-			}
+				
+			// RESULT VALIDATION
+				
+				// If it was requested that validation hash and timestamp are also returned
+				if($this->apiRequestReturnHash){
+					//$this->apiReturnValidTimestamp;
+				}
+				
+			// Returning request result
+			return $return;
 			
 		}
 

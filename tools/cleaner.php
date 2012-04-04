@@ -1,18 +1,20 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 Filesystem cleaner
 
-This script is used to clear WWW system generated cache. It should be used for debugging
-purposes during development. This script can be configured by running it with a GET variable. 
-Possible values are 'all' (clears everything), 'output' (clears /filesystem/cache/output/), 
-'images' (clears images cache), 'resources' (clears cache of JavaScript and CSS), 
-'limiter' (clears request data of client IP's), 'log' (clears system log), 'sessions' 
-(clears API session tokens), 'tmp' (clears folder from everything that might be stored 
-here). The only folders of /filesystem/ this script cannot touch are /userdata/ (meant 
-for various user-uploaded files) /keys/ (meant for various keys and certificates for 
-e-payment systems) and /data/ (meant for databases, like SQLite).
+This script is used to clear WWW system generated cache. It should be used for debugging purposes 
+during development. This script can be configured by running it with a GET variable. Possible 
+values are 'all' (clears everything), 'output' (clears /filesystem/cache/output/), 'images' 
+(clears images cache), 'resources' (clears cache of JavaScript and CSS), 'limiter' (clears 
+request data of user agent IP's), 'logs' (clears system logs), 'sessions' (clears API session 
+tokens), 'tmp' (clears folder from everything that might be stored here). The only folders of 
+/filesystem/ this script cannot touch are /userdata/ (meant for various user-uploaded files) 
+/keys/ (meant for various keys and certificates for e-payment systems) and /data/ (meant for 
+databases, like SQLite).
+
+* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -25,7 +27,7 @@ if(!isset($config['http-authentication-username']) || !isset($config['http-authe
 	header('WWW-Authenticate: Basic realm="Login"');
 	header('HTTP/1.1 401 Unauthorized');
 	echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
-	echo '<h2>Username and password need to be provided by the client</h2>';
+	echo '<h2>Username and password need to be provided by the user agent</h2>';
 	die();
 }
 
@@ -67,7 +69,7 @@ if(isset($_GET['all']) || isset($_GET['resources'])){
 	$log=array_merge($log,dirCleaner($directory));
 }
 
-// Clears request data of client IP's
+// Clears request data of user agent IP's
 if(isset($_GET['all']) || isset($_GET['limiter'])){
 	$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'limiter'.DIRECTORY_SEPARATOR;
 	$log=array_merge($log,dirCleaner($directory));

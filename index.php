@@ -1,51 +1,19 @@
 <?php
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-error_reporting(E_ALL);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* 
-WWW - PHP micro-framework
+WWW Framework
 Index gateway
 
 Index gateway is a file where majority of requests are forwarded by Apache and /.htaccess file. 
 This file serves caches and compresses data, if supported, for both static files as well 
 as regular views. It also displays errors for files not found or files that are forbidden to 
 be accessed. Handlers for Index gateway are stored in /engine/ subfolder.
+
+* Request limiter checks
+* Loads state and loggers
+* Loads API handler and data handler
+* Loads files, resources and images through handlers
+* Loads robots.txt and sitemap.xml through handlers
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -66,7 +34,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	$resourceRequest=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR,$_SERVER['DOCUMENT_ROOT'].$resourceAddress);
 	// Getting directory, filename and extension information about current resource address
 	$resourceInfo=pathinfo($resourceRequest);
-	// Solving the folder that client is loading resource from
+	// Solving the folder that user agent is loading resource from
 	$resourceFolder=$resourceInfo['dirname'].DIRECTORY_SEPARATOR;
 	// Assigning file information
 	$resourceFile=$resourceInfo['basename'];
@@ -124,9 +92,9 @@ Author and support: Kristo Vaher - kristo@waher.net
 		if(isset($config['blacklist-limiter']) && $config['blacklist-limiter']!=''){
 			$limiter->limitBlacklisted($config['blacklist-limiter']);
 		}
-		// If HTTPS limiter is used, the ststem returns a 401 error if the client attempts to access the site without HTTPS
+		// If HTTPS limiter is used, the ststem returns a 401 error if the user agent attempts to access the site without HTTPS
 		if(isset($config['https-limiter']) && $config['https-limiter']==true){
-			$limiter->limitNonSecureRequests(); // By default the client is redirected to HTTPS address of the same request
+			$limiter->limitNonSecureRequests(); // By default the user agent is redirected to HTTPS address of the same request
 		}
 		// If HTTP authentication is turned on, the system checks for credentials and returns 401 if failed
 		if(isset($config['http-authentication-limiter']) && $config['http-authentication-limiter']==true){

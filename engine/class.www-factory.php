@@ -1,35 +1,29 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 Factory class
 
-One of the three main files of the framework, this file is always required. WWW_Factory is 
-used as factory class for supporting the MVC components of the system, every MVC component 
-is (usually) inherited from WWW_Factory. Note that this is not required, you can develop 
-controllers that are not inherited from WWW_Factory.
+Factory class is required for MVC objects. Factory is used as factory class for supporting the 
+MVC components of the system, every MVC component is (usually) inherited from this class. Factory
+carries with itself currently used API.
 
 * Factory can dynamically load and return new classes of its own per demand
-* All child classes can access system state and API objects as well as make database requests
+* All child classes can access system state and API objects
+* Factory also acts as a wrapper for database calls
+* Factory also allows loading of API Wrapper for communicating with other WWW Framework API's
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
 
 class WWW_Factory {
 
-	// API and State objects are stored here
+	// API object is stored here
 	private $WWW_API=false;
-	private $WWW_State=false;
 
 	// When a model, view or controller is created, it can be loaded with existing state or API
-	// * state - WWW_State object
 	// * api - WWW_API object
-	final public function __construct($state=false,$api=false){
-	
-		// State is passed to the object, if defined
-		if($state){ 
-			$this->WWW_State=$state; 
-		}
+	final public function __construct($api=false){
 		// API is passed to the object, if defined
 		if($api){ 
 			$this->WWW_API=$api; 
@@ -38,7 +32,6 @@ class WWW_Factory {
 		if(method_exists($this,'__initialize')){
 			$this->__initialize();
 		}
-		
 	}
 	
 	// Factory created objects can make API calls
@@ -60,12 +53,28 @@ class WWW_Factory {
 		return $this->WWW_API->command($inputData,$useBuffer,false);
 	}
 	
+	// This function returns API wrapper for external API connections
+	// * address - Address of the API file
+	// * userAgent - Custom user agent string
+	final public function externalApi($address,$userAgent=false){
+		// Address is required
+		if($address && $address!=''){
+			if(!class_exists('WWW_Wrapper') && file_exists(__DIR__.DIRECTORY_SEPARATOR.'class.www-factory.php')){
+				require(__DIR__.DIRECTORY_SEPARATOR.'class.www-wrapper.php');
+			}
+			// Returning new Wrapper object
+			return new WWW_Wrapper($address,$userAgent);
+		} else {
+			return false;
+		}
+	}
+	
 	// Returns data from State objects data array
 	// * variable - variable name of State
 	// * subvariable - subvariable of State
 	// Returns requested variable, otherwise returns false
 	final public function getState($variable=false,$subvariable=false){
-		return $this->WWW_State->getState($variable,$subvariable);
+		return $this->WWW_API->state->getState($variable,$subvariable);
 	}
 	
 	// Sets data for State objects data array
@@ -73,7 +82,7 @@ class WWW_Factory {
 	// * value - Value to be set
 	// If variable was set, this function always returns true
 	final public function setState($variable,$value=true){
-		return $this->WWW_State->setState($variable,$value);
+		return $this->WWW_API->state->setState($variable,$value);
 	}
 	
 	// Factory function for loading a class and returning an object or a specific function of that object
@@ -89,12 +98,12 @@ class WWW_Factory {
 		// It's made sure that the class has not already been defined
 		if(!class_exists($className)){
 			// Class file can be loaded from /overrides/ directories, if set
-			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php')){
+			if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php')){
 				// Requiring override file
-				require($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php');
-			} elseif(file_exists($this->WWW_State->data['system-root'].'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php')){
+				require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php');
+			} elseif(file_exists($this->WWW_API->state->data['system-root'].'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php')){
 				// Requiring original file
-				require($this->WWW_State->data['system-root'].'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php');
+				require($this->WWW_API->state->data['system-root'].'models'.DIRECTORY_SEPARATOR.'class.'.$model.'.php');
 			} else {
 				// Error is thrown if class was not found
 				throw new Exception('Model ['.$model.'] does not exist');
@@ -104,10 +113,10 @@ class WWW_Factory {
 		// Object is returned if no specific method name is called
 		if(!$methodName){
 			// If method name was not defined then this function returns the entire class with current State and API set
-			return new $className($this->WWW_State,$this->WWW_API);
+			return new $className($this->WWW_API->state,$this->WWW_API);
 		} else {
 			// If method name was set, then this function creates a new temporary object
-			$tempObject=new $className($this->WWW_State,$this->WWW_API);
+			$tempObject=new $className($this->WWW_API->state,$this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
 			if(method_exists($tempObject,$methodName)){
 				return $tempObject->$methodName($methodData);
@@ -132,12 +141,12 @@ class WWW_Factory {
 		// It's made sure that the class has not already been defined
 		if(!class_exists($className)){
 			// Class file can be loaded from /overrides/ directories, if set
-			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php')){
+			if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php')){
 				// Requiring override file
-				require($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php');
-			} elseif(file_exists($this->WWW_State->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php')){
+				require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php');
+			} elseif(file_exists($this->WWW_API->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php')){
 				// Requiring original file
-				require($this->WWW_State->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php');
+				require($this->WWW_API->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$controller.'.php');
 			} else {
 				// Error is thrown if class was not found
 				throw new Exception('Controller ['.$controller.'] does not exist');
@@ -147,10 +156,10 @@ class WWW_Factory {
 		// Object is returned if no specific method name is called
 		if(!$methodName){
 			// If method name was not defined then this function returns the entire class with current State and API set
-			return new $className($this->WWW_State,$this->WWW_API);
+			return new $className($this->WWW_API->state,$this->WWW_API);
 		} else {
 			// If method name was set, then this function creates a new temporary object
-			$tempObject=new $className($this->WWW_State,$this->WWW_API);
+			$tempObject=new $className($this->WWW_API->state,$this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
 			if(method_exists($tempObject,$methodName)){
 				return $tempObject->$methodName($methodData);
@@ -175,12 +184,12 @@ class WWW_Factory {
 		// It's made sure that the class has not already been defined
 		if(!class_exists($className)){
 			// Class file can be loaded from /overrides/ directories, if set
-			if(file_exists($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php')){
+			if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php')){
 				// Requiring override file
-				require($this->WWW_State->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php');
-			} elseif(file_exists($this->WWW_State->data['system-root'].'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php')){
+				require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php');
+			} elseif(file_exists($this->WWW_API->state->data['system-root'].'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php')){
 				// Requiring original file
-				require($this->WWW_State->data['system-root'].'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php');
+				require($this->WWW_API->state->data['system-root'].'views'.DIRECTORY_SEPARATOR.'class.'.$view.'.php');
 			} else {
 				// Error is thrown if class was not found
 				throw new Exception('View ['.$view.'] does not exist');
@@ -190,10 +199,10 @@ class WWW_Factory {
 		// Object is returned if no specific method name is called
 		if(!$methodName){
 			// If method name was not defined then this function returns the entire class with current State and API set
-			return new $className($this->WWW_State,$this->WWW_API);
+			return new $className($this->WWW_API->state,$this->WWW_API);
 		} else {
 			// If method name was set, then this function creates a new temporary object
-			$tempObject=new $className($this->WWW_State,$this->WWW_API);
+			$tempObject=new $className($this->WWW_API->state,$this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
 			if(method_exists($tempObject,$methodName)){
 				return $tempObject->$methodName($methodData);
@@ -210,7 +219,7 @@ class WWW_Factory {
 	// * variables - array of variables to use in prepared statement
 	// Returns result of that query
 	final public function dbSingle($query,$variables=array()){
-		return $this->state->databaseConnection->single($query,$variables);
+		return $this->WWW_API->state->databaseConnection->single($query,$variables);
 	}
 	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class
@@ -218,7 +227,7 @@ class WWW_Factory {
 	// * variables - array of variables to use in prepared statement
 	// Returns result of that query
 	final public function dbMultiple($query,$variables=array()){
-		return $this->state->databaseConnection->multiple($query,$variables);
+		return $this->WWW_API->state->databaseConnection->multiple($query,$variables);
 	}
 	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class
@@ -226,37 +235,37 @@ class WWW_Factory {
 	// * variables - array of variables to use in prepared statement
 	// Returns result of that query
 	final public function dbCommand($query,$variables=array()){
-		return $this->state->databaseConnection->command($query,$variables);
+		return $this->WWW_API->state->databaseConnection->command($query,$variables);
 	}
 	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class
 	// Returns result of that call
 	final public function dbLastId(){
-		return $this->state->databaseConnection->lastId();
+		return $this->WWW_API->state->databaseConnection->lastId();
 	}
 	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class
 	// Returns result of that call
 	final public function dbTransaction(){
-		return $this->state->databaseConnection->beginTransaction();
+		return $this->WWW_API->state->databaseConnection->beginTransaction();
 	}
 	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class
 	// Returns result of that call
 	final public function dbRollback(){
-		return $this->state->databaseConnection->rollbackTransaction();
+		return $this->WWW_API->state->databaseConnection->rollbackTransaction();
 	}
 	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class
 	// Returns result of that call
 	final public function dbCommit(){
-		return $this->state->databaseConnection->commitTransaction();
+		return $this->WWW_API->state->databaseConnection->commitTransaction();
 	}
 	
 	// This simply allows to call WWW_Database function from the object itself, routed through database class
 	// Returns result of that call
 	final public function dbPDO(){
-		return $this->state->databaseConnection->pdo;
+		return $this->WWW_API->state->databaseConnection->pdo;
 	}
 
 }

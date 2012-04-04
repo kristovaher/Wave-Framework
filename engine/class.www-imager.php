@@ -1,12 +1,17 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 Image editor class
 
 This class is used to handle basic image editing, mostly for file resizes and cropping. This 
-is used by default by Index gateway when a PNG or JPEG file is requested with specific
-parameters, but can also be used for other image editing in the system.
+is used by default by Index gateway when a PNG or JPEG file is requested with specific parameters, 
+but can also be used for other image editing in the system since it can be loaded independently.
+
+* Image resizing
+* Image positioning
+* Image filtering
+* Basic layering of filters
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
@@ -103,7 +108,7 @@ class WWW_Imager {
 			}
 		}
 		
-		// It output location is set, then file is stored in filesystem. If not set, then output is sent to client.
+		// It output location is set, then file is stored in filesystem. If not set, then output is sent to user agent.
 		if($location){
 		
 			// Different file types have different compression levels for quality

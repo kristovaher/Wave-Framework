@@ -8,8 +8,12 @@ general Javascript functionality. This controller adds some useful functionality
 websites, such as an AJAX controller that connects to API and parses the data from that 
 file, as well as a hidden iFrame form submitting function that can be used for situations 
 where AJAX cannot be used (such as when submitting files in background). Please note that 
-ajax() and form() functions listed in this Javascript require some variables defined by 
-WWW_controller_view class HTML header.
+ajax() and form() functions listed in this Javascript require some variables defined in 
+View controller class, such as location of API script.
+
+* Callback functions, if www-callback is returned in API
+* AJAX API connection
+* Hidden iFrame and form based API connection (can be used for uploading files)
 
 Author and support: Kristo Vaher - kristo@waher.net
 */

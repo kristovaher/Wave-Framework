@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW - PHP micro-framework
+WWW Framework
 MVC View class
 
 This view is loaded when WWW_controller_view finds root or home page as the view file. Name 

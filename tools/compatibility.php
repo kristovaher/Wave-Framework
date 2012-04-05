@@ -43,13 +43,13 @@ $log[]='';
 // PHP VERSION
 	$phpVersion=phpversion();
 	if($phpVersion){
-		if(version_compare($phpVersion,'5.3.0')>=0){
-			$log[]='SUCCESS: PHP is running version 5.3 or newer';
+		if(version_compare($phpVersion,'5.3.3')>=0){
+			$log[]='SUCCESS: PHP is running version 5.3.3 or newer';
 		} else {
-			$log[]='FAILURE: PHP is running older version than 5.3, WWW Framework has not been tested on older versions of PHP';
+			$log[]='FAILURE: PHP is running older version than 5.3.3, WWW Framework has not been tested on older versions of PHP';
 		}
 	} else {
-		$log[]='WARNING: Unable to detect PHP version number, WWW Framework requires PHP version 5.3 or above';
+		$log[]='WARNING: Unable to detect PHP version number, WWW Framework requires PHP version 5.3.3 or above';
 	}
 	
 // SHORT OPEN TAG

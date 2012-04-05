@@ -7,7 +7,8 @@ WWW API connnection wrapper class
 This class should be used when you wish to communicate with WWW Framework that is set up in another 
 server. This class is independent from WWW Framework itself and can be used by other servers alone. 
 This class allows sending and receiving encrypted data as well as sending files and creating session 
-tokens in a system set up with WWW Framework.
+tokens in a system set up with WWW Framework. This class also requires PHP 5.3.3 or newer due to 
+has validations with JSON encoded string and numeric conversions.
 
 * cURL is used for requests by default. POST and file upload requests are only possible with cURL
 * If cURL is not enabled, then system falls back to GET requests only with file_get_contents() and file uploads are not possible
@@ -33,8 +34,7 @@ class WWW_Wrapper {
 	// API settings
 	private $apiMinify=0;
 	private $apiCacheTimeout=0;
-	private $apiReturnDataType='json';
-	private $apiSerializer='json';
+	private $apiReturnType='json';
 	private $apiRequestReturnHash=false;
 	private $apiReturnValidTimestamp=10;
 	
@@ -63,9 +63,9 @@ class WWW_Wrapper {
 			// If cURL is enabled, then file_get_contents() requires PHP setting to make requests to URL's
 			throw new Exception('PHP cannot make URL requests, please enable allow_url_fopen setting');
 		}
-		// Data is encoded with JSON by default, if that is not enabled then serialize() is used
-		if(!function_exists('json_encode')){
-			$this->apiSerializer='serialize';
+		// JSON is required with JSON_NUMERIC_CHECK option
+		if(!function_exists('json_encode') || !defined('JSON_NUMERIC_CHECK')){
+			throw new Exception('JSON with automatic numeric check is required for API requests to work properly');
 		}
 	}
 	
@@ -109,6 +109,7 @@ class WWW_Wrapper {
 			// Requires non-empty strings
 			if($apiProfile && $apiSecretKey && $apiProfile!='' && $apiSecretKey!=''){
 				$this->apiProfile=$apiProfile;
+				$this->inputData['www-profile']=$apiProfile;
 				$this->apiSecretKey=$apiSecretKey;
 				$this->log[]='Authentication set to API profile "'.$apiProfile.'" with secret key: '.$apiSecretKey;
 			} else {
@@ -151,6 +152,10 @@ class WWW_Wrapper {
 			$this->log[]='API profile, API secret key and API token removed, public profile assumed';
 			$this->apiProfile=false;
 			$this->apiSecretKey=false;
+			// If profile is set in input data array
+			if(isset($this->inputData['www-profile'])){
+				unset($this->inputData['www-profile']);
+			}
 			return true;
 		}
 		
@@ -180,12 +185,12 @@ class WWW_Wrapper {
 			if(is_array($input)){
 				foreach($input as $key=>$val){
 					// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
-					$this->inputData[$key]=strval($val);
+					$this->inputData[$key]=$val;
 					$this->log[]='Input value of "'.$key.'" set to: '.$val;
 				}
 			} else {
 				// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
-				$this->inputData[$input]=strval($value);
+				$this->inputData[$input]=$value;
 				$this->log[]='Input value of "'.$input.'" set to: '.$value;
 			}
 			return true;
@@ -199,12 +204,12 @@ class WWW_Wrapper {
 			if(is_array($input)){
 				foreach($input as $key=>$val){
 					// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
-					$this->cryptedData[$key]=strval($val);
+					$this->cryptedData[$key]=$val;
 					$this->log[]='Crypted input value of "'.$key.'" set to: '.$val;
 				}
 			} else {
 				// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
-				$this->cryptedData[$input]=strval($value);
+				$this->cryptedData[$input]=$value;
 				$this->log[]='Crypted input value of "'.$input.'" set to: '.$value;
 			}
 			return true;
@@ -243,7 +248,7 @@ class WWW_Wrapper {
 			$this->inputData=array();
 			$this->cryptedData=array();
 			$this->inputFiles=array();
-			$this->log[]='Input and crypted input values unset';
+			$this->log[]='Input data, crypted input and file data is unset';
 			return true;
 		}
 		
@@ -258,6 +263,7 @@ class WWW_Wrapper {
 				// Command is lowercased just in case
 				$command=strtolower(trim($command));
 				$this->apiCommand=$command;
+				$this->inputData['www-command']=$command;
 				$this->log[]='API command set to: '.$command;
 			} else {
 				throw new Exception('API command is incorrect');
@@ -268,13 +274,19 @@ class WWW_Wrapper {
 		// This function sets the return type of API request, essentially what type of data is expected to be returned
 		// * type - Return type expected, either json, xml, html, rss, csv, js, css, vcard, ini, serializedarray, text or binary
 		// Returns true if correct type is used.
-		public function setReturnDataType($type){
+		public function setReturnType($type){
 			// Making sure that type is lowercased
 			$type=strtolower(trim($type));
 			// Type has to be in supported format
 			if(in_array($type,array('json','xml','html','rss','csv','js','css','vcard','ini','serializedarray','text','binary'))){
-				$this->apiReturnDataType=$type;
+				$this->apiReturnType=$type;
 				$this->log[]='Returned data type set to: '.$type;
+				// If default value is set in input data from previous requests
+				if($type=='json' && isset($this->inputData['www-return-type'])){
+					unset($this->inputData['www-return-type']);
+				} else {
+					$this->inputData['www-return-type']=$type;
+				}
 			} else {
 				throw new Exception('This return data type is not supported: '.$type);
 			}
@@ -290,6 +302,12 @@ class WWW_Wrapper {
 			if(is_numeric($timeout)){
 				$this->apiCacheTimeout=$timeout;
 				$this->log[]='Cache timeout set to '.$timeout.' seconds';
+				// If the default is already set in the input array
+				if($timeout==0 && isset($this->inputData['www-cache-timeout'])){
+					unset($this->inputData['www-cache-timeout']);
+				} else {
+					$this->inputData['www-cache-timeout']=$timeout;
+				}
 			} else {
 				throw new Exception('API cache timeout is not defined correctly, must be a number');
 			}
@@ -303,10 +321,15 @@ class WWW_Wrapper {
 		public function setMinify($flag){
 			if($flag){
 				$this->apiMinify=1;
+				$this->inputData['www-minify']=1;
 				$this->log[]='API minification request for returned result is turned on';
 			} else {
 				$this->apiMinify=0;
 				$this->log[]='API minification request for returned result is turned off';
+				// If the default is already set in the input array
+				if(isset($this->inputData['www-minify'])){
+					unset($this->inputData['www-minify']);
+				}
 			}
 			return true;
 		}
@@ -318,10 +341,15 @@ class WWW_Wrapper {
 			if($flag && $timestamp>0){
 				$this->apiRequestReturnHash=1;
 				$this->apiReturnValidTimestamp=$timestamp;
+				$this->inputData['www-return-hash']=1;
 				$this->log[]='API request will require a hash and timestamp validation from API';
 			} else {
 				$this->apiRequestReturnHash=0;
 				$this->log[]='API request will not require a hash and timestamp validation from API';
+				// If the default is already set in the input array
+				if(isset($this->inputData['www-return-hash'])){
+					unset($this->inputData['www-return-hash']);
+				}
 			}
 			return true;
 		}
@@ -330,34 +358,30 @@ class WWW_Wrapper {
 		
 		// This is the main function for making the request
 		// This method builds a request string and then makes a request to API and attempts to fetch and parse the returned result
-		// * unserialize - Whether the result is automatically unserialized or not
-		public function sendRequest($unserialize=true){
+		// * unserializeResult - Whether the result is automatically unserialized or not
+		public function sendRequest($unserializeResult=true){
 			
 			// Log entry
 			$this->log[]='Starting to build request';
 		
 			// Correct request requires command to be set
-			if($this->apiCommand && $this->apiCommand!=''){
+			if(!isset($this->inputData['www-command']) && $this->apiCommand && $this->apiCommand!=''){
 				$this->inputData['www-command']=$this->apiCommand;
-			} else {
+			} elseif(!isset($this->inputData['www-command'])){
 				throw new Exception('API command is not defined');
 			}
 		
 			// If return data type is anything except JSON, then it is defined in request string
-			if($this->apiReturnDataType!='json'){
-				$this->inputData['www-return-data-type']=$this->apiReturnDataType;
+			if(!isset($this->inputData['www-return-type']) && $this->apiReturnType!='json'){
+				$this->inputData['www-return-type']=$this->apiReturnType;
 			}
 			// If cache timeout is set above 0 then it is defined in request string
-			if($this->apiCacheTimeout>0){
-				$this->inputData['www-cache-timeout']=strval($this->apiCacheTimeout);
+			if(!isset($this->inputData['www-cache-timeout']) && $this->apiCacheTimeout>0){
+				$this->inputData['www-cache-timeout']=$this->apiCacheTimeout;
 			}
 			// If minification is set then it is defined in request string
-			if($this->apiMinify==1){
+			if(!isset($this->inputData['www-minify']) && $this->apiMinify==1){
 				$this->inputData['www-minify']='1';
-			}
-			// If serializer is not JSON, then other serializer is defined in input string
-			if($this->apiSerializer!='json'){
-				$this->inputData['www-serializer']='serialize';
 			}
 		
 			// If API profile and secret key are set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
@@ -367,17 +391,21 @@ class WWW_Wrapper {
 				$this->log[]='API profile set, hash authentication will be used';
 			
 				// If encryption key is set, then this is sent together with crypted data
-				if($this->apiEncryptionKey){
+				if(!isset($this->inputData['www-crypt-output']) && $this->apiEncryptionKey){
 					$this->cryptedData['www-crypt-output']=$this->apiEncryptionKey;
 				}
 			
 				// Non-public profile use also has to be defined in request string
-				$this->inputData['www-profile']=$this->apiProfile;
+				if(!isset($this->inputData['www-profile'])){
+					$this->inputData['www-profile']=$this->apiProfile;
+				}
 				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
-				$this->inputData['www-timestamp']=strval(time());
+				if(!isset($this->inputData['www-timestamp'])){
+					$this->inputData['www-timestamp']=time();
+				}
 				
 				// If this is set, then API is requested to also return a timestamp and hash validation
-				if($this->apiRequestReturnHash==1){
+				if(!isset($this->inputData['www-return-hash']) && $this->apiRequestReturnHash==1){
 					$this->inputData['www-return-hash']='1';
 				}
 				
@@ -387,19 +415,14 @@ class WWW_Wrapper {
 				}
 		
 				// If crypted data array is populated, then this data is encrypted in www-crypt-input key
-				if(!empty($this->cryptedData)){
+				if(!isset($this->inputData['www-crypt-input']) && !empty($this->cryptedData)){
 					// This is only possible if API token is set
 					if($this->apiToken){
 						// Mcrypt extension is required
 						if(extension_loaded('mcrypt')){
-							// Data is encrypted based on serializer method
-							if($this->apiSerializer=='json'){
-								$this->inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,$this->apiToken,json_encode($this->cryptedData),MCRYPT_MODE_CBC,md5($this->apiSecretKey)));
-								$this->log[]='Crypted input created using JSON encoded input data, token and secret key';
-							} else {
-								$this->inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,$this->apiToken,serialize($this->cryptedData),MCRYPT_MODE_CBC,md5($this->apiSecretKey)));
-								$this->log[]='Crypted input created using serialized input data, token and secret key';
-							}
+							// Data is encrypted with Rijndael 256bit encryption
+							$this->inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,$this->apiToken,json_encode($this->cryptedData),MCRYPT_MODE_CBC,md5($this->apiSecretKey)));
+							$this->log[]='Crypted input created using JSON encoded input data, token and secret key';
 						} else {
 							throw new Exception('Mcrypt extension is required to use encrypted input');
 							return false;
@@ -414,19 +437,22 @@ class WWW_Wrapper {
 				ksort($this->inputData);
 				
 				// Validation hash is generated based on current serialization option
-				if($this->apiSerializer=='json'){
-					$this->inputData['www-hash']=sha1(json_encode($this->inputData).$this->apiToken.$this->apiSecretKey);
-					$this->log[]='Validation hash created using JSON encoded input data and secret key';
+				if(!isset($this->inputData['www-hash'])){
+					$this->inputData['www-hash']=sha1(json_encode($this->inputData,JSON_NUMERIC_CHECK).$this->apiToken.$this->apiSecretKey);
+				}
+
+				// Log entry
+				if($this->apiToken){
+					$this->log[]='Validation hash created using JSON encoded input data, API token and secret key';
 				} else {
-					$this->inputData['www-hash']=sha1(serialize($this->inputData).$this->apiToken.$this->apiSecretKey);
-					$this->log[]='Validation hash created using serialized input data and secret key';
+					$this->log[]='Validation hash created using JSON encoded input data and secret key';
 				}
 				
 			} else {
 				$this->log[]='API profile is not set, using public profile';
 			
 				// If encryption key is set, then this is sent together with input data string
-				if($this->apiEncryptionKey){
+				if(!isset($this->inputData['www-crypt-output']) && $this->apiEncryptionKey){
 					$this->inputData['www-crypt-output']=$this->apiEncryptionKey;
 				}
 				
@@ -509,7 +535,7 @@ class WWW_Wrapper {
 						$cURL=curl_init();
 						// Setting cURL options
 						$requestOptions=array(
-							CURLOPT_URL=>$requestURL,
+							CURLOPT_URL=>$this->apiAddress,
 							CURLOPT_REFERER=>((!isset($_SERVER['HTTPS']) || ($_SERVER['HTTPS']!=1 && $_SERVER['HTTPS']!='on'))?'http://':'https://').$_SERVER['HTTP_HOST'].'/'.$_SERVER['REQUEST_URI'],
 							CURLOPT_POST=>true,
 							CURLOPT_POSTFIELDS=>$this->inputData,
@@ -569,21 +595,10 @@ class WWW_Wrapper {
 			// PARSING REQUEST RESULT
 			
 				// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
-				if($this->apiReturnDataType=='json' && $unserialize){
+				if($this->apiReturnType=='json' && $unserializeResult){
 					// JSON supportis required
-					if(function_exists('json_decode')){
-						$return=json_decode($result,true);
-						if($return==null){
-							$this->log[]='Cannot JSON decode data string';
-							return false;
-						} else {
-							$this->log[]='Returning JSON decoded result';
-						}
-					} else {
-						$this->log[]='JSON is not supported on the server, cannot decode JSON response';
-						return false;
-					}
-				} else if($this->apiReturnDataType=='serializedarray' && $unserialize){
+					$return=json_decode($result,true);
+				} else if($this->apiReturnType=='serializedarray' && $unserializeResult){
 					// Return data is unserialized
 					$return=unserialize($result,true);
 					if(!$return){
@@ -592,7 +607,7 @@ class WWW_Wrapper {
 					} else {
 						$this->log[]='Returning unserialized result';
 					}
-				} else if($this->apiReturnDataType=='querystring' && $unserialize){
+				} else if($this->apiReturnType=='querystring' && $unserializeResult){
 					// Return data is filtered through string parsing and url decoding to create return array
 					$return=parse_str(urldecode($result),$return);
 					if(!$return){
@@ -601,9 +616,9 @@ class WWW_Wrapper {
 					} else {
 						$this->log[]='Returning parsed query string result';
 					}
-				} else if($unserialize){
+				} else if($unserializeResult){
 					// Every other unserialization attempt fails
-					$this->log[]='Cannot unserialize this return data type: '.$this->apiReturnDataType;
+					$this->log[]='Cannot unserialize this return data type: '.$this->apiReturnType;
 					return false;
 				} else {
 					// Data is simply returned if serialization was not requested
@@ -613,9 +628,48 @@ class WWW_Wrapper {
 			// RESULT VALIDATION
 				
 				// If it was requested that validation hash and timestamp are also returned
-				if($this->apiRequestReturnHash){
-					//$this->apiReturnValidTimestamp;
+				// This only applies to non-public profiles
+				if($this->apiProfile && $this->apiSecretKey && $this->apiRequestReturnHash){
+					// This validation is only done if string was unserialized
+					if($unserializeResult){
+						// Hash and timestamp have to be defined in response
+						if(isset($return['www-hash']) && isset($return['www-timestamp'])){
+							// Making sure that the returned result is within accepted time limit
+							if((time()-$this->apiReturnValidTimestamp)<=$return['www-timestamp']){
+								// Assigning returned array to hash validation array
+								$validationHash=$return;
+								// Hash itself is removed from validation
+								unset($validationHash['www-hash']);
+								// Data is sorted
+								ksort($validationHash);
+								// Validation depends on whether session creation or destruction commands were called
+								if($this->inputData['www-command']=='www-create-session' || $this->inputData['www-command']=='www-destroy-session'){
+									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$this->apiSecretKey);
+								} else {
+									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$this->apiToken.$this->apiSecretKey);
+								}
+								// If sent hash is the same as calculated hash
+								if($hash==$return['www-hash']){
+									$this->log[]='Hash validation successful';
+								} else {
+									$this->log[]='Hash validation failed';
+									return false;
+								}
+							} else {
+								$this->log[]='Returned data timestamp is too old, return was accepted only within '.$this->apiReturnValidTimestamp.' seconds';
+								return false;
+							}
+						} else {
+							$this->log[]='Returned data validation failed, hash and timestamp not returned';
+							return false;
+						}
+					} else {
+						$this->log[]='Return hash validation was requested, but it cannot be unserialized by wrapper so manual validation is required';
+					}
 				}
+				
+			// Clears input data
+			$this->clearInput();
 				
 			// Returning request result
 			return $return;

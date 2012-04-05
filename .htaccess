@@ -1,11 +1,11 @@
 
 # WWW - PHP micro-framework
+# Apache configuration
 # 
 # Apache commands are stored in this file, including the loading of RewriteEngine, which is 
 # used to filter requests to certain file extensions and direct certain files to /index.php 
 # for parsing, including loading all URL's that it cannot find that WWW_controller_url can 
-# solve. These commands are required if you wish to use /index.php for website building with 
-# WWW framework.
+# solve.
 # 
 # Author and support: Kristo Vaher - kristo@waher.net
 

@@ -56,14 +56,15 @@ class WWW_Factory {
 	// This function returns API wrapper for external API connections
 	// * address - Address of the API file
 	// * userAgent - Custom user agent string
-	final public function externalApi($address,$userAgent=false){
+	// Returns the Wrapper object if successful
+	final public function apiConnection($address){
 		// Address is required
 		if($address && $address!=''){
 			if(!class_exists('WWW_Wrapper') && file_exists(__DIR__.DIRECTORY_SEPARATOR.'class.www-factory.php')){
 				require(__DIR__.DIRECTORY_SEPARATOR.'class.www-wrapper.php');
 			}
 			// Returning new Wrapper object
-			return new WWW_Wrapper($address,$userAgent);
+			return new WWW_Wrapper($address);
 		} else {
 			return false;
 		}
@@ -113,10 +114,10 @@ class WWW_Factory {
 		// Object is returned if no specific method name is called
 		if(!$methodName){
 			// If method name was not defined then this function returns the entire class with current State and API set
-			return new $className($this->WWW_API->state,$this->WWW_API);
+			return new $className($this->WWW_API);
 		} else {
 			// If method name was set, then this function creates a new temporary object
-			$tempObject=new $className($this->WWW_API->state,$this->WWW_API);
+			$tempObject=new $className($this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
 			if(method_exists($tempObject,$methodName)){
 				return $tempObject->$methodName($methodData);
@@ -156,10 +157,10 @@ class WWW_Factory {
 		// Object is returned if no specific method name is called
 		if(!$methodName){
 			// If method name was not defined then this function returns the entire class with current State and API set
-			return new $className($this->WWW_API->state,$this->WWW_API);
+			return new $className($this->WWW_API);
 		} else {
 			// If method name was set, then this function creates a new temporary object
-			$tempObject=new $className($this->WWW_API->state,$this->WWW_API);
+			$tempObject=new $className($this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
 			if(method_exists($tempObject,$methodName)){
 				return $tempObject->$methodName($methodData);
@@ -199,10 +200,10 @@ class WWW_Factory {
 		// Object is returned if no specific method name is called
 		if(!$methodName){
 			// If method name was not defined then this function returns the entire class with current State and API set
-			return new $className($this->WWW_API->state,$this->WWW_API);
+			return new $className($this->WWW_API);
 		} else {
 			// If method name was set, then this function creates a new temporary object
-			$tempObject=new $className($this->WWW_API->state,$this->WWW_API);
+			$tempObject=new $className($this->WWW_API);
 			// If method exists, then the result of this method is returned as a result
 			if(method_exists($tempObject,$methodName)){
 				return $tempObject->$methodName($methodData);

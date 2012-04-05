@@ -14,7 +14,6 @@ class WWW_view_example extends WWW_Factory {
 
 	// WWW_controller_url calls this function as output for page content
 	public function render($input){
-	
 		// Showing how to make an API call within the view
 		$apiCall=$this->api('example-get');
 		

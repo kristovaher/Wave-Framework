@@ -238,8 +238,8 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// This states how long an API profile token is valid by default
 	// This value can be overwritten in /resources/api.keys.php file
 	// If the token has not been used for longer than the amount of seconds stored in this variable, then new token needs to be generated
-	// This value is 30 by default, which means that API profile cannot be validated
-	// $config['api-token-timeout']=30;
+	// This value is 3600 by default
+	// $config['api-token-timeout']=3600;
 	
 	// Every API command is generated with timestamp value, this value checks how long ago the request was sent
 	// If API detects the request timestamp to be too long in the past, then that command will fail

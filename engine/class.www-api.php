@@ -109,7 +109,6 @@ class WWW_API {
 				'push-output'=>true,
 				'content-type-header'=>false,
 				'minify-output'=>false,
-				'serializer'=>'json',
 				'last-modified'=>$this->state->data['request-time'],
 				'custom-header'=>false
 			);
@@ -235,61 +234,34 @@ class WWW_API {
 				$apiState['minify-output']=$apiInputData['www-minify'];
 			}
 			
-			// If custom hash serializer function is defined then that is used for serialization
-			// This serializer is used for calculating hashes as well as serializing crypted input data
-			if(isset($apiInputData['www-serializer'])){
-				$apiState['serializer']=$apiInputData['www-serializer'];
-			}
-			
 		// HANDLING CRYPTED INPUT
 			
 			// If crypted input is set
 			if(isset($apiInputData['www-crypt-input'])){
-				// Crypted input is only possible with non-public profiles
-				if($apiState['profile']!=$this->state->data['api-public-profile']){
-					// Crypted input is only possible to be decrypted with valid API profile token
-					if($apiState['token']){
-						// Mcrypt is required for decryption
-						if(extension_loaded('mcrypt')){
-							// Rijndael 256 bit decryption is used in CBC mode
-							$decryptedData=$this->decryptRijndael256($apiInputData['www-crypt-input'],$apiState['token'],$apiState['secret-key']);
-							if($decryptedData){
-								// Unserializing crypted data to an array based on serializer
-								switch($apiState['serializer']){
-									case 'json':
-										// This returns associative array
-										$decryptedData=json_decode($decryptedData,true);
-										break;
-									case 'serialize':
-										// Simple unserializing
-										$decryptedData=unserialize($decryptedData);
-										break;
-									case 'querystring':
-										// This parses the string in the first variable to an array in the second variable
-										parse_str($decryptedData,$decryptedData);
-										break;
-									default:
-										return $this->output(array('www-error'=>'Assigned serializer cannot be used to decrypt data','www-error-code'=>13),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-										break;
-								}
-								// Unserialization can fail if the data is not in correct format
-								if($decryptedData && is_array($decryptedData)){
-									// Merging crypted input with set input data
-									$apiInputData=$decryptedData+$apiInputData;
-								} else {
-									return $this->output(array('www-error'=>'Cannot decrypt data or decrypted data is not an array','www-error-code'=>12),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-								}
+				// Crypted input is only possible with non-public profiles and an active session
+				if($apiState['profile']!=$this->state->data['api-public-profile'] && $apiState['token']){
+					// Mcrypt is required for decryption
+					if(extension_loaded('mcrypt')){
+						// Rijndael 256 bit decryption is used in CBC mode
+						$decryptedData=$this->decryptRijndael256($apiInputData['www-crypt-input'],$apiState['token'],$apiState['secret-key']);
+						if($decryptedData){
+							// Unserializing crypted data with JSON
+							$decryptedData=json_decode($decryptedData,true);
+							// Unserialization can fail if the data is not in correct format
+							if($decryptedData && is_array($decryptedData)){
+								// Merging crypted input with set input data
+								$apiInputData=$decryptedData+$apiInputData;
 							} else {
-								return $this->output(array('www-error'=>'Failed to decrypt data','www-error-code'=>11),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-							}	
+								return $this->output(array('www-error'=>'Unserialized decrypted data is not an array','www-error-code'=>11),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+							}
 						} else {
-							return $this->output(array('www-error'=>'Unable to decrypt data','www-error-code'=>10),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						}
+							return $this->output(array('www-error'=>'Failed to decrypt data','www-error-code'=>10),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						}	
 					} else {
-						return $this->output(array('www-error'=>'Crypted input can only be sent for profiles with an active session token','www-error-code'=>9),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'Unable to decrypt data','www-error-code'=>9),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 				} else {
-					return $this->output(array('www-error'=>'Crypted input can only be sent with non-public API profiles','www-error-code'=>8),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+					return $this->output(array('www-error'=>'Crypted input can only be sent with non-public API profile with an active token','www-error-code'=>8),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 				}
 			}
 			
@@ -321,30 +293,14 @@ class WWW_API {
 					
 					// Validation data is sorted by keys
 					ksort($validationHash);
-					
-					// Validation hash array is serialized to text string for validation purposes
-					switch($apiState['serializer']){
-						case 'json':
-							$validationHash=json_encode($validationHash);
-							break;
-						case 'serialize':
-							$validationHash=serialize($validationHash);
-							break;
-						case 'querystring':
-							$validationHash=http_build_query($validationHash);
-							break;
-						default:
-							return $this->output(array('www-error'=>'Assigned serializer cannot be used to validate input','www-error-code'=>14),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-							break;
-					}
 				
 					// Final validation hash depends on whether the command was about session creation, destruction or any other command
 					if($apiState['command']=='www-create-session' || $apiState['command']=='www-destroy-session'){
 						// Session creation and destruction commands have validation hashes built only with the secret key
-						$validationHash=sha1($validationHash.$apiState['secret-key']);
+						$validationHash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['secret-key']);
 					} else {
 						// Every other command takes token into account when calculating the validation hash
-						$validationHash=sha1($validationHash.$apiState['token'].$apiState['secret-key']);
+						$validationHash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
 					}
 					
 				// HASH VALIDATION AND SESSION COMMANDS
@@ -386,7 +342,7 @@ class WWW_API {
 						}	
 					
 					} else {
-						return $this->output(array('www-error'=>'API profile input hash validation failed','www-error-code'=>15),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'API profile input hash validation failed','www-error-code'=>12),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 			
 			}
@@ -497,7 +453,7 @@ class WWW_API {
 						require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle (controller not found)','www-error-code'=>16),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle (controller not found)','www-error-code'=>13),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}
 				}
 				
@@ -510,14 +466,14 @@ class WWW_API {
 					// If command method does not exist, 501 page is returned or error triggered
 					if(!method_exists($controller,$methodName)){
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle (controller method not found)','www-error-code'=>17),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle (controller method not found)','www-error-code'=>14),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}
 					// Result of the command is solved with this call
 					// Input data is also submitted to this function
 					$apiResult=$controller->$methodName($apiInputData);
 				} else {
 					// Since an error was detected, system pushes for output immediately
-					return $this->output(array('www-error'=>'User agent request recognized, but unable to handle (controller method not defined)','www-error-code'=>18),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+					return $this->output(array('www-error'=>'User agent request recognized, but unable to handle (controller method not found)','www-error-code'=>14),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 				}
 				
 				// If returned data type was using output buffer, then that is gathered for the result instead
@@ -591,27 +547,12 @@ class WWW_API {
 				$returnHash=$apiResult;
 				// Sorting the output data
 				ksort($returnHash);
-				// Input is serialized so that hash can be calculated from the data
-				switch($apiState['serializer']){
-					case 'json':
-						$returnHash=json_encode($returnHash);
-						break;
-					case 'serialize':
-						$returnHash=serialize($returnHash);
-						break;
-					case 'querystring':
-						$returnHash=http_build_query($returnHash);
-						break;
-					default:
-						return $this->output(array('www-error'=>'Assigned serializer cannot be used to calculate return hash','www-error-code'=>19),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						break;
-				}
 				// Hash is written to returned result
 				// Session creation and destruction commands return data is hashed without token
 				if($apiState['command']=='www-create-session' || $apiState['command']=='www-destroy-session'){
-					$apiResult['www-hash']=sha1($returnHash.$apiState['secret-key']);
+					$apiResult['www-hash']=sha1(json_encode($returnHash,JSON_NUMERIC_CHECK).$apiState['secret-key']);
 				} else {
-					$apiResult['www-hash']=sha1($returnHash.$apiState['token'].$apiState['secret-key']);
+					$apiResult['www-hash']=sha1(json_encode($returnHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
 				}
 			}
 		
@@ -930,7 +871,7 @@ class WWW_API {
 			}
 
 			// This adds a session
-			if(isset($data['www-set-session'])){
+			if(isset($data['www-set-session']) && is_array($data['www-set-session'])){
 				foreach($data['www-set-session'] as $session){
 					// Sessions require name and value to be set
 					if(isset($session['name']) && isset($session['value'])){

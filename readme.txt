@@ -23,7 +23,7 @@ Twitter - http://www.twitter.com/WWWFramework
 FEATURES
 --------
 
- * Modern API-focused framework
+ * Modern API-focused framework for PHP versions 5.3.3 and above
  * Secure API requests with input and token and key-based authentication
  * Dynamically loaded Hierarchical MVC objects through Factory pattern
  * API returns XML, CSV, JSON, HTML, native PHP and other data formats
@@ -53,10 +53,12 @@ INSTALLATION
  1. Unpack the WWW Framework downloaded archive.
  2. Configuration file in root directory /config.php of the archive should be configured according to your needs. Read more about configuration from Wiki.
  3. Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writeable by PHP, for example with command chmod 0777 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 777) or with any other FTP software. This is not required on Windows server.
- 4. There is a tool script for checking if your system is compatible for WWW Framework or not. After you have uploaded scripts to server, run the script /tools/compatibility.php. If this script shows any errors, then WWW Framework might not work properly.
- 5. WWW Framework requires servers ability to redirect all requests to /index.php file. Compatibility script should tell you if there is a problem with your setup.
- 6. In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again. This only applies to Apache server.
- 7. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
+ 4. There is a tool script for checking if your system is compatible for WWW Framework or not. After you have uploaded scripts to server, run the script /tools/compatibility.php. If this script shows any warning messages, then WWW Framework might not work properly.
+ 5. WWW Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 6a and 6b, depending on your server.
+ 6a. This only applies to Apache server: In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again.
+ 6b. This only applies to Nginx server: For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.
+ 7. Test if server is set up properly by making a request to /tools/compatibility.php script.
+ 8. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
  
 HELP AND DOCUMENTATION
 ----------------------

@@ -137,7 +137,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.resource.php');
 				}
 				
-			} elseif(in_array($resourceExtension,array('tmp','log','ht','htaccess','pem','crt','db','sql','version','nginx'))){
+			} elseif(in_array($resourceExtension,array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf'))){
 			
 				// These file extensions are not allowed, thus 403 error is returned
 				// Log category is 'file' due to it being a file with an extension

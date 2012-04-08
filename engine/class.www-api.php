@@ -293,7 +293,7 @@ class WWW_API {
 					
 					// Validation data is sorted by keys
 					ksort($validationHash);
-				
+					
 					// Final validation hash depends on whether the command was about session creation, destruction or any other command
 					if($apiState['command']=='www-create-session' || $apiState['command']=='www-destroy-session'){
 						// Session creation and destruction commands have validation hashes built only with the secret key

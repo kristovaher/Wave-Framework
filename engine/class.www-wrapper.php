@@ -67,6 +67,8 @@ class WWW_Wrapper {
 		if(!function_exists('json_encode') || !defined('JSON_NUMERIC_CHECK')){
 			throw new Exception('JSON with automatic numeric check is required for API requests to work properly');
 		}
+		// Log entry
+		$this->log[]='WWW Wrapper object created';
 	}
 	
 	// SETTINGS
@@ -121,7 +123,7 @@ class WWW_Wrapper {
 		// This sets current session token to be used
 		// * apiToken - Current token
 		// Returns true as long as token value is set
-		public function setToken($apiToken){
+		public function setToken($apiToken=false){
 			// Requires non-empty string
 			if($apiToken && $apiToken!=''){
 				$this->apiToken=$apiToken;
@@ -133,9 +135,9 @@ class WWW_Wrapper {
 		}
 		
 		// This sets encryption key for data encryption
-		// * apiToken - Current token
-		// Returns true as long as token value is set
-		public function setEncryptionKey($encryptionKey){
+		// * encryptionKey - Current encryption key
+		// Returns true as long as key value is set
+		public function setEncryptionKey($encryptionKey=false){
 			// Requires non-empty string
 			if($encryptionKey && $encryptionKey!=''){
 				$this->apiEncryptionKey=$encryptionKey;
@@ -180,6 +182,7 @@ class WWW_Wrapper {
 		// This populates input array either with an array of input or a key and a value
 		// * input - Can be an array or a key value of input
 		// * value - If input value is not an array, then this is what the input key will get as a value
+		// Sets the input value
 		public function setInput($input,$value=false){
 			// If this is an array then it populates input array recursively
 			if(is_array($input)){
@@ -189,7 +192,7 @@ class WWW_Wrapper {
 					$this->log[]='Input value of "'.$key.'" set to: '.$val;
 				}
 			} else {
-				// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
+				// Value is simply added to inputData array
 				$this->inputData[$input]=$value;
 				$this->log[]='Input value of "'.$input.'" set to: '.$value;
 			}
@@ -199,6 +202,7 @@ class WWW_Wrapper {
 		// This populates crypted input array either with an array of input or a key and a value
 		// * input - Can be an array or a key value of input
 		// * value - If input value is not an array, then this is what the input key will get as a value
+		// Sets the crypted input value
 		public function setCryptedInput($input,$value=false){
 			// If this is an array then it populates input array recursively
 			if(is_array($input)){
@@ -208,7 +212,7 @@ class WWW_Wrapper {
 					$this->log[]='Crypted input value of "'.$key.'" set to: '.$val;
 				}
 			} else {
-				// Value is converted to string to make sure that json_encode() includes quotes in hash calculations
+				// Value is simply added to inputData array
 				$this->cryptedData[$input]=$value;
 				$this->log[]='Crypted input value of "'.$input.'" set to: '.$value;
 			}
@@ -218,6 +222,7 @@ class WWW_Wrapper {
 		// This sets file names and locations to be uploaded with the cURL request
 		// * file - Can be an array or a key value of file
 		// * location - If input value is not an array, then this is what the input file address is
+		// Sets the file to be uploaded
 		public function setFile($file,$location=false){
 			// If this is an array then it populates input array recursively
 			if(is_array($file)){
@@ -381,7 +386,7 @@ class WWW_Wrapper {
 			}
 			// If minification is set then it is defined in request string
 			if(!isset($this->inputData['www-minify']) && $this->apiMinify==1){
-				$this->inputData['www-minify']='1';
+				$this->inputData['www-minify']=1;
 			}
 		
 			// If API profile and secret key are set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
@@ -406,7 +411,7 @@ class WWW_Wrapper {
 				
 				// If this is set, then API is requested to also return a timestamp and hash validation
 				if(!isset($this->inputData['www-return-hash']) && $this->apiRequestReturnHash==1){
-					$this->inputData['www-return-hash']='1';
+					$this->inputData['www-return-hash']=1;
 				}
 				
 				// Token has to be provided for every request that is not a 'www-create-session' or 'www-destroy-session'
@@ -464,7 +469,7 @@ class WWW_Wrapper {
 				$requestURL=$this->apiAddress.'?'.http_build_query($this->inputData);
 				
 				// Get request is made if the URL is shorter than 2048 bytes (2KB).
-				// While servers can easily handle 8KB of data, servers are recommended to be vary if the request is longer than 2KB
+				// While servers can easily handle 8KB of data, servers are recommended to be vary if the GET request is longer than 2KB
 				if(strlen($requestURL)<=2048 && empty($this->inputFiles)){
 				
 					// cURL is used unless it is not supported on the server
@@ -569,10 +574,10 @@ class WWW_Wrapper {
 					}
 				}
 				
-			// PARSING REQUEST RESULT
-				
 				// Log entry
 				$this->log[]='Result of request: '.$result;
+				
+			// DECRYPTION
 				
 				// If requested data was encrypted, then this attempts to decrypt the data
 				if($this->apiEncryptionKey){
@@ -596,12 +601,12 @@ class WWW_Wrapper {
 			
 				// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
 				if($this->apiReturnType=='json' && $unserializeResult){
-					// JSON supportis required
-					$return=json_decode($result,true);
+					// JSON support is required
+					$result=json_decode($result,true);
 				} else if($this->apiReturnType=='serializedarray' && $unserializeResult){
 					// Return data is unserialized
-					$return=unserialize($result,true);
-					if(!$return){
+					$result=unserialize($result,true);
+					if(!$result){
 						$this->log[]='Cannot unserialize data string';
 						return false;
 					} else {
@@ -609,8 +614,8 @@ class WWW_Wrapper {
 					}
 				} else if($this->apiReturnType=='querystring' && $unserializeResult){
 					// Return data is filtered through string parsing and url decoding to create return array
-					$return=parse_str(urldecode($result),$return);
-					if(!$return){
+					$result=parse_str(urldecode($result),$result);
+					if(!$result){
 						$this->log[]='Cannot parse query data string';
 						return false;
 					} else {
@@ -633,11 +638,11 @@ class WWW_Wrapper {
 					// This validation is only done if string was unserialized
 					if($unserializeResult){
 						// Hash and timestamp have to be defined in response
-						if(isset($return['www-hash']) && isset($return['www-timestamp'])){
+						if(isset($result['www-hash']) && isset($result['www-timestamp'])){
 							// Making sure that the returned result is within accepted time limit
-							if((time()-$this->apiReturnValidTimestamp)<=$return['www-timestamp']){
+							if((time()-$this->apiReturnValidTimestamp)<=$result['www-timestamp']){
 								// Assigning returned array to hash validation array
-								$validationHash=$return;
+								$validationHash=$result;
 								// Hash itself is removed from validation
 								unset($validationHash['www-hash']);
 								// Data is sorted
@@ -649,7 +654,7 @@ class WWW_Wrapper {
 									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$this->apiToken.$this->apiSecretKey);
 								}
 								// If sent hash is the same as calculated hash
-								if($hash==$return['www-hash']){
+								if($hash==$result['www-hash']){
 									$this->log[]='Hash validation successful';
 								} else {
 									$this->log[]='Hash validation failed';
@@ -664,7 +669,8 @@ class WWW_Wrapper {
 							return false;
 						}
 					} else {
-						$this->log[]='Return hash validation was requested, but it cannot be unserialized by wrapper so manual validation is required';
+						$this->log[]='Return hash validation was requested, but it cannot be unserialized and validated by wrapper';
+						return false;
 					}
 				}
 				
@@ -672,7 +678,7 @@ class WWW_Wrapper {
 			$this->clearInput();
 				
 			// Returning request result
-			return $return;
+			return $result;
 			
 		}
 

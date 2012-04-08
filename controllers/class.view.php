@@ -135,16 +135,14 @@ class WWW_controller_view extends WWW_Factory {
 					<?php } ?>
 					<!-- System state -->
 					<script type="text/javascript">
-						var __WWW=new Object();
-						__WWW['web-root']='<?=$webRoot?>';
-						__WWW['api-url']='<?=$webRoot?>www.api';
-						__WWW['language']='<?=$language?>';
-						__WWW['form-queue-set']=false;
-						__WWW['form-queue']=new Array();
+						var WWW=new Object();
+						WWW['web-root']='<?=$webRoot?>';
+						WWW['language']='<?=$language?>';
 						// If translations are used then they are stored in this object
 						var translations=new Object();
 					</script>
 					<!-- JavaScript -->
+					<script type="text/javascript" src="<?=$webRoot?>engine/class.www-wrapper.js"></script>
 					<script type="text/javascript" src="<?=$webRoot?>resources/<?=implode('&',$coreJavaScript)?>"></script>
 					<?php if(!empty($moduleJavaScript)){ ?>
 						<script type="text/javascript" src="<?=$webRoot?>resources/<?=implode('&',$moduleJavaScript)?>"></script>

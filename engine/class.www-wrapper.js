@@ -17,31 +17,24 @@ function WWW_Wrapper(address){
 	var apiAddress=address;
 	
 	// API profile information
-	var apiProfile=false;
 	var apiSecretKey=false;
 	var apiToken=false;
-	var apiEncryptionKey=false;
 	
-	// Command to be run
-	var apiCommand=false;
-	
-	// API settings
-	var apiMinify=0;
-	var apiCacheTimeout=0;
-	var apiReturnType='json';
-	var apiRequestReturnHash=false;
-	var apiReturnValidTimestamp=10;
-	var apiSubmitFormId=false;
+	// Information about last error
+	var errorMessage=false;
+	var errorCode=false;
 	
 	// Input data
 	var inputData=new Object();
 	
 	// State settings
 	var log=new Array();
+	var timestampDuration=10;
 	var hiddenWindowCounter=0;
-	
+	var apiSubmitFormId=false;
+		
 	// Log entry
-	log.push('WWW Wrapper object created');
+	log.push('WWW API Wrapper object created with API address: '+address);
 	
 	// SETTINGS
 		
@@ -49,6 +42,7 @@ function WWW_Wrapper(address){
 		// Function returns current log as an array
 		this.returnLog=function(implode){
 			log.push('Returning log');
+			// Imploding, if requested
 			if(implode==null || implode==false){
 				return log;
 			} else {
@@ -63,80 +57,10 @@ function WWW_Wrapper(address){
 			return true;
 		}
 		
-	// AUTHENTICATION
-	
-		// This function sets current API profile and secret key
-		// * profile - Current profile name, this must be defined in the receiving system /resources/api.profiles.php file
-		// * secretKey - This is secret key of the used profile
-		// Returns true as long as profile and secret key are set
-		this.setAuthentication=function(profile,secretKey){
-			// Requires non-empty strings
-			if(profile!=null && secretKey!=null && profile!='' && secretKey!=''){
-				apiProfile=profile;
-				inputData['www-profile']=profile;
-				apiSecretKey=secretKey;
-				log.push('Authentication set to API profile "'+apiProfile+'" with secret key: '+apiSecretKey);
-			} else {
-				alert('API profile name and secret key are incorrect for authentication');
-			}
-			return true;
-		}
-		
-		// This sets current session token to be used
-		// * token - Current token
-		// Returns true as long as token value is set
-		this.setToken=function(token){
-			// Requires non-empty string
-			if(token!=null && token!=''){
-				apiToken=token;
-				log.push('API token set to: '+token);
-			} else {
-				alert('API token is incorrect for authentication');
-			}
-			return true;
-		}
-		
-		// This sets encryption key for data encryption
-		// * key - Current encryption key
-		// Returns true as long as key value is set
-		this.setEncryptionKey=function(key){
-			alert('setEncryptionKey() is not supported with WWW Framework JavaScript API Wrapper');
-			return true;
-		}
-		
-		// This clears all authentication data
-		// Returns true
-		this.clearAuthentication=function(){
-			log.push('API profile, API secret key and API token removed, public profile assumed');
-			apiProfile=false;
-			apiSecretKey=false;
-			// If profile is set in input data array
-			if(inputData['www-profile']!=null){
-				delete inputData['www-profile'];
-			}
-			return true;
-		}
-		
-		// This clears all authentication data
-		// Returns true
-		this.clearToken=function(){
-			log.push('API token removed');
-			apiToken=false;
-			return true;
-		}
-		
-		// This clears encryption key
-		// Returns true
-		this.clearEncryptionKey=function(){
-			log.push('API return data encryption key unset');
-			apiEncryptionKey=false;
-			return true;
-		}
-		
 	// INPUT
-		
+	
 		// This populates input array either with an array of input or a key and a value
-		// * input - Key value of the input
+		// * input - Can be an array or a key value of input
 		// * value - If input value is not an array, then this is what the input key will get as a value
 		// Sets the input value
 		this.setInput=function(input,value){
@@ -144,21 +68,57 @@ function WWW_Wrapper(address){
 			if(value==null || value==false){
 				value=0;
 			}
-			// Converting numeric flaots and strings to their proper formats
-			if(!!(value % 1)){
-				value=parseFloat(value);
-			} else if((typeof(value) === 'number' || typeof(value) === 'string') && value !== '' && !isNaN(value)){
-				value=parseInt(value);
-			}
 			// If this is an array then it populates input array recursively
-			if (typeof input==='object' && input instanceof Object){
+			if(typeof input==='object' && input instanceof Object){
 				for(var node in input){
-					inputData[node]=input[node];
-					log.push('Input value of "'+node+'" set to: '+input[node]);
+					inputSetter(node,input[node]);
 				}
 			} else {
-				inputData[input]=value;
-				log.push('Input value of "'+input+'" set to: '+value);
+				inputSetter(input,value);
+			}
+			return true;
+		}
+		
+		// This private function is used to seek out various private www-* settings that are not actually sent in request to API
+		// * input - Input data key
+		// * value - Input data value
+		// Returns true after setting the data
+		var inputSetter=function(input,value){
+			switch(input){
+				case 'www-api':
+					apiAddress=value;
+					log.push('API address changed to: '+value);
+					break;
+				case 'www-secret-key':
+					apiSecretKey=value;
+					log.push('API secret key set to: '+value);
+					break;
+				case 'www-token':
+					apiToken=value;
+					log.push('API session token set to: '+value);
+					break;
+				case 'www-timestamp-duration':
+					timestampDuration=$value;
+					log.push('API valid timestamp duration set to: '+value);
+					break;
+				case 'www-output':
+					log.push('Ignoring www-output setting, wrapper always requires output to be set to true');
+					break;
+				default:
+					// Converting numeric flaots and strings to their proper formats
+					if(!!(value % 1)){
+						value=parseFloat(value);
+					} else if((typeof(value) === 'number' || typeof(value) === 'string') && value !== '' && !isNaN(value)){
+						value=parseInt(value);
+					}
+					if(value==true){
+						value=1;
+					} else if(value==false){
+						value=0;
+					}
+					inputData[input]=value;
+					log.push('Input value of "'+input+'" set to: '+value);
+					break;				
 			}
 			return true;
 		}
@@ -184,120 +144,23 @@ function WWW_Wrapper(address){
 			if(inputData['www-content-type']!=null){
 				delete inputData['www-content-type'];
 			}
-			apiSubmitForm=false;
+			apiSubmitFormId=false;
 		}
 		
 		// This function simply deletes current input values
 		// Returns true
 		this.clearInput=function(){
+			// Settings
+			apiSecretKey=false;
+			apiToken=false;
+			requestTimeout=10;
+			timestampDuration=10;
+			// Input data
 			inputData=new Object();
 			cryptedData=new Object();
 			inputFiles=new Object();
+			// Log entry
 			log.push('Input data, crypted input and file data is unset');
-			return true;
-		}
-		
-	// API SETTINGS
-	
-		// This sets current API command
-		// * command - Correctly formed API command, for example 'example-get'
-		// Returns true if command is correctly formated
-		this.setCommand=function(command){
-			// Command must not be empty
-			if(command!=null && command!=''){
-				// Command is lowercased just in case
-				command=command.toLowerCase();
-				apiCommand=command;
-				inputData['www-command']=command;
-				log.push('API command set to: '+command);
-			} else {
-				alert('API command is incorrect');
-			}
-			return true;
-		}
-		
-		// This function sets the return type of API request, essentially what type of data is expected to be returned
-		// * type - Return type expected, either json, xml, html, rss, csv, js, css, vcard, ini, serializedarray, text or binary
-		// Returns true if correct type is used.
-		this.setReturnType=function(type){
-			// Making sure that type is lowercased
-			type=type.toLowerCase();
-			// Type has to be in supported format
-			if(type=='json' || type=='xml' || type=='html' || type=='rss' || type=='csv' || type=='js' || type=='css' || type=='vcard' || type=='ini' || type=='serializedarray' || type=='text' || type=='binary'){
-				apiReturnType=type;
-				log.push('Returned data type set to: '+type);
-				// If default value is set in input data from previous requests
-				if(type=='json' && inputData['www-return-type']!=null){
-					delete inputData['www-return-type'];
-				} else {
-					inputData['www-return-type']=type;
-				}
-			} else {
-				alert('This return data type is not supported: '+type);
-			}
-			return true;
-		}
-	
-		// This sets the cache timeout value of API commands, if this is set to 0 then cache is never used
-		// Set this higher than 0 to requests that are expected to change less frequently
-		// * timeout - Time in seconds how old cache is allowed by this request
-		// Returns true if cache is a number
-		this.setCacheTimeout=function(timeout){
-			// Default value
-			if(timeout==null){
-				timeout=0;
-			}
-			apiCacheTimeout=timeout;
-			log.push('Cache timeout set to '+timeout+' seconds');
-			// If the default is already set in the input array
-			if(timeout==0 && inputData['www-cache-timeout']!=null){
-				delete inputData['www-cache-timeout'];
-			} else {
-				inputData['www-cache-timeout']=timeout;
-			}
-		}
-		
-		// This tells API to return minified results
-		// This only applies when returned data is XML, CSS, HTML or JavaScript
-		// * flag - Either true or false
-		// Returns true
-		this.setMinify=function(flag){
-			if(flag){
-				apiMinify=1;
-				inputData['www-minify']=1;
-				log.push('API minification request for returned result is turned on');
-			} else {
-				apiMinify=0;
-				log.push('API minification request for returned result is turned off');
-				// If the default is already set in the input array
-				if(inputData['www-minify']!=null){
-					delete inputData['www-minify'];
-				}
-			}
-			return true;
-		}
-		
-		// This tells API to also return a validation hash and timestamp for return data validation
-		// * flag - Either true or false
-		// Returns true
-		this.setRequestReturnHash=function(flag,timestamp){
-			// Default value
-			if(timestamp==null){
-				timestamp=120;
-			}
-			if(flag!=null && timestamp>0){
-				apiRequestReturnHash=1;
-				apiReturnValidTimestamp=timestamp;
-				inputData['www-return-hash']=1;
-				log.push('API request will require a hash and timestamp validation from API');
-			} else {
-				apiRequestReturnHash=0;
-				log.push('API request will not require a hash and timestamp validation from API');
-				// If the default is already set in the input array
-				if(inputData['www-return-hash']!=null){
-					delete inputData['www-return-hash'];
-				}
-			}
 			return true;
 		}
 		
@@ -324,56 +187,60 @@ function WWW_Wrapper(address){
 			log.push('Starting to build request');
 		
 			// Correct request requires command to be set
-			if(inputData['www-command']==null && apiCommand && apiCommand!=''){
-				inputData['www-command']=apiCommand;
-			} else if(inputData['www-command']==null){
-				alert('API command is not defined');
+			if(inputData['www-command']==null){
+				errorCode=201;
+				errorMessage='API command is not set, this is required';
+				log.push(errorMessage);
+				return false;
 			}
 		
-			// If return data type is anything except JSON, then it is defined in request string
-			if(inputData['www-return-type']==null && apiReturnType!='json'){
-				inputData['www-return-type']=apiReturnType;
+			// If default value is set, then it is removed
+			if(inputData['www-return-type']!=null && inputData['www-return-type']=='json'){
+				log.push('Since www-return-type is set to default value, it is removed from input data');
+				delete inputData['www-return-type'];
 			}
-			// If cache timeout is set above 0 then it is defined in request string
-			if(inputData['www-cache-timeout']==null && apiCacheTimeout>0){
-				inputData['www-cache-timeout']=apiCacheTimeout;
+			// If default value is set, then it is removed
+			if(inputData['www-cache-timeout']!=null && inputData['www-cache-timeout']==0){
+				log.push('Since www-cache-timeout is set to default value, it is removed from input data');
+				delete inputData['www-cache-timeout'];
 			}
-			// If minification is set then it is defined in request string
-			if(inputData['www-minify']==null && apiMinify==1){
-				inputData['www-minify']=1;
+			// If default value is set, then it is removed
+			if(inputData['www-minify']!=null && inputData['www-minify']==0){
+				log.push('Since www-minify is set to default value, it is removed from input data');
+				delete inputData['www-minify'];
 			}
-		
-			// If API profile and secret key are set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
-			if(apiProfile && apiSecretKey){
+			// If default value is set, then it is removed
+			if(inputData['www-return-hash']!=null && inputData['www-return-hash']==0){
+				log.push('Since www-return-hash is set to default value, it is removed from input data');
+				delete inputData['www-return-hash'];
+			}
+			// If default value is set, then it is removed
+			if(inputData['www-output']!=null && inputData['www-output']==1){
+				log.push('Since www-output is set to default value, it is removed from input data');
+				delete inputData['www-output'];
+			}
 			
-				// Log entry
-				log.push('API profile set, hash authentication will be used');
+			// If profile is used, then timestamp will also be sent with the request
+			if(inputData['www-profile']!=null){
 			
-				// If encryption key is set, then this is sent together with crypted data
-				if(inputData['www-crypt-output']==null && apiEncryptionKey){
-					cryptedData['www-crypt-output']=apiEncryptionKey;
-				}
-			
-				// Non-public profile use also has to be defined in request string
-				if(inputData['www-profile']==null){
-					inputData['www-profile']=apiProfile;
-				}
 				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
 				if(inputData['www-timestamp']==null){
 					inputData['www-timestamp']=Math.floor(new Date().getTime()/1000);
 				}
 				
-				// If this is set, then API is requested to also return a timestamp and hash validation
-				if(inputData['www-return-hash']==null && apiRequestReturnHash==1){
-					inputData['www-return-hash']=1;
-				}
+			}
+		
+			// If API profile and secret key are set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
+			if(apiSecretKey){
+			
+				// Log entry
+				log.push('API secret key set, hash authentication will be used');
 				
-				// Token has to be provided for every request that is not a 'www-create-session' or 'www-destroy-session'
-				if(!apiToken && apiCommand!='www-create-session' && apiCommand!='www-destroy-session'){
-					alert('Token is required for this request');
-					return false;
+				// Token has to be provided for every request that is not a 'www-create-session'
+				if(!apiToken){
+					var requestToken=apiToken;
 				} else if(!apiToken){
-					apiToken='';
+					var requestToken='';
 				}
 				
 				// Input data has to be sorted based on key
@@ -381,7 +248,7 @@ function WWW_Wrapper(address){
 				
 				// Validation hash is generated based on current serialization option
 				if(inputData['www-hash']==null){
-					inputData['www-hash']=sha1(JSON.stringify(inputData)+apiToken+apiSecretKey);
+					inputData['www-hash']=sha1(JSON.stringify(inputData)+requestToken+apiSecretKey);
 				}
 
 				// Log entry
@@ -392,12 +259,9 @@ function WWW_Wrapper(address){
 				}
 				
 			} else {
-				log.push('API profile is not set, using public profile');
 			
-				// If encryption key is set, then this is sent together with input data string
-				if(inputData['www-crypt-output']==null && apiEncryptionKey){
-					inputData['www-crypt-output']=apiEncryptionKey;
-				}
+				// Log entry
+				log.push('API profile is not set, using public profile');
 				
 			}
 			
@@ -441,10 +305,21 @@ function WWW_Wrapper(address){
 							if(XMLHttp.readyState===4){
 								if(XMLHttp.status===200){
 									log.push('Result of the request: '+XMLHttp.responseText);
-									return parseResult(XMLHttp.responseText,callback,apiReturnType,unserializeResult,apiProfile,apiSecretKey,apiRequestReturnHash,apiReturnValidTimestamp,apiToken,inputData);
-								} else {  
-									alert('Request failed: '+XMLHttp.statusText);
-									log.push('Request failed: '+XMLHttp.statusText);
+									return parseResult(XMLHttp.responseText,callback,apiSecretKey,apiToken,timestampDuration,inputData,unserializeResult);
+								} else if(XMLHttp.status===304){
+									errorCode=214;
+									errorMessage='Not modified';
+									log.push(errorMessage);
+									return false;
+								} else {
+									if(method=='POST'){
+										errorCode=205;
+										errorMessage='POST request failed: '+XMLHttp.statusText;
+									} else {
+										errorCode=204;
+										errorMessage='GET request failed: '+XMLHttp.statusText;
+									}
+									log.push(errorMessage);
 									return false;
 								}  
 							}  
@@ -456,10 +331,21 @@ function WWW_Wrapper(address){
 						XMLHttp.send(postData);
 						if(XMLHttp.status===200){  
 							log.push('Result of the request: '+XMLHttp.responseText);
-							return parseResult(XMLHttp.responseText,callback,apiReturnType,unserializeResult,apiProfile,apiSecretKey,apiRequestReturnHash,apiReturnValidTimestamp,apiToken,inputData);
-						} else {
-							alert('Request failed: '+XMLHttp.statusText);
-							log.push('Request failed: '+XMLHttp.statusText);
+							return parseResult(XMLHttp.responseText,callback,apiSecretKey,apiToken,timestampDuration,inputData,unserializeResult);
+						} else if(XMLHttp.status===304){
+							errorCode=214;
+							errorMessage='Not modified';
+							log.push(errorMessage);
+							return false;
+						} else { 
+							if(method=='POST'){
+								errorCode=205;
+								errorMessage='POST request failed: '+XMLHttp.statusText;
+							} else {
+								errorCode=204;
+								errorMessage='GET request failed: '+XMLHttp.statusText;
+							}
+							log.push(errorMessage);
 							return false;
 						}
 					}
@@ -470,7 +356,9 @@ function WWW_Wrapper(address){
 					var apiSubmitForm=document.getElementById(apiSubmitFormId);
 					
 					if(apiSubmitForm==null){
-						alert('Form with an ID of '+formId+' does not exist');
+						errorCode=215;
+						errorMessage='Form not found: '.apiSubmitFormId;
+						log.push(errorMessage);
 						return false;
 					}
 				
@@ -537,11 +425,11 @@ function WWW_Wrapper(address){
 								hiddenFields[i].parentNode.removeChild(hiddenFields[i]);
 							}
 						}
+						// Parsing the result
+						var result=hiddenWindow.contentWindow.document.body.innerHTML;
 						// Log entry
 						log.push('Result of the request: '+result);
-						// Parsing the result
-						var result=hiddenWindow.contentWindow.document.body.innerHTML;	
-						result=parseResult(result,callback,apiReturnType,unserializeResult,apiProfile,apiSecretKey,apiRequestReturnHash,apiReturnValidTimestamp,apiToken,inputData);
+						result=parseResult(result,callback,apiSecretKey,apiToken,timestampDuration,inputData,unserializeResult);
 						// Removing hidden iFrame
 						apiSubmitForm.removeChild(hiddenWindow);
 						return result;
@@ -565,24 +453,20 @@ function WWW_Wrapper(address){
 		}
 		
 		// The return parsing method has to be separate, since JavaScript allows to make calls to API asynchronously
-		var parseResult=function(r_result,r_callback,r_apiReturnType,r_unserializeResult,r_apiProfile,r_apiSecretKey,r_apiRequestReturnHash,r_apiReturnValidTimestamp,r_apiToken,r_inputData){
-		
-			// Request failed
-			if(r_result==null){
-				return false;
-			}
+		var parseResult=function(result,callback,apiSecretKey,apiToken,timestampDuration,inputData,unserializeResult){
 				
 			// PARSING REQUEST RESULT
 				
 				// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
-				if(r_apiReturnType=='json' && r_unserializeResult){
+				if((inputData['www-return-type']==null || inputData['www-return-type']=='json') && unserializeResult){
 					// JSON support is required
-					r_result=JSON.parse(r_result);
+					result=JSON.parse(result);
 					log.push('Returning JSON object');
-				} else if(r_unserializeResult){
+				} else if(unserializeResult){
 					// Every other unserialization attempt fails
-					log.push('Cannot unserialize this return data type: '+r_apiReturnType);
-					alert('Cannot unserialize this return data type: '+r_apiReturnType);
+					errorCode=207;
+					errorMessage='Cannot unserialize returned data';
+					log.push(errorMessage);
 					return false;
 				} else {
 					// Data is simply returned if serialization was not requested
@@ -593,52 +477,65 @@ function WWW_Wrapper(address){
 				
 				// If it was requested that validation hash and timestamp are also returned
 				// This only applies to non-public profiles
-				if(r_apiProfile && r_apiSecretKey && r_apiRequestReturnHash){
+				if(inputData['www-profile']!=null && apiSecretKey && inputData['www-return-hash']!=null){
 					// This validation is only done if string was unserialized
-					if(r_unserializeResult){
+					if(unserializeResult){
 						// Hash and timestamp have to be defined in response
-						if(r_result['www-hash']!=null && r_result['www-timestamp']!=null){
+						if(result['www-hash']!=null && result['www-timestamp']!=null){
 							// Making sure that the returned result is within accepted time limit
-							if(((Math.floor(new Date().getTime()/1000))-r_apiReturnValidTimestamp)<=r_result['www-timestamp']){
+							if(((Math.floor(new Date().getTime()/1000))-timestampDuration)<=result['www-timestamp']){
 								// Assigning returned array to hash validation array
-								var validationHash=clone(r_result);
+								var validationHash=clone(result);
 								// Hash itself is removed from validation
 								delete validationHash['www-hash'];
 								// Data is sorted
 								validationHash=ksort(validationHash);
 								// Validation depends on whether session creation or destruction commands were called
-								if(r_inputData['www-command']=='www-create-session' || r_inputData['www-command']=='www-destroy-session'){
-									var result_hash=sha1(JSON.stringify(validationHash)+r_apiSecretKey);
+								if(inputData['www-command']=='www-create-session'){
+									var result_hash=sha1(JSON.stringify(validationHash)+apiSecretKey);
 								} else {
-									var result_hash=sha1(JSON.stringify(validationHash)+r_apiToken+r_apiSecretKey);
+									var result_hash=sha1(JSON.stringify(validationHash)+apiToken+apiSecretKey);
 								}
 								// If sent hash is the same as calculated hash
-								if(result_hash==r_result['www-hash']){
+								if(result_hash==result['www-hash']){
 									log.push('Hash validation successful');
 								} else {
-									log.push('Hash validation failed');
-									alert('Hash validation failed');
+									errorCode=211;
+									errorMessage='Hash validation failed';
+									log.push(errorMessage);
 									return false;
 								}
 							} else {
-								log.push('Returned data timestamp is too old, return was accepted only within '+r_apiReturnValidTimestamp+' seconds');
+								errorCode=210;
+								errorMessage='Validation timestamp is too old';
+								log.push(errorMessage);
 								return false;
 							}
 						} else {
-							log.push('Returned data validation failed, hash and timestamp not returned');
+							errorCode=209;
+							errorMessage='Server did not return hash and timestamp';
+							log.push(errorMessage);
 							return false;
 						}
 					} else {
-						log.push('Return hash validation was requested, but it cannot be unserialized and validated by wrapper');
+						errorCode=208;
+						errorMessage='Cannot validate hash';
+						log.push(errorMessage);
 						return false;
 					}
 				}
 			
-			if(r_callback==null){
+			// Resetting the error variables
+			errorCode=false;
+			errorMessage=false;
+			
+			// If callback function is set
+			if(callback==null){
 				// Returning request result
-				return r_result;
+				return result;
 			} else {
-				eval(r_callback+'(r_result);');
+				log.push('Sending data to callback '+callback+'(result)');
+				eval(callback+'(result);');
 			}				
 
 		}

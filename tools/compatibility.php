@@ -60,13 +60,6 @@ $log[]='';
 		$log[]='WARNING: PHP setting short_open_tag is turned off, default View controller requires this to work properly, if this is not possible then edit /controllers/class.view.php';
 	}
 	
-// XML
-	if(extension_loaded('SimpleXML')){
-		$log[]='SUCCESS: SimpleXML is supported';
-	} else {
-		$log[]='WARNING: SimpleXML PHP extension is not supported, this is needed if API returns XML-formatted data, if XML is not used then this warning can be ignored';
-	}
-	
 // ZLIB
 	if(extension_loaded('Zlib')){
 		$log[]='SUCCESS: Zlib is supported';

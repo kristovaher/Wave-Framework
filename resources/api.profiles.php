@@ -13,9 +13,9 @@ to API profile settings, such as timeouts and IP restrictions.
 * Key of the $apiProfiles array is the profile name
 * disabled - A true or false setting whether this profile is disabled
 * ip - Either aterisk or comma separated list of IP addresses, this limits what IP's can use this profile
-* secret-key - Secret key of the API profile, should be a 32 character string for best security
-* token-timeout - Time (in seconds) how long a generated token is valid if left unused
-* timestamp-timeout - This sets how many seconds from the moment request was made this request is valid (this is used to help protect against replay attacks)
+* secret-key - Secret key of the API profile, should be a 32 character string for best security. If not defined, then hash validation is not used.
+* token-timeout - Time (in seconds) how long a generated token is valid if left unused. If not set, then token is not required. Note that tokens require hash validation.
+* timestamp-timeout - This sets how many seconds from the moment request was made this request is valid (this is used to help protect against replay attacks). If not set, then timestamp validation is not used.
 
 Author and support: Kristo Vaher - kristo@waher.net
 */

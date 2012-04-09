@@ -88,8 +88,6 @@ Author and support: Kristo Vaher - kristo@waher.net
 		}
 		if(isset($_FILES) && !empty($_FILES)){ 
 			$inputData['www-files']=$_FILES;
-			// If files are defined, then API is told not to use cache
-			$inputData['www-no-cache']=true; 
 		}
 		if(isset($_COOKIES) && !empty($_COOKIES)){ 
 			$inputData['www-cookies']=$_COOKIES; 

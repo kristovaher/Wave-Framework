@@ -33,7 +33,7 @@ FEATURES
  * Smart Index gateway that handles all HTTP requests
  * Full cache control for all types of dynamic and static requests
  * View and URL controllers that support multiple languages and clean URL's
- * jQuery based front-end UI controller with smart AJAX functionality
+ * jQuery JavaScript framework supported
  * On-demand dynamic image resizer and basic image editor
  * On-demand resource compressing, unifying and minifying
  * Automatic sitemap.xml and robots.txt generation

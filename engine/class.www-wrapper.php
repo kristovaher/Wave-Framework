@@ -269,6 +269,12 @@ class WWW_Wrapper {
 				$this->log[]='Since www-return-hash is set to default value, it is removed from input data';
 				unset($this->inputData['www-return-hash']);
 			}
+			// If default value is set, then it is removed
+			if(isset($this->inputData['www-return-timestamp']) && $this->inputData['www-return-timestamp']==false){
+				$this->log[]='Since www-return-timestamp is set to default value, it is removed from input data';
+				unset($this->inputData['www-return-timestamp']);
+			}
+			
 			
 			// If encryption key is set, then this is sent together with crypted data
 			if(isset($this->inputData['www-profile']) && isset($this->apiSecretKey) && isset($this->inputData['www-crypt-output'])){
@@ -279,12 +285,10 @@ class WWW_Wrapper {
 			
 			// If profile is used, then timestamp will also be sent with the request
 			if(isset($this->inputData['www-profile'])){
-				
 				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
 				if(!isset($this->inputData['www-timestamp'])){
 					$this->inputData['www-timestamp']=time();
 				}
-				
 			}
 		
 			// If API secret key is set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
@@ -336,8 +340,16 @@ class WWW_Wrapper {
 				}
 				
 			} else {
-				// Log entry
-				$this->log[]='API secret key is not set, hash validation will not be used';
+			
+				// Token-only validation means that token will be sent to the server, but data itself will not be hashed. This works like a cookie.
+				if($this->apiToken){
+					// Log entry
+					$this->log[]='Using token-only validation';
+				} else {
+					// Log entry
+					$this->log[]='API secret key is not set, hash validation will not be used';
+				}
+				
 			}
 			
 			// MAKING A REQUEST
@@ -387,7 +399,7 @@ class WWW_Wrapper {
 								$this->log[]=$this->errorMessage;
 							} else {
 								$this->errorCode=204;
-								$this->errorMessage='GET request failed: cURL error '.curl_getinfo($cURL,CURLINFO_HTTP_CODE);
+								$this->errorMessage='GET request failed: cURL error '.curl_getinfo($cURL,CURLINFO_HTTP_CODE).' - '.curl_error($cURL);
 								$this->log[]=$this->errorMessage;
 							}
 							// Closing the resource
@@ -463,7 +475,7 @@ class WWW_Wrapper {
 								$this->log[]=$this->errorMessage;
 							} else {
 								$this->errorCode=205;
-								$this->errorMessage='POST request failed: cURL error '.curl_getinfo($cURL,CURLINFO_HTTP_CODE);
+								$this->errorMessage='POST request failed: cURL error '.curl_getinfo($cURL,CURLINFO_HTTP_CODE).' - '.curl_error($cURL);
 								$this->log[]=$this->errorMessage;
 							}
 							// Closing the resource
@@ -490,7 +502,8 @@ class WWW_Wrapper {
 			// DECRYPTION
 				
 				// If requested data was encrypted, then this attempts to decrypt the data
-				if(isset($this->inputData['www-crypt-output']) || isset($this->cryptedData['www-crypt-output'])){
+				// This also checks to make sure that a serialized data was not returned (which is usually an error)
+				if(strpos($result,'{')===false && strpos($result,'[')===false && isset($this->cryptedData['www-crypt-output']) || isset($this->inputData['www-crypt-output'])){
 					// Getting the decryption key
 					if(isset($this->cryptedData['www-crypt-output'])){
 						$cryptKey=$this->cryptedData['www-crypt-output'];
@@ -566,16 +579,35 @@ class WWW_Wrapper {
 				}
 				
 			// RESULT VALIDATION
+			
+				// Result validation only applies to non-public profiles
+				if(isset($this->inputData['www-profile'])){
 				
-				// If it was requested that validation hash and timestamp are also returned
-				// This only applies to non-public profiles
-				if(isset($this->inputData['www-profile']) && $this->apiSecretKey && isset($this->inputData['www-return-hash'])){
-					// This validation is only done if string was unserialized
+					// Only unserialized data can be validated
 					if($unserializeResult){
-						// Hash and timestamp have to be defined in response
-						if(isset($result['www-hash']) && isset($result['www-timestamp'])){
-							// Making sure that the returned result is within accepted time limit
-							if((time()-$this->timestampDuration)<=$result['www-timestamp']){
+					
+						// If it was requested that validation timestamp is returned
+						if(isset($this->inputData['www-return-timestamp'])){
+							if(isset($result['www-timestamp'])){
+								// Making sure that the returned result is within accepted time limit
+								if((time()-$this->timestampDuration)>$result['www-timestamp']){
+									$this->errorCode=210;
+									$this->errorMessage='Validation timestamp is too old';
+									$this->log[]=$this->errorMessage;
+									return false;
+								}
+							} else {
+								$this->errorCode=209;
+								$this->errorMessage='Validation data missing: Timestamp was not returned';
+								$this->log[]=$this->errorMessage;
+								return false;
+							}
+						}
+						
+						// If it was requested that validation hash is returned
+						if(isset($this->inputData['www-return-hash'])){
+							// Hash and timestamp have to be defined in response
+							if(isset($result['www-hash'])){
 								// Assigning returned array to hash validation array
 								$validationHash=$result;
 								// Hash itself is removed from validation
@@ -598,23 +630,20 @@ class WWW_Wrapper {
 									return false;
 								}
 							} else {
-								$this->errorCode=210;
-								$this->errorMessage='Validation timestamp is too old';
+								$this->errorCode=209;
+								$this->errorMessage='Validation data missing: Hash was not returned';
 								$this->log[]=$this->errorMessage;
 								return false;
 							}
-						} else {
-							$this->errorCode=209;
-							$this->errorMessage='Server did not return hash and timestamp';
-							$this->log[]=$this->errorMessage;
-							return false;
 						}
+					
 					} else {
 						$this->errorCode=208;
-						$this->errorMessage='Cannot validate hash';
+						$this->errorMessage='Cannot validate hash: Unserialization not possible';
 						$this->log[]=$this->errorMessage;
 						return false;
 					}
+				
 				}
 				
 			// Clears input data

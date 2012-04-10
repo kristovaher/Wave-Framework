@@ -23,6 +23,6 @@ Author and support: Kristo Vaher - kristo@waher.net
 // All keys are stored in an array
 $apiProfiles=array();
 
-$apiProfiles['custom-profile']=array('disabled'=>false,'ip'=>'*','secret-key'=>'my-secret-key','token-timeout'=>300,'timestamp-timeout'=>10); // API profile has multiple settings set
+$apiProfiles['custom-profile']=array('disabled'=>false,'ip'=>'*','timestamp-timeout'=>10,'token-timeout'=>300,'secret-key'=>'my-secret-key'); // API profile has multiple settings set
 	
 ?>

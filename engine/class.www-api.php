@@ -95,33 +95,32 @@ class WWW_API {
 			// This stores information about current API command state
 			// Various defaults are loaded from State
 			$apiState=array(
+				'cache-timeout'=>false,
 				'command'=>false,
+				'content-type-header'=>false,
+				'custom-header'=>false,
 				'hash'=>false,
-				'timestamp'=>false,
+				'ip-session'=>false,
+				'last-modified'=>$this->state->data['request-time'],
+				'minify-output'=>false,
+				'output-crypt-key'=>false,
+				'profile'=>$this->state->data['api-public-profile'],
+				'push-output'=>true,
 				'return-hash'=>false,
+				'return-timestamp'=>false,
+				'return-type'=>'json',
 				'secret-key'=>false,
 				'token'=>false,
 				'token-file'=>false,
 				'token-directory'=>false,
-				'ip-session'=>false,
-				'output-crypt-key'=>false,
-				'profile'=>$this->state->data['api-public-profile'],
-				'timestamp-timeout'=>false,
-				'token-timeout'=>false,
-				'cache-timeout'=>false,
-				'return-type'=>'json',
-				'push-output'=>true,
-				'content-type-header'=>false,
-				'minify-output'=>false,
-				'last-modified'=>$this->state->data['request-time'],
-				'custom-header'=>false
+				'token-timeout'=>false
 			);
 	
 			// If API command is not set and is not set in input array either, the system will return false
 			if(isset($apiInputData['www-command'])){
-				$apiState['command']=$apiInputData['www-command'];
+				$apiState['command']=strtolower($apiInputData['www-command']);
 			} else {
-				return $this->output(array('www-error'=>'API command not set','www-error-code'=>1),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+				return $this->output(array('www-error'=>'API command not set','www-error-code'=>101),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 			}
 			
 			// Existing response is checked from buffer if it exists
@@ -133,102 +132,6 @@ class WWW_API {
 				}
 			}
 			
-		// API PROFILE INITIALIZATION AND INITIAL VALIDATION
-			
-			// API profile data is loaded only if API profile is set and is not set as public profile
-			// If profile is public, then hash validations and certain encryption options are not available
-			if(isset($apiInputData['www-profile']) && $apiInputData['www-profile']!='' && $apiInputData['www-profile']!=$this->state->data['api-public-profile']){
-			
-				// Current API profile is assigned to state
-				// This is useful for controller development if you wish to restrict certain controllers to only certain API profiles
-				$apiState['profile']=$apiInputData['www-profile'];
-				
-				// This checks whether API profile information is defined in /resources/api.profiles.php file
-				if(isset($this->apiProfiles[$apiInputData['www-profile']])){
-				
-					// Testing if API profile is disabled or not
-					if(isset($this->apiProfiles[$apiState['profile']]['disabled']) && $this->apiProfiles[$apiState['profile']]['disabled']==1){
-						// If profile is set to be disabled
-						return $this->output(array('www-error'=>'API profile is disabled','www-error-code'=>3),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-					} 
-					
-					// Testing if IP is in valid range
-					if(isset($this->apiProfiles[$apiState['profile']]['ip']) && $this->apiProfiles[$apiState['profile']]['ip']!='*' && !in_array($this->state->data['true-client-ip'],explode(',',$this->apiProfiles[$apiState['profile']]['ip']))){
-						// If profile has IP set and current IP is not allowed
-						return $this->output(array('www-error'=>'API profile not allowed from this IP','www-error-code'=>4),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-					}
-					
-					// Returns an error if hash validation is required but www-hash is not provided
-					if(isset($this->apiProfiles[$apiState['profile']]['secret-key'])){
-						// Hash value has to be set and not be empty
-						if(!isset($apiInputData['www-hash']) || $apiInputData['www-hash']==''){
-							return $this->output(array('www-error'=>'Request validation hash is missing','www-error-code'=>5),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						} else {
-							// Validation hash
-							$apiState['hash']=$apiInputData['www-hash'];
-							// Secret key
-							$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
-						}
-					}
-					
-					// Returns an error if timestamp validation is required but www-timestamp is not provided						
-					if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout'])){
-						// Timestamp value has to be set and not be empty
-						if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
-							return $this->output(array('www-error'=>'Request validation timestamp is missing','www-error-code'=>6),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
-							return $this->output(array('www-error'=>'Request timestamp is too old','www-error-code'=>7),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						} else {
-							$apiState['timestamp']=$apiInputData['www-timeout'];
-						}
-					}
-					
-					// Token timeout
-					if(isset($this->apiProfiles[$apiState['profile']]['token-timeout'])){
-						$apiState['token-timeout']=$this->apiProfiles[$apiState['profile']]['token-timeout'];
-					}
-					
-					// Token check (only valid if hash and token timeout are set)
-					if($apiState['secret-key'] && $apiState['token-timeout']){
-					
-						// Session filename is a simple hashed API profile name
-						$apiState['token-file']=md5($apiState['profile']).'.tmp';
-						$apiState['token-file-ip']=md5($this->state->data['true-client-ip'].$apiState['profile']).'.tmp';
-						// Session folder in filesystem
-						$apiState['token-directory']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($apiState['token-file'],0,2).DIRECTORY_SEPARATOR;
-						$apiState['token-directory-ip']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($apiState['token-file-ip'],0,2).DIRECTORY_SEPARATOR;
-					
-						// Checking if valid token is active
-						// It is possible that the token was created with linked IP, which is checked here
-						if(file_exists($apiState['token-directory-ip'].$apiState['token-file-ip']) && filemtime($apiState['token-directory-ip'].$apiState['token-file-ip'])>=($this->state->data['request-time']-$apiState['token-timeout'])){
-							// Loading contents of current token file to API state
-							$apiState['token']=file_get_contents($apiState['token-directory-ip'].$apiState['token-file-ip']);
-							// This updates the last-modified time, thus postponing the time how long the token is considered valid
-							touch($apiState['token-directory-ip'].$apiState['token-file-ip']);
-							// Setting the IP directories to regular addresses
-							$apiState['token-file']=$apiState['token-file-ip'];
-							$apiState['token-directory']=$apiState['token-directory-ip'];
-						} elseif(file_exists($apiState['token-directory'].$apiState['token-file']) && filemtime($apiState['token-directory'].$apiState['token-file'])>=($this->state->data['request-time']-$apiState['token-timeout'])){
-							// Loading contents of current token file to API state
-							$apiState['token']=file_get_contents($apiState['token-directory'].$apiState['token-file']);
-							// This updates the last-modified time, thus postponing the time how long the token is considered valid
-							touch($apiState['token-directory'].$apiState['token-file']);
-						} elseif($apiState['command']=='www-create-session' && isset($apiInputData['www-ip-session']) && $apiInputData['www-ip-session']==true){
-							$apiState['ip-session']=true;
-							// Setting the IP directories to regular addresses
-							$apiState['token-file']=$apiState['token-file-ip'];
-							$apiState['token-directory']=$apiState['token-directory-ip'];
-						} elseif($apiState['command']!='www-create-session'){
-							// Token is not required for commands that create or destroy existing tokens
-							return $this->output(array('www-error'=>'API token does not exist or is timed out','www-error-code'=>8),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						}
-						
-					}
-					
-				} else {
-					return $this->output(array('www-error'=>'Valid API profile not found','www-error-code'=>2),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-				}
-			}
 			
 		// ASSIGNING WWW-* VALUES FROM INPUT TO API STATE
 			
@@ -252,6 +155,11 @@ class WWW_API {
 				$apiState['return-hash']=$apiInputData['www-return-hash'];
 			}
 			
+			// If this is set then user agent requests that API also returns a hash validation check (calculated from input and secret key) and timestamp in the response
+			if(isset($apiInputData['www-return-timestamp'])){
+				$apiState['return-timestamp']=$apiInputData['www-return-timestamp'];
+			}
+			
 			// This can be used to overwrite the default content type that is returned. Note that this does not affect the data type itself
 			// This can be used to send HTML headers and return JSON string, for example
 			if(isset($apiInputData['www-content-type'])){
@@ -264,57 +172,121 @@ class WWW_API {
 				$apiState['minify-output']=$apiInputData['www-minify'];
 			}
 			
-		// HANDLING CRYPTED INPUT
-		
-			// Validation hash is declared here due to decrypted input data otherwise manipulating it
-			$validationHash=$apiInputData;
+			// API profile data is loaded only if API profile is set and is not set as public profile
+			// If profile is public, then hash validations and certain encryption options are not available
+			if(isset($apiInputData['www-profile']) && $apiInputData['www-profile']!=$this->state->data['api-public-profile']){
 			
-			// If crypted input is set
-			if(isset($apiInputData['www-crypt-input'])){
-				// Crypted input is only possible with non-public profiles and an active session
-				if($apiState['profile']!=$this->state->data['api-public-profile'] && $apiState['secret-key']){
-					// Mcrypt is required for decryption
-					if(extension_loaded('mcrypt')){
-						// Rijndael 256 bit decryption is used in CBC mode
-						if($apiState['token'] && $apiState['command']!='www-create-session'){
-							$decryptedData=$this->decryptRijndael256($apiInputData['www-crypt-input'],$apiState['token'],$apiState['secret-key']);
-						} else {
-							$decryptedData=$this->decryptRijndael256($apiInputData['www-crypt-input'],$apiState['secret-key']);
-						}
-						if($decryptedData){
-							// Unserializing crypted data with JSON
-							$decryptedData=json_decode($decryptedData,true);
-							// Unserialization can fail if the data is not in correct format
-							if($decryptedData && is_array($decryptedData)){
-								// Merging crypted input with set input data
-								$apiInputData=$decryptedData+$apiInputData;
-							} else {
-								return $this->output(array('www-error'=>'Unserialized decrypted data is not an array','www-error-code'=>12),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-							}
-						} else {
-							return $this->output(array('www-error'=>'Failed to decrypt data','www-error-code'=>11),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						}	
-					} else {
-						return $this->output(array('www-error'=>'Unable to decrypt data','www-error-code'=>10),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+				// Current API profile is assigned to state
+				// This is useful for controller development if you wish to restrict certain controllers to only certain API profiles
+				$apiState['profile']=$apiInputData['www-profile'];
+				
+				// This checks whether API profile information is defined in /resources/api.profiles.php file
+				if(isset($this->apiProfiles[$apiInputData['www-profile']])){
+				
+					// Current API profile is assigned to state
+					$apiState['profile']=$apiInputData['www-profile'];
+					
+					// Testing if API profile is disabled or not
+					if(isset($this->apiProfiles[$apiState['profile']]['disabled']) && $this->apiProfiles[$apiState['profile']]['disabled']==1){
+						// If profile is set to be disabled
+						return $this->output(array('www-error'=>'API profile is disabled','www-error-code'=>103),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+					} 
+					
+					// Testing if IP is in valid range
+					if(isset($this->apiProfiles[$apiState['profile']]['ip']) && $this->apiProfiles[$apiState['profile']]['ip']!='*' && !in_array($this->state->data['true-client-ip'],explode(',',$this->apiProfiles[$apiState['profile']]['ip']))){
+						// If profile has IP set and current IP is not allowed
+						return $this->output(array('www-error'=>'API profile not allowed from this IP','www-error-code'=>104),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
+					
+					// Returns an error if timestamp validation is required but www-timestamp is not provided						
+					if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout'])){
+						// Timestamp value has to be set and not be empty
+						if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
+							return $this->output(array('www-error'=>'Request validation timestamp is missing','www-error-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
+							return $this->output(array('www-error'=>'Request timestamp is too old','www-error-code'=>106),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						}
+					}
+					
+					// Returns an error if hash validation is required but www-hash is not provided
+					if(isset($this->apiProfiles[$apiState['profile']]['secret-key'])){
+						// Hash value has to be set and not be empty
+						if(!isset($apiInputData['www-hash']) || $apiInputData['www-hash']==''){
+							return $this->output(array('www-error'=>'Request validation hash is missing','www-error-code'=>108),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						} else {
+							// Validation hash
+							$apiState['hash']=$apiInputData['www-hash'];
+							// Secret key
+							$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
+						}
+					} else {
+						return $this->output(array('www-error'=>'API profile configuration incorrect: Secret key missing','www-error-code'=>107),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+					}
+					
+					// Returns an error if timestamp validation is required but www-timestamp is not provided						
+					if(isset($this->apiProfiles[$apiState['profile']]['token-timeout']) && $this->apiProfiles[$apiState['profile']]['token-timeout']!=0){
+						// Since this is not null, token based validation is used
+						$apiState['token-timeout']=$this->apiProfiles[$apiState['profile']]['token-timeout'];
+					}
+					
 				} else {
-					return $this->output(array('www-error'=>'Crypted input can only be sent with non-public API profile with a secret key','www-error-code'=>9),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+					return $this->output(array('www-error'=>'Valid API profile not found','www-error-code'=>102),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 				}
+
 			}
 			
-			// If this is set, then the value of this is used to crypt the output
-			// Please note that while www-crypt-output key can be set outside www-crypt-input data, it is recommended to keep that key within crypted input when making a request
-			if(isset($apiInputData['www-crypt-output'])){
-				$apiState['output-crypt-key']=$apiInputData['www-crypt-output'];
-			}
-			
-		// NON-PUBLIC PROFILE VALIDATION
+		// API PROFILE VALIDATION FOR HASH AND TOKENS
 		
-			// Input data and hash validation is only done for non-public profiles and only when hash validation is used
-			if($apiState['profile']!=$this->state->data['api-public-profile'] && $apiState['secret-key']){
+			// API profile validation happens only if non-public profile is actually set
+			if($apiState['profile'] && $apiState['profile']!=$this->state->data['api-public-profile']){
 			
-				// BUILDING VALIDATION HASH
-			
+				// TOKEN CHECKS
+					
+					// Session filename is a simple hashed API profile name
+					$apiState['token-file']=md5($apiState['profile']).'.tmp';
+					$apiState['token-file-ip']=md5($this->state->data['true-client-ip'].$apiState['profile']).'.tmp';
+					// Session folder in filesystem
+					$apiState['token-directory']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($apiState['token-file'],0,2).DIRECTORY_SEPARATOR;
+					$apiState['token-directory-ip']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($apiState['token-file-ip'],0,2).DIRECTORY_SEPARATOR;
+				
+					// Checking if valid token is active
+					// It is possible that the token was created with linked IP, which is checked here
+					if(file_exists($apiState['token-directory-ip'].$apiState['token-file-ip']) && (!$apiState['token-timeout'] || filemtime($apiState['token-directory-ip'].$apiState['token-file-ip'])>=($this->state->data['request-time']-$apiState['token-timeout']))){
+					
+						// Loading contents of current token file to API state
+						$apiState['token']=file_get_contents($apiState['token-directory-ip'].$apiState['token-file-ip']);
+						// This updates the last-modified time, thus postponing the time how long the token is considered valid
+						touch($apiState['token-directory-ip'].$apiState['token-file-ip']);
+						// Setting the IP directories to regular addresses
+						$apiState['token-file']=$apiState['token-file-ip'];
+						$apiState['token-directory']=$apiState['token-directory-ip'];
+					
+					} elseif(file_exists($apiState['token-directory'].$apiState['token-file']) && (!$apiState['token-timeout'] || filemtime($apiState['token-directory'].$apiState['token-file'])>=($this->state->data['request-time']-$apiState['token-timeout']))){
+						
+						// Loading contents of current token file to API state
+						$apiState['token']=file_get_contents($apiState['token-directory'].$apiState['token-file']);
+						// This updates the last-modified time, thus postponing the time how long the token is considered valid
+						touch($apiState['token-directory'].$apiState['token-file']);
+						
+					} elseif($apiState['command']=='www-create-session' && isset($apiInputData['www-ip-session']) && $apiInputData['www-ip-session']==true){
+					
+						$apiState['ip-session']=true;
+						// Setting the IP directories to regular addresses
+						$apiState['token-file']=$apiState['token-file-ip'];
+						$apiState['token-directory']=$apiState['token-directory-ip'];
+						
+					} elseif($apiState['command']!='www-create-session'){
+					
+						// Token is not required for commands that create or destroy existing tokens
+						return $this->output(array('www-error'=>'API token does not exist or is timed out','www-error-code'=>109),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						
+					}
+					
+				// TOKEN AND HASH VALIDATION
+					
+					// Validation hash is calculated from input data
+					$validationHash=$apiInputData;
+				
 					// Unsetting validation hash itself from input
 					unset($validationHash['www-hash']);
 					// Session input is not considered for validation hash and is unset
@@ -329,84 +301,108 @@ class WWW_API {
 					if(isset($validationHash['www-files'])){
 						unset($validationHash['www-files']);
 					}
-					
+
 					// Validation data is sorted by keys
 					ksort($validationHash);
 					
-					// Final validation hash depends on whether the command was about session creation, destruction or any other command
-					// When tokens are not used (token-timeout is not set) then validation hash is calculated without token
-					if(!$apiState['token-timeout'] || $apiState['command']=='www-create-session'){
+					// If token is set then this is used for validation as long as the command is not www-create-session
+					if($apiState['token'] && $apiState['command']!='www-create-session'){
 						// Session creation and destruction commands have validation hashes built only with the secret key
-						$validationHash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['secret-key']);
+						$validationHash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
 					} else {
 						// Every other command takes token into account when calculating the validation hash
-						$validationHash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
+						$validationHash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['secret-key']);
 					}
 					
-				// HASH VALIDATION AND SESSION COMMANDS
+					// If validation hashes do not match
+					if($validationHash!=$apiState['hash']){
+						return $this->output(array('www-error'=>'API profile input hash validation failed','www-error-code'=>110),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+					}
 					
-					// Provided hash in the request must match the calculated hash
-					if($validationHash==$apiState['hash']){
+				// HANDLING CRYPTED INPUT
 					
-						// Session-based commands only work when tokens are actually used
-						if($apiState['token-timeout']){
-					
-							// These two commands are an exception to the rule, these are the only non-public profile commands that can be executed without requiring a valid token
-							if($apiState['command']=='www-create-session'){
-							
-								// If session token subdirectory does not exist, it is created
-								if(!is_dir($apiState['token-directory'])){
-									if(!mkdir($apiState['token-directory'],0777)){
-										throw new Exception('Cannot create sessions folder');
-									}
-								}
-								// Token for API access is generated simply from current profile name and request time
-								$apiState['token']=md5($apiState['profile'].$this->state->data['request-time']);
-								// Session token file is created and token itself is returned to the user agent as a successful request
-								if(file_put_contents($apiState['token-directory'].$apiState['token-file'],$apiState['token'])){
-									// Token is returned to user agent together with current token timeout setting
-									if($apiState['token-timeout']){
-										// Returning current IP together with the session
-										if($apiState['ip-session']){
-											return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>$apiState['token-timeout'],'www-ip-session'=>$this->state->data['true-client-ip']),$apiState);
-										} else {
-											return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>$apiState['token-timeout']),$apiState);
-										}
-									} else {
-										return $this->output(array('www-error'=>'API tokens are not used with this profile','www-error-code'=>15),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-									}
+					// If crypted input is set
+					if(isset($apiInputData['www-crypt-input'])){
+						// Mcrypt is required for decryption
+						if(extension_loaded('mcrypt')){
+							// Rijndael 256 bit decryption is used in CBC mode
+							if($apiState['token'] && $apiState['command']!='www-create-session'){
+								$decryptedData=$this->decryptRijndael256($apiInputData['www-crypt-input'],$apiState['token'],$apiState['secret-key']);
+							} else {
+								$decryptedData=$this->decryptRijndael256($apiInputData['www-crypt-input'],$apiState['secret-key']);
+							}
+							if($decryptedData){
+								// Unserializing crypted data with JSON
+								$decryptedData=json_decode($decryptedData,true);
+								// Unserialization can fail if the data is not in correct format
+								if($decryptedData && is_array($decryptedData)){
+									// Merging crypted input with set input data
+									$apiInputData=$decryptedData+$apiInputData;
 								} else {
-									throw new Exception('Cannot create API token file');
+									return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-error-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 								}
-
-							} elseif($apiState['command']=='www-destroy-session'){
-							
-								// Making sure that the token file exists, then removing it
-								if(file_exists($apiState['token-directory'].$apiState['token-file'])){
-									unlink($apiState['token-directory'].$apiState['token-file']);
-								}
-								// Returning success message
-								return $this->output(array('www-result'=>'Token destroyed'),$apiState);
-							
-							} elseif($apiState['command']=='www-validate-session'){
-								// This simply returns output
-								return $this->output(array('www-result'=>'API profile validation successful'),$apiState);
+							} else {
+								return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decryption failed','www-error-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 							}	
-						
-						} elseif(in_array($apiState['command'],array('www-create-session','www-destroy-session','www-validate-session'))){
-							// Since session timeout is not used and command is of that type, it is rejected
-							return $this->output(array('www-error'=>'API profile does not support session commands','www-error-code'=>16),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						} else {
+							return $this->output(array('www-error'=>'Problem decrypting encrypted data: No tools to decrypt data','www-error-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
-					
-					} else {
-						return $this->output(array('www-error'=>'API profile input hash validation failed','www-error-code'=>13),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
+					
+					// If this is set, then the value of this is used to crypt the output
+					// Please note that while www-crypt-output key can be set outside www-crypt-input data, it is recommended to keep that key within crypted input when making a request
+					if(isset($apiInputData['www-crypt-output'])){
+						$apiState['output-crypt-key']=$apiInputData['www-crypt-output'];
+					}
+					
+				// SESSION CREATION, DESTRUCTION AND VALIDATION COMMANDS
+				
+					// These two commands are an exception to the rule, these are the only non-public profile commands that can be executed without requiring a valid token
+					if($apiState['command']=='www-create-session'){
+					
+						// If session token subdirectory does not exist, it is created
+						if(!is_dir($apiState['token-directory'])){
+							if(!mkdir($apiState['token-directory'],0777)){
+								return $this->output(array('www-error'=>'Server configuration error: Cannot create session token folder','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							}
+						}
+						// Token for API access is generated simply from current profile name and request time
+						$apiState['token']=md5($apiState['profile'].$this->state->data['request-time']);
+						// Session token file is created and token itself is returned to the user agent as a successful request
+						if(file_put_contents($apiState['token-directory'].$apiState['token-file'],$apiState['token'])){
+							// Token is returned to user agent together with current token timeout setting
+							if($apiState['token-timeout']){
+								// Returning current IP together with the session
+								if($apiState['ip-session']){
+									return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>$apiState['token-timeout'],'www-ip-session'=>$this->state->data['true-client-ip']),$apiState);
+								} else {
+									return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>$apiState['token-timeout']),$apiState);
+								}
+							} else {
+								// Since token timeout is not set, the token is assumed to be infinite
+								return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>'infinite'),$apiState);
+							}
+						} else {
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create session token file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+						}
+
+					} elseif($apiState['command']=='www-destroy-session'){
+					
+						// Making sure that the token file exists, then removing it
+						if(file_exists($apiState['token-directory'].$apiState['token-file'])){
+							unlink($apiState['token-directory'].$apiState['token-file']);
+						}
+						// Returning success message
+						return $this->output(array('www-result'=>'Token destroyed'),$apiState);
+					
+					} elseif($apiState['command']=='www-validate-session'){
+						// This simply returns output
+						return $this->output(array('www-result'=>'API profile validation successful'),$apiState);
+					}	
 			
-			} elseif(in_array($apiState['command'],array('www-create-session','www-destroy-session','www-validate-session'))){
-				// Since session timeout is not used and command is of that type, it is rejected
-				return $this->output(array('www-error'=>'API profile does not support session commands','www-error-code'=>16),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-				// Since validation hash was not required, it is unset
-				unset($validationHash);
+			} else if(in_array($apiState['command'],array('www-create-session','www-destroy-session','www-validate-session'))){
+				// Since public profile is used, the session-related tokens cannot be used
+				return $this->output(array('www-error'=>'API token commands cannot be used with public profile','www-error-code'=>111),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 			}
 		
 		// CACHE HANDLING IF CACHE IS USED
@@ -451,6 +447,10 @@ class WWW_API {
 				// Unsetting return hash request from cache validation, if set
 				if(isset($cacheValidator['www-return-hash'])){
 					unset($cacheValidator['www-return-hash']);
+				}
+				// Unsetting return hash request from cache validation, if set
+				if(isset($cacheValidator['www-return-timestamp'])){
+					unset($cacheValidator['www-return-timestamp']);
 				}
 				// Unsetting content type overwrite from cache validation, if set
 				if(isset($cacheValidator['www-content-type'])){
@@ -545,7 +545,7 @@ class WWW_API {
 						require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>14),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}
 				}
 				
@@ -558,14 +558,14 @@ class WWW_API {
 					// If command method does not exist, 501 page is returned or error triggered
 					if(!method_exists($controller,$methodName)){
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>14),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}
 					// Result of the command is solved with this call
 					// Input data is also submitted to this function
 					$apiResult=$controller->$methodName($apiInputData);
 				} else {
 					// Since an error was detected, system pushes for output immediately
-					return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>14),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+					return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 				}
 				
 				// If returned data type was using output buffer, then that is gathered for the result instead
@@ -578,22 +578,22 @@ class WWW_API {
 					// If cache subdirectory does not exist, it is created
 					if(!is_dir($cacheFolder.$cacheSubfolder)){
 						if(!mkdir($cacheFolder.$cacheSubfolder,0777)){
-							throw new Exception('Cannot create cache folder');
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}
 					// If returned data is HTML or text, it is simply written into cache file
 					// Other results are serialized before being written to cache
 					if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
 						if(!file_put_contents($cacheFolder.$cacheSubfolder.$cacheFile,$apiResult)){
-							throw new Exception('Cannot write cache file');
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					} elseif($apiState['return-type']=='php'){
 						if(!file_put_contents($cacheFolder.$cacheSubfolder.$cacheFile,serialize($apiResult))){
-							throw new Exception('Cannot write cache file');
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					} else {
 						if(!file_put_contents($cacheFolder.$cacheSubfolder.$cacheFile,json_encode($apiResult))){
-							throw new Exception('Cannot write cache file');
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}
 				}
@@ -629,11 +629,14 @@ class WWW_API {
 		
 		// OUTPUT HASH VALIDATION
 		
+			// If timestamp is required to be returned
+			if($apiState['return-timestamp']){
+				$apiResult['www-timestamp']=time();
+			}
+		
 			// If request demanded a hash to also be returned
 			// This is only valid when the result is not an 'error' and has a secret key set
 			if($apiState['return-hash'] && !isset($apiResult['www-error']) && $apiState['secret-key']){
-				// This is used to timestamp the time hash was created
-				$apiResult['www-timestamp']=time();
 				// Hash is calculated from all the data returned to the user agent, except hash itself
 				$returnHash=$apiResult;
 				// Sorting the output data
@@ -645,6 +648,12 @@ class WWW_API {
 				} else {
 					$apiResult['www-hash']=sha1(json_encode($returnHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
 				}
+			}
+			
+			// Simple flag for error check, this is used for output encryption
+			$errorFound=false;
+			if(isset($apiResult['www-error'])){
+				$errorFound=true;
 			}
 		
 		// DATA CONVERSION FROM RESULT TO REQUESTED FORMAT
@@ -691,8 +700,7 @@ class WWW_API {
 			}
 		
 		// IF OUTPUT IS REQUESTED TO BE CRYPTED
-		
-			if($apiState['return-type']!='php' && $apiState['push-output'] && $apiState['output-crypt-key']){
+			if($apiState['return-type']!='php' && $apiState['push-output'] && $apiState['output-crypt-key'] && !$errorFound){
 				// Returned result will be with plain text instead of requested format, but only if header is not already overwritten
 				if(!$apiState['content-type-header']){
 					$apiState['content-type-header']='Content-Type: text/plain;charset=utf-8';

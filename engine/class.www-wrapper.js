@@ -157,8 +157,6 @@ function WWW_Wrapper(address){
 			timestampDuration=10;
 			// Input data
 			inputData=new Object();
-			cryptedData=new Object();
-			inputFiles=new Object();
 			// Log entry
 			log.push('Input data, crypted input and file data is unset');
 			return true;
@@ -173,7 +171,7 @@ function WWW_Wrapper(address){
 		// * unserializeResult - Whether the result is automatically unserialized or not
 		// Executes callback function with returned result, if no problems are encountered
 		this.sendRequest=function(callback,asynchronous,unserializeResult){
-								
+		
 			// Default value
 			if(unserializeResult==null){
 				unserializeResult=true;
@@ -210,6 +208,11 @@ function WWW_Wrapper(address){
 				delete inputData['www-minify'];
 			}
 			// If default value is set, then it is removed
+			if(inputData['www-return-timestamp']!=null && inputData['www-return-timestamp']==0){
+				log.push('Since www-return-timestamp is set to default value, it is removed from input data');
+				delete inputData['www-return-timestamp'];
+			}
+			// If default value is set, then it is removed
 			if(inputData['www-return-hash']!=null && inputData['www-return-hash']==0){
 				log.push('Since www-return-hash is set to default value, it is removed from input data');
 				delete inputData['www-return-hash'];
@@ -222,14 +225,12 @@ function WWW_Wrapper(address){
 			
 			// If profile is used, then timestamp will also be sent with the request
 			if(inputData['www-profile']!=null){
-			
 				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
 				if(inputData['www-timestamp']==null){
 					inputData['www-timestamp']=Math.floor(new Date().getTime()/1000);
 				}
-				
 			}
-		
+						
 			// If API profile and secret key are set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
 			if(apiSecretKey){
 			
@@ -259,9 +260,15 @@ function WWW_Wrapper(address){
 				}
 				
 			} else {
-			
-				// Log entry
-				log.push('API profile is not set, using public profile');
+		
+				// Token-only validation means that token will be sent to the server, but data itself will not be hashed. This works like a cookie.
+				if(apiToken){
+					// Log entry
+					log.push('Using token-only validation');
+				} else {
+					// Log entry
+					log.push('API secret key is not set, hash validation will not be used');
+				}
 				
 			}
 			
@@ -281,7 +288,7 @@ function WWW_Wrapper(address){
 				
 				// POST data
 				var postData=null;
-
+				
 				// Command is made slightly differently depending on whether files are to be uploaded or not
 				if(apiSubmitFormId==false){
 				
@@ -323,10 +330,12 @@ function WWW_Wrapper(address){
 									return false;
 								}  
 							}  
-						}; 
+						};
+						log.push('Making '+method+' request to URL: '+requestURL);
 						XMLHttp.open(method,requestURL,true);
 						XMLHttp.send(postData);
 					} else {
+						log.push('Making '+method+' request to URL: '+requestURL);
 						XMLHttp.open(method,requestURL,false);
 						XMLHttp.send(postData);
 						if(XMLHttp.status===200){  
@@ -442,6 +451,8 @@ function WWW_Wrapper(address){
 						hiddenWindow.attachEvent('onload',onLoad);
 					}
 
+					log.push('Making POST request to URL: '+apiAddress);
+					
 					// Submitting form
 					apiSubmitForm.submit();	
 					
@@ -474,16 +485,35 @@ function WWW_Wrapper(address){
 				}
 				
 			// RESULT VALIDATION
+			
+				// Result validation only applies to non-public profiles
+				if(inputData['www-profile']!=null){
 				
-				// If it was requested that validation hash and timestamp are also returned
-				// This only applies to non-public profiles
-				if(inputData['www-profile']!=null && apiSecretKey && inputData['www-return-hash']!=null){
-					// This validation is only done if string was unserialized
+					// Only unserialized data can be validated
 					if(unserializeResult){
-						// Hash and timestamp have to be defined in response
-						if(result['www-hash']!=null && result['www-timestamp']!=null){
-							// Making sure that the returned result is within accepted time limit
-							if(((Math.floor(new Date().getTime()/1000))-timestampDuration)<=result['www-timestamp']){
+					
+						// If it was requested that validation timestamp is returned
+						if(inputData['www-return-timestamp']!=null){
+							if(result['www-timestamp']!=null){
+								// Making sure that the returned result is within accepted time limit
+								if(((Math.floor(new Date().getTime()/1000))-timestampDuration)>result['www-timestamp']){
+									errorCode=210;
+									errorMessage='Validation timestamp is too old';
+									log.push(errorMessage);
+									return false;
+								}
+							} else {
+								errorCode=209;
+								errorMessage='Validation data missing: Timestamp was not returned';
+								log.push(errorMessage);
+								return false;
+							}
+						}
+						
+						// If it was requested that validation hash is returned
+						if(inputData['www-return-hash']!=null){
+							// Hash and timestamp have to be defined in response
+							if(result['www-hash']!=null){
 								// Assigning returned array to hash validation array
 								var validationHash=clone(result);
 								// Hash itself is removed from validation
@@ -492,12 +522,12 @@ function WWW_Wrapper(address){
 								validationHash=ksort(validationHash);
 								// Validation depends on whether session creation or destruction commands were called
 								if(inputData['www-command']=='www-create-session'){
-									var result_hash=sha1(JSON.stringify(validationHash)+apiSecretKey);
+									var resultHash=sha1(JSON.stringify(validationHash)+apiSecretKey);
 								} else {
-									var result_hash=sha1(JSON.stringify(validationHash)+apiToken+apiSecretKey);
+									var resultHash=sha1(JSON.stringify(validationHash)+apiToken+apiSecretKey);
 								}
 								// If sent hash is the same as calculated hash
-								if(result_hash==result['www-hash']){
+								if(resultHash==result['www-hash']){
 									log.push('Hash validation successful');
 								} else {
 									errorCode=211;
@@ -506,25 +536,22 @@ function WWW_Wrapper(address){
 									return false;
 								}
 							} else {
-								errorCode=210;
-								errorMessage='Validation timestamp is too old';
+								errorCode=209;
+								errorMessage='Validation data missing: Hash was not returned';
 								log.push(errorMessage);
 								return false;
 							}
-						} else {
-							errorCode=209;
-							errorMessage='Server did not return hash and timestamp';
-							log.push(errorMessage);
-							return false;
 						}
+					
 					} else {
 						errorCode=208;
-						errorMessage='Cannot validate hash';
+						errorMessage='Cannot validate hash: Unserialization not possible';
 						log.push(errorMessage);
 						return false;
 					}
+				
 				}
-			
+							
 			// Resetting the error variables
 			errorCode=false;
 			errorMessage=false;

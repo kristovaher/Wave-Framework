@@ -164,14 +164,14 @@ $log[]='';
 		$log[]='WARNING: GD Graphics Library extension is not supported, this is required for dynamically loaded images, this warning can be ignored if dynamic loading is not used';
 	}
 	
-// APACHE
+// APACHE AND NGINX
 	if(strpos($_SERVER['SERVER_SOFTWARE'],'Apache')!==false){
 		$log[]='SUCCESS: Apache server is used';
 		
 		// APACHE URL REWRITES
 			if(file_exists('.htaccess')){
 				// .htaccess in this directory attempts to rewrite compatibility.php into compatibility.php?mod_rewrite_enabled and if this is successful then mod_rewrite must work
-				if(isset($_GET['mod_rewrite_enabled'])){
+				if(isset($_GET['rewrite_enabled'])){
 					$log[]='SUCCESS: Apache mod_rewrite extension is supported';
 				} else {
 					$log[]='SUCCESS: Apache mod_rewrite extension is not supported, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
@@ -184,11 +184,22 @@ $log[]='';
 			if(file_exists('..'.DIRECTORY_SEPARATOR.'.htaccess')){
 				$log[]='SUCCESS: .htaccess file is present';
 			} else {
-				$log[]='WARNING: .htaccess file is missing from root folder, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+				$log[]='WARNING: .htaccess file is missing from root folder, Index gateway and rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
 			}
 			
+	} else if(strpos($_SERVER['SERVER_SOFTWARE'],'nginx')!==false){
+		$log[]='SUCCESS: Nginx server is used';
+
+		// NGINX URL REWRITES
+		// This only works if the /nginx.conf location setting for compatibility script is used in Nginx server configuration
+		if(isset($_GET['rewrite_enabled'])){
+			$log[]='SUCCESS: Nginx HttpRewriteModule is supported';
+		} else {
+			$log[]='SUCCESS: Apache HttpRewriteModule is not supported, Index gateway and rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+		}
+		
 	} else {
-		$log[]='WARNING: Your server is not Apache, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+		$log[]='WARNING: Your server is not Apache or Nginx, Index gateway will not work, this warning can be ignored if Index gateway is not used';
 	}
 	
 	
@@ -261,11 +272,11 @@ $log[]='';
 	
 	// FILESYSTEM LOG
 	// This stores all Logger generated log files
-	if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.'test.tmp','1')){
-		$log[]='SUCCESS: /filesystem/log/ is writable';
-		unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.'test.tmp');
+	if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+		$log[]='SUCCESS: /filesystem/logs/ is writable';
+		unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'test.tmp');
 	} else {
-		$log[]='WARNING: /filesystem/log/ is not writable, this warning can be ignored if performance logging is not used by Index gateway';
+		$log[]='WARNING: /filesystem/logs/ is not writable, this warning can be ignored if performance logging is not used by Index gateway';
 	}
 	
 	// FILESYSTEM SESSIONS

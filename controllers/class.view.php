@@ -133,6 +133,9 @@ class WWW_controller_view extends WWW_Factory {
 					<?php if(!empty($moduleStylesheet)){ ?>
 						<link type="text/css" href="<?=$webRoot?>resources/<?=implode('&',$moduleStylesheet)?>" rel="stylesheet" media="all"/>
 					<?php } ?>
+					<!-- Favicons -->
+					<link rel="icon" href="<?=$webRoot?>favicon.ico" type="image/x-icon"/>
+					<link rel="icon" href="<?=$webRoot?>favicon.ico" type="image/vnd.microsoft.icon"/>
 					<!-- System state -->
 					<script type="text/javascript">
 						var WWW=new Object();
@@ -147,9 +150,6 @@ class WWW_controller_view extends WWW_Factory {
 					<?php if(!empty($moduleJavaScript)){ ?>
 						<script type="text/javascript" src="<?=$webRoot?>resources/<?=implode('&',$moduleJavaScript)?>"></script>
 					<?php } ?>
-					<!-- Favicons -->
-					<link rel="icon" href="<?=$webRoot?>favicon.ico" type="image/x-icon"/>
-					<link rel="icon" href="<?=$webRoot?>favicon.ico" type="image/vnd.microsoft.icon"/>
 				</head>
 				<body>
 				<?php

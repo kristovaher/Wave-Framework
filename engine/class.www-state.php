@@ -56,7 +56,7 @@ class WWW_State	{
 				'http-if-modified-since'=>((isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))?strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']):false),
 				'http-authentication-password'=>'',
 				'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
-				'system-root'=>str_replace('index.php','',$_SERVER['SCRIPT_FILENAME']),
+				'system-root'=>str_replace('index.php','',((DIRECTORY_SEPARATOR!='/')?str_replace('/',DIRECTORY_SEPARATOR,$this->data['system-root']):$_SERVER['SCRIPT_FILENAME'])),
 				'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 				'enforce-url-end-slash'=>true,
 				'enforce-first-language-url'=>true,
@@ -75,7 +75,17 @@ class WWW_State	{
 				'session-cookie'=>false
 			);
 			
+			
+			
 		// ASSIGNING STATE FROM CONFIGURATION FILE
+		
+			// Removing full stop from the beginning of both directory URL's
+			if($this->data['web-root'][0]=='.'){
+				$this->data['web-root'][0]='';
+			}
+			if($this->data['system-root'][0]=='.'){
+				$this->data['system-root'][0]='';
+			}
 		
 			// If array of configuration data is set during object creation, it is used
 			// This loops over all the configuration options from /config.php file through setState() function
@@ -85,6 +95,7 @@ class WWW_State	{
 			}
 			
 		// CHECKING FOR SERVER OR PHP SPECIFIC CONFIGURATION OPTIONS
+		
 		
 			// If timezone is still set to false, then system attempts to set the currently set timezone
 			// Some systems throw deprecated warning if this value is not set

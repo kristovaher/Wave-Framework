@@ -25,7 +25,7 @@ class WWW_view_home extends WWW_Factory {
 				<!-- Simple translation is echoed to show how the translations can be used -->
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;text-align:center;"><?=$translations['hello-world']?></h1>
 				<!-- This shows how to dynamically load a resource -->
-				<img src="<?=$input['www-view-data']['web-root']?>resources/images/160x160&logo.png"/>
+				<img width="160" height="160" src="<?=$input['www-view-data']['web-root']?>resources/images/160x160&logo.png"/>
 			</div>
 		<?php
 		

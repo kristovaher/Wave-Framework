@@ -485,9 +485,9 @@ class WWW_API {
 							}
 							// Cache headers (Last modified is never sent with 304 header)
 							if($this->state->data['http-authentication']==true){
-								header('Cache-Control: private,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).',must-revalidate');
+								header('Cache-Control: private,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 							} else {
-								header('Cache-Control: public,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).',must-revalidate');
+								header('Cache-Control: public,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 							}
 							header('Expires: '.gmdate('D, d M Y H:i:s',($apiState['last-modified']+$apiState['cache-timeout'])).' GMT');
 							// Returning 304 header
@@ -531,7 +531,6 @@ class WWW_API {
 				if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
 					ob_start();
 				}
-
 				// API command is solved into bits to be parsed
 				$commandBits=explode('-',$apiState['command'],2);
 				// Class name is found based on command
@@ -762,9 +761,9 @@ class WWW_API {
 					if($apiState['cache-timeout']!=0){
 						// Cache control depends whether HTTP authentication is used or not
 						if($this->state->data['http-authentication']==true){
-							header('Cache-Control: private,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).',must-revalidate');
+							header('Cache-Control: private,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 						} else {
-							header('Cache-Control: public,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).',must-revalidate');
+							header('Cache-Control: public,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 						}
 						header('Expires: '.gmdate('D, d M Y H:i:s',($apiState['last-modified']+$apiState['cache-timeout'])).' GMT');
 						header('Last-Modified: '.gmdate('D, d M Y H:i:s',$apiState['last-modified']).' GMT');

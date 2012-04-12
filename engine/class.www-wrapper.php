@@ -23,8 +23,11 @@ class WWW_Wrapper {
 	private $apiAddress;
 	
 	// API profile information
+	private $apiProfile=false;
 	private $apiSecretKey=false;
 	private $apiToken=false;
+	private $returnHash=false;
+	private $returnTimestamp=false;
 	
 	// Information about last error
 	public $errorMessage=false;
@@ -133,6 +136,19 @@ class WWW_Wrapper {
 					$this->apiToken=$value;
 					$this->log[]='API session token set to: '.$value;
 					break;
+				case 'www-profile':
+					$this->apiProfile=$value;
+					$this->inputData[$input]=$value;
+					$this->log[]='API profile set to: '.$value;
+					break;
+				case 'www-return-hash':
+					$this->returnHash=$value;
+					$this->log[]='API request will require hash validation';
+					break;
+				case 'www-return-timestamp':
+					$this->returnTimestamp=$value;
+					$this->log[]='API request will require timestamp validation';
+					break;
 				case 'www-request-timeout':
 					$this->requestTimeout=$value;
 					$this->log[]='API request timeout set to: '.$value;
@@ -208,13 +224,19 @@ class WWW_Wrapper {
 		
 		// This function simply deletes all current input values
 		// This also deletes crypted input and input files
+		// * clearAuth - True or false flag whether to also reset authentication and state data
 		// Returns true
-		public function clearInput(){
-			// Settings
-			$this->apiSecretKey=false;
-			$this->apiToken=false;
-			$this->requestTimeout=10;
-			$this->timestampDuration=10;
+		public function clearInput($clearAuth=false){
+			// If authentication should also be cleared
+			if($clearAuth){
+				$this->apiProfile=false;
+				$this->apiSecretKey=false;
+				$this->apiToken=false;
+				$this->returnHash=false;
+				$this->returnTimestamp=false;
+				$this->requestTimeout=10;
+				$this->timestampDuration=10;
+			}
 			// Input data
 			$this->inputData=array();
 			$this->cryptedData=array();
@@ -237,10 +259,26 @@ class WWW_Wrapper {
 			$thisInputData=$this->inputData;
 			
 			// Current state settings
+			$apiProfile=$this->apiProfile;
 			$apiSecretKey=$this->apiSecretKey;
 			$apiToken=$this->apiToken;
 			$requestTimeout=$this->requestTimeout;
 			$timestampDuration=$this->timestampDuration;
+			$returnTimestamp=$this->returnTimestamp;
+			$returnHash=$this->returnHash;
+			
+			// Assigning authentication options that are sent with the request
+			if($apiProfile!=false){
+				$thisInputData['www-profile']=$apiProfile;
+			}
+			// Assigning return-timestamp flag to request
+			if($returnTimestamp==true || $returnTimestamp==1){
+				$thisInputData['www-return-timestamp']=1;
+			}
+			// Assigning return-timestamp flag to request
+			if($returnHash==true || $returnHash==1){
+				$thisInputData['www-return-hash']=1;
+			}
 			
 			// Clears the source input data
 			$this->clearInput();
@@ -276,27 +314,17 @@ class WWW_Wrapper {
 				$this->log[]='Since www-minify is set to default value, it is removed from input data';
 				unset($thisInputData['www-minify']);
 			}
-			// If default value is set, then it is removed
-			if(isset($thisInputData['www-return-hash']) && $thisInputData['www-return-hash']==false){
-				$this->log[]='Since www-return-hash is set to default value, it is removed from input data';
-				unset($thisInputData['www-return-hash']);
-			}
-			// If default value is set, then it is removed
-			if(isset($thisInputData['www-return-timestamp']) && $thisInputData['www-return-timestamp']==false){
-				$this->log[]='Since www-return-timestamp is set to default value, it is removed from input data';
-				unset($thisInputData['www-return-timestamp']);
-			}
 			
 			
 			// If encryption key is set, then this is sent together with crypted data
-			if(isset($thisInputData['www-profile']) && isset($apiSecretKey) && isset($thisInputData['www-crypt-output'])){
+			if($apiProfile && isset($apiSecretKey) && isset($thisInputData['www-crypt-output'])){
 				$this->log[]='Crypt output key was set as regular input for non-public profile API request, it is moved to crypted input instead';
 				$this->cryptedData['www-crypt-output']=$thisInputData['www-crypt-output'];
 				unset($thisInputData['www-crypt-output']);
 			}
 			
 			// If profile is used, then timestamp will also be sent with the request
-			if(isset($thisInputData['www-profile'])){
+			if($apiProfile){
 				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
 				if(!isset($thisInputData['www-timestamp'])){
 					$thisInputData['www-timestamp']=time();
@@ -593,13 +621,13 @@ class WWW_Wrapper {
 			// RESULT VALIDATION
 			
 				// Result validation only applies to non-public profiles
-				if(isset($thisInputData['www-profile'])){
+				if($apiProfile){
 				
 					// Only unserialized data can be validated
 					if($unserializeResult){
 					
 						// If it was requested that validation timestamp is returned
-						if(isset($thisInputData['www-return-timestamp'])){
+						if($returnTimestamp){
 							if(isset($result['www-timestamp'])){
 								// Making sure that the returned result is within accepted time limit
 								if((time()-$timestampDuration)>$result['www-timestamp']){
@@ -617,7 +645,7 @@ class WWW_Wrapper {
 						}
 						
 						// If it was requested that validation hash is returned
-						if(isset($thisInputData['www-return-hash'])){
+						if($returnHash){
 							// Hash and timestamp have to be defined in response
 							if(isset($result['www-hash'])){
 								// Assigning returned array to hash validation array
@@ -661,6 +689,12 @@ class WWW_Wrapper {
 			// Resetting the error variables
 			$this->errorCode=false;
 			$this->errorMessage=false;
+			
+			// If this command was to create a token
+			if($thisInputData['www-command']=='www-create-session' && isset($result['www-token'])){
+				$this->apiToken=$result['www-token'];
+				$this->log[]='Session token was found in reply, API session token set to: '.$result['www-token'];
+			}
 				
 			// Returning request result
 			return $result;

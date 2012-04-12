@@ -338,6 +338,42 @@ class WWW_Factory {
 		final public function dbPDO(){
 			return $this->WWW_API->state->databaseConnection->pdo;
 		}
+		
+	// TERMINAL
+	
+		// This function looks for available terminal/command line option and attempts to execute it
+		// * command - Command to be executed
+		// Returns command result, if available
+		final public function terminal($command){
+		
+			// Status variable
+			$status=1;
+		
+			// Checking all possibleterminal functions
+			if(function_exists('system')){
+				ob_start();
+				system($command,$status);
+				$output=ob_get_contents();
+				ob_end_clean();
+			} elseif(function_exists('passthru')){
+				ob_start();
+				passthru($command,$status);
+				$output=ob_get_contents();
+				ob_end_clean();
+			} elseif(function_exists('exec')){
+				exec($command,$output,$status);
+				$output=implode("\n",$output);
+			} elseif(function_exists('shell_exec')){
+				$output=shell_exec($command);
+			} else {
+				// No function was available, returning false
+				return false;
+			}
+
+			// Returning result
+			return array('output'=>$output,'status'=>$return_var);
+			
+		}
 
 }
 	

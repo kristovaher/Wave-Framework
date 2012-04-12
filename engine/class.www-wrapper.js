@@ -17,8 +17,11 @@ function WWW_Wrapper(address){
 	var apiAddress=address;
 	
 	// API profile information
+	var apiProfile=false;
 	var apiSecretKey=false;
 	var apiToken=false;
+	var returnHash=false;
+	var returnTimestamp=false;
 	
 	// Information about last error
 	var errorMessage=false;
@@ -98,6 +101,19 @@ function WWW_Wrapper(address){
 					apiToken=value;
 					log.push('API session token set to: '+value);
 					break;
+				case 'www-profile':
+					apiProfile=value;
+					inputData[input]=value;
+					log.push('API profile set to: '+value);
+					break;
+				case 'www-return-hash':
+					apiProfile=value;
+					log.push('API request will require hash validation');
+					break;
+				case 'www-return-timestamp':
+					apiProfile=value;
+					log.push('API request will require timestamp validation');
+					break;
 				case 'www-timestamp-duration':
 					timestampDuration=$value;
 					log.push('API valid timestamp duration set to: '+value);
@@ -149,12 +165,18 @@ function WWW_Wrapper(address){
 		}
 		
 		// This function simply deletes current input values
+		// * clearAuth - True or false flag whether to also reset authentication and state data
 		// Returns true
-		this.clearInput=function(){
-			// Settings
-			apiSecretKey=false;
-			apiToken=false;
-			timestampDuration=10;
+		this.clearInput=function(clearAuth){
+			if(clearAuth!=null && clearAuth==true){
+				// Settings
+				apiProfile=false;
+				apiSecretKey=false;
+				apiToken=false;
+				returnHash=false;
+				returnTimestamp=false;
+				timestampDuration=10;
+			}
 			apiSubmitFormId=false;
 			// Input data
 			inputData=new Object();
@@ -186,10 +208,26 @@ function WWW_Wrapper(address){
 			var thisInputData=clone(inputData);
 			
 			// Current state settings
+			var thisApiProfile=apiProfile;
 			var thisApiSecretKey=apiSecretKey;
 			var thisApiToken=apiToken;
 			var thisTimestampDuration=timestampDuration;
 			var thisApiSubmitFormId=apiSubmitFormId;
+			var thisReturnTimestamp=returnTimestamp;
+			var thisReturnHash=returnHash;
+			
+			// Assigning authentication options that are sent with the request
+			if(thisApiProfile!=false){
+				thisInputData['www-profile']=thisApiProfile;
+			}
+			// Assigning return-timestamp flag to request
+			if(thisReturnTimestamp==true || thisReturnTimestamp==1){
+				thisInputData['www-return-timestamp']=1;
+			}
+			// Assigning return-timestamp flag to request
+			if(thisReturnHash==true || thisReturnHash==1){
+				thisInputData['www-return-hash']=1;
+			}
 					
 			// Clearing input data
 			this.clearInput();
@@ -220,24 +258,9 @@ function WWW_Wrapper(address){
 				log.push('Since www-minify is set to default value, it is removed from input data');
 				delete thisInputData['www-minify'];
 			}
-			// If default value is set, then it is removed
-			if(thisInputData['www-return-timestamp']!=null && thisInputData['www-return-timestamp']==0){
-				log.push('Since www-return-timestamp is set to default value, it is removed from input data');
-				delete thisInputData['www-return-timestamp'];
-			}
-			// If default value is set, then it is removed
-			if(thisInputData['www-return-hash']!=null && thisInputData['www-return-hash']==0){
-				log.push('Since www-return-hash is set to default value, it is removed from input data');
-				delete thisInputData['www-return-hash'];
-			}
-			// If default value is set, then it is removed
-			if(thisInputData['www-output']!=null && thisInputData['www-output']==1){
-				log.push('Since www-output is set to default value, it is removed from input data');
-				delete thisInputData['www-output'];
-			}
 			
 			// If profile is used, then timestamp will also be sent with the request
-			if(thisInputData['www-profile']!=null){
+			if(thisApiProfile){
 				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
 				if(thisInputData['www-timestamp']==null){
 					thisInputData['www-timestamp']=Math.floor(new Date().getTime()/1000);
@@ -512,13 +535,13 @@ function WWW_Wrapper(address){
 			// RESULT VALIDATION
 			
 				// Result validation only applies to non-public profiles
-				if(thisInputData['www-profile']!=null){
+				if(thisApiProfile){
 				
 					// Only unserialized data can be validated
 					if(unserializeResult){
 					
 						// If it was requested that validation timestamp is returned
-						if(thisInputData['www-return-timestamp']!=null){
+						if(thisReturnTimestamp){
 							if(result['www-timestamp']!=null){
 								// Making sure that the returned result is within accepted time limit
 								if(((Math.floor(new Date().getTime()/1000))-thisTimestampDuration)>result['www-timestamp']){
@@ -536,7 +559,7 @@ function WWW_Wrapper(address){
 						}
 						
 						// If it was requested that validation hash is returned
-						if(thisInputData['www-return-hash']!=null){
+						if(thisReturnHash){
 							// Hash and timestamp have to be defined in response
 							if(result['www-hash']!=null){
 								// Assigning returned array to hash validation array
@@ -580,6 +603,12 @@ function WWW_Wrapper(address){
 			// Resetting the error variables
 			errorCode=false;
 			errorMessage=false;
+			
+			// If this command was to create a token
+			if(thisInputData['www-command']=='www-create-session' && result['www-token']!=null){
+				apiToken=result['www-token'];
+				log.push('Session token was found in reply, API session token set to: '+result['www-token']);
+			}
 			
 			// If callback function is set
 			if(callback==null){

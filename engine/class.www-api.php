@@ -420,9 +420,9 @@ class WWW_API {
 			
 				// Calculating cache validation string
 				$cacheValidator=$apiInputData;
-				// If session cookie is defined, it is removed from input data for cache validation
-				if($this->state->data['session-cookie'] && isset($cacheValidator['www-cookies'][$this->state->data['session-cookie']])){
-					unset($cacheValidator['www-cookies'][$this->state->data['session-cookie']]);
+				// If session namespace is defined, it is removed from cookies for cache validation
+				if(isset($cacheValidator['www-cookies'][$this->state->data['session-namespace']])){
+					unset($cacheValidator['www-cookies'][$this->state->data['session-namespace']]);
 				}
 				// Unsetting hash from cache validation, if set
 				if(isset($cacheValidator['www-hash'])){
@@ -909,24 +909,7 @@ class WWW_API {
 				foreach($data['www-set-cookie'] as $cookie){
 					// Cookies require name and value to be set
 					if(isset($cookie['name']) && isset($cookie['value'])){
-						// Setting defaults to non-required cookies
-						if(!isset($cookie['expire'])){
-							$cookie['expire']=2147483647;
-						}
-						if(!isset($cookie['path'])){
-							$cookie['path']=$this->state->data['web-root'];
-						}
-						if(!isset($cookie['domain'])){
-							$cookie['domain']=$this->state->data['http-host'];
-						}
-						if(!isset($cookie['secure'])){
-							$cookie['secure']=false;
-						}
-						if(!isset($cookie['httponly'])){
-							$cookie['httponly']=false;
-						}
-						// Setting the cookie
-						setcookie($cookie['name'],$cookie['value'],$cookie['expire'],$cookie['path'],$cookie['domain'],$cookie['secure'],$cookie['httponly']);
+						$this->state->setCookie($cookie['name'],$cookie['value']);
 					}
 				}
 			}
@@ -936,34 +919,19 @@ class WWW_API {
 				// Multiple cookies can be unset simultaneously
 				if(is_array($data['www-unset-cookie'])){
 					foreach($data['www-unset-cookie'] as $cookie){
-						// Cookie is unset only if it actually exists
-						if(isset($_COOKIE[$cookie])){
-							// Setting 0 as timestamp will delete the cokie at the end of session
-							setcookie($cookie,0);
-						}
+						$this->state->unsetCookie($cookie);
 					}
 				} else {
-					// Cookie is unset only if it actually exists
-					if(isset($_COOKIE[$data['www-unset-cookie']])){
-						setcookie($data['www-unset-cookie'],0);
-					}
+					$this->state->unsetCookie($data['www-unset-cookie']);
 				}
-			}
-		
-			// This starts sessions if session-specific funtions are used
-			if((isset($data['www-set-session']) || isset($data['www-unset-session'])) && !session_id()){
-				if($this->state->data['session-cookie']){
-					session_name($this->state->data['session-cookie']);
-				}
-				session_start();
 			}
 
 			// This adds a session
-			if(isset($data['www-set-session']) && is_array($data['www-set-session'])){
+			if(isset($data['www-set-session'])){
+				// Session value must be an array
 				foreach($data['www-set-session'] as $session){
-					// Sessions require name and value to be set
 					if(isset($session['name']) && isset($session['value'])){
-						$_SESSION[$session['name']]=$session['value'];
+						$this->state->setSession($session['name'],$session['value']);
 					}
 				}
 			}
@@ -973,16 +941,10 @@ class WWW_API {
 			if(isset($data['www-unset-session'])){
 				if(is_array($data['www-unset-session'])){
 					foreach($data['www-unset-session'] as $session){
-						// Session is unset only if it actually exists
-						if(isset($_SESSION[$session])){
-							unset($_SESSION[$session]);
-						}
+						$this->state->unsetSession($session);
 					}
 				} else {
-					// Session is unset only if it actually exists
-					if(isset($_SESSION[$data['www-unset-session']])){
-						unset($_SESSION[$data['www-unset-session']]);
-					}
+					$this->state->unsetSession($data['www-unset-session']);
 				}
 			}
 		

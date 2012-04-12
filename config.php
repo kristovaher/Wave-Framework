@@ -270,16 +270,5 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// This setting sets the server load limit after which requests will be blocked
 	// This is set to 0 and thus not used by default
 	// $config['load-limiter']=80;
-	
-// SESSIONS
-
-	// Disabling automatic session start
-	// If this is set then State will not automatically initialize sessions and you can assign conditional session starts in URL and View controllers
-	// This is turned off by default
-	// $config['disable-session-start']=false;
-	
-	// Session cookie name
-	// If this is not set then PHP uses default session cookie name (usually PHPSESSID)
-	// $config['session-cookie']='PHPSESSID';
 
 ?>

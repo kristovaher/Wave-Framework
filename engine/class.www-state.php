@@ -26,9 +26,12 @@ class WWW_State	{
 	// Database connection is stored in this variable, if set
 	public $databaseConnection=false;
 	
+	// Flag that stores if sessions have been started or not
+	public $sessionStarted=false;
+	
 	// When state file is initiated, it populates data with default values from system and PHP settings
 	// * config - If set, State file has additional data loaded from provided configuration array
-	public function __construct($config=array()){
+	final public function __construct($config=array()){
 	
 		// PRE-DEFINED STATE VALUES
 	
@@ -44,7 +47,6 @@ class WWW_State	{
 				'404-view'=>'404',
 				'error-reporting'=>0,
 				'timezone'=>false,
-				'disable-session-start'=>false,
 				'output-compression'=>'deflate',
 				'http-host'=>$_SERVER['HTTP_HOST'],
 				'http-accept'=>((isset($_SERVER['HTTP_ACCEPT']))?explode(',',$_SERVER['HTTP_ACCEPT']):''),
@@ -69,10 +71,9 @@ class WWW_State	{
 				'server-ip'=>$_SERVER['SERVER_ADDR'],
 				'request-uri'=>$_SERVER['REQUEST_URI'],
 				'request-time'=>$_SERVER['REQUEST_TIME'],
+				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'true-request'=>false,
-				'fingerprint'=>'',
-				'www-session-key'=>'www-framework',
-				'session-cookie'=>false
+				'fingerprint'=>''
 			);
 			
 			
@@ -114,19 +115,6 @@ class WWW_State	{
 				$this->data['language']=$this->data['languages'][0];
 			}
 			
-			// Sessions are started only if sessions are not already started and auto-start is not disabled
-			if($this->data['disable-session-start']==false){
-				// This only applies if session is not already started
-				if(!session_id()){
-					// Assigning current session name to session-cookie variable
-					if(!isset($config['session-cookie'])){
-						$this->data['session-cookie']=session_name();
-					}
-					// Starting sessions
-					session_start();
-				}
-			}
-			
 			// Compressed output is turned off if the requesting user agent does not support it
 			// This is also turned off if PHP does not support Zlib compressions
 			if($this->data['output-compression']!=false){
@@ -165,109 +153,243 @@ class WWW_State	{
 		
 	}
 	
-	// Returns data from State data array
-	// * variable - data array key to be returned
-	// * subvariable - if returned element is an array itself, this returns the value of that key
-	// Returns variable if found, false if failed
-	public function getState($variable=false,$subvariable=false){
+	// STATE MANIPULATION
 	
-		// Unless variable and subvariable are set, the script returns entire State data array
-		if($subvariable && $variable){
-			// If variable and subvariable are both defined and data exists
-			if(isset($this->data[$variable][$subvariable])){
-				return $this->data[$variable][$subvariable];
-			} else {
-				return false;
-			}
-		} elseif($variable){
-			// If variable is defined and data exists
-			if(isset($this->data[$variable])){
-				return $this->data[$variable];
-			} else {
-				return false;
-			}
-		} else {
-			// If no variable was requested the entire data array is returned
-			return $this->data;
-		}
+		// Returns data from State data array
+		// * variable - data array key to be returned
+		// * subvariable - if returned element is an array itself, this returns the value of that key
+		// Returns variable if found, false if failed
+		final public function getState($variable=false,$subvariable=false){
 		
-	}
-	
-	// Used for setting state data
-	// This will take into account internal mechanics, such as PHP settings
-	// * variable - Data key to be set
-	// * value - Value of the new data
-	// Returns true, since it just sets a new variable
-	public function setState($variable,$value=true){
-	
-		// If variable is an array with values it assumes that array keys are variables and values are to be set for those variables
-		if(is_array($variable)){
-			foreach($variable as $key=>$val){
-				// Certain variables can affect system behavior and this is checked here
-				$this->stateChanged($key,$val);
-			}
-		} else {
-			// Certain variables can affect system behavior and this is checked here
-			$this->stateChanged($variable,$value);
-		}
-		// State has been set
-		return true;
-		
-	}
-	
-	// This function is used to set certain system flags, if certain values are set for State
-	// * variable - Variable name that is changed
-	// * value - New value of the variable
-	// Returns always true since it just checks for certain variable conditions
-	private function stateChanged($variable,$value=true){
-	
-		// Value is set instantly
-		$this->data[$variable]=$value;
-		
-		// Certain variables are checked that might change system flags
-		switch ($variable) {
-			case 'error-reporting':
-				// Attempting to turn on PHP error-reporting
-				if($value!=0 && $value!=false){
-					// In some environments the ini_set() function is not enabled
-					if(function_exists('ini_set')){
-						ini_set('display_errors',1);
-						ini_set('error_reporting',$value);
-					}
-					error_reporting($value);
+			// Unless variable and subvariable are set, the script returns entire State data array
+			if($subvariable && $variable){
+				// If variable and subvariable are both defined and data exists
+				if(isset($this->data[$variable][$subvariable])){
+					return $this->data[$variable][$subvariable];
 				} else {
-					error_reporting(0);
+					return false;
 				}
-				break;
-			case 'timezone':
-				// Attempting to set default timezone
-				date_default_timezone_set($value);
-				break;
-			case 'session-cookie':
-				// If session cookie name is set
-				// Note that this should always be set before session_start() or it just does not work
-				if(!session_id() && $value!=''){
-					session_name($value);
+			} elseif($variable){
+				// If variable is defined and data exists
+				if(isset($this->data[$variable])){
+					return $this->data[$variable];
+				} else {
+					return false;
 				}
-				break;
-			case 'output-compression':
-				// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
-				if($value==false || !in_array($value,$this->data['http-accept-encoding']) || !extension_loaded('Zlib')){
-					$this->data[$variable]=false;
-				}
-				break;
-			case 'languages':
-				// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
-				if($value!=false && $value!=''){
-					$this->data[$variable]=explode(',',$value);
-				}
-				break;
+			} else {
+				// If no variable was requested the entire data array is returned
+				return $this->data;
+			}
+			
 		}
 		
-		// State has been changed
-		return true;
+		// Used for setting state data
+		// This will take into account internal mechanics, such as PHP settings
+		// * variable - Data key to be set
+		// * value - Value of the new data
+		// Returns true, since it just sets a new variable
+		final public function setState($variable,$value=true){
 		
-	}
+			// If variable is an array with values it assumes that array keys are variables and values are to be set for those variables
+			if(is_array($variable)){
+				foreach($variable as $key=>$val){
+					// Certain variables can affect system behavior and this is checked here
+					$this->stateChanged($key,$val);
+				}
+			} else {
+				// Certain variables can affect system behavior and this is checked here
+				$this->stateChanged($variable,$value);
+			}
+			// State has been set
+			return true;
+			
+		}
+		
+		// This function is used to set certain system flags, if certain values are set for State
+		// * variable - Variable name that is changed
+		// * value - New value of the variable
+		// Returns always true since it just checks for certain variable conditions
+		final private function stateChanged($variable,$value=true){
+		
+			// Value is set instantly
+			$this->data[$variable]=$value;
+			
+			// Certain variables are checked that might change system flags
+			switch ($variable) {
+				case 'error-reporting':
+					// Attempting to turn on PHP error-reporting
+					if($value!=0 && $value!=false){
+						// In some environments the ini_set() function is not enabled
+						if(function_exists('ini_set')){
+							ini_set('display_errors',1);
+							ini_set('error_reporting',$value);
+						}
+						error_reporting($value);
+					} else {
+						error_reporting(0);
+					}
+					break;
+				case 'timezone':
+					// Attempting to set default timezone
+					date_default_timezone_set($value);
+					break;
+				case 'output-compression':
+					// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
+					if($value==false || !in_array($value,$this->data['http-accept-encoding']) || !extension_loaded('Zlib')){
+						$this->data[$variable]=false;
+					}
+					break;
+				case 'languages':
+					// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
+					if($value!=false && $value!=''){
+						$this->data[$variable]=explode(',',$value);
+					}
+					break;
+			}
+			
+			// State has been changed
+			return true;
+			
+		}
+		
+	// SESSION AND COOKIES
+	
+		// This starts session in current namespace
+		final public function startSession(){
+			// Making sure that sessions have not already been started
+			if(!session_id()){
+				session_name($this->data['session-namespace']);
+				session_start();
+			}
+			// Flag for session state
+			$this->sessionStarted=true;
+			return true;
+		}
+		
+		// This function regenerates ongoing session
+		final public function regenerateSession(){
+			// Making sure that sessions have been started
+			if(!$this->sessionStarted){
+				$this->startSession();
+			}
+			// Regenerating session id
+			session_regenerate_id();
+			return true;
+		}
+		
+		// This function regenerates ongoing session
+		final public function destroySession(){
+			// Making sure that sessions have been started
+			if($this->sessionStarted){
+				$this->startSession();
+			}
+			// Regenerating session id
+			session_destroy();
+			// Unsetting session cookie
+			$this->unsetCookie($this->data['session-namespace']);
+			return true;
+		}
+		
+		// This sets session variable in current session namespace
+		// * key - Key of the variable
+		// * value - Value to be set
+		// Returns true
+		final public function setSession($key,$value){
+			// Making sure that sessions have been started
+			if(!$this->sessionStarted){
+				$this->startSession();
+			}
+			$_SESSION[$this->data['session-namespace']][$key]=$value;
+			return true;
+		}
+		
+		// Gets a value based on a key from current namespace
+		// * key - Key of the value to be returned
+		// Returns the value if it exists
+		final public function getSession($key){
+			// Making sure that sessions have been started
+			if(!$this->sessionStarted){
+				$this->startSession();
+			}
+			if(isset($_SESSION[$this->data['session-namespace']][$key])){
+				return $_SESSION[$this->data['session-namespace']][$key];
+			} else {
+				return false;
+			}	
+		}
+		
+		// Unsets session variable
+		// * key - Key of the value to be unset
+		// Returns true
+		final public function unsetSession($key){
+			// Making sure that sessions have been started
+			if(!$this->sessionStarted){
+				$this->startSession();
+			}
+			if(isset($_SESSION[$this->data['session-namespace']][$key])){
+				unset($_SESSION[$this->data['session-namespace']][$key]);
+			} else {
+				return false;
+			}
+			return true;
+		}
+		
+		// This sets session variable
+		// * key - Key of the variable
+		// * value - Value to be set, can also be an array
+		// * configuration - Cookie configuration options
+		// Returns true
+		final public function setCookie($key,$value,$configuration=array()){
+			// Checking for configuration options
+			if(!isset($configuration['expire'])){
+				$configuration['expire']=2147483647;
+			}
+			if(!isset($configuration['path'])){
+				$configuration['path']=$this->data['web-root'];
+			}
+			if(!isset($configuration['domain'])){
+				$configuration['domain']=$this->data['http-host'];
+			}
+			if(!isset($configuration['secure'])){
+				$configuration['secure']=false;
+			}
+			if(!isset($configuration['httponly'])){
+				$configuration['httponly']=false;
+			}
+			// Value can be an array, in which case the values set will be an array
+			if(is_array($value)){
+				foreach($value as $index=>$val){
+					setcookie($key.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+				}
+			} else {
+				// Setting the cookie
+				setcookie($key,$value,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+			}
+		}
+		
+		// Gets a value based on a key from current cookies
+		// * key - Key of the value to be returned
+		// Returns the value if it exists
+		final public function getCookie($key){
+			if(isset($_COOKIE[$key])){
+				return $_COOKIE[$key];
+			} else {
+				return false;
+			}	
+		}
+		
+		// Unsets session variable
+		// * key - Key of the value to be unset
+		// Returns true
+		final public function unsetCookie($key){
+			if(isset($_COOKIE[$key])){
+				// Removes cookie by setting its duration to 0
+				setcookie($key,'',($this->data['request-time']-3600));
+			} else {
+				return false;
+			}
+			return true;
+		}
 	
 }
 	

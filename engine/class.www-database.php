@@ -270,12 +270,14 @@ class WWW_Database {
 	// Triggers an error if there was an error
 	private function checkError($query){
 	
-		if($this->connected==1 && $this->showErrors==1){
-			// Checking if there is error information stored for this request
-			$errors=$query->errorInfo();
-			if($errors && !empty($errors)){
-				// PDO errorInfo carries verbose error as third in the index
-				throw new Exception('Query failed: '.$errors[2].'');
+		if($this->connected==1){
+			if($this->showErrors==1){
+				// Checking if there is error information stored for this request
+				$errors=$query->errorInfo();
+				if($errors && !empty($errors)){
+					// PDO errorInfo carries verbose error as third in the index
+					throw new Exception('Query failed: '.$errors[2].'');
+				}
 			}
 		} else {
 			throw new Exception('Database not connected');

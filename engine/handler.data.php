@@ -37,7 +37,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	if(!isset($config['index-url-cache-timeout'])){
 		$config['index-url-cache-timeout']=0;
 	}
-
+	
 	// State class is used by API and Factory created objects to keep track of request state
 	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-state.php');
 	$state=new WWW_State($config);
@@ -83,14 +83,20 @@ Author and support: Kristo Vaher - kristo@waher.net
 		if(isset($_GET) && !empty($_GET)){ 
 			$inputData+=$_GET; 
 		}
-		if(isset($_SESSION) && !empty($_SESSION)){ 
-			$inputData['www-session']=$_SESSION; 
-		}
 		if(isset($_FILES) && !empty($_FILES)){ 
 			$inputData['www-files']=$_FILES;
 		}
 		if(isset($_COOKIES) && !empty($_COOKIES)){ 
-			$inputData['www-cookies']=$_COOKIES; 
+			$inputData['www-cookies']=$_COOKIES;
+			// Testing if namespace cookie has been set, if it has then checking for session variables
+			if(isset($_COOKIES[$state->data['session-namespace']])){
+				// Starting sessions
+				$state->sessionStart();
+				// Checking for session variables
+				if(isset($_SESSION[$state->data['session-namespace']]) && !empty($_SESSION[$state->data['session-namespace']])){ 
+					$inputData['www-session']=$_SESSION[$state->data['session-namespace']]; 
+				}
+			}
 		}
 
 		// Solved request is used to load the view through API

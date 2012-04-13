@@ -404,7 +404,7 @@ class WWW_Wrapper {
 					$keys=array_keys($validationHash);
 					$keySize=sizeOf($keys);
 					for($i=0;$i<$keySize;$i++){
-						if(!is_array($val)){
+						if(!is_array($validationHash[$keys[$i]])){
 							$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
 						}
 					}
@@ -688,7 +688,7 @@ class WWW_Wrapper {
 								$keys=array_keys($validationHash);
 								$keySize=sizeOf($keys);
 								for($i=0;$i<$keySize;$i++){
-									if(!is_array($val)){
+									if(!is_array($validationHash[$keys[$i]])){
 										$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
 									}
 								}

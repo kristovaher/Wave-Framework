@@ -303,9 +303,12 @@ class WWW_API {
 					// Validation data is sorted by keys
 					ksort($validationHash);
 					// Encoding all of the variables for validation
-					foreach($validationHash as $key=>$val){
+					// Why is it written like this? Four times faster than foreach manipulation of the same array
+					$keys=array_keys($validationHash);
+					$keySize=sizeOf($keys);
+					for($i=0;$i<$keySize;$i++){
 						if(!is_array($val)){
-							$validationHash[$key]=rawurlencode($val);
+							$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
 						}
 					}
 					
@@ -645,10 +648,12 @@ class WWW_API {
 				$validationHash=$apiResult;
 				// Sorting the output data
 				ksort($validationHash);
-				// Encoding all of the variables for validation
-				foreach($validationHash as $key=>$val){
+				// Why is it written like this? Four times faster than foreach manipulation of the same array
+				$keys=array_keys($validationHash);
+				$keySize=sizeOf($keys);
+				for($i=0;$i<$keySize;$i++){
 					if(!is_array($val)){
-						$validationHash[$key]=rawurlencode($val);
+						$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
 					}
 				}
 				
@@ -1081,7 +1086,7 @@ class WWW_API {
 				$result[]=implode("\t",array_keys($first));
 				
 				// Rows will be processed as a result
-				foreach($apiResult as $subResult){
+				foreach($apiResult as $subResult){		
 					foreach($subResult as $key=>$subSubResult){
 						// If result is still an array, then the values are imploded with commas
 						if(is_array($subSubResult)){

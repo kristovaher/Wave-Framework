@@ -400,9 +400,12 @@ class WWW_Wrapper {
 					// Input data has to be sorted based on key
 					ksort($validationHash);
 					// Encoding all of the variables for validation
-					foreach($validationHash as $key=>$val){
+					// Why is it written like this? Four times faster than foreach manipulation of the same array
+					$keys=array_keys($validationHash);
+					$keySize=sizeOf($keys);
+					for($i=0;$i<$keySize;$i++){
 						if(!is_array($val)){
-							$validationHash[$key]=rawurlencode($val);
+							$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
 						}
 					}
 					
@@ -681,9 +684,12 @@ class WWW_Wrapper {
 								// Data is sorted
 								ksort($validationHash);
 								// Encoding all of the variables for validation
-								foreach($validationHash as $key=>$val){
+								// Why is it written like this? Four times faster than foreach manipulation of the same array
+								$keys=array_keys($validationHash);
+								$keySize=sizeOf($keys);
+								for($i=0;$i<$keySize;$i++){
 									if(!is_array($val)){
-										$validationHash[$key]=rawurlencode($val);
+										$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
 									}
 								}
 								

@@ -16,12 +16,21 @@ function WWW_Wrapper(address){
 	// HTTP address of WWW-Framework-based API
 	var apiAddress=address;
 	
-	// API profile information
-	var apiProfile=false;
-	var apiSecretKey=false;
-	var apiToken=false;
-	var returnHash=false;
-	var returnTimestamp=false;
+	// This is current API state
+	var apiState={
+		apiProfile:false,
+		apiSecretKey:false,
+		apiToken:false,
+		returnHash:false,
+		returnTimestamp:false,
+		successCallback:false,
+		failureCallback:false,
+		timestampDuration:60,
+		hiddenWindowCounter:0,
+		apiSubmitFormId:false,
+		asynchronous:true,
+		unserialize:true
+	}
 	
 	// Information about last error
 	var errorMessage=false;
@@ -30,11 +39,11 @@ function WWW_Wrapper(address){
 	// Input data
 	var inputData=new Object();
 	
-	// State settings
+	// Log
 	var log=new Array();
-	var timestampDuration=10;
-	var hiddenWindowCounter=0;
-	var apiSubmitFormId=false;
+	
+	// User agent
+	var userAgent='WWWFramework/2.0.0 (JavaScript)';
 		
 	// Log entry
 	log.push('WWW API Wrapper object created with API address: '+address);
@@ -47,7 +56,7 @@ function WWW_Wrapper(address){
 		this.returnLog=function(implode){
 			log.push('Returning log');
 			// Imploding, if requested
-			if(implode==null || implode==false){
+			if(implode==null){
 				return log;
 			} else {
 				return log.join(implode);
@@ -90,44 +99,71 @@ function WWW_Wrapper(address){
 		var inputSetter=function(input,value){
 			switch(input){
 				case 'www-api':
-					apiAddress=value;
+					apiState.apiAddress=value;
 					log.push('API address changed to: '+value);
 					break;
 				case 'www-secret-key':
-					apiSecretKey=value;
+					apiState.apiSecretKey=value;
 					log.push('API secret key set to: '+value);
 					break;
 				case 'www-token':
-					apiToken=value;
+					apiState.apiToken=value;
 					log.push('API session token set to: '+value);
 					break;
 				case 'www-profile':
-					apiProfile=value;
-					inputData[input]=value;
+					apiState.apiProfile=value;
 					log.push('API profile set to: '+value);
 					break;
+				case 'www-unserialize':
+					if(value){
+						apiState.unserialize=true;
+						log.push('Returned result will be automatically unserialized');
+					} else {
+						apiState.unserialize=false;
+						log.push('Returned result will not be automatically unserialized');
+					}
+					break;
+				case 'www-asynchronous':
+					if(value){
+						apiState.asynchronous=true;
+						log.push('Request will be made asynchronously');
+					} else {
+						apiState.asynchronous=false;
+						log.push('Request will not be made asynchronously');
+					}
+					break;
 				case 'www-return-hash':
-					apiProfile=value;
-					log.push('API request will require hash validation');
+					if(value){
+						apiState.returnHash=value;
+						log.push('API request will require hash validation');
+					}
 					break;
 				case 'www-return-timestamp':
-					apiProfile=value;
-					log.push('API request will require timestamp validation');
+					if(value){
+						apiState.returnTimestamp=value;
+						log.push('API request will require timestamp validation');
+					}
+					break;
+				case 'www-success-callback':
+					if(value){
+						apiState.successCallback=value;
+						log.push('API return success callback set to '+value+'()');
+					}
+					break;
+				case 'www-failure-callback':
+					if(value){
+						apiState.failureCallback=value;
+						log.push('API return failure callback set to '+value+'()');
+					}
 					break;
 				case 'www-timestamp-duration':
-					timestampDuration=$value;
+					apiState.timestampDuration=$value;
 					log.push('API valid timestamp duration set to: '+value);
 					break;
 				case 'www-output':
 					log.push('Ignoring www-output setting, wrapper always requires output to be set to true');
 					break;
 				default:
-					// Converting numeric flaots and strings to their proper formats
-					if(!!(value % 1)){
-						value=parseFloat(value);
-					} else if((typeof(value) === 'number' || typeof(value) === 'string') && value !== '' && !isNaN(value)){
-						value=parseInt(value);
-					}
 					if(value==true){
 						value=1;
 					} else if(value==false){
@@ -143,16 +179,14 @@ function WWW_Wrapper(address){
 		// This sets file names and locations to be uploaded with the cURL request
 		// * form - ID of the form to be used
 		// * location - If input value is not an array, then this is what the input file address is
+		// Returns true
 		this.setForm=function(formId){
-			if(formId!=null){
-				// Sets the form handler
-				apiSubmitFormId=formId;
-				// This forces another content type to stop browsers from pre-formatting the hidden iFrame content
-				inputData['www-content-type']='text/html';
-				log.push('Form ID set');
-			} else {
-				alert('Please enter proper form ID');
-			}
+			// Sets the form handler
+			apiState.apiSubmitFormId=formId;
+			// This forces another content type to stop browsers from pre-formatting the hidden iFrame content
+			inputData['www-content-type']='text/html';
+			log.push('Form ID set: '+formId);
+			return true;
 		}
 		
 		// This function disables the use of form
@@ -161,7 +195,7 @@ function WWW_Wrapper(address){
 			if(inputData['www-content-type']!=null){
 				delete inputData['www-content-type'];
 			}
-			apiSubmitFormId=false;
+			apiState.apiSubmitFormId=false;
 		}
 		
 		// This function simply deletes current input values
@@ -170,14 +204,20 @@ function WWW_Wrapper(address){
 		this.clearInput=function(clearAuth){
 			if(clearAuth!=null && clearAuth==true){
 				// Settings
-				apiProfile=false;
-				apiSecretKey=false;
-				apiToken=false;
-				returnHash=false;
-				returnTimestamp=false;
-				timestampDuration=10;
+				apiState.apiProfile=false;
+				apiState.apiSecretKey=false;
+				apiState.apiToken=false;
+				apiState.returnHash=false;
+				apiState.returnTimestamp=false;
+				apiState.timestampDuration=10;
 			}
-			apiSubmitFormId=false;
+			// Neutralizing state settings
+			apiState.unserialize=true;
+			apiState.asynchronous=true;
+			// Neutralizing callbacks and submit form
+			apiState.successCallback=false;
+			apiState.failureCallback=false;
+			apiState.apiSubmitFormId=false;
 			// Input data
 			inputData=new Object();
 			// Log entry
@@ -189,43 +229,25 @@ function WWW_Wrapper(address){
 		
 		// This is the main function for making the request
 		// This method builds a request string and then makes a request to API and attempts to fetch and parse the returned result
-		// * callback - Method to call with the result as input once the request is done
-		// * asynchronous - True or false flag about whether the request is asynchronous or not
-		// * unserializeResult - Whether the result is automatically unserialized or not
 		// Executes callback function with returned result, if no problems are encountered
-		this.sendRequest=function(callback,asynchronous,unserializeResult){
-		
-			// Default value
-			if(unserializeResult==null){
-				unserializeResult=true;
-			}
-			// Default value
-			if(asynchronous==null){
-				asynchronous=false;
-			}
+		this.sendRequest=function(){
 			
 			// Storing input data
 			var thisInputData=clone(inputData);
 			
 			// Current state settings
-			var thisApiProfile=apiProfile;
-			var thisApiSecretKey=apiSecretKey;
-			var thisApiToken=apiToken;
-			var thisTimestampDuration=timestampDuration;
-			var thisApiSubmitFormId=apiSubmitFormId;
-			var thisReturnTimestamp=returnTimestamp;
-			var thisReturnHash=returnHash;
+			var thisApiState=clone(apiState);
 			
 			// Assigning authentication options that are sent with the request
-			if(thisApiProfile!=false){
-				thisInputData['www-profile']=thisApiProfile;
+			if(thisApiState.apiProfile!=false){
+				thisInputData['www-profile']=thisApiState.apiProfile;
 			}
 			// Assigning return-timestamp flag to request
-			if(thisReturnTimestamp==true || thisReturnTimestamp==1){
+			if(thisApiState.returnTimestamp==true || thisApiState.returnTimestamp==1){
 				thisInputData['www-return-timestamp']=1;
 			}
 			// Assigning return-timestamp flag to request
-			if(thisReturnHash==true || thisReturnHash==1){
+			if(thisApiState.returnHash==true || thisApiState.returnHash==1){
 				thisInputData['www-return-hash']=1;
 			}
 					
@@ -237,10 +259,7 @@ function WWW_Wrapper(address){
 		
 			// Correct request requires command to be set
 			if(thisInputData['www-command']==null){
-				errorCode=201;
-				errorMessage='API command is not set, this is required';
-				log.push(errorMessage);
-				return false;
+				return failureHandler(thisInputData,201,'API command is not set, this is required',thisApiState.failureCallback);
 			}
 		
 			// If default value is set, then it is removed
@@ -248,6 +267,7 @@ function WWW_Wrapper(address){
 				log.push('Since www-return-type is set to default value, it is removed from input data');
 				delete thisInputData['www-return-type'];
 			}
+			
 			// If default value is set, then it is removed
 			if(thisInputData['www-cache-timeout']!=null && thisInputData['www-cache-timeout']==0){
 				log.push('Since www-cache-timeout is set to default value, it is removed from input data');
@@ -260,7 +280,7 @@ function WWW_Wrapper(address){
 			}
 			
 			// If profile is used, then timestamp will also be sent with the request
-			if(thisApiProfile){
+			if(thisApiState.apiProfile){
 				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
 				if(thisInputData['www-timestamp']==null){
 					thisInputData['www-timestamp']=Math.floor(new Date().getTime()/1000);
@@ -268,28 +288,46 @@ function WWW_Wrapper(address){
 			}
 						
 			// If API profile and secret key are set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
-			if(thisApiSecretKey){
+			if(thisApiState.apiSecretKey){
 			
 				// Log entry
 				log.push('API secret key set, hash authentication will be used');
 				
 				// Token has to be provided for every request that is not a 'www-create-session'
-				if(thisApiToken){
-					var requestToken=thisApiToken;
-				} else {
-					var requestToken='';
+				if(thisApiState.apiToken){
+					var requestToken=thisApiState.apiToken;
 				}
-				
-				// Input data has to be sorted based on key
-				thisInputData=ksort(thisInputData);
 				
 				// Validation hash is generated based on current serialization option
 				if(thisInputData['www-hash']==null){
-					thisInputData['www-hash']=sha1(JSON.stringify(thisInputData)+requestToken+thisApiSecretKey);
+				
+					// Validation requires a different hash
+					var validationHash=clone(thisInputData);
+					// Input data has to be sorted based on key
+					validationHash=ksort(validationHash);
+					// JSON specific forward slash escaping
+					for(var key in validationHash){
+						var value=validationHash[key];
+						// Converting numeric flaots and strings to their proper formats
+						if(!!(value % 1)){
+							validationHash[key]=parseFloat(value);
+						} else if((typeof(value) === 'number' || typeof(value) === 'string') && value !== '' && !isNaN(value)){
+							validationHash[key]=parseInt(value);
+						} else {
+							validationHash[key]=encodeURIComponent(value);
+						}
+					}
+					// Calculating validation hash
+					if(requestToken && thisInputData['www-command']!='www-create-session'){
+						thisInputData['www-hash']=sha1(JSON.stringify(validationHash)+requestToken+thisApiState.apiSecretKey);
+					} else {
+						thisInputData['www-hash']=sha1(JSON.stringify(validationHash)+thisApiState.apiSecretKey);
+					}
+					
 				}
 
 				// Log entry
-				if(thisApiToken){
+				if(thisApiState.apiToken){
 					log.push('Validation hash created using JSON encoded input data, API token and secret key');
 				} else {
 					log.push('Validation hash created using JSON encoded input data and secret key');
@@ -298,7 +336,7 @@ function WWW_Wrapper(address){
 			} else {
 		
 				// Token-only validation means that token will be sent to the server, but data itself will not be hashed. This works like a cookie.
-				if(thisApiToken){
+				if(thisApiState.apiToken){
 					// Log entry
 					log.push('Using token-only validation');
 				} else {
@@ -310,40 +348,42 @@ function WWW_Wrapper(address){
 			
 			// MAKING A REQUEST
 			
-				// Getting input variables
-				var queryString=new Array();
-				for(node in thisInputData){
-					queryString.push(node+'='+encodeURIComponent(thisInputData[node]));
-				}
-			
 				// Building the request URL
-				var requestURL=apiAddress+'?'+(queryString.join('&'));
-				
-				// Method
-				var method='GET';
-				
-				// POST data
-				var postData=null;
+				var requestURL=apiAddress;
 				
 				// Command is made slightly differently depending on whether files are to be uploaded or not
-				if(thisApiSubmitFormId==false){
+				if(thisApiState.apiSubmitFormId==false){
+				
+					// Default method
+					var method='GET';
+				
+					// Getting input variables
+					var requestData=new Array();
+					for(node in thisInputData){
+						requestData.push(node+'='+encodeURIComponent(thisInputData[node]));
+					}
+				
+					// Request data
+					var requestData=requestData.join('&');
+				
+					// Creating request handler
+					XMLHttp=new XMLHttpRequest();
+					
+					// Request data information
+					log.push('Data sent with request: '+requestData);
 				
 					// POST request is made if the URL is longer than 2048 bytes (2KB).
 					// While servers can easily handle 8KB of data, servers are recommended to be vary if the GET request is longer than 2KB
-					if(requestURL.length>2048){
-						// Inserting all input data to POST variables for submit command
-						var postData=new FormData();
-						for(node in thisInputData){
-							postData.append(node,thisInputData[node]);
-						}
-						// Resetting the API url to not carry input data
-						requestURL=apiAddress;
+					if((requestURL+'?'+requestData)>2048){
+						// Log entries
+						log.push('More than 2048 bytes sent, POST request will be used');
+						// Request header and method for POST
+						XMLHttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 						method='POST';
 					}
 				
-					// Making the request
-					XMLHttp=new XMLHttpRequest();
-					if(asynchronous){
+					// Separate functionality for synchronous and asynchronous requests
+					if(thisApiState.asynchronous){
 						
 						// Log entry
 						log.push('Making '+method+' request to URL: '+requestURL);
@@ -354,57 +394,54 @@ function WWW_Wrapper(address){
 								// Result based on status
 								if(XMLHttp.status===200){
 									log.push('Result of the request: '+XMLHttp.responseText);
-									return parseResult(XMLHttp.responseText,callback,thisApiSecretKey,thisApiToken,thisTimestampDuration,thisInputData,unserializeResult);
+									return parseResult(XMLHttp.responseText,thisInputData,thisApiState);
 								} else if(XMLHttp.status===304){
-									errorCode=214;
-									errorMessage='Not modified';
-									log.push(errorMessage);
-									return false;
+									return failureHandler(thisInputData,214,'Not modified',thisApiState.failureCallback);
 								} else {
 									if(method=='POST'){
-										errorCode=205;
-										errorMessage='POST request failed: '+XMLHttp.statusText;
+										return failureHandler(thisInputData,205,'POST request failed: '+XMLHttp.statusText,thisApiState.failureCallback);
 									} else {
-										errorCode=204;
-										errorMessage='GET request failed: '+XMLHttp.statusText;
+										return failureHandler(thisInputData,204,'GET request failed: '+XMLHttp.statusText,thisApiState.failureCallback);
 									}
-									log.push(errorMessage);
-									return false;
 								}  
 							}  
 						};
 						
-						XMLHttp.open(method,requestURL,true);
-						XMLHttp.send(postData);
+						// Sending the request
+						if(method=='POST'){
+							XMLHttp.open(method,requestURL,true);
+							XMLHttp.send(requestData);
+						} else {
+							XMLHttp.open(method,requestURL+'?'+requestData,true);
+							XMLHttp.send(null);
+						}
 						
 					} else {
 					
 						// Log entry
 						log.push('Making '+method+' request to URL: '+requestURL);
 						
-						// XMLHttp request
-						XMLHttp.open(method,requestURL,false);
-						XMLHttp.send(postData);
+						// Sending the request
+						if(method=='POST'){
+							XMLHttp.open(method,requestURL,false);
+							XMLHttp.send(requestData);
+						} else {
+							XMLHttp.open(method,requestURL+'?'+requestData,false);
+							XMLHttp.send(null);
+						}
 						
 						// Result based on status
 						if(XMLHttp.status===200){  
 							log.push('Result of the request: '+XMLHttp.responseText);
-							return parseResult(XMLHttp.responseText,callback,thisApiSecretKey,thisApiToken,thisTimestampDuration,thisInputData,unserializeResult);
+							return parseResult(XMLHttp.responseText,thisInputData,thisApiState);
 						} else if(XMLHttp.status===304){
-							errorCode=214;
-							errorMessage='Not modified';
-							log.push(errorMessage);
-							return false;
-						} else { 
+							return failureHandler(thisInputData,214,'Not modified',thisApiState.failureCallback);
+						} else {
 							if(method=='POST'){
-								errorCode=205;
-								errorMessage='POST request failed: '+XMLHttp.statusText;
+								return failureHandler(thisInputData,205,'POST request failed: '+XMLHttp.statusText,thisApiState.failureCallback);
 							} else {
-								errorCode=204;
-								errorMessage='GET request failed: '+XMLHttp.statusText;
+								return failureHandler(thisInputData,204,'GET request failed: '+XMLHttp.statusText,thisApiState.failureCallback);
 							}
-							log.push(errorMessage);
-							return false;
 						}
 						
 					}
@@ -412,19 +449,16 @@ function WWW_Wrapper(address){
 				} else {
 				
 					// Getting the hidden form
-					var apiSubmitForm=document.getElementById(thisApiSubmitFormId);
+					var apiSubmitForm=document.getElementById(thisApiState.apiSubmitFormId);
 					
 					if(apiSubmitForm==null){
-						errorCode=215;
-						errorMessage='Form not found: '.thisApiSubmitFormId;
-						log.push(errorMessage);
-						return false;
+						return failureHandler(thisInputData,215,'Form not found: '.thisApiState.apiSubmitFormId,thisApiState.failureCallback);
 					}
 				
 					// Hidden iFrame
-					hiddenWindowCounter++;
+					thisApiState.hiddenWindowCounter++;
 					var hiddenWindow=document.createElement('iframe');
-					var hiddenWindowName='WWW_API_Wrapper_Hidden_iFrame_'+hiddenWindowCounter;
+					var hiddenWindowName='WWW_API_Wrapper_Hidden_iFrame_'+thisApiState.hiddenWindowCounter;
 					hiddenWindow.id=hiddenWindowName;
 					hiddenWindow.name=hiddenWindowName;
 					hiddenWindow.style.display='none';
@@ -453,6 +487,8 @@ function WWW_Wrapper(address){
 						hiddenFields[counter].value=thisInputData[node];
 						hiddenFields[counter].type='hidden';
 						apiSubmitForm.appendChild(hiddenFields[counter]);
+						// Log entry
+						log.push('Attaching variable to form request: '+node+'='+thisInputData[node]);
 					}
 					
 					// This is on-load function for iFrame
@@ -488,14 +524,15 @@ function WWW_Wrapper(address){
 						var result=hiddenWindow.contentWindow.document.body.innerHTML;
 						// Log entry
 						log.push('Result of the request: '+result);
-						result=parseResult(result,callback,thisApiSecretKey,thisApiToken,thisTimestampDuration,thisInputData,unserializeResult);
+						result=parseResult(result,thisInputData,thisApiState);
 						// Removing hidden iFrame
-						apiSubmitForm.removeChild(hiddenWindow);
+						setTimeout(function(){apiSubmitForm.removeChild(hiddenWindow);},100);
 						return result;
 					}
 					
+					// Hidden iFrame onload function
+					// Two versions, one IE compatible, another one not
 					if(hiddenWindow.attachEvent==null){
-						// Hidden iFrame onload function
 						hiddenWindow.onload=onLoad;
 					} else {
 						hiddenWindow.attachEvent('onload',onLoad);
@@ -512,21 +549,27 @@ function WWW_Wrapper(address){
 		}
 		
 		// The return parsing method has to be separate, since JavaScript allows to make calls to API asynchronously
-		var parseResult=function(result,callback,thisApiSecretKey,thisApiToken,thisTimestampDuration,thisInputData,unserializeResult){
+		// * result - Result from the request
+		// * thisInputData - Input data sent to request
+		// * thisApiState - API state at the time of the request
+		// Returns result
+		var parseResult=function(result,thisInputData,thisApiState){
+		
+			// Checking for existing error
+			if(thisApiState['unserialize'] && result['www-error']!=null){
+				return failureHandler(thisInputData,result['www-error-code'],result['www-error'],thisApiState['failureCallback']);
+			}
 				
 			// PARSING REQUEST RESULT
 				
 				// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
-				if((thisInputData['www-return-type']==null || thisInputData['www-return-type']=='json') && unserializeResult){
+				if((thisInputData['www-return-type']==null || thisInputData['www-return-type']=='json') && thisApiState.unserialize){
 					// JSON support is required
 					result=JSON.parse(result);
 					log.push('Returning JSON object');
-				} else if(unserializeResult){
+				} else if(thisApiState.unserialize){
 					// Every other unserialization attempt fails
-					errorCode=207;
-					errorMessage='Cannot unserialize returned data';
-					log.push(errorMessage);
-					return false;
+					return failureHandler(thisInputData,207,'Cannot unserialize returned data',thisApiState.failureCallback);
 				} else {
 					// Data is simply returned if serialization was not requested
 					log.push('Returning result');
@@ -535,67 +578,69 @@ function WWW_Wrapper(address){
 			// RESULT VALIDATION
 			
 				// Result validation only applies to non-public profiles
-				if(thisApiProfile){
+				if(thisApiState.apiProfile && (thisApiState.returnTimestamp || thisApiState.returnHash)){
 				
 					// Only unserialized data can be validated
-					if(unserializeResult){
+					if(thisApiState.unserialize){
 					
 						// If it was requested that validation timestamp is returned
-						if(thisReturnTimestamp){
+						if(thisApiState.returnTimestamp){
 							if(result['www-timestamp']!=null){
 								// Making sure that the returned result is within accepted time limit
-								if(((Math.floor(new Date().getTime()/1000))-thisTimestampDuration)>result['www-timestamp']){
-									errorCode=210;
-									errorMessage='Validation timestamp is too old';
-									log.push(errorMessage);
-									return false;
+								if(((Math.floor(new Date().getTime()/1000))-thisApiState.timestampDuration)>result['www-timestamp']){
+									return failureHandler(thisInputData,210,'Validation timestamp is too old',thisApiState.failureCallback);
 								}
 							} else {
-								errorCode=209;
-								errorMessage='Validation data missing: Timestamp was not returned';
-								log.push(errorMessage);
-								return false;
+								return failureHandler(thisInputData,209,'Validation data missing: Timestamp was not returned',thisApiState.failureCallback);
 							}
 						}
 						
 						// If it was requested that validation hash is returned
-						if(thisReturnHash){
+						if(thisApiState.returnHash){
 							// Hash and timestamp have to be defined in response
 							if(result['www-hash']!=null){
+							
 								// Assigning returned array to hash validation array
 								var validationHash=clone(result);
 								// Hash itself is removed from validation
 								delete validationHash['www-hash'];
 								// Data is sorted
 								validationHash=ksort(validationHash);
+								
+								// JSON specific forward slash escaping
+								for(var key in validationHash){
+									var value=validationHash[key];
+									// Converting numeric flaots and strings to their proper formats
+									if(!!(value % 1)){
+										validationHash[key]=parseFloat(value);
+									} else if((typeof(value) === 'number' || typeof(value) === 'string') && value !== '' && !isNaN(value)){
+										validationHash[key]=parseInt(value);
+									} else {
+										validationHash[key]=encodeURIComponent(value);
+									}
+								}
+								
 								// Validation depends on whether session creation or destruction commands were called
 								if(thisInputData['www-command']=='www-create-session'){
-									var resultHash=sha1(JSON.stringify(validationHash)+thisApiSecretKey);
+									var resultHash=sha1(JSON.stringify(validationHash)+thisApiState.apiSecretKey);
 								} else {
-									var resultHash=sha1(JSON.stringify(validationHash)+thisApiToken+thisApiSecretKey);
+									var resultHash=sha1(JSON.stringify(validationHash)+thisApiState.apiToken+thisApiState.apiSecretKey);
 								}
+								
 								// If sent hash is the same as calculated hash
 								if(resultHash==result['www-hash']){
 									log.push('Hash validation successful');
 								} else {
-									errorCode=211;
-									errorMessage='Hash validation failed';
-									log.push(errorMessage);
-									return false;
+									return failureHandler(thisInputData,211,'Hash validation failed',thisApiState.failureCallback);
 								}
+								
 							} else {
-								errorCode=209;
-								errorMessage='Validation data missing: Hash was not returned';
-								log.push(errorMessage);
-								return false;
+								return failureHandler(thisInputData,209,'Validation data missing: Hash was not returned',thisApiState.failureCallback);
 							}
 						}
 					
 					} else {
-						errorCode=208;
-						errorMessage='Cannot validate hash: Unserialization not possible';
-						log.push(errorMessage);
-						return false;
+						return failureHandler(thisInputData,208,'Cannot validate hash: Unserialization not possible',thisApiState.failureCallback);
 					}
 				
 				}
@@ -604,24 +649,72 @@ function WWW_Wrapper(address){
 			errorCode=false;
 			errorMessage=false;
 			
-			// If this command was to create a token
-			if(thisInputData['www-command']=='www-create-session' && result['www-token']!=null){
-				apiToken=result['www-token'];
-				log.push('Session token was found in reply, API session token set to: '+result['www-token']);
+			// Return specific actions
+			if(thisApiState.unserialize){
+			
+				// If this command was to create a token
+				if(thisInputData['www-command']=='www-create-session' && result['www-token']!=null){
+					apiState.apiToken=result['www-token'];
+					log.push('Session token was found in reply, API session token set to: '+result['www-token']);
+				}
+			
+				// If error was detected
+				if(result['www-error']!=null){
+					return failureHandler(thisInputData,result['www-error-code'],result['www-error'],thisApiState['failureCallback']);
+				}
+				
 			}
 			
 			// If callback function is set
-			if(callback==null){
+			if(thisApiState.successCallback){
+				// Calling user function
+				thisCallback=this.window[thisApiState.successCallback];
+				if(typeof thisCallback==='function'){
+					log.push('Sending failure data to callback: '+thisApiState['failureCallback']+'()');
+					// Callback execution
+					return thisCallback.call(this,result);
+				} else {
+					return failureHandler(thisInputData,216,'Callback method not found',thisApiState['failureCallback']);
+				}
+			} else {
 				// Returning request result
 				return result;
-			} else {
-				log.push('Sending data to callback '+callback+'(result)');
-				eval(callback+'(result);');
 			}				
 
 		}
 		
 	// REQUIRED FUNCTIONS
+	
+		// This method is simply meant for returning a result if there was an error in the sent request
+		// * thisInputData - Data sent to request
+		// * thisErrorCode - Code number to be set as an error
+		// * thisErrorMessage - Clear text error message
+		// * thisFailureCallback - Callback function to call with the error message
+		// Returns either false or the result of callback function
+		var failureHandler=function(thisInputData,thisErrorCode,thisErrorMessage,thisFailureCallback){
+			// Assigning error details to object state
+			errorCode=thisErrorCode;
+			errorMessage=thisErrorMessage;
+			log.push(errorMessage);
+			// If failure callback has been defined
+			if(thisFailureCallback){
+				// Looking for function of that name
+				thisCallback=this.window[thisFailureCallback];
+				if(typeof thisCallback==='function'){
+					log.push('Sending failure data to callback: '+thisFailureCallback+'()');
+					// Callback execution
+					var result={'www-input':thisInputData,'www-error-code':errorCode,'www-error':errorMessage};
+					return thisCallback.call(this,result);
+				} else {
+					errorCode=216;
+					errorMessage='Callback method not found: '+thisFailureCallback+'()';
+					log.push(errorMessage);
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
 	
 		// This function clones one JavaScript object to another
 		// * object - Object to be cloned
@@ -667,6 +760,42 @@ function WWW_Wrapper(address){
 				sorted[keys[i]]=object[keys[i]];
 			}
 			return sorted;
+		}
+		
+		// This function encodes string in base64, this is used for hash validations
+		// * value - value to convert
+		var base64_encode=function(data){
+			var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+			var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
+				ac = 0,
+				enc = "",
+				tmp_arr = [];
+
+			if (!data) {
+				return data;
+			}
+
+			do { // pack three octets into four hexets
+				o1 = data.charCodeAt(i++);
+				o2 = data.charCodeAt(i++);
+				o3 = data.charCodeAt(i++);
+
+				bits = o1 << 16 | o2 << 8 | o3;
+
+				h1 = bits >> 18 & 0x3f;
+				h2 = bits >> 12 & 0x3f;
+				h3 = bits >> 6 & 0x3f;
+				h4 = bits & 0x3f;
+
+				// use hexets to index into b64, and append result to encoded string
+				tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
+			} while (i < data.length);
+
+			enc = tmp_arr.join('');
+			
+			var r = data.length % 3;
+			
+			return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
 		}
 	
 		// This calculates sha1 hash from string
@@ -842,7 +971,3 @@ function WWW_Wrapper(address){
 		}
 		
 }
-
-/*
-This Wrapper is not yet implemented in WWW Framework
-*/

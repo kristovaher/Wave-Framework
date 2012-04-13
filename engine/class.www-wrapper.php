@@ -22,12 +22,20 @@ class WWW_Wrapper {
 	// HTTP address of WWW-Framework-based API
 	private $apiAddress;
 	
-	// API profile information
-	private $apiProfile=false;
-	private $apiSecretKey=false;
-	private $apiToken=false;
-	private $returnHash=false;
-	private $returnTimestamp=false;
+	// This is current API state
+	private $apiState=array(
+		'apiProfile'=>false,
+		'apiSecretKey'=>false,
+		'apiToken'=>false,
+		'returnHash'=>false,
+		'returnTimestamp'=>false,
+		'successCallback'=>false,
+		'failureCallback'=>false,
+		'requestTimeout'=>10,
+		'timestampDuration'=>60,
+		'unserialize'=>true,
+		'lastModified'=>false
+	);
 	
 	// Information about last error
 	public $errorMessage=false;
@@ -41,9 +49,10 @@ class WWW_Wrapper {
 	// State settings
 	private $curlEnabled=false;
 	private $log=array();
-	private $requestTimeout=10;
-	private $timestampDuration=10;
 	private $criticalError=false;
+	
+	// User agent
+	private $userAgent='WWWFramework/2.0.0 (PHP)';
 
 	// API Address and custom user agent are assigned during object creation
 	// * apiAddress - Full URL is required, like http://www.example.com/www.api
@@ -64,12 +73,12 @@ class WWW_Wrapper {
 			$this->errorMessage='Cannot make URL requests: PHP cannot make URL requests, please enable allow_url_fopen setting';
 			$this->log[]=$this->errorMessage;
 		}
-		// JSON is required with JSON_NUMERIC_CHECK option
-		if(!function_exists('json_encode') || !defined('JSON_NUMERIC_CHECK')){
+		// JSON is required
+		if(!function_exists('json_encode')){
 			// This means that requests cannot be made at all
 			$this->criticalError=true;
 			$this->errorCode=213;
-			$this->errorMessage='Cannot serialize data: JSON with automatic numeric check is required for API requests to work properly';
+			$this->errorMessage='Cannot serialize data: JSON is required for API requests to work properly';
 			$this->log[]=$this->errorMessage;
 		}
 		// Log entry
@@ -129,32 +138,62 @@ class WWW_Wrapper {
 					$this->log[]='API address changed to: '.$value;
 					break;
 				case 'www-secret-key':
-					$this->apiSecretKey=$value;
+					$this->apiState['apiSecretKey']=$value;
 					$this->log[]='API secret key set to: '.$value;
 					break;
 				case 'www-token':
-					$this->apiToken=$value;
+					$this->apiState['apiToken']=$value;
 					$this->log[]='API session token set to: '.$value;
 					break;
 				case 'www-profile':
-					$this->apiProfile=$value;
-					$this->inputData[$input]=$value;
+					$this->apiState['apiProfile']=$value;
 					$this->log[]='API profile set to: '.$value;
 					break;
 				case 'www-return-hash':
-					$this->returnHash=$value;
-					$this->log[]='API request will require hash validation';
+					if($value){
+						$this->apiState['returnHash']=$value;
+						$this->log[]='API request will require hash validation';
+					}
 					break;
 				case 'www-return-timestamp':
-					$this->returnTimestamp=$value;
-					$this->log[]='API request will require timestamp validation';
+					if($value){
+						$this->apiState['returnTimestamp']=$value;
+						$this->log[]='API request will require timestamp validation';
+					}
 					break;
 				case 'www-request-timeout':
-					$this->requestTimeout=$value;
+					$this->apiState['requestTimeout']=$value;
 					$this->log[]='API request timeout set to: '.$value;
 					break;
+				case 'www-unserialize':
+					if($value){
+						$this->apiState['unserialize']=true;
+						$this->log[]='Returned result will be automatically unserialized';
+					} else {
+						$this->apiState['unserialize']=false;
+						$this->log[]='Returned result will not be automatically unserialized';
+					}
+					break;
+				case 'www-success-callback':
+					if($value){
+						$this->apiState['successCallback']=$value;
+						$ths->log[]='API return success callback set to '.$value.'()';
+					}
+					break;
+				case 'www-failure-callback':
+					if($value){
+						$this->apiState['failureCallback']=$value;
+						$ths->log[]='API return failure callback set to '.$value.'()';
+					}
+					break;
+				case 'www-last-modified':
+					if($value){
+						$this->apiState['lastModified']=$value;
+						$ths->log[]='API last-modified request time set to '.$value;
+					}
+					break;
 				case 'www-timestamp-duration':
-					$this->timestampDuration=$value;
+					$this->apiState['timestampDuration']=$value;
 					$this->log[]='API valid timestamp duration set to: '.$value;
 					break;
 				case 'www-output':
@@ -229,14 +268,20 @@ class WWW_Wrapper {
 		public function clearInput($clearAuth=false){
 			// If authentication should also be cleared
 			if($clearAuth){
-				$this->apiProfile=false;
-				$this->apiSecretKey=false;
-				$this->apiToken=false;
-				$this->returnHash=false;
-				$this->returnTimestamp=false;
-				$this->requestTimeout=10;
-				$this->timestampDuration=10;
+				$this->apiState['apiProfile']=false;
+				$this->apiState['apiSecretKey']=false;
+				$this->apiState['apiToken']=false;
+				$this->apiState['returnHash']=false;
+				$this->apiState['returnTimestamp']=false;
+				$this->apiState['requestTimeout']=10;
+				$this->apiState['timestampDuration']=60;
 			}
+			// Neutralizing state settings
+			$this->apiState['unserialize']=true;
+			$this->apiState['lastModified']=false;
+			// Neutralizing callbacks
+			$this->apiState['successCallback']=false;
+			$this->apiState['failureCallback']=false;
 			// Input data
 			$this->inputData=array();
 			$this->cryptedData=array();
@@ -250,42 +295,34 @@ class WWW_Wrapper {
 		
 		// This is the main function for making the request
 		// This method builds a request string and then makes a request to API and attempts to fetch and parse the returned result
-		// * unserializeResult - Whether the result is automatically unserialized or not
-		// * lastModified - Unix timestamp of last-modified date, this can be used to check if data has been last modified or not
 		// Returns the result of the request
-		public function sendRequest($unserializeResult=true,$lastModified=false){
+		public function sendRequest(){
 		
 			// This is the input data used
 			$thisInputData=$this->inputData;
 			
 			// Current state settings
-			$apiProfile=$this->apiProfile;
-			$apiSecretKey=$this->apiSecretKey;
-			$apiToken=$this->apiToken;
-			$requestTimeout=$this->requestTimeout;
-			$timestampDuration=$this->timestampDuration;
-			$returnTimestamp=$this->returnTimestamp;
-			$returnHash=$this->returnHash;
+			$thisApiState=$this->apiState;
 			
 			// Assigning authentication options that are sent with the request
-			if($apiProfile!=false){
-				$thisInputData['www-profile']=$apiProfile;
+			if($thisApiState['apiProfile']!=false){
+				$thisInputData['www-profile']=$thisApiState['apiProfile'];
 			}
 			// Assigning return-timestamp flag to request
-			if($returnTimestamp==true || $returnTimestamp==1){
+			if($thisApiState['returnTimestamp']==true || $thisApiState['returnTimestamp']==1){
 				$thisInputData['www-return-timestamp']=1;
 			}
 			// Assigning return-timestamp flag to request
-			if($returnHash==true || $returnHash==1){
+			if($thisApiState['returnHash']==true || $thisApiState['returnHash']==1){
 				$thisInputData['www-return-hash']=1;
 			}
 			
 			// Clears the source input data
 			$this->clearInput();
 		
-			// Returns false if there is an existing error
+			// Returns false if there is an existing critical error
 			if($this->criticalError){
-				return false;
+				return $this->failureHandler($thisInputData,$this->errorCode,$this->errorMessage,$thisApiState['failureCallback']);
 			}
 			
 			// Log entry
@@ -293,10 +330,7 @@ class WWW_Wrapper {
 		
 			// Correct request requires command to be set
 			if(!isset($thisInputData['www-command'])){
-				$this->errorCode=201;
-				$this->errorMessage='API command is not set, this is required';
-				$this->log[]=$this->errorMessage;
-				return false;
+				return $this->failureHandler($thisInputData,201,'API command is not set, this is required',$thisApiState['failureCallback']);
 			}
 		
 			// If default value is set, then it is removed
@@ -317,14 +351,14 @@ class WWW_Wrapper {
 			
 			
 			// If encryption key is set, then this is sent together with crypted data
-			if($apiProfile && isset($apiSecretKey) && isset($thisInputData['www-crypt-output'])){
+			if($thisApiState['apiProfile'] && isset($thisApiState['apiSecretKey']) && isset($thisInputData['www-crypt-output'])){
 				$this->log[]='Crypt output key was set as regular input for non-public profile API request, it is moved to crypted input instead';
 				$this->cryptedData['www-crypt-output']=$thisInputData['www-crypt-output'];
 				unset($thisInputData['www-crypt-output']);
 			}
 			
 			// If profile is used, then timestamp will also be sent with the request
-			if($apiProfile){
+			if($thisApiState['apiProfile']){
 				// Timestamp is required in API requests since it will be used for request validation and replay attack protection
 				if(!isset($thisInputData['www-timestamp'])){
 					$thisInputData['www-timestamp']=time();
@@ -332,7 +366,7 @@ class WWW_Wrapper {
 			}
 		
 			// If API secret key is set, then wrapper assumes that non-public profile is used, thus hash and timestamp have to be included
-			if($apiSecretKey){
+			if($thisApiState['apiSecretKey']){
 			
 				// Log entry
 				$this->log[]='API secret key set, hash authentication will be used';
@@ -340,40 +374,52 @@ class WWW_Wrapper {
 				// If crypted data array is populated, then this data is encrypted in www-crypt-input key
 				if(!isset($thisInputData['www-crypt-input']) && !empty($this->cryptedData)){
 					// This is only possible if API token is set
-					if($apiSecretKey){
+					if($thisApiState['apiSecretKey']){
 						// Mcrypt extension is required
 						if(extension_loaded('mcrypt')){
 							// Data is encrypted with Rijndael 256bit encryption
-							if($apiToken){
-								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($apiToken),json_encode($this->cryptedData),MCRYPT_MODE_CBC,md5($apiSecretKey)));
+							if($thisApiState['apiToken']){
+								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),json_encode($this->cryptedData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey'])));
 							} else {
-								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($apiSecretKey),json_encode($this->cryptedData),MCRYPT_MODE_ECB));
+								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiSecretKey']),json_encode($this->cryptedData),MCRYPT_MODE_ECB));
 							}
 							$this->log[]='Crypted input created using JSON encoded input data, token and secret key';
 						} else {
-							$this->errorCode=203;
-							$this->errorMessage='Unable to encrypt data, server configuration problem';
-							$this->log[]=$this->errorMessage;
-							return false;
+							return $this->failureHandler($thisInputData,203,'Unable to encrypt data, server configuration problem',$thisApiState['failureCallback']);
 						}
 					} else {
-						$this->errorCode=202;
-						$this->errorMessage='Crypted input can only be used with a set secret key';
-						$this->log[]=$this->errorMessage;
-						return false;
+						return $this->failureHandler($thisInputData,202,'Crypted input can only be used with a set secret key',$thisApiState['failureCallback']);
 					}
 				}
 				
-				// Input data has to be sorted based on key
-				ksort($thisInputData);
-				
 				// Validation hash is generated based on current serialization option
 				if(!isset($thisInputData['www-hash'])){
-					$thisInputData['www-hash']=sha1(json_encode($thisInputData,JSON_NUMERIC_CHECK).$apiToken.$apiSecretKey);
+				
+					// Building validation hash
+					$validationHash=$thisInputData;
+					// Input data has to be sorted based on key
+					ksort($validationHash);
+					// Encoding all of the variables for validation
+					foreach($validationHash as $key=>$val){
+						if(!is_array($val)){
+							$validationHash[$key]=rawurlencode($val);
+						}
+					}
+					
+					// Calculating validation hash
+					if($thisApiState['apiToken'] && $thisInputData['www-command']!='www-create-session'){
+						$thisInputData['www-hash']=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$thisApiState['apiToken'].$thisApiState['apiSecretKey']);
+					} else {
+						$thisInputData['www-hash']=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$thisApiState['apiSecretKey']);
+					}
+					
+					// Unsetting validation hash, since it is not used anymore
+					unset($validationHash);
+					
 				}
 
 				// Log entry
-				if($apiToken){
+				if($thisApiState['apiToken']){
 					$this->log[]='Validation hash created using JSON encoded input data, API token and secret key';
 				} else {
 					$this->log[]='Validation hash created using JSON encoded input data and secret key';
@@ -382,7 +428,7 @@ class WWW_Wrapper {
 			} else {
 			
 				// Token-only validation means that token will be sent to the server, but data itself will not be hashed. This works like a cookie.
-				if($apiToken){
+				if($thisApiState['apiToken']){
 					// Log entry
 					$this->log[]='Using token-only validation';
 				} else {
@@ -395,11 +441,15 @@ class WWW_Wrapper {
 			// MAKING A REQUEST
 			
 				// Building the request URL
-				$requestURL=$this->apiAddress.'?'.http_build_query($thisInputData);
+				$requestURL=$this->apiAddress;
+				$requestData=http_build_query($thisInputData);
 				
 				// Get request is made if the URL is shorter than 2048 bytes (2KB).
 				// While servers can easily handle 8KB of data, servers are recommended to be vary if the GET request is longer than 2KB
-				if(strlen($requestURL)<=2048 && empty($this->inputFiles)){
+				if(strlen($requestURL.'?'.$requestData)<=2048 && empty($this->inputFiles)){
+				
+					// Log entry
+					$this->log[]='Data sent with request: '.$requestData;
 				
 					// cURL is used unless it is not supported on the server
 					if($this->curlEnabled){
@@ -411,11 +461,11 @@ class WWW_Wrapper {
 						$cURL=curl_init();
 						// Setting cURL options
 						$requestOptions=array(
-							CURLOPT_URL=>$requestURL,
+							CURLOPT_URL=>$requestURL.'?'.$requestData,
 							CURLOPT_REFERER=>((!isset($_SERVER['HTTPS']) || ($_SERVER['HTTPS']!=1 && $_SERVER['HTTPS']!='on'))?'http://':'https://').$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'],
 							CURLOPT_HTTPGET=>true,
-							CURLOPT_TIMEOUT=>$requestTimeout,
-							CURLOPT_USERAGENT=>'WWWFramework/2.0.0',
+							CURLOPT_TIMEOUT=>$thisApiState['requestTimeout'],
+							CURLOPT_USERAGENT=>$this->userAgent,
 							CURLOPT_HEADER=>false,
 							CURLOPT_RETURNTRANSFER=>true,
 							CURLOPT_FOLLOWLOCATION=>false,
@@ -423,8 +473,8 @@ class WWW_Wrapper {
 							CURLOPT_SSL_VERIFYPEER=>false
 						);
 						// If last modified header is sent
-						if($lastModified){
-							curl_setopt($cURL,CURLOPT_HTTPHEADER,array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT'));
+						if($thisApiState['lastModified']){
+							curl_setopt($cURL,CURLOPT_HTTPHEADER,array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',$thisApiState['lastModified']).' GMT'));
 						}
 						// Assigning options to cURL object
 						curl_setopt_array($cURL,$requestOptions);
@@ -433,18 +483,16 @@ class WWW_Wrapper {
 						
 						// Returning false if the request failed
 						if(!$result){
-							if($lastModified && curl_getinfo($cURL,CURLINFO_HTTP_CODE)==304){
-								$this->errorCode=214;
-								$this->errorMessage='Not modified';
-								$this->log[]=$this->errorMessage;
+							if($thisApiState['lastModified'] && curl_getinfo($cURL,CURLINFO_HTTP_CODE)==304){
+								// Closing the resource
+								curl_close($cURL);
+								return $this->failureHandler($thisInputData,214,'Not modified',$thisApiState['failureCallback']);
 							} else {
-								$this->errorCode=204;
-								$this->errorMessage='GET request failed: cURL error '.curl_getinfo($cURL,CURLINFO_HTTP_CODE).' - '.curl_error($cURL);
-								$this->log[]=$this->errorMessage;
+								$error='POST request failed: cURL error '.curl_getinfo($cURL,CURLINFO_HTTP_CODE).' - '.curl_error($cURL);
+								// Closing the resource
+								curl_close($cURL);
+								return $this->failureHandler($thisInputData,204,$error,$thisApiState['failureCallback']);
 							}
-							// Closing the resource
-							curl_close($cURL);
-							return false;
 						} else {
 							$this->log[]='GET request successful: '.curl_getinfo($cURL,CURLINFO_HTTP_CODE);
 						}
@@ -454,13 +502,12 @@ class WWW_Wrapper {
 						
 					} else {
 					
-						// GET request an also be made by file_get_contents()
+						// Log entry
 						$this->log[]='Making GET request to API using file-get-contents to URL: '.$requestURL;
-						if(!$result=file_get_contents($requestURL)){
-							$this->errorCode=204;
-							$this->errorMessage='GET request failed: file_get_contents() failed';
-							$this->log[]=$this->errorMessage;
-							return false;
+					
+						// GET request an also be made by file_get_contents()
+						if(!$result=file_get_contents($requestURL.'?'.$requestData)){
+							return $this->failureHandler($thisInputData,204,'GET request failed: file_get_contents() failed',$thisApiState['failureCallback']);
 						}
 						
 					}
@@ -469,16 +516,18 @@ class WWW_Wrapper {
 				
 					// cURL is used unless it is not supported on the server
 					if($this->curlEnabled){
-					
-						// Log entry
-						$this->log[]='Making POST request to API using cURL to URL '.$this->apiAddress.' with data: '.serialize($thisInputData);
 						
 						// If files are to be uploaded
 						if(!empty($this->inputFiles)){
 							foreach($this->inputFiles as $file=>$location){
-								$this->log[]='Attaching a file '.$location.' to request';
+								$this->log[]='Attaching a file to request: '.$location;
 								$thisInputData[$file]='@'.$location;
 							}
+						}
+						
+						// Logging the data
+						foreach($thisInputData as $key=>$val){
+							$this->log[]='Attaching variable to request: '.$key.'='.$val;
 						}
 
 						// Initializing cURL object
@@ -490,8 +539,8 @@ class WWW_Wrapper {
 							CURLOPT_REFERER=>((!isset($_SERVER['HTTPS']) || ($_SERVER['HTTPS']!=1 && $_SERVER['HTTPS']!='on'))?'http://':'https://').$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'],
 							CURLOPT_POST=>true,
 							CURLOPT_POSTFIELDS=>$thisInputData,
-							CURLOPT_TIMEOUT=>$requestTimeout,
-							CURLOPT_USERAGENT=>'WWWFramework/2.0.0',
+							CURLOPT_TIMEOUT=>$thisApiState['requestTimeout'],
+							CURLOPT_USERAGENT=>$this->userAgent,
 							CURLOPT_HEADER=>false,
 							CURLOPT_RETURNTRANSFER=>true,
 							CURLOPT_FOLLOWLOCATION=>false,
@@ -499,28 +548,29 @@ class WWW_Wrapper {
 							CURLOPT_SSL_VERIFYPEER=>false
 						);
 						// If last modified header is sent
-						if($lastModified){
-							curl_setopt($cURL,CURLOPT_HTTPHEADER,array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT'));
+						if($thisApiState['lastModified']){
+							curl_setopt($cURL,CURLOPT_HTTPHEADER,array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',$thisApiState['lastModified']).' GMT'));
 						}
 						// Assigning options to cURL object
 						curl_setopt_array($cURL,$requestOptions);
 						// Executing the request
 						$result=curl_exec($cURL);
+					
+						// Log entry
+						$this->log[]='Making POST request to API using cURL to URL: '.$this->apiAddress;
 						
 						// Returning false if the request failed
 						if(!$result){
-							if($lastModified && curl_getinfo($cURL,CURLINFO_HTTP_CODE)==304){
-								$this->errorCode=214;
-								$this->errorMessage='Not modified';
-								$this->log[]=$this->errorMessage;
+							if($thisApiState['lastModified'] && curl_getinfo($cURL,CURLINFO_HTTP_CODE)==304){
+								// Closing the resource
+								curl_close($cURL);
+								return $this->failureHandler($thisInputData,214,'Not modified',$thisApiState['failureCallback']);
 							} else {
-								$this->errorCode=205;
-								$this->errorMessage='POST request failed: cURL error '.curl_getinfo($cURL,CURLINFO_HTTP_CODE).' - '.curl_error($cURL);
-								$this->log[]=$this->errorMessage;
+								$error='POST request failed: cURL error '.curl_getinfo($cURL,CURLINFO_HTTP_CODE).' - '.curl_error($cURL);
+								// Closing the resource
+								curl_close($cURL);
+								return $this->failureHandler($thisInputData,205,$error,$thisApiState['failureCallback']);
 							}
-							// Closing the resource
-							curl_close($cURL);
-							return false;
 						} else {
 							$this->log[]='POST request successful: '.curl_getinfo($cURL,CURLINFO_HTTP_CODE);
 						}
@@ -529,10 +579,7 @@ class WWW_Wrapper {
 						curl_close($cURL);
 					
 					} else {
-						$this->errorCode=205;
-						$this->errorMessage='POST request failed: cURL is not supported';
-						$this->log[]=$this->errorMessage;
-						return false;
+						return $this->failureHandler($thisInputData,205,'POST request failed: cURL is not supported',$thisApiState['failureCallback']);
 					}
 				}
 				
@@ -543,17 +590,17 @@ class WWW_Wrapper {
 				
 				// If requested data was encrypted, then this attempts to decrypt the data
 				// This also checks to make sure that a serialized data was not returned (which is usually an error)
-				if(strpos($result,'{')===false && strpos($result,'[')===false && isset($this->cryptedData['www-crypt-output']) || isset($thisInputData['www-crypt-output'])){
+				if(strpos($result,'{')===false && strpos($result,'[')===false && isset($thisCryptedData['www-crypt-output']) || isset($thisInputData['www-crypt-output'])){
 					// Getting the decryption key
-					if(isset($this->cryptedData['www-crypt-output'])){
-						$cryptKey=$this->cryptedData['www-crypt-output'];
+					if(isset($thisCryptedData['www-crypt-output'])){
+						$cryptKey=$thisCryptedData['www-crypt-output'];
 					} else {
 						$cryptKey=$thisInputData['www-crypt-output'];
 					}
 					// Decryption is different based on whether secret key was used or not
-					if($apiSecretKey){
+					if($thisApiState['apiSecretKey']){
 						// If secret key was set, then decryption uses the secret key for initialization vector
-						$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($result),MCRYPT_MODE_CBC,md5($apiSecretKey));
+						$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($result),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey']));
 					} else {
 						// Without secret key the system assumes that public profile is used and decryption is done in ECB mode
 						$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($result),MCRYPT_MODE_ECB);
@@ -563,47 +610,34 @@ class WWW_Wrapper {
 						$result=trim($result);
 						$this->log[]='Result of decrypted request: '.$result;
 					} else {
-						$this->errorCode=206;
-						$this->errorMessage='Output decryption has failed';
-						$this->log[]=$this->errorMessage;
-						return false;
+						return $this->failureHandler($thisInputData,206,'Output decryption has failed',$thisApiState['failureCallback']);
 					}
 				}
 				
 			// PARSING REQUEST RESULT
 			
 				// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
-				if($unserializeResult && (!isset($thisInputData['www-return-type']) || $thisInputData['www-return-type']=='json')){
+				if($thisApiState['unserialize'] && (!isset($thisInputData['www-return-type']) || $thisInputData['www-return-type']=='json')){
 					// JSON support is required
 					$result=json_decode($result,true);
-				} else if($unserializeResult && $thisInputData['www-return-type']=='serializedarray'){
+				} else if($thisApiState['unserialize'] && $thisInputData['www-return-type']=='serializedarray'){
 					// Return data is unserialized
 					$result=unserialize($result,true);
 					if(!$result){
-						$this->errorCode=207;
-						$this->errorMessage='Cannot unserialize returned data: unserialize() failed';
-						$this->log[]=$this->errorMessage;
-						return false;
+						return $this->failureHandler($thisInputData,207,'Cannot unserialize returned data: unserialize() failed',$thisApiState['failureCallback']);
 					} else {
 						$this->log[]='Returning unserialized result';
 					}
-				} else if($unserializeResult && $thisInputData['www-return-type']=='querystring'){
+				} else if($thisApiState['unserialize'] && $thisInputData['www-return-type']=='querystring'){
 					// Return data is filtered through string parsing and url decoding to create return array
 					$result=parse_str(urldecode($result),$result);
 					if(!$result){
-						$this->errorCode=207;
-						$this->errorMessage='Cannot unserialize returned data: Cannot parse query data string';
-						$this->log[]=$this->errorMessage;
-						return false;
+						return $this->failureHandler($thisInputData,207,'Cannot unserialize returned data: Cannot parse query data string',$thisApiState['failureCallback']);
 					} else {
 						$this->log[]='Returning parsed query string result';
 					}
-				} else if($unserializeResult){
-					// Every other unserialization attempt fails
-					$this->errorCode=207;
-					$this->errorMessage='Cannot unserialize returned data: Data type '.$thisInputData['www-return-type'].' not supported';
-					$this->log[]=$this->errorMessage;
-					return false;
+				} else if($thisApiState['unserialize']){
+					return $this->failureHandler($thisInputData,207,'Cannot unserialize returned data: Data type '.$thisInputData['www-return-type'].' not supported',$thisApiState['failureCallback']);
 				} else {
 					// Data is simply returned if serialization was not requested
 					$this->log[]='Returning result';
@@ -611,77 +645,72 @@ class WWW_Wrapper {
 				
 			// ERRORS
 			
-				if($unserializeResult && isset($result['www-error'])){
-					$this->errorCode=$result['www-error-code'];
-					$this->errorMessage='Error from API: '.$result['www-error-code'].' - '.$result['www-error'];
-					$this->log[]=$this->errorMessage;
-					return false;
+				if($thisApiState['unserialize'] && isset($result['www-error'])){
+					return $this->failureHandler($thisInputData,$result['www-error-code'],$result['www-error'],$thisApiState['failureCallback']);
 				}
 				
 			// RESULT VALIDATION
 			
 				// Result validation only applies to non-public profiles
-				if($apiProfile){
+				if($thisApiState['apiProfile'] && ($thisApiState['returnHash'] || $thisApiState['returnTimestamp'])){
 				
 					// Only unserialized data can be validated
-					if($unserializeResult){
+					if($thisApiState['unserialize']){
 					
 						// If it was requested that validation timestamp is returned
-						if($returnTimestamp){
+						if($thisApiState['returnTimestamp']){
 							if(isset($result['www-timestamp'])){
 								// Making sure that the returned result is within accepted time limit
-								if((time()-$timestampDuration)>$result['www-timestamp']){
-									$this->errorCode=210;
-									$this->errorMessage='Validation timestamp is too old';
-									$this->log[]=$this->errorMessage;
-									return false;
+								if((time()-$thisApiState['timestampDuration'])>$result['www-timestamp']){
+									return $this->failureHandler($thisInputData,210,'Validation timestamp is too old',$thisApiState['failureCallback']);
 								}
 							} else {
-								$this->errorCode=209;
-								$this->errorMessage='Validation data missing: Timestamp was not returned';
-								$this->log[]=$this->errorMessage;
-								return false;
+								return $this->failureHandler($thisInputData,209,'Validation data missing: Timestamp was not returned',$thisApiState['failureCallback']);
 							}
 						}
 						
 						// If it was requested that validation hash is returned
-						if($returnHash){
+						if($thisApiState['returnHash']){
 							// Hash and timestamp have to be defined in response
 							if(isset($result['www-hash'])){
+							
 								// Assigning returned array to hash validation array
 								$validationHash=$result;
 								// Hash itself is removed from validation
 								unset($validationHash['www-hash']);
 								// Data is sorted
 								ksort($validationHash);
+								// Encoding all of the variables for validation
+								foreach($validationHash as $key=>$val){
+									if(!is_array($val)){
+										$validationHash[$key]=rawurlencode($val);
+									}
+								}
+								
 								// Validation depends on whether session creation or destruction commands were called
 								if($thisInputData['www-command']=='www-create-session'){
-									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiSecretKey);
+									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$thisApiState['apiSecretKey']);
 								} else {
-									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiToken.$apiSecretKey);
+									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$thisApiState['apiToken'].$thisApiState['apiSecretKey']);
 								}
+								
+								// Unsetting the validation hash since it is not used
+								unset($validationHash);
+								
 								// If sent hash is the same as calculated hash
 								if($hash==$result['www-hash']){
 									$this->log[]='Hash validation successful';
 								} else {
-									$this->errorCode=211;
-									$this->errorMessage='Hash validation failed';
-									$this->log[]=$this->errorMessage;
-									return false;
+									return $this->failureHandler($thisInputData,211,'Hash validation failed',$thisApiState['failureCallback']);
 								}
+								
 							} else {
-								$this->errorCode=209;
-								$this->errorMessage='Validation data missing: Hash was not returned';
-								$this->log[]=$this->errorMessage;
-								return false;
+								return $this->failureHandler($thisInputData,209,'Validation data missing: Hash was not returned',$thisApiState['failureCallback']);
 							}
 						}
 					
 					} else {
-						$this->errorCode=208;
-						$this->errorMessage='Cannot validate hash: Unserialization not possible';
-						$this->log[]=$this->errorMessage;
-						return false;
+						return $this->failureHandler($thisInputData,208,'Cannot validate hash: Unserialization not possible',$thisApiState['failureCallback']);
 					}
 				
 				}
@@ -690,15 +719,68 @@ class WWW_Wrapper {
 			$this->errorCode=false;
 			$this->errorMessage=false;
 			
-			// If this command was to create a token
-			if($thisInputData['www-command']=='www-create-session' && isset($result['www-token'])){
-				$this->apiToken=$result['www-token'];
-				$this->log[]='Session token was found in reply, API session token set to: '.$result['www-token'];
-			}
-				
-			// Returning request result
-			return $result;
+			// Return specific actions
+			if($thisApiState['unserialize']){
 			
+				// If this command was to create a token
+				if($thisInputData['www-command']=='www-create-session' && isset($result['www-token'])){
+					$this->apiState['apiToken']=$result['www-token'];
+					$this->log[]='Session token was found in reply, API session token set to: '.$result['www-token'];
+				}
+				
+				// If error was detected
+				if(isset($result['www-error'])){
+					return $this->failureHandler($thisInputData,$result['www-error-code'],$result['www-error'],$thisApiState['failureCallback']);
+				}
+				
+			}
+			
+			// If callback has been defined
+			if($thisApiState['successCallback']){
+				// Calling user function
+				if(function_exists($thisApiState['successCallback'])){
+					$this->log[]='Sending data to callback: '.$thisApiState['successCallback'].'()';
+					// Callback execution
+					return call_user_func($thisApiState['successCallback'],$result);
+				} else {
+					return $this->failureHandler($thisInputData,216,'Callback method not found',$thisApiState['failureCallback']);
+				}
+			} else {
+				// Returning request result
+				return $result;
+			}
+			
+		}
+		
+	// REQUIRED FUNCTIONS
+		
+		// This method is simply meant for returning a result if there was an error in the sent request
+		// * inputData - Data sent to request
+		// * errorCode - Code number to be set as an error
+		// * errorMessage - Clear text error message
+		// * failureCallback - Callback function to call with the error message
+		// Returns either false or the result of callback function
+		private function failureHandler($inputData,$errorCode,$errorMessage,$failureCallback){
+			// Assigning error details to object state
+			$this->errorCode=$errorCode;
+			$this->errorMessage=$errorMessage;
+			$this->log[]=$errorMessage;
+			// If failure callback has been defined
+			if($failureCallback){
+				// Looking for function of that name
+				if(function_exists($failureCallback)){
+					$this->log[]='Sending failure data to callback: '.$failureCallback.'()';
+					// Callback execution
+					return call_user_func($failureCallback,array('www-input'=>$inputData,'www-error-code'=>$errorCode,'www-error'=>$errorMessage));
+				} else {
+					$this->errorCode=216;
+					$this->errorMessage='Callback method not found: '.$apiState['failureCallback'].'()';
+					$this->log[]=$this->errorMessage;
+					return false;
+				}
+			} else {
+				return false;
+			}
 		}
 
 

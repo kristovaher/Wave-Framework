@@ -286,7 +286,6 @@ class WWW_API {
 					
 					// Validation hash is calculated from input data
 					$validationHash=$apiInputData;
-				
 					// Unsetting validation hash itself from input
 					unset($validationHash['www-hash']);
 					// Session input is not considered for validation hash and is unset
@@ -301,9 +300,14 @@ class WWW_API {
 					if(isset($validationHash['www-files'])){
 						unset($validationHash['www-files']);
 					}
-
 					// Validation data is sorted by keys
 					ksort($validationHash);
+					// Encoding all of the variables for validation
+					foreach($validationHash as $key=>$val){
+						if(!is_array($val)){
+							$validationHash[$key]=rawurlencode($val);
+						}
+					}
 					
 					// If token is set then this is used for validation as long as the command is not www-create-session
 					if($apiState['token'] && $apiState['command']!='www-create-session'){
@@ -636,17 +640,29 @@ class WWW_API {
 			// If request demanded a hash to also be returned
 			// This is only valid when the result is not an 'error' and has a secret key set
 			if($apiState['return-hash'] && !isset($apiResult['www-error']) && $apiState['secret-key']){
+			
 				// Hash is calculated from all the data returned to the user agent, except hash itself
-				$returnHash=$apiResult;
+				$validationHash=$apiResult;
 				// Sorting the output data
-				ksort($returnHash);
+				ksort($validationHash);
+				// Encoding all of the variables for validation
+				foreach($validationHash as $key=>$val){
+					if(!is_array($val)){
+						$validationHash[$key]=rawurlencode($val);
+					}
+				}
+				
 				// Hash is written to returned result
 				// Session creation and destruction commands return data is hashed without token
 				if(!$apiState['token-timeout'] || $apiState['command']=='www-create-session'){
-					$apiResult['www-hash']=sha1(json_encode($returnHash,JSON_NUMERIC_CHECK).$apiState['secret-key']);
+					$apiResult['www-hash']=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['secret-key']);
 				} else {
-					$apiResult['www-hash']=sha1(json_encode($returnHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
+					$apiResult['www-hash']=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
 				}
+				
+				// Unsetting as it is not needed any further
+				unset($validationHash);
+				
 			}
 			
 			// Simple flag for error check, this is used for output encryption

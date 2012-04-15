@@ -394,30 +394,13 @@ class WWW_Wrapper {
 				
 				// Validation hash is generated based on current serialization option
 				if(!isset($thisInputData['www-hash'])){
-				
-					// Building validation hash
-					$validationHash=$thisInputData;
-					// Input data has to be sorted based on key
-					ksort($validationHash);
-					// Encoding all of the variables for validation
-					// Why is it written like this? Four times faster than foreach manipulation of the same array
-					$keys=array_keys($validationHash);
-					$keySize=sizeOf($keys);
-					for($i=0;$i<$keySize;$i++){
-						if(!is_array($validationHash[$keys[$i]])){
-							$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
-						}
-					}
 					
 					// Calculating validation hash
 					if($thisApiState['apiToken'] && $thisInputData['www-command']!='www-create-session'){
-						$thisInputData['www-hash']=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$thisApiState['apiToken'].$thisApiState['apiSecretKey']);
+						$thisInputData['www-hash']=$this->validationHash($thisInputData,$thisApiState['apiToken'].$thisApiState['apiSecretKey']);
 					} else {
-						$thisInputData['www-hash']=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$thisApiState['apiSecretKey']);
+						$thisInputData['www-hash']=$this->validationHash($thisInputData,$thisApiState['apiSecretKey']);
 					}
-					
-					// Unsetting validation hash, since it is not used anymore
-					unset($validationHash);
 					
 				}
 
@@ -482,10 +465,10 @@ class WWW_Wrapper {
 						// Assigning options to cURL object
 						curl_setopt_array($cURL,$requestOptions);
 						// Executing the request
-						$result=curl_exec($cURL);
+						$resultData=curl_exec($cURL);
 						
 						// Returning false if the request failed
-						if(!$result){
+						if(!$resultData){
 							if($thisApiState['lastModified'] && curl_getinfo($cURL,CURLINFO_HTTP_CODE)==304){
 								// Closing the resource
 								curl_close($cURL);
@@ -509,7 +492,7 @@ class WWW_Wrapper {
 						$this->log[]='Making GET request to API using file-get-contents to URL: '.$requestURL;
 					
 						// GET request an also be made by file_get_contents()
-						if(!$result=file_get_contents($requestURL.'?'.$requestData)){
+						if(!$resultData=file_get_contents($requestURL.'?'.$requestData)){
 							return $this->failureHandler($thisInputData,204,'GET request failed: file_get_contents() failed',$thisApiState['failureCallback']);
 						}
 						
@@ -557,13 +540,13 @@ class WWW_Wrapper {
 						// Assigning options to cURL object
 						curl_setopt_array($cURL,$requestOptions);
 						// Executing the request
-						$result=curl_exec($cURL);
+						$resultData=curl_exec($cURL);
 					
 						// Log entry
 						$this->log[]='Making POST request to API using cURL to URL: '.$this->apiAddress;
 						
 						// Returning false if the request failed
-						if(!$result){
+						if(!$resultData){
 							if($thisApiState['lastModified'] && curl_getinfo($cURL,CURLINFO_HTTP_CODE)==304){
 								// Closing the resource
 								curl_close($cURL);
@@ -587,13 +570,13 @@ class WWW_Wrapper {
 				}
 				
 				// Log entry
-				$this->log[]='Result of request: '.$result;
+				$this->log[]='Result of request: '.$resultData;
 				
 			// DECRYPTION
 				
 				// If requested data was encrypted, then this attempts to decrypt the data
 				// This also checks to make sure that a serialized data was not returned (which is usually an error)
-				if(strpos($result,'{')===false && strpos($result,'[')===false && isset($thisCryptedData['www-crypt-output']) || isset($thisInputData['www-crypt-output'])){
+				if(strpos($resultData,'{')===false && strpos($resultData,'[')===false && isset($thisCryptedData['www-crypt-output']) || isset($thisInputData['www-crypt-output'])){
 					// Getting the decryption key
 					if(isset($thisCryptedData['www-crypt-output'])){
 						$cryptKey=$thisCryptedData['www-crypt-output'];
@@ -603,15 +586,15 @@ class WWW_Wrapper {
 					// Decryption is different based on whether secret key was used or not
 					if($thisApiState['apiSecretKey']){
 						// If secret key was set, then decryption uses the secret key for initialization vector
-						$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($result),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey']));
+						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey']));
 					} else {
 						// Without secret key the system assumes that public profile is used and decryption is done in ECB mode
-						$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($result),MCRYPT_MODE_ECB);
+						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_ECB);
 					}
 					// If decryption was a success
-					if($result){
-						$result=trim($result);
-						$this->log[]='Result of decrypted request: '.$result;
+					if($resultData){
+						$resultData=trim($resultData);
+						$this->log[]='Result of decrypted request: '.$resultData;
 					} else {
 						return $this->failureHandler($thisInputData,206,'Output decryption has failed',$thisApiState['failureCallback']);
 					}
@@ -622,19 +605,19 @@ class WWW_Wrapper {
 				// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
 				if($thisApiState['unserialize'] && (!isset($thisInputData['www-return-type']) || $thisInputData['www-return-type']=='json')){
 					// JSON support is required
-					$result=json_decode($result,true);
+					$resultData=json_decode($resultData,true);
 				} else if($thisApiState['unserialize'] && $thisInputData['www-return-type']=='serializedarray'){
 					// Return data is unserialized
-					$result=unserialize($result,true);
-					if(!$result){
+					$resultData=unserialize($resultData,true);
+					if(!$resultData){
 						return $this->failureHandler($thisInputData,207,'Cannot unserialize returned data: unserialize() failed',$thisApiState['failureCallback']);
 					} else {
 						$this->log[]='Returning unserialized result';
 					}
 				} else if($thisApiState['unserialize'] && $thisInputData['www-return-type']=='querystring'){
 					// Return data is filtered through string parsing and url decoding to create return array
-					$result=parse_str(urldecode($result),$result);
-					if(!$result){
+					$resultData=parse_str(urldecode($resultData),$resultData);
+					if(!$resultData){
 						return $this->failureHandler($thisInputData,207,'Cannot unserialize returned data: Cannot parse query data string',$thisApiState['failureCallback']);
 					} else {
 						$this->log[]='Returning parsed query string result';
@@ -648,8 +631,8 @@ class WWW_Wrapper {
 				
 			// ERRORS
 			
-				if($thisApiState['unserialize'] && isset($result['www-error'])){
-					return $this->failureHandler($thisInputData,$result['www-error-code'],$result['www-error'],$thisApiState['failureCallback']);
+				if($thisApiState['unserialize'] && isset($resultData['www-error'])){
+					return $this->failureHandler($thisInputData,$resultData['www-error-code'],$resultData['www-error'],$thisApiState['failureCallback']);
 				}
 				
 			// RESULT VALIDATION
@@ -662,9 +645,9 @@ class WWW_Wrapper {
 					
 						// If it was requested that validation timestamp is returned
 						if($thisApiState['returnTimestamp']){
-							if(isset($result['www-timestamp'])){
+							if(isset($resultData['www-timestamp'])){
 								// Making sure that the returned result is within accepted time limit
-								if((time()-$thisApiState['timestampDuration'])>$result['www-timestamp']){
+								if((time()-$thisApiState['timestampDuration'])>$resultData['www-timestamp']){
 									return $this->failureHandler($thisInputData,210,'Validation timestamp is too old',$thisApiState['failureCallback']);
 								}
 							} else {
@@ -675,36 +658,25 @@ class WWW_Wrapper {
 						// If it was requested that validation hash is returned
 						if($thisApiState['returnHash']){
 							// Hash and timestamp have to be defined in response
-							if(isset($result['www-hash'])){
+							if(isset($resultData['www-hash'])){
 							
 								// Assigning returned array to hash validation array
-								$validationHash=$result;
+								$validationData=$resultData;
 								// Hash itself is removed from validation
-								unset($validationHash['www-hash']);
-								// Data is sorted
-								ksort($validationHash);
-								// Encoding all of the variables for validation
-								// Why is it written like this? Four times faster than foreach manipulation of the same array
-								$keys=array_keys($validationHash);
-								$keySize=sizeOf($keys);
-								for($i=0;$i<$keySize;$i++){
-									if(!is_array($validationHash[$keys[$i]])){
-										$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
-									}
-								}
+								unset($validationData['www-hash']);
 								
 								// Validation depends on whether session creation or destruction commands were called
 								if($thisInputData['www-command']=='www-create-session'){
-									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$thisApiState['apiSecretKey']);
+									$hash=$this->validationHash($validationData,$thisApiState['apiSecretKey']);
 								} else {
-									$hash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$thisApiState['apiToken'].$thisApiState['apiSecretKey']);
+									$hash=$this->validationHash($validationData,$thisApiState['apiToken'].$thisApiState['apiSecretKey']);
 								}
 								
 								// Unsetting the validation hash since it is not used
-								unset($validationHash);
+								unset($validationData);
 								
 								// If sent hash is the same as calculated hash
-								if($hash==$result['www-hash']){
+								if($hash==$resultData['www-hash']){
 									$this->log[]='Hash validation successful';
 								} else {
 									return $this->failureHandler($thisInputData,211,'Hash validation failed',$thisApiState['failureCallback']);
@@ -727,18 +699,11 @@ class WWW_Wrapper {
 			
 			// Return specific actions
 			if($thisApiState['unserialize']){
-			
 				// If this command was to create a token
-				if($thisInputData['www-command']=='www-create-session' && isset($result['www-token'])){
-					$this->apiState['apiToken']=$result['www-token'];
-					$this->log[]='Session token was found in reply, API session token set to: '.$result['www-token'];
+				if($thisInputData['www-command']=='www-create-session' && isset($resultData['www-token'])){
+					$this->apiState['apiToken']=$resultData['www-token'];
+					$this->log[]='Session token was found in reply, API session token set to: '.$resultData['www-token'];
 				}
-				
-				// If error was detected
-				if(isset($result['www-error'])){
-					return $this->failureHandler($thisInputData,$result['www-error-code'],$result['www-error'],$thisApiState['failureCallback']);
-				}
-				
 			}
 			
 			// If callback has been defined
@@ -747,18 +712,47 @@ class WWW_Wrapper {
 				if(function_exists($thisApiState['successCallback'])){
 					$this->log[]='Sending data to callback: '.$thisApiState['successCallback'].'()';
 					// Callback execution
-					return call_user_func($thisApiState['successCallback'],$result);
+					return call_user_func($thisApiState['successCallback'],$resultData);
 				} else {
 					return $this->failureHandler($thisInputData,216,'Callback method not found',$thisApiState['failureCallback']);
 				}
 			} else {
 				// Returning request result
-				return $result;
+				return $resultData;
 			}
 			
 		}
 		
 	// REQUIRED FUNCTIONS
+	
+		// Calculates validation hash
+		// * validationData - Data to build a hash from
+		// * postFix - Data used to salt the hash
+		// Returns the hash
+		private function validationHash($validationData,$postFix){
+			// Sorting and encoding the output data
+			$validationData=$this->ksortArray($validationData);
+			// Returning validation hash
+			return sha1(http_build_query($validationData).$postFix);
+		}
+		
+		// This function applies key-based sorting recursively to an array of arrays
+		// * array - Array to be sorted
+		// Returns sorted array
+		private function ksortArray($data){
+			// Method is based on the current data type
+			if(is_array($data)){
+				// Sorting the current array
+				ksort($data);
+				// Sorting every sub-array, if it is one
+				$keys=array_keys($data);
+				$keySize=sizeOf($keys);
+				for($i=0;$i<$keySize;$i++){
+					$data[$keys[$i]]=$this->ksortArray($data[$keys[$i]]);
+				}
+			}
+			return $data;
+		}
 		
 		// This method is simply meant for returning a result if there was an error in the sent request
 		// * inputData - Data sent to request

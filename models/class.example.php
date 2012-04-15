@@ -27,7 +27,7 @@ class WWW_model_example extends WWW_Factory {
 	public function load($id){
 		// Actual database query should be built here
 		$this->id=$id;
-		$this->name='Lorem Ipsum #'.rand(1,10000); // This is used for simply testing cache
+		$this->name='Lorem Ipsum #'.rand(1,1000); // This is used for simply testing cache
 		return true;
 	}
 	

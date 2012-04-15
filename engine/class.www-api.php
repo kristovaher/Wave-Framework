@@ -285,41 +285,33 @@ class WWW_API {
 				// TOKEN AND HASH VALIDATION
 					
 					// Validation hash is calculated from input data
-					$validationHash=$apiInputData;
+					$validationData=$apiInputData;
 					// Unsetting validation hash itself from input
-					unset($validationHash['www-hash']);
+					unset($validationData['www-hash']);
 					// Session input is not considered for validation hash and is unset
-					if(isset($validationHash['www-session'])){
-						unset($validationHash['www-session']);
+					if(isset($validationData['www-session'])){
+						unset($validationData['www-session']);
 					}
 					// Cookie input is not considered for validation hash and is unset
-					if(isset($validationHash['www-cookies'])){
-						unset($validationHash['www-cookies']);
+					if(isset($validationData['www-cookies'])){
+						unset($validationData['www-cookies']);
 					}
 					// Files input is not considered for validation hash and is unset
-					if(isset($validationHash['www-files'])){
-						unset($validationHash['www-files']);
-					}
-					// Validation data is sorted by keys
-					ksort($validationHash);
-					// Encoding all of the variables for validation
-					// Why is it written like this? Four times faster than foreach manipulation of the same array
-					$keys=array_keys($validationHash);
-					$keySize=sizeOf($keys);
-					for($i=0;$i<$keySize;$i++){
-						if(!is_array($validationHash[$keys[$i]])){
-							$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
-						}
+					if(isset($validationData['www-files'])){
+						unset($validationData['www-files']);
 					}
 					
 					// If token is set then this is used for validation as long as the command is not www-create-session
 					if($apiState['token'] && $apiState['command']!='www-create-session'){
-						// Session creation and destruction commands have validation hashes built only with the secret key
-						$validationHash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
+						// Session creation commands have validation hashes built only with the secret key
+						$validationHash=$this->validationHash($validationData,$apiState['token'].$apiState['secret-key']);
 					} else {
 						// Every other command takes token into account when calculating the validation hash
-						$validationHash=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['secret-key']);
+						$validationHash=$this->validationHash($validationData,$apiState['secret-key']);
 					}
+					
+					// Unsetting validation data array
+					unset($validationData);
 					
 					// If validation hashes do not match
 					if($validationHash!=$apiState['hash']){
@@ -643,30 +635,14 @@ class WWW_API {
 			// If request demanded a hash to also be returned
 			// This is only valid when the result is not an 'error' and has a secret key set
 			if($apiState['return-hash'] && !isset($apiResult['www-error']) && $apiState['secret-key']){
-			
-				// Hash is calculated from all the data returned to the user agent, except hash itself
-				$validationHash=$apiResult;
-				// Sorting the output data
-				ksort($validationHash);
-				// Why is it written like this? Four times faster than foreach manipulation of the same array
-				$keys=array_keys($validationHash);
-				$keySize=sizeOf($keys);
-				for($i=0;$i<$keySize;$i++){
-					if(!is_array($validationHash[$keys[$i]])){
-						$validationHash[$keys[$i]]=rawurlencode($validationHash[$keys[$i]]);;
-					}
-				}
 				
 				// Hash is written to returned result
 				// Session creation and destruction commands return data is hashed without token
 				if(!$apiState['token-timeout'] || $apiState['command']=='www-create-session'){
-					$apiResult['www-hash']=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['secret-key']);
+					$apiResult['www-hash']=$this->validationHash($apiResult,$apiState['secret-key']);
 				} else {
-					$apiResult['www-hash']=sha1(json_encode($validationHash,JSON_NUMERIC_CHECK).$apiState['token'].$apiState['secret-key']);
+					$apiResult['www-hash']=$this->validationHash($apiResult,$apiState['token'].$apiState['secret-key']);
 				}
-				
-				// Unsetting as it is not needed any further
-				unset($validationHash);
 				
 			}
 			
@@ -901,6 +877,35 @@ class WWW_API {
 				return $apiResult;
 			}
 		
+	}
+	
+	// Calculates validation hash
+	// * validationData - Data to build a hash from
+	// * postFix - Data used to salt the hash
+	// Returns the hash
+	private function validationHash($validationData,$postFix){
+		// Sorting and encoding the output data
+		$validationData=$this->ksortArray($validationData);
+		// Returning validation hash
+		return sha1(http_build_query($validationData).$postFix);
+	}
+	
+	// This function applies key-based sorting recursively to an array of arrays
+	// * array - Array to be sorted
+	// Returns sorted array
+	private function ksortArray($data){
+		// Method is based on the current data type
+		if(is_array($data)){
+			// Sorting the current array
+			ksort($data);
+			// Sorting every sub-array, if it is one
+			$keys=array_keys($data);
+			$keySize=sizeOf($keys);
+			for($i=0;$i<$keySize;$i++){
+				$data[$keys[$i]]=$this->ksortArray($data[$keys[$i]]);
+			}
+		}
+		return $data;
 	}
 	
 	// This function checks the data for various keys and values that might affect headers

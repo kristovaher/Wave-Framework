@@ -82,7 +82,7 @@ function WWW_Wrapper(address){
 				value=0;
 			}
 			// If this is an array then it populates input array recursively
-			if(typeof input==='object' && input instanceof Object){
+			if(typeof(input)==='object'){
 				for(var node in input){
 					inputSetter(node,input[node]);
 				}
@@ -293,35 +293,16 @@ function WWW_Wrapper(address){
 				// Log entry
 				log.push('API secret key set, hash authentication will be used');
 				
-				// Token has to be provided for every request that is not a 'www-create-session'
-				if(thisApiState.apiToken){
-					var requestToken=thisApiState.apiToken;
-				}
-				
 				// Validation hash is generated based on current serialization option
 				if(thisInputData['www-hash']==null){
 				
 					// Validation requires a different hash
-					var validationHash=clone(thisInputData);
-					// Input data has to be sorted based on key
-					validationHash=ksort(validationHash);
-					// JSON specific forward slash escaping
-					for(var key in validationHash){
-						var value=validationHash[key];
-						// Converting numeric flaots and strings to their proper formats
-						if(!!(value % 1)){
-							validationHash[key]=parseFloat(value);
-						} else if((typeof(value) === 'number' || typeof(value) === 'string') && value !== '' && !isNaN(value)){
-							validationHash[key]=parseInt(value);
-						} else {
-							validationHash[key]=encodeURIComponent(value);
-						}
-					}
+					var validationData=clone(thisInputData);
 					// Calculating validation hash
-					if(requestToken && thisInputData['www-command']!='www-create-session'){
-						thisInputData['www-hash']=sha1(JSON.stringify(validationHash)+requestToken+thisApiState.apiSecretKey);
+					if(thisApiState.apiToken && thisInputData['www-command']!='www-create-session'){
+						thisInputData['www-hash']=validationHash(validationData,thisApiState.apiToken+thisApiState.apiSecretKey);
 					} else {
-						thisInputData['www-hash']=sha1(JSON.stringify(validationHash)+thisApiState.apiSecretKey);
+						thisInputData['www-hash']=validationHash(validationData,thisApiState.apiSecretKey);
 					}
 					
 				}
@@ -358,13 +339,7 @@ function WWW_Wrapper(address){
 					var method='GET';
 				
 					// Getting input variables
-					var requestData=new Array();
-					for(node in thisInputData){
-						requestData.push(node+'='+encodeURIComponent(thisInputData[node]));
-					}
-				
-					// Request data
-					var requestData=requestData.join('&');
+					var requestData=buildRequestData(thisInputData);
 				
 					// Creating request handler
 					XMLHttp=new XMLHttpRequest();
@@ -473,7 +448,8 @@ function WWW_Wrapper(address){
 					// Preparing form submission
 					apiSubmitForm.method='POST';
 					apiSubmitForm.action=apiAddress;
-					apiSubmitForm.enctype='multipart/form-data';
+					apiSubmitForm.setAttribute('enctype','multipart/form-data'); // Done differently because of IE8
+					apiSubmitForm.setAttribute('encoding','multipart/form-data'); // IE6 wants this
 					apiSubmitForm.target=hiddenWindowName;
 					
 					// Input data
@@ -505,9 +481,11 @@ function WWW_Wrapper(address){
 							apiSubmitForm.action='';
 						}
 						if(old_formEnctype!=null){
-							apiSubmitForm.enctype=old_formEnctype;
+							apiSubmitForm.setAttribute('enctype',old_formEnctype);
+							apiSubmitForm.setAttribute('encoding',old_formEnctype);
 						} else {
-							apiSubmitForm.enctype='';
+							apiSubmitForm.setAttribute('enctype','');
+							apiSubmitForm.setAttribute('encoding','');
 						}
 						if(old_formTarget!=null){
 							apiSubmitForm.target=old_formTarget;
@@ -521,13 +499,13 @@ function WWW_Wrapper(address){
 							}
 						}
 						// Parsing the result
-						var result=hiddenWindow.contentWindow.document.body.innerHTML;
+						var resultData=hiddenWindow.contentWindow.document.body.innerHTML;
 						// Log entry
-						log.push('Result of the request: '+result);
-						result=parseResult(result,thisInputData,thisApiState);
+						log.push('Result of the request: '+resultData);
+						resultData=parseResult(resultData,thisInputData,thisApiState);
 						// Removing hidden iFrame
 						setTimeout(function(){apiSubmitForm.removeChild(hiddenWindow);},100);
-						return result;
+						return resultData;
 					}
 					
 					// Hidden iFrame onload function
@@ -553,19 +531,14 @@ function WWW_Wrapper(address){
 		// * thisInputData - Input data sent to request
 		// * thisApiState - API state at the time of the request
 		// Returns result
-		var parseResult=function(result,thisInputData,thisApiState){
-		
-			// Checking for existing error
-			if(thisApiState['unserialize'] && result['www-error']!=null){
-				return failureHandler(thisInputData,result['www-error-code'],result['www-error'],thisApiState['failureCallback']);
-			}
+		var parseResult=function(resultData,thisInputData,thisApiState){
 				
 			// PARSING REQUEST RESULT
 				
 				// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
 				if((thisInputData['www-return-type']==null || thisInputData['www-return-type']=='json') && thisApiState.unserialize){
 					// JSON support is required
-					result=JSON.parse(result);
+					resultData=JSON.parse(resultData);
 					log.push('Returning JSON object');
 				} else if(thisApiState.unserialize){
 					// Every other unserialization attempt fails
@@ -573,6 +546,14 @@ function WWW_Wrapper(address){
 				} else {
 					// Data is simply returned if serialization was not requested
 					log.push('Returning result');
+				}
+				
+				// Return specific actions
+				if(thisApiState.unserialize){
+					// If error was detected
+					if(resultData['www-error']!=null){
+						return failureHandler(thisInputData,resultData['www-error-code'],resultData['www-error'],thisApiState['failureCallback']);
+					}
 				}
 				
 			// RESULT VALIDATION
@@ -585,9 +566,9 @@ function WWW_Wrapper(address){
 					
 						// If it was requested that validation timestamp is returned
 						if(thisApiState.returnTimestamp){
-							if(result['www-timestamp']!=null){
+							if(resultData['www-timestamp']!=null){
 								// Making sure that the returned result is within accepted time limit
-								if(((Math.floor(new Date().getTime()/1000))-thisApiState.timestampDuration)>result['www-timestamp']){
+								if(((Math.floor(new Date().getTime()/1000))-thisApiState.timestampDuration)>resultData['www-timestamp']){
 									return failureHandler(thisInputData,210,'Validation timestamp is too old',thisApiState.failureCallback);
 								}
 							} else {
@@ -598,37 +579,22 @@ function WWW_Wrapper(address){
 						// If it was requested that validation hash is returned
 						if(thisApiState.returnHash){
 							// Hash and timestamp have to be defined in response
-							if(result['www-hash']!=null){
+							if(resultData['www-hash']!=null){
 							
 								// Assigning returned array to hash validation array
-								var validationHash=clone(result);
+								var validationData=clone(resultData);
 								// Hash itself is removed from validation
-								delete validationHash['www-hash'];
-								// Data is sorted
-								validationHash=ksort(validationHash);
-								
-								// JSON specific forward slash escaping
-								for(var key in validationHash){
-									var value=validationHash[key];
-									// Converting numeric flaots and strings to their proper formats
-									if(!!(value % 1)){
-										validationHash[key]=parseFloat(value);
-									} else if((typeof(value) === 'number' || typeof(value) === 'string') && value !== '' && !isNaN(value)){
-										validationHash[key]=parseInt(value);
-									} else {
-										validationHash[key]=encodeURIComponent(value);
-									}
-								}
+								delete validationData['www-hash'];
 								
 								// Validation depends on whether session creation or destruction commands were called
 								if(thisInputData['www-command']=='www-create-session'){
-									var resultHash=sha1(JSON.stringify(validationHash)+thisApiState.apiSecretKey);
+									var resultHash=validationHash(validationData,thisApiState.apiSecretKey);
 								} else {
-									var resultHash=sha1(JSON.stringify(validationHash)+thisApiState.apiToken+thisApiState.apiSecretKey);
+									var resultHash=validationHash(validationData,thisApiState.apiToken+thisApiState.apiSecretKey);
 								}
 								
 								// If sent hash is the same as calculated hash
-								if(resultHash==result['www-hash']){
+								if(resultHash==resultData['www-hash']){
 									log.push('Hash validation successful');
 								} else {
 									return failureHandler(thisInputData,211,'Hash validation failed',thisApiState.failureCallback);
@@ -651,34 +617,27 @@ function WWW_Wrapper(address){
 			
 			// Return specific actions
 			if(thisApiState.unserialize){
-			
 				// If this command was to create a token
-				if(thisInputData['www-command']=='www-create-session' && result['www-token']!=null){
-					apiState.apiToken=result['www-token'];
-					log.push('Session token was found in reply, API session token set to: '+result['www-token']);
-				}
-			
-				// If error was detected
-				if(result['www-error']!=null){
-					return failureHandler(thisInputData,result['www-error-code'],result['www-error'],thisApiState['failureCallback']);
-				}
-				
+				if(thisInputData['www-command']=='www-create-session' && resultData['www-token']!=null){
+					apiState.apiToken=resultData['www-token'];
+					log.push('Session token was found in reply, API session token set to: '+resultData['www-token']);
+				}				
 			}
 			
 			// If callback function is set
 			if(thisApiState.successCallback){
 				// Calling user function
 				thisCallback=this.window[thisApiState.successCallback];
-				if(typeof thisCallback==='function'){
+				if(typeof(thisCallback)==='function'){
 					log.push('Sending failure data to callback: '+thisApiState['failureCallback']+'()');
 					// Callback execution
-					return thisCallback.call(this,result);
+					return thisCallback.call(this,resultData);
 				} else {
 					return failureHandler(thisInputData,216,'Callback method not found',thisApiState['failureCallback']);
 				}
 			} else {
 				// Returning request result
-				return result;
+				return resultData;
 			}				
 
 		}
@@ -700,7 +659,7 @@ function WWW_Wrapper(address){
 			if(thisFailureCallback){
 				// Looking for function of that name
 				thisCallback=this.window[thisFailureCallback];
-				if(typeof thisCallback==='function'){
+				if(typeof(thisCallback)==='function'){
 					log.push('Sending failure data to callback: '+thisFailureCallback+'()');
 					// Callback execution
 					var result={'www-input':thisInputData,'www-error-code':errorCode,'www-error':errorMessage};
@@ -730,16 +689,90 @@ function WWW_Wrapper(address){
 			return tmp;
 		}
 		
-		// This checks if an object is empty or not
-		// * object - Object to be checked
-		// Returns true or false
-		var empty=function(object){
-			if(typeof object=='object'){
-				for(key in object){
-					return false;
+		// Calculates validation hash
+		// * apiResult - Data array to calculate validation hash from
+		// * postFix - Part of the validation that is only known to sender and recipient
+		// Returns the hash
+		var validationHash=function(validationData,postFix){
+			// Sorting and encoding the output data
+			validationData=ksortArray(validationData);
+			// Returning validation hash		
+			return sha1(buildRequestData(validationData)+postFix);
+		}
+		
+		// This function applies key-based sorting recursively to an array of arrays
+		// * array - Array to be sorted
+		// Returns sorted array
+		var ksortArray=function(data){
+			// Method is based on the current data type
+			if(typeof(data)==='array' || typeof(data)==='object'){
+				// Sorting the current array
+				data=ksort(data);
+				// Sorting every sub-array, if it is one
+				for(var i in data){
+					data[i]=ksortArray(data[i]);
 				}
-				return true;
 			}
+			return data;
+		}
+		
+		// This function builds a request data string from input data
+		// * value - input data object to be converted
+		// Returns the data string
+		var buildRequestData=function(value){
+			var variables=new Array();
+			for(var i in value){
+				// Using the helper function
+				var query=subRequestData(value[i],i);
+				if(query!=''){
+					variables.push(query);
+				}
+			}
+			return variables.join('&');
+		}
+		
+		// This is a helper function for request builder
+		// * value - Value
+		// * key - Key
+		// Returns snippet for request string
+		var subRequestData=function(value,key){
+			var variables=new Array();
+			if(value!=null){
+				// Converting true/false to numeric
+				if(value===true){
+					value='1';
+				} else if(value===false){
+					value='0';
+				}
+				// Object will be parsed through subRequestData recursively
+				if(typeof(value)==='object'){
+					for(var i in value){
+						if(value[i]!=null){
+							variables.push(subRequestData(value[i],key+'['+i+']'));
+						}
+					}
+					return variables.join('&');
+				} else {
+					return encodeValue(key)+'='+encodeValue(value);
+				}
+			} else {
+				return '';
+			}
+		};
+		
+		// This function is a modified version of encodeURIComponent
+		// It adds certain conversions for PHP-sake
+		// * data - String to encode
+		// Returns encoded string
+		var encodeValue=function(data){
+			data=encodeURIComponent(data);
+			data=data.replace('\'','%27');
+			data=data.replace('!','%21');
+			data=data.replace('(','%28');
+			data=data.replace(')','%29');
+			data=data.replace('*','%2A');
+			data=data.replace('%20','+');
+			return data;
 		}
 	
 		// This function sorts object based on its keys
@@ -803,18 +836,15 @@ function WWW_Wrapper(address){
 		// * msg - String to convert
 		// Returns hashed string
 		var sha1=function(msg){
-		 
 			function rotate_left(n,s) {
 				var t4 = ( n<<s ) | (n>>>(32-s));
 				return t4;
 			};
-		 
 			function lsb_hex(val) {
 				var str="";
 				var i;
 				var vh;
 				var vl;
-		 
 				for( i=0; i<=6; i+=2 ) {
 					vh = (val>>>(i*4+4))&0x0f;
 					vl = (val>>>(i*4))&0x0f;
@@ -822,28 +852,21 @@ function WWW_Wrapper(address){
 				}
 				return str;
 			};
-		 
 			function cvt_hex(val) {
 				var str="";
 				var i;
 				var v;
-		 
 				for( i=7; i>=0; i-- ) {
 					v = (val>>>(i*4))&0x0f;
 					str += v.toString(16);
 				}
 				return str;
 			};
-		 
-		 
 			function Utf8Encode(string) {
 				string = string.replace(/\r\n/g,"\n");
 				var utftext = "";
-		 
 				for (var n = 0; n < string.length; n++) {
-		 
 					var c = string.charCodeAt(n);
-		 
 					if (c < 128) {
 						utftext += String.fromCharCode(c);
 					}
@@ -856,12 +879,9 @@ function WWW_Wrapper(address){
 						utftext += String.fromCharCode(((c >> 6) & 63) | 128);
 						utftext += String.fromCharCode((c & 63) | 128);
 					}
-		 
 				}
-		 
 				return utftext;
 			};
-		 
 			var blockstart;
 			var i, j;
 			var W = new Array(80);
@@ -872,18 +892,14 @@ function WWW_Wrapper(address){
 			var H4 = 0xC3D2E1F0;
 			var A, B, C, D, E;
 			var temp;
-		 
 			msg = Utf8Encode(msg);
-		 
 			var msg_len = msg.length;
-		 
 			var word_array = new Array();
 			for( i=0; i<msg_len-3; i+=4 ) {
 				j = msg.charCodeAt(i)<<24 | msg.charCodeAt(i+1)<<16 |
 				msg.charCodeAt(i+2)<<8 | msg.charCodeAt(i+3);
 				word_array.push( j );
 			}
-		 
 			switch( msg_len % 4 ) {
 				case 0:
 					i = 0x080000000;
@@ -891,35 +907,25 @@ function WWW_Wrapper(address){
 				case 1:
 					i = msg.charCodeAt(msg_len-1)<<24 | 0x0800000;
 				break;
-		 
 				case 2:
 					i = msg.charCodeAt(msg_len-2)<<24 | msg.charCodeAt(msg_len-1)<<16 | 0x08000;
 				break;
-		 
 				case 3:
 					i = msg.charCodeAt(msg_len-3)<<24 | msg.charCodeAt(msg_len-2)<<16 | msg.charCodeAt(msg_len-1)<<8	| 0x80;
 				break;
 			}
-		 
 			word_array.push( i );
-		 
 			while( (word_array.length % 16) != 14 ) word_array.push( 0 );
-		 
-			word_array.push( msg_len>>>29 );
-			word_array.push( (msg_len<<3)&0x0ffffffff );
-		 
-		 
-			for ( blockstart=0; blockstart<word_array.length; blockstart+=16 ) {
-		 
+			word_array.push(msg_len>>>29);
+			word_array.push((msg_len<<3)&0x0ffffffff);
+			for ( blockstart=0; blockstart<word_array.length; blockstart+=16 ){
 				for( i=0; i<16; i++ ) W[i] = word_array[blockstart+i];
 				for( i=16; i<=79; i++ ) W[i] = rotate_left(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);
-		 
 				A = H0;
 				B = H1;
 				C = H2;
 				D = H3;
 				E = H4;
-		 
 				for( i= 0; i<=19; i++ ) {
 					temp = (rotate_left(A,5) + ((B&C) | (~B&D)) + E + W[i] + 0x5A827999) & 0x0ffffffff;
 					E = D;
@@ -928,7 +934,6 @@ function WWW_Wrapper(address){
 					B = A;
 					A = temp;
 				}
-		 
 				for( i=20; i<=39; i++ ) {
 					temp = (rotate_left(A,5) + (B ^ C ^ D) + E + W[i] + 0x6ED9EBA1) & 0x0ffffffff;
 					E = D;
@@ -937,7 +942,6 @@ function WWW_Wrapper(address){
 					B = A;
 					A = temp;
 				}
-		 
 				for( i=40; i<=59; i++ ) {
 					temp = (rotate_left(A,5) + ((B&C) | (B&D) | (C&D)) + E + W[i] + 0x8F1BBCDC) & 0x0ffffffff;
 					E = D;
@@ -946,7 +950,6 @@ function WWW_Wrapper(address){
 					B = A;
 					A = temp;
 				}
-		 
 				for( i=60; i<=79; i++ ) {
 					temp = (rotate_left(A,5) + (B ^ C ^ D) + E + W[i] + 0xCA62C1D6) & 0x0ffffffff;
 					E = D;
@@ -955,19 +958,14 @@ function WWW_Wrapper(address){
 					B = A;
 					A = temp;
 				}
-		 
 				H0 = (H0 + A) & 0x0ffffffff;
 				H1 = (H1 + B) & 0x0ffffffff;
 				H2 = (H2 + C) & 0x0ffffffff;
 				H3 = (H3 + D) & 0x0ffffffff;
 				H4 = (H4 + E) & 0x0ffffffff;
-		 
 			}
-		 
 			var temp = cvt_hex(H0) + cvt_hex(H1) + cvt_hex(H2) + cvt_hex(H3) + cvt_hex(H4);
-		 
 			return temp.toLowerCase();
-		 
 		}
 		
 }

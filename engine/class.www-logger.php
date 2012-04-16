@@ -56,7 +56,7 @@ class WWW_Logger {
 	// This allows single or multiple log data keys to be sent to Logger at the same time
 	// * setting - single key or array of data
 	// Always returns true
-	public function setCustomLogData($key,$value){
+	public function setCustomLogData($key,$value=false){
 		if(is_array($key)){
 			$this->logData=$key+$this->logData;
 		} else {

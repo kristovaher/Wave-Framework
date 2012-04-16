@@ -31,6 +31,7 @@ class WWW_Database {
 	public $password='';
 	public $host='';
 	public $database='';
+	public $persistent=false;
 	
 	// Flag for checking whether database connection is active or not
 	public $showErrors=0;
@@ -53,14 +54,21 @@ class WWW_Database {
 	}
 
 	// Connects to database based on set configuration
+	// * persistent - Whether database connection is persistent or not
 	// Throws errors if database connection fails
-	public function connect(){
+	public function connect($persistent=false){
+	
+		// Persistent or not
+		if($persistent==true){
+			$this->persistent=true;
+		}
+	
 		// Actions based on database type
 		switch($this->type){
 			case 'mysql':
 				// This mode can only be used if PDO MySQL is loaded as PHP extension
 				if(extension_loaded('pdo_mysql')){
-					$this->pdo=new PDO('mysql:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::MYSQL_ATTR_INIT_COMMAND=>'SET NAMES \'UTF8\''));
+					$this->pdo=new PDO('mysql:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent,PDO::MYSQL_ATTR_INIT_COMMAND=>'SET NAMES \'UTF8\''));
 					if($this->pdo){
 						$this->connected=1;
 					} else {
@@ -73,7 +81,7 @@ class WWW_Database {
 			case 'sqlite':
 				// This mode can only be used if PDO SQLite is loaded as PHP extension
 				if(extension_loaded('pdo_sqlite')){
-					$this->pdo=new PDO('sqlite:'.$this->database,$this->username,$this->password);
+					$this->pdo=new PDO('sqlite:'.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->connected=1;
 					} else {
@@ -86,7 +94,7 @@ class WWW_Database {
 			case 'postgresql':
 				// This mode can only be used if PDO PostgreSQL is loaded as PHP extension
 				if(extension_loaded('pdo_pgsql')){
-					$this->pdo=new PDO('pgsql:host='.$this->host.';dbname='.$this->database,$this->username,$this->password);
+					$this->pdo=new PDO('pgsql:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->pdo->exec('SET NAMES \'UTF8\'');
 						$this->connected=1;
@@ -100,7 +108,7 @@ class WWW_Database {
 			case 'oracle':
 				// This mode can only be used if PDO Oracle is loaded as PHP extension
 				if(extension_loaded('pdo_oci')){
-					$this->pdo=new PDO('oci:dbname='.$this->database.';charset=AL32UTF8',$this->username,$this->password);
+					$this->pdo=new PDO('oci:dbname='.$this->database.';charset=AL32UTF8',$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->connected=1;
 					} else {
@@ -113,7 +121,7 @@ class WWW_Database {
 			case 'mssql':
 				// This mode can only be used if PDO MSSQL is loaded as PHP extension
 				if(extension_loaded('pdo_mssql')){
-					$this->pdo=new PDO('dblib:host='.$this->host.';dbname='.$this->database,$this->username,$this->password);
+					$this->pdo=new PDO('dblib:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->pdo->exec('SET NAMES \'UTF8\'');
 						$this->connected=1;
@@ -136,7 +144,7 @@ class WWW_Database {
 	public function disconnect($resetQueryCounter=false){
 	
 		// This is only executed if existing connection is detected
-		if($this->connected==1 && $this->key!='' && !$this->persistent){
+		if($this->connected==1 && !$this->persistent){
 			// Resetting the query counter
 			if($resetQueryCounter){
 				$this->queryCounter=0;

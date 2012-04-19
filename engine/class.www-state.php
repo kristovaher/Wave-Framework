@@ -308,7 +308,6 @@ class WWW_State	{
 					// Setting messenger data
 					$this->messengerData[$data]=$value;
 				}
-				print_r($this->messengerData);
 				return true;
 			} else {
 				return false;

@@ -30,33 +30,48 @@ if(!isset($config['http-authentication-username']) || !isset($config['http-authe
 // Error reporting is turned off in this script
 error_reporting(0);
 
-// Log reader can access any log file created by the system
-if(isset($_GET['log'])){
-	// User agent requested input URL is validated against hostile characters
-	$logFileName=preg_replace('/[^A-Za-z\-\_0-9\/]/i','',$_GET['log']);
+// Checking if logger attempts to read internal log
+if(isset($_GET['internal'])){
+
+	// Actual log address
+	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log.tmp';
+
 } else {
-	// By default the results are returned from current hour
-	$logFileName=date('Y-m-d-H');
-}
 
-// This stores the array types to print out
-$types=array();
-
-// You can print out only some log information
-if(isset($_GET['types'])){
-	$rawTypes=explode(',',$_GET['types']);
-	foreach($rawTypes as $t){
-		$types[$t]=true;
+	// Log reader can access any log file created by the system
+	if(isset($_GET['log'])){
+		// User agent requested input URL is validated against hostile characters
+		$logFileName=preg_replace('/[^A-Za-z\-\_0-9\/]/i','',$_GET['log']);
+	} else {
+		// By default the results are returned from current hour
+		$logFileName=date('Y-m-d-H');
 	}
-} else {
-	$types['all']=true;
+		
+	// This stores the array types to print out
+	$types=array();
+
+	// You can print out only some log information
+	if(isset($_GET['types'])){
+		$rawTypes=explode(',',$_GET['types']);
+		foreach($rawTypes as $t){
+			$types[$t]=true;
+		}
+	} else {
+		$types['all']=true;
+	}
+
+	// Every day the logs are stored under different log subfolder
+	$logSubfolder=substr($logFileName,0,10);
+	
+	// Actual log address
+	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp';
+
 }
 
-// Every day the logs are stored under different log subfolder
-$logSubfolder=substr($logFileName,0,10);
+
 
 // All logs are stored in /log/ folder, if a folder does not exist
-if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp')){
+if(file_exists($logAddress)){
 
 	// Log is printed out in plain text format
 	header('Content-Type: text/html;charset=utf-8');
@@ -64,7 +79,7 @@ if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.
 	echo '<div style="font:12px Verdana;">';
 	
 		// Log files are stored as JSON serialized arrays, separated with line-breaks
-		$log=explode("\n",file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp'));
+		$log=explode("\n",file_get_contents($logAddress));
 		// Printing out every line from the log file
 		foreach($log as $l){
 			// Output buffer allows to increase peformance due to multiple echo's
@@ -75,7 +90,7 @@ if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.
 			if(is_array($l)){
 				// Printing out log data
 				foreach($l as $key=>$entry){
-					if(isset($types['all']) || isset($types[$key])){
+					if(isset($_GET['internal']) || isset($types['all']) || isset($types[$key])){
 						if(!is_array($entry)){
 							echo '<b>'.$key.':</b> '.$entry.'<br/>';
 						} else {

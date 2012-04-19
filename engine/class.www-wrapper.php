@@ -520,7 +520,6 @@ class WWW_Wrapper {
 						$cURL=curl_init();
 						// Setting cURL options
 						$requestOptions=array(
-							CURLOPT_HTTPHEADER=>array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',time()).' GMT'),
 							CURLOPT_URL=>$this->apiAddress,
 							CURLOPT_REFERER=>((!isset($_SERVER['HTTPS']) || ($_SERVER['HTTPS']!=1 && $_SERVER['HTTPS']!='on'))?'http://':'https://').$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'],
 							CURLOPT_POST=>true,

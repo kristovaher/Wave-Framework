@@ -45,12 +45,12 @@ class WWW_Factory {
 			// Setting the set command variable to proper format for API
 			$inputData['www-command']=$command;
 			// This defaults return data type
-			if(!isset($inputData['www-datatype'])){
-				$inputData['www-datatype']='php';
+			if(!isset($inputData['www-return-type'])){
+				$inputData['www-return-type']='php';
 			}
 			// This defaults whether API command is pushed with headers or not
 			if(!isset($inputData['www-output'])){
-				$inputData['www-output']=false;
+				$inputData['www-output']=0;
 			}
 			return $this->WWW_API->command($inputData,$useBuffer,false);
 		}
@@ -219,6 +219,31 @@ class WWW_Factory {
 				}
 			}
 			
+		}
+		
+	// STATE MESSENGER WRAPPERS
+	
+		// This method sets the request messenger key
+		// * address - Key that messenger data will be saved under
+		// Always returns true
+		final public function stateMessenger($address){
+			return $this->WWW_API->state->stateMessenger($address);
+		}
+		
+		// This sets messenger data
+		// * data - Key or data array
+		// * value - Value, if data is a key
+		// Returns true or false
+		final public function stateMessengerData($data,$value=false){
+			return $this->WWW_API->state->setMessengerData($data,$value);
+		}
+		
+		// This function returns messenger data either from filesystem or from current session
+		// * address - Messenger address
+		// * remove - True or false flag whether to delete the request data after returning it
+		// Returns request messenger data
+		final public function getStateMessengerData($address=false,$remove=true){
+			return $this->WWW_API->state->getMessengerData($address,$remove);
 		}
 	
 	// SESSION AND COOKIE WRAPPERS

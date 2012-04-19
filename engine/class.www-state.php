@@ -26,6 +26,10 @@ class WWW_State	{
 	// Database connection is stored in this variable, if set
 	public $databaseConnection=false;
 	
+	// This stores connection to request messenger
+	private $messenger=false;
+	private $messengerData=array();
+	
 	// Flag that stores if sessions have been started or not
 	public $sessionStarted=false;
 	
@@ -69,6 +73,7 @@ class WWW_State	{
 				'client-ip'=>$_SERVER['REMOTE_ADDR'],
 				'true-client-ip'=>$_SERVER['REMOTE_ADDR'],
 				'server-ip'=>$_SERVER['SERVER_ADDR'],
+				'request-id'=>((isset($_SERVER['UNIQUE_ID']))?$_SERVER['UNIQUE_ID']:''),
 				'request-uri'=>$_SERVER['REQUEST_URI'],
 				'request-time'=>$_SERVER['REQUEST_TIME'],
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
@@ -151,6 +156,25 @@ class WWW_State	{
 			// Fingerprint is hashed with MD5
 			$this->data['fingerprint']=md5($fingerprint);
 		
+	}
+	
+	// This is called when state is not used anymore
+	// It is used to store request messenger data in filesystem
+	final public function __destruct(){
+		// Only applies if request messenger actually holds data
+		if($this->messenger){
+			// Finding data folder
+			$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
+			if(!is_dir($dataFolder)){
+				if(!mkdir($dataFolder,0777)){
+					throw new Exception('Cannot create messenger folder');
+				}
+			}
+			// Writing messenger data to file
+			if(!file_put_contents($dataFolder.$this->messenger.'.tmp',json_encode($this->messengerData))){
+				throw new Exception('Cannot write messenger data');
+			}
+		}
 	}
 	
 	// STATE MANIPULATION
@@ -250,6 +274,78 @@ class WWW_State	{
 			// State has been changed
 			return true;
 			
+		}
+		
+	// REQUEST MESSENGER
+	
+		// This method sets the request messenger key
+		// * address - Key that messenger data will be saved under
+		// Always returns true
+		final public function stateMessenger($address){
+			// File is stored in file system as hashed
+			$this->messenger=md5($address);
+			$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
+			// If this state messenger address already stores data, then it is loaded
+			if(file_exists($dataAddress)){
+				$this->messengerData=json_decode(file_get_contents($dataAddress),true);
+			}
+			return true;
+		}
+		
+		// This sets messenger data
+		// * data - Key or data array
+		// * value - Value, if data is a key
+		// Returns true or false
+		final public function setMessengerData($data,$value=false){
+			if($this->messenger){
+				// If data is an array, then it adds data recursively
+				if(is_array($data)){
+					foreach($data as $key=>$value){
+						// Setting messenger data
+						$this->messengerData[$key]=$value;
+					}
+				} else {
+					// Setting messenger data
+					$this->messengerData[$data]=$value;
+				}
+				print_r($this->messengerData);
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		// This function returns messenger data either from filesystem or from current session
+		// * address - Messenger address
+		// * remove - True or false flag whether to delete the request data after returning it
+		// Returns request messenger data
+		final public function getMessengerData($address=false,$remove=true){
+			if($address){
+				// File is stored in file system as hashed
+				$address=md5($address);
+				// Solving the address of messenger data
+				$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
+				if(file_exists($dataAddress)){
+					// Data is stored as encoded JSON
+					$data=json_decode(file_get_contents($dataAddress),true);
+					// Removing messenger data, if flag is set
+					if($remove){
+						unlink($dataAddress);
+					}
+					// Data returned
+					return $data;
+				} else {
+					return false;
+				}
+			} else {
+				// if there is a messenger active
+				if($this->messenger){
+					// Data returned
+					return $this->messengerData;
+				} else {
+					return false;
+				}
+			}
 		}
 		
 	// SESSION AND COOKIES

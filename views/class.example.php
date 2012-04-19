@@ -18,6 +18,16 @@ class WWW_view_example extends WWW_Factory {
 		// Showing how to make an API call within the view
 		$apiCall=$this->api('example-get');
 		
+		// This shows how to use state messenger
+		$messengerData=$this->getStateMessengerData('aaabbb',false);
+		if(!$messengerData){
+			$this->stateMessenger('aaabbb');
+			$messengerName='Thomas Moore #'.rand(1,1000);
+			$this->stateMessengerData('name',$messengerName);
+		} else {
+			$messengerName=$messengerData['name'];
+		}
+		
 		?>
 			<div style="padding:30px;width:600px;margin-left:auto;margin-right:auto;">
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">An example API response:</h1>
@@ -29,6 +39,11 @@ class WWW_view_example extends WWW_Factory {
 				<pre>
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
 					<?=print_r($input,true)?>
+				</pre>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">State messenger data:</h1>
+				<pre>
+					<!-- This shows data stored in state messenger -->
+					<?=print_r($messengerData,true)?>
 				</pre>
 			</div>
 		<?php

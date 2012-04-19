@@ -69,6 +69,12 @@ if(isset($_GET['all']) || isset($_GET['resources'])){
 	$log=array_merge($log,dirCleaner($directory));
 }
 
+// Clears cache of JavaScript and CSS
+if(isset($_GET['all']) || isset($_GET['messenger'])){
+	$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR;
+	$log=array_merge($log,dirCleaner($directory));
+}
+
 // Clears request data of user agent IP's
 if(isset($_GET['all']) || isset($_GET['limiter'])){
 	$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'limiter'.DIRECTORY_SEPARATOR;

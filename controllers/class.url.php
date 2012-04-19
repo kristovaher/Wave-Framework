@@ -288,6 +288,9 @@ class WWW_controller_url extends WWW_Factory {
 	// This function returns view data
 	private function returnViewData($data){
 		
+		// Appending the data from Sitemap file
+		$data+=$this->siteMapInfo;
+		
 		// This will be returned to view and can be used there for building links
 		$siteMapReference=array();
 		
@@ -331,7 +334,18 @@ class WWW_controller_url extends WWW_Factory {
 			} else {
 				$siteMapReference[$node['view']]['url']=$this->webRoot.$data['language'].'/'.$url;
 			}
-		}
+		}		
+		
+		// This is the best place to build your authentication module for web views
+		// But the commands that it uses are not shown here, so it is commented out
+		// This is essentially the boilerplate startpoint for you to implement authentication
+		// Attempting to get user session
+		// if(isset($data['usergroups']) && $data['usergroups']!=false){
+			// $data['administrative-user']=$this->api('user-get-session',array('required-usergroups'=>$data['usergroups']));
+			// if(!$data['administrative-user']){
+				// return array('www-temporary-redirect'=>$siteMapReference['login']['url']);
+			// }
+		// }
 		
 		// This stores flipped array (for reverse access in views and objects) as a state
 		$data['sitemap']=$siteMapReference;
@@ -339,9 +353,6 @@ class WWW_controller_url extends WWW_Factory {
 		$data['web-root']=$this->webRoot;
 		// Web root will also be returned
 		$data['system-root']=$this->systemRoot;
-		
-		// Appending the data from Sitemap file
-		$data+=$this->siteMapInfo;
 		
 		// These headers will be set by API
 		$data['www-set-header']=array();

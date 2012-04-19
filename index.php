@@ -152,37 +152,24 @@ Author and support: Kristo Vaher - kristo@waher.net
 				
 			} elseif($resourceExtension=='api'){
 				
-				// If the file requested is 'www.api' then it loads the default handler, but it is possible to add a custom API handler by requiesting a different API
-				if($resourceFile=='www.api'){
-					// Default API handler
-					$apiHandler='www';
-					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api.php');
+				// Replacing the extension in the request to find handler filename
+				$apiHandler=str_replace('.api','',$resourceFile);
+				
+				// If the file exists then system loads the new API, otherwise 404 is returned
+				if(file_exists(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php')){
+										
+					// Custom API files need to be placed in engine subfolder
+					// To see how the default API is built, take a look at handler.api.php
+					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php');
+					
 				} else {
 				
-					// Replacing the extension in the request to find handler filename
-					$apiHandler=str_replace('.api','',$resourceFile);
-					
-					// If the file exists then system loads the new API, otherwise 404 is returned
-					if(file_exists(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php')){
-											
-						// Custom API files need to be placed in engine subfolder
-						// To see how the default API is built, take a look at handler.api.php
-						require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php');
-						
-					} else {
-					
-						// Request is logged and can be used for performance review later
-						if($logger){
-							$logger->setCustomLogData(array('response-code'=>404,'category'=>'file'));
-							$logger->writeLog();
-						}
-						
-						// Returning 404 header
-						header('HTTP/1.1 404 Not Found');
-						die();
-					
+					// This allows API filename to define what type of data should be returned
+					if($apiHandler!='json' && $apiHandler!='www'){
+						$_GET['www-return-type']=$apiHandler;
 					}
-					
+					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api.php');
+				
 				}
 				
 			} else {

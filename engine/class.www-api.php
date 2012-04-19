@@ -34,6 +34,10 @@ class WWW_API {
 
 	// This stores WWW_State object
 	public $state=false;
+	
+	// This is for internal testing
+	private $internalLogging=true;
+	private $internalLog=array();
 			
 	// API requires State object for majority of functionality
 	// * state - Object of WWW_State class
@@ -70,6 +74,13 @@ class WWW_API {
 		
 	}
 	
+	// This writes log data to file, if internal logging is turned on 
+	public function __destruct(){
+		if($this->internalLogging){
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log.tmp',json_encode($this->internalLog)."\n",FILE_APPEND);
+		}
+	}
+	
 	// This function replaces the current API state
 	// * state - new state object
 	public function setState($state){
@@ -89,6 +100,11 @@ class WWW_API {
 	// * useLogger - Whether logger array is updated during execution
 	// Returns the result of the API call, depending on command and classes it loads
 	public function command($apiInputData=array(),$useBuffer=false,$apiValidation=true,$useLogger=false){
+	
+		// If internal logging is enabled
+		if($this->internalLogging){
+			$this->internalLog[]['input-data']=$apiInputData;
+		}
 	
 		// DEFAULT VALUES, COMMAND AND BUFFER CHECK
 		
@@ -131,7 +147,6 @@ class WWW_API {
 					return $this->buffer[$commandBufferAddress];
 				}
 			}
-			
 			
 		// ASSIGNING WWW-* VALUES FROM INPUT TO API STATE
 			
@@ -465,13 +480,11 @@ class WWW_API {
 				// Cache filename consists of API command, serialized input data, return type and whether API output is used.
 				$cacheFile=$cacheValidator.'.tmp';
 				// Setting cache folder
-				$cacheFolder=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR;
-				// Cache subfolder is taken from first three characters of cache filename
-				$cacheSubfolder=substr($cacheFile,0,2).DIRECTORY_SEPARATOR;
+				$cacheFolder=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.substr($cacheFile,0,2).DIRECTORY_SEPARATOR;
 				// If cache file exists, it will be parsed and set as API value
-				if(file_exists($cacheFolder.$cacheSubfolder.$cacheFile)){
+				if(file_exists($cacheFolder.$cacheFile)){
 					// Current cache timeout is used to return to browser information about how long browser should store this result
-					$apiState['last-modified']=filemtime($cacheFolder.$cacheSubfolder.$cacheFile);
+					$apiState['last-modified']=filemtime($cacheFolder.$cacheFile);
 					
 					// If server detects its cache to still within cache limit
 					if($apiState['last-modified']>=($this->state->data['request-time']-$apiState['cache-timeout'])){
@@ -495,12 +508,10 @@ class WWW_API {
 						}
 						
 						// System loads the result from cache file based on return data type
-						if($apiState['return-type']=='html'){
-							$apiResult=file_get_contents($cacheFolder.$cacheSubfolder.$cacheFile);
-						} elseif($apiState['return-type']=='php'){
-							$apiResult=unserialize(file_get_contents($cacheFolder.$cacheSubfolder.$cacheFile));
+						if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
+							$apiResult=file_get_contents($cacheFolder.$cacheFile);
 						} else {
-							$apiResult=json_decode(file_get_contents($cacheFolder.$cacheSubfolder.$cacheFile),true);
+							$apiResult=json_decode(file_get_contents($cacheFolder.$cacheFile),true);
 						}
 						
 						// Since cache was used
@@ -550,7 +561,7 @@ class WWW_API {
 				// Second half of the command string is used to solve the function that is called by the command
 				if(isset($commandBits[1])){
 					// Solving method name, dashes are underscored
-					$methodName=str_replace('-','_',$commandBits[1]);
+					$methodName=str_replace('-','',$commandBits[1]);
 					// New controller is created based on API call
 					$controller=new $className($this);
 					// If command method does not exist, 501 page is returned or error triggered
@@ -574,23 +585,19 @@ class WWW_API {
 				// If cache timeout was set then the result is stored as a cache in the filesystem
 				if($apiState['cache-timeout']){
 					// If cache subdirectory does not exist, it is created
-					if(!is_dir($cacheFolder.$cacheSubfolder)){
-						if(!mkdir($cacheFolder.$cacheSubfolder,0777)){
+					if(!is_dir($cacheFolder)){
+						if(!mkdir($cacheFolder,0777)){
 							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}
 					// If returned data is HTML or text, it is simply written into cache file
 					// Other results are serialized before being written to cache
 					if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
-						if(!file_put_contents($cacheFolder.$cacheSubfolder.$cacheFile,$apiResult)){
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
-						}
-					} elseif($apiState['return-type']=='php'){
-						if(!file_put_contents($cacheFolder.$cacheSubfolder.$cacheFile,serialize($apiResult))){
+						if(!file_put_contents($cacheFolder.$cacheFile,$apiResult)){
 							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					} else {
-						if(!file_put_contents($cacheFolder.$cacheSubfolder.$cacheFile,json_encode($apiResult))){
+						if(!file_put_contents($cacheFolder.$cacheFile,json_encode($apiResult))){
 							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}
@@ -619,10 +626,24 @@ class WWW_API {
 	// * useLogger - If logger is used
 	// Returns final-formatted data
 	private function output($apiResult,$apiState,$useLogger=true){
+			
+		// If internal logging is enabled
+		if($this->internalLogging){
+			if($apiState['return-type']=='html' || $apiState['return-type']=='xml' || $apiState['return-type']=='rss'){
+				$this->internalLog[]['output-data']='['.strtoupper($apiState['return-type']). ' DATA RETURNED]';
+			} else {
+				$this->internalLog[]['output-data']=$apiResult;
+			}
+		}
+		
+		// If error is set and the returned data is in PHP format, then we simply return false
+		if($apiState['return-type']=='php' && isset($apiResult['www-error'])){
+			return false;
+		}
 		
 		// This filters the result through various PHP and header specific commands
 		if(!isset($apiResult['www-disable-callbacks']) || $apiResult['www-disable-callbacks']==false){
-			$this->apiCallbacks($apiResult,$useLogger);
+			$this->apiCallbacks($apiResult,$useLogger,$apiState['return-type']);
 		}
 		
 		// OUTPUT HASH VALIDATION
@@ -634,7 +655,7 @@ class WWW_API {
 		
 			// If request demanded a hash to also be returned
 			// This is only valid when the result is not an 'error' and has a secret key set
-			if($apiState['return-hash'] && !isset($apiResult['www-error']) && $apiState['secret-key']){
+			if($apiState['return-hash'] && $apiState['secret-key']){
 				
 				// Hash is written to returned result
 				// Session creation and destruction commands return data is hashed without token
@@ -912,20 +933,25 @@ class WWW_API {
 	// * data - Data array
 	// * useLogger - If logger is used
 	// Always returns true after filtering
-	private function apiCallbacks($data,$useLogger){
+	private function apiCallbacks($data,$useLogger,$returnType){
 	
 		// HEADERS
+		
+			// These are only in effect if PHP is returned
+			if($returnType=='php'){
 	
-			// This sets a specific header
-			if(isset($data['www-set-header'])){
-				// It is possible to set multiple headers simultaneously
-				if(is_array($data['www-set-header'])){
-					foreach($data['www-set-header'] as $header){
-						header($header);
+				// This sets a specific header
+				if(isset($data['www-set-header'])){
+					// It is possible to set multiple headers simultaneously
+					if(is_array($data['www-set-header'])){
+						foreach($data['www-set-header'] as $header){
+							header($header);
+						}
+					} else {
+						header($data['www-set-header']);
 					}
-				} else {
-					header($data['www-set-header']);
 				}
+				
 			}
 			
 		// COOKIES AND SESSIONS
@@ -976,25 +1002,30 @@ class WWW_API {
 		
 		// REDIRECTS
 		
-			// It is possible to re-direct API after submission
-			if(isset($data['www-temporary-redirect'])){
-				if($useLogger){
-					// Adding log entry
-					$this->apiLoggerData['response-code']=302;
-					$this->apiLoggerData['temporary-redirect']=$data['www-temporary-redirect'];
+			// These are only in effect if PHP is returned
+			if($returnType=='php'){
+		
+				// It is possible to re-direct API after submission
+				if(isset($data['www-temporary-redirect'])){
+					if($useLogger){
+						// Adding log entry
+						$this->apiLoggerData['response-code']=302;
+						$this->apiLoggerData['temporary-redirect']=$data['www-temporary-redirect'];
+					}
+					// Redirection header
+					header('Location: '.$data['www-temporary-redirect'],true,302);
+					
+				} elseif(isset($data['www-permanent-redirect'])){
+					if($useLogger){
+						// Adding log entry
+						$this->apiLoggerData['response-code']=301;
+						$this->apiLoggerData['permanent-redirect']=$data['www-permanent-redirect'];
+					}
+					// Redirection header
+					header('Location: '.$data['www-permanent-redirect'],true,301);
+					
 				}
-				// Redirection header
-				header('Location: '.$data['www-temporary-redirect'],true,302);
-				
-			} elseif(isset($data['www-permanent-redirect'])){
-				if($useLogger){
-					// Adding log entry
-					$this->apiLoggerData['response-code']=301;
-					$this->apiLoggerData['permanent-redirect']=$data['www-permanent-redirect'];
-				}
-				// Redirection header
-				header('Location: '.$data['www-permanent-redirect'],true,301);
-				
+			
 			}
 	
 		// Processing complete

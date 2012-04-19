@@ -141,7 +141,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// This sets what type of output compression is used, options include 'default' and 'gzip' or false
 	// Note that whether the output will be actually compressed based on user agents request depends on whether user agent states compression type support in request header
 	// This value is 'deflate' by default'
-	// $config['output-compression']='deflate';
+	// $config['output-compression']=false;
 	
 	// Index URL controller cache timeout
 	// This is the cache duration for URL solving through URL controller

@@ -164,7 +164,7 @@ class WWW_State	{
 		// Only applies if request messenger actually holds data
 		if($this->messenger){
 			// Finding data folder
-			$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
+			$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
 			if(!is_dir($dataFolder)){
 				if(!mkdir($dataFolder,0777)){
 					throw new Exception('Cannot create messenger folder');
@@ -284,7 +284,7 @@ class WWW_State	{
 		final public function stateMessenger($address){
 			// File is stored in file system as hashed
 			$this->messenger=md5($address);
-			$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
+			$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
 			// If this state messenger address already stores data, then it is loaded
 			if(file_exists($dataAddress)){
 				$this->messengerData=json_decode(file_get_contents($dataAddress),true);
@@ -324,7 +324,7 @@ class WWW_State	{
 				// File is stored in file system as hashed
 				$address=md5($address);
 				// Solving the address of messenger data
-				$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
+				$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
 				if(file_exists($dataAddress)){
 					// Data is stored as encoded JSON
 					$data=json_decode(file_get_contents($dataAddress),true);

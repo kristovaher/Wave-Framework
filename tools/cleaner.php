@@ -71,7 +71,7 @@ if(isset($_GET['all']) || isset($_GET['resources'])){
 
 // Clears cache of JavaScript and CSS
 if(isset($_GET['all']) || isset($_GET['messenger'])){
-	$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR;
+	$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR;
 	$log=array_merge($log,dirCleaner($directory));
 }
 

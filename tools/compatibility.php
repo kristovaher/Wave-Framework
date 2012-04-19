@@ -250,6 +250,16 @@ $log[]='';
 		$log[]='FAILURE: /filesystem/cache/resources/ is not writable';
 	}
 	
+	// FILESYSTEM MESSENGER
+	// All the certificates and encryption keys should be stored here
+	// WWW Framework itself does not use this folder and this should be used by developer, if necessary
+	if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+		$log[]='SUCCESS: /filesystem/messenger/ is writable';
+		unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.'test.tmp');
+	} else {
+		$log[]='WARNING: /filesystem/messenger/ is not writable, this warning can be ignored if state messenger is not used';
+	}
+	
 	// FILESYSTEM KEYS
 	// All the certificates and encryption keys should be stored here
 	// WWW Framework itself does not use this folder and this should be used by developer, if necessary

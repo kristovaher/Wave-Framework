@@ -109,8 +109,15 @@ Author and support: Kristo Vaher - kristo@waher.net
 			$config['index-view-cache-timeout']=0;
 		}
 		
+		// Default view controller defined
+		$viewController='view';
+		// View controller can be overwritten from sitemap files
+		if(isset($viewData['view-controller'])){
+			$viewController=$viewData['view-controller'];
+		}
+		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command($inputData+array('www-profile'=>$state->data['api-public-profile'],'www-command'=>'view-load','www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
+		$api->command($inputData+array('www-profile'=>$state->data['api-public-profile'],'www-command'=>$viewController.'-load','www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
 	
 	}
 	

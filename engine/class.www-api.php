@@ -132,7 +132,7 @@ class WWW_API {
 				'token-timeout'=>false
 			);
 	
-			// If API command is not set and is not set in input array either, the system will return false
+			// If API command is not set and is not set in input array either, the system will return an error
 			if(isset($apiInputData['www-command'])){
 				$apiState['command']=strtolower($apiInputData['www-command']);
 			} else {
@@ -636,14 +636,15 @@ class WWW_API {
 			}
 		}
 		
-		// If error is set and the returned data is in PHP format, then we simply return false
-		if($apiState['return-type']=='php' && isset($apiResult['www-error'])){
-			return false;
-		}
-		
 		// This filters the result through various PHP and header specific commands
 		if(!isset($apiResult['www-disable-callbacks']) || $apiResult['www-disable-callbacks']==false){
 			$this->apiCallbacks($apiResult,$useLogger,$apiState['return-type']);
+		}
+		
+		// If error is set and the returned data is in PHP format, then we simply return false
+		// This is used for benefit when API calls are made within MVC objects as you can easily check if you encountered an error or not
+		if($apiState['return-type']=='php' && isset($apiResult['www-error'])){
+			return false;
 		}
 		
 		// OUTPUT HASH VALIDATION

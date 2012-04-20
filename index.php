@@ -89,7 +89,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 			$limiter->limitServerLoad($config['load-limiter']);
 		}
 		// Load limiter blocks access to specific blacklist of IP's
-		if(isset($config['blacklist-limiter']) && $config['blacklist-limiter']!=''){
+		if(isset($config['blacklist-limiter']) && $config['blacklist-limiter'] && $config['blacklist-limiter']!=''){
 			$limiter->limitBlacklisted($config['blacklist-limiter']);
 		}
 		// If HTTPS limiter is used, the ststem returns a 401 error if the user agent attempts to access the site without HTTPS

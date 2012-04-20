@@ -34,7 +34,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 // DEBUGGING AND LOGGING
 
 	// This turns on Index gateway performance logging
-	// 'all' means that all data is logged, other values should be comma-separated values of the logged array (check using /tools/log-reader.php)
+	// Value of '*' means that all data is logged, other values should be comma-separated values of the logged array (check using /tools/log-reader.php)
 	// Set this to false to turn off logging entirely
 	// This is set to false by default
 	$config['logger']='*';
@@ -112,7 +112,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// Example is redirecting http://www.example.com/mypage to http://www.example.com/mypage/
 	// Slash in the end of the URL is considered the correct and standard way of writing page address
 	// This value is 'true' by default
-	// $config['enforce-url-end-slash']=true;
+	// $config['enforce-url-end-slash']=false;
 	
 	// Enforcing first language URL node
 	// If this value is set to true, then first language URL node must be defined in URL requests
@@ -120,20 +120,20 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// For example, http://www.example.com/contact/ would be then redirected to http://www.example.com/en/contact/
 	// This only applies to first language, every other language would require the language node anyway
 	// This value is 'true' by default
-	// $config['enforce-first-language-url']=true;
+	// $config['enforce-first-language-url']=false;
 	
 	// Robots
 	// This sets the default robots setting in the system
 	// By default the value is 'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet', but this can be overwritten by Sitemap 'robots' setting per URL
 	// Robots can tell search engine crawlers and robots to either index or not specific URL's and images
-	// $config['robots']='noindex,nocache,nofollow,noarchive,noimageindex,nosnippet';
+	// $config['robots']='all';
 	
 	// Resource specific robots
 	// This sets the default robots setting in the system for resource files
 	// If these are not set, then handlers use the previous 'robots' setting when serving these files
-	// $config['image-robots']='noindex,nocache,nofollow,noarchive,noimageindex,nosnippet';
-	// $config['resource-robots']='noindex,nocache,nofollow,noarchive,noimageindex,nosnippet';
-	// $config['file-robots']='noindex,nocache,nofollow,noarchive,noimageindex,nosnippet';
+	// $config['image-robots']='all';
+	// $config['resource-robots']='all';
+	// $config['file-robots']='all';
 	
 // OPTIMIZATIONS AND CACHE
 
@@ -178,14 +178,14 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// 404 image placeholder
 	// If this is set to true, then system returns /resources/placeholder.jpg file when the actual file cannot be found
 	// This is set to true by default
-	// $config['404-image-placeholder']=true;
+	// $config['404-image-placeholder']=false;
 	
 	// Dynamic image loading
 	// This flag sets if dynamic image loading is allowed
 	// Dynamic image loading allows image resizing and basic editing over HTTP dynamically, such as generating thumbnails
 	// This allows to return a 60x60 thumbnail of logo for example http://www.example.com/resources/images/60x60&logo.png
 	// This is enabled by default
-	// $config['dynamic-image-loading']=true;
+	// $config['dynamic-image-loading']=false;
 	
 	// Dynamic image max size
 	// This sets the max width or height a dynamically generated image can be before returning 404
@@ -220,7 +220,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// Dynamic image filters
 	// This sets if image filters are allowed for dynamic image loading, in other words the filter() parameters
 	// By default this value is set to true
-	// $config['dynamic-image-filters']=true;
+	// $config['dynamic-image-filters']=false;
 	
 	// Dynamic filter whitelist
 	// This is an array of image filters that are allowed during image generation
@@ -229,11 +229,25 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// By default this value is not defined and all filters are allowed
 	// $config['dynamic-filter-whitelist']=array();
 	
+// DYNAMIC RESOURCES
+
+	// Dynamic resource loading
+	// This true-false setting defines if resources can be loaded dynamically
+	// Main behavior of this is that you can unify different /resource/ scripts and return them with the same HTTP request by separating their names with & symbol
+	// This value is set to true by default
+	// $config['dynamic-resource-loading']=false;
+
 // API SETTINGS
 	
 	// This sets the default API profile that is used
 	// All profile names that are not public require an API profile data set in /resources/api.keys.php
 	// $config['api-public-profile']='public';
+	
+	// This setting assigns whether internal API logging/debugging is used
+	// Turning this on allows MVC objects to call $this->internalLogEntry('log key','log entry')
+	// This log can be read with log reader as /tools/log-reader.php?internal
+	// By default this value is set to false
+	// $config['internal-logging']=true;
 	
 // LIMITER
 

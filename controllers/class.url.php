@@ -35,10 +35,10 @@ class WWW_controller_url extends WWW_Factory {
 	private $view404;
 	// This stores current language Sitemap
 	private $siteMap;
-	// Stores current robots string
-	private $robots;
 	// This stores sitemap information of detected URL from Sitemap file
 	private $siteMapInfo=array();
+	// Stores current robots string
+	private $robots;
 
 	// This is called by index.php gateway when trying to solve request URL to view
 	public function solve($input){
@@ -290,6 +290,11 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// Appending the data from Sitemap file
 		$data+=$this->siteMapInfo;
+		
+		// If view controller has not been defined in sitemap configuration
+		if(!isset($data['view-controller'])){
+			$data['view-controller']='view';
+		}
 		
 		// This will be returned to view and can be used there for building links
 		$siteMapReference=array();

@@ -36,7 +36,7 @@ class WWW_API {
 	public $state=false;
 	
 	// This is for internal testing
-	private $internalLogging=true;
+	private $internalLogging=false;
 	private $internalLog=array();
 			
 	// API requires State object for majority of functionality
@@ -56,6 +56,11 @@ class WWW_API {
 			$this->state=new WWW_State();
 		}
 		
+		// If internal logging is used
+		if($this->state->data['internal-logging']){
+			$this->internalLogging=true;
+		}
+		
 		// Factory class is loaded, if it doesn't already exist, since MVC classes require it
 		if(!class_exists('WWW_Factory')){
 			require(__DIR__.DIRECTORY_SEPARATOR.'class.www-factory.php');
@@ -69,8 +74,10 @@ class WWW_API {
 			} else {
 				require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'api.profiles.php');
 			}
-			$this->apiProfiles=$apiProfiles;
 		}
+		
+		// Assigning API profiles
+		$this->apiProfiles=$apiProfiles;
 		
 	}
 	
@@ -93,6 +100,25 @@ class WWW_API {
 		$this->buffer=array();
 	}
 	
+	// This function is used to add data to internal log, if it is turned on
+	// * key - Descriptive key that the log entry will be stored under
+	// * data - Data contained in the entry
+	// Returns true, if logging is used
+	public function internalLogEntry($key,$data=false){
+		// Only applies if internal logging is turned on
+		if($this->internalLogging){
+			// Preparing a log entry object
+			$entry=array($key=>$data);
+			// Adding log entry to log array
+			$this->internalLog[]=$entry;
+			// Unsetting log entry container
+			unset($entry);
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	// The main function of API
 	// * apiInputData - array of input data
 	// * useBuffer - This turns off internal buffer that is used when the same API call is executed many times
@@ -103,7 +129,7 @@ class WWW_API {
 	
 		// If internal logging is enabled
 		if($this->internalLogging){
-			$this->internalLog[]['input-data']=$apiInputData;
+			$this->internalLogEntry('input-data',$apiInputData);
 		}
 	
 		// DEFAULT VALUES, COMMAND AND BUFFER CHECK
@@ -630,9 +656,9 @@ class WWW_API {
 		// If internal logging is enabled
 		if($this->internalLogging){
 			if($apiState['return-type']=='html' || $apiState['return-type']=='xml' || $apiState['return-type']=='rss'){
-				$this->internalLog[]['output-data']='['.strtoupper($apiState['return-type']). ' DATA RETURNED]';
+				$this->internalLogEntry('output-data','['.strtoupper($apiState['return-type']). ' DATA RETURNED]');
 			} else {
-				$this->internalLog[]['output-data']=$apiResult;
+				$this->internalLogEntry('output-data',$apiResult);
 			}
 		}
 		

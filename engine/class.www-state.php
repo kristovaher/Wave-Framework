@@ -78,6 +78,7 @@ class WWW_State	{
 				'request-time'=>$_SERVER['REQUEST_TIME'],
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'true-request'=>false,
+				'internal-logging'=>false,
 				'fingerprint'=>''
 			);
 			

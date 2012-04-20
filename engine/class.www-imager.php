@@ -705,10 +705,7 @@ class WWW_Imager {
 		if($type=='convulate'){
 		
 			// Convulation matrix is 3x3 array of floats
-			$matrix=array();
-			$matrix[]=array($settings[0],$settings[1],$settings[2]);
-			$matrix[]=array($settings[3],$settings[4],$settings[5]);
-			$matrix[]=array($settings[6],$settings[7],$settings[8]);
+			$matrix=array(array($settings[0],$settings[1],$settings[2]),array($settings[3],$settings[4],$settings[5]),array($settings[6],$settings[7],$settings[8]));
 			
 			// Convulation applied
 			if(!imageconvolution($this->resource, $matrix, $settings[9], $settings[10])){

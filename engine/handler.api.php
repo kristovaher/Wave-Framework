@@ -60,7 +60,6 @@ Author and support: Kristo Vaher - kristo@waher.net
 
 	// API is used to process all requests and it handles caching and API validations
 	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-api.php');
-	
 	$api=new WWW_API($state);
 
 	// All the data sent by the user agent is stored in this variable

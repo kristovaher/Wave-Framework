@@ -247,6 +247,16 @@ class WWW_Factory {
 			}
 		}
 		
+	// INTERNAL LOG ENTRY WRAPPER
+	
+		// This function is used to add data to internal log, if it is turned on
+		// * key - Descriptive key that the log entry will be stored under
+		// * data - Data contained in the entry
+		// Returns true, if logging is used
+		final public function internalLogEntry($key,$data=false){
+			return $this->WWW_API->internalLogEntry($key,$data);
+		}
+		
 	// STATE MESSENGER WRAPPERS
 	
 		// This method sets the request messenger key

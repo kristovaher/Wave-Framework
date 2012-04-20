@@ -117,7 +117,7 @@ if(file_exists($logAddress)){
 	// 404 is returned if no log file was found for that date
 	header('HTTP/1.1 404 Not Found');
 	echo '<h1>HTTP/1.1 404 Not Found</h1>';
-	echo '<h2>No log exists for this hour</h2>';
+	echo '<h2>Cannot find log information</h2>';
 }
 	
 ?>

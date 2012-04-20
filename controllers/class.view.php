@@ -64,9 +64,6 @@ class WWW_controller_view extends WWW_Factory {
 			}
 		}
 		
-		// Current translations are loaded
-		$translations=$input['www-view-data']['translations'];
-		
 		// List of CSS Stylesheets to load from resources folder
 		// These scripts will all be unified to a single CSS
 		$coreStyleSheet=array();

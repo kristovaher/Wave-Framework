@@ -314,6 +314,22 @@ class WWW_State	{
 			}
 		}
 		
+		// This function removes data from state messenger
+		// * key - Key that will be removed
+		// Returns true if data was set and is now removed
+		final public function unsetMessengerData($key){
+			if($this->messenger){
+				if(isset($this->messengerData[$key])){
+					unset($this->messengerData[$key]);
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		
 		// This function returns messenger data either from filesystem or from current session
 		// * address - Messenger address
 		// * remove - True or false flag whether to delete the request data after returning it

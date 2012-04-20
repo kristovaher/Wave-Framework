@@ -221,6 +221,32 @@ class WWW_Factory {
 			
 		}
 		
+	// CUSTOM RETURNED ARRAYS
+		
+		// This is simply used to return an error from MVC elements, it generates a proper return array
+		// * message - Error message
+		// * responseCode - Error code number
+		// Returns an array
+		final public function errorArray($message,$responseCode=300,$customData=false){
+			if($customData){
+				return array('www-error'=>$message,'www-response-code'=>$responseCode)+$customData;
+			} else {
+				return array('www-error'=>$message,'www-response-code'=>$responseCode);
+			}
+		}
+		
+		// This is simply used to return a success array from MVC elements, it generates a proper return array
+		// * message - Success message
+		// * responseCode - Response code number
+		// Returns an array
+		final public function successArray($message,$responseCode=400,$customData=false){
+			if($customData){
+				return array('www-success'=>$message,'www-response-code'=>$responseCode)+$customData;
+			} else {
+				return array('www-success'=>$message,'www-response-code'=>$responseCode);
+			}
+		}
+		
 	// STATE MESSENGER WRAPPERS
 	
 		// This method sets the request messenger key
@@ -234,8 +260,15 @@ class WWW_Factory {
 		// * data - Key or data array
 		// * value - Value, if data is a key
 		// Returns true or false
-		final public function stateMessengerData($data,$value=false){
+		final public function setStateMessengerData($data,$value=false){
 			return $this->WWW_API->state->setMessengerData($data,$value);
+		}
+		
+		// This function removes data from state messenger
+		// * key - Key that will be removed
+		// Returns true if data was set and is now removed
+		final public function unsetStateMessengerData($key){
+			return $this->WWW_API->state->unsetMessengerData($key);
 		}
 		
 		// This function returns messenger data either from filesystem or from current session

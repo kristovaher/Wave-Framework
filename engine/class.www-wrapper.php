@@ -39,7 +39,7 @@ class WWW_Wrapper {
 	
 	// Information about last error
 	public $errorMessage=false;
-	public $errorCode=false;
+	public $responseCode=false;
 	
 	// Input data
 	private $inputData=array();
@@ -69,7 +69,7 @@ class WWW_Wrapper {
 			// This means that requests cannot be made at all
 			$this->criticalError=true;
 			// If cURL is enabled, then file_get_contents() requires PHP setting to make requests to URL's
-			$this->errorCode=212;
+			$this->responseCode=212;
 			$this->errorMessage='Cannot make URL requests: PHP cannot make URL requests, please enable allow_url_fopen setting';
 			$this->log[]=$this->errorMessage;
 		}
@@ -77,7 +77,7 @@ class WWW_Wrapper {
 		if(!function_exists('json_encode')){
 			// This means that requests cannot be made at all
 			$this->criticalError=true;
-			$this->errorCode=213;
+			$this->responseCode=213;
 			$this->errorMessage='Cannot serialize data: JSON is required for API requests to work properly';
 			$this->log[]=$this->errorMessage;
 		}
@@ -322,7 +322,7 @@ class WWW_Wrapper {
 		
 			// Returns false if there is an existing critical error
 			if($this->criticalError){
-				return $this->failureHandler($thisInputData,$this->errorCode,$this->errorMessage,$thisApiState['failureCallback']);
+				return $this->failureHandler($thisInputData,$this->responseCode,$this->errorMessage,$thisApiState['failureCallback']);
 			}
 			
 			// Log entry
@@ -631,7 +631,7 @@ class WWW_Wrapper {
 			// ERRORS
 			
 				if($thisApiState['unserialize'] && isset($resultData['www-error'])){
-					return $this->failureHandler($thisInputData,$resultData['www-error-code'],$resultData['www-error'],$thisApiState['failureCallback']);
+					return $this->failureHandler($thisInputData,$resultData['www-response-code'],$resultData['www-error'],$thisApiState['failureCallback']);
 				}
 				
 			// RESULT VALIDATION
@@ -693,7 +693,7 @@ class WWW_Wrapper {
 				}
 			
 			// Resetting the error variables
-			$this->errorCode=false;
+			$this->responseCode=false;
 			$this->errorMessage=false;
 			
 			// Return specific actions
@@ -755,13 +755,13 @@ class WWW_Wrapper {
 		
 		// This method is simply meant for returning a result if there was an error in the sent request
 		// * inputData - Data sent to request
-		// * errorCode - Code number to be set as an error
+		// * responseCode - Code number to be set as an error
 		// * errorMessage - Clear text error message
 		// * failureCallback - Callback function to call with the error message
 		// Returns either false or the result of callback function
-		private function failureHandler($inputData,$errorCode,$errorMessage,$failureCallback){
+		private function failureHandler($inputData,$responseCode,$errorMessage,$failureCallback){
 			// Assigning error details to object state
-			$this->errorCode=$errorCode;
+			$this->responseCode=$responseCode;
 			$this->errorMessage=$errorMessage;
 			$this->log[]=$errorMessage;
 			// If failure callback has been defined
@@ -770,9 +770,9 @@ class WWW_Wrapper {
 				if(function_exists($failureCallback)){
 					$this->log[]='Sending failure data to callback: '.$failureCallback.'()';
 					// Callback execution
-					return call_user_func($failureCallback,array('www-input'=>$inputData,'www-error-code'=>$errorCode,'www-error'=>$errorMessage));
+					return call_user_func($failureCallback,array('www-input'=>$inputData,'www-response-code'=>$responseCode,'www-error'=>$errorMessage));
 				} else {
-					$this->errorCode=216;
+					$this->responseCode=216;
 					$this->errorMessage='Callback method not found: '.$apiState['failureCallback'].'()';
 					$this->log[]=$this->errorMessage;
 					return false;

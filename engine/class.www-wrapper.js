@@ -34,7 +34,7 @@ function WWW_Wrapper(address){
 	
 	// Information about last error
 	var errorMessage=false;
-	var errorCode=false;
+	var responseCode=false;
 	
 	// Input data
 	var inputData=new Object();
@@ -552,7 +552,7 @@ function WWW_Wrapper(address){
 				if(thisApiState.unserialize){
 					// If error was detected
 					if(resultData['www-error']!=null){
-						return failureHandler(thisInputData,resultData['www-error-code'],resultData['www-error'],thisApiState['failureCallback']);
+						return failureHandler(thisInputData,resultData['www-response-code'],resultData['www-error'],thisApiState['failureCallback']);
 					}
 				}
 				
@@ -612,7 +612,7 @@ function WWW_Wrapper(address){
 				}
 							
 			// Resetting the error variables
-			errorCode=false;
+			responseCode=false;
 			errorMessage=false;
 			
 			// Return specific actions
@@ -646,13 +646,13 @@ function WWW_Wrapper(address){
 	
 		// This method is simply meant for returning a result if there was an error in the sent request
 		// * thisInputData - Data sent to request
-		// * thisErrorCode - Code number to be set as an error
+		// * thisresponseCode - Code number to be set as an error
 		// * thisErrorMessage - Clear text error message
 		// * thisFailureCallback - Callback function to call with the error message
 		// Returns either false or the result of callback function
-		var failureHandler=function(thisInputData,thisErrorCode,thisErrorMessage,thisFailureCallback){
+		var failureHandler=function(thisInputData,thisresponseCode,thisErrorMessage,thisFailureCallback){
 			// Assigning error details to object state
-			errorCode=thisErrorCode;
+			responseCode=thisresponseCode;
 			errorMessage=thisErrorMessage;
 			log.push(errorMessage);
 			// If failure callback has been defined
@@ -662,10 +662,10 @@ function WWW_Wrapper(address){
 				if(typeof(thisCallback)==='function'){
 					log.push('Sending failure data to callback: '+thisFailureCallback+'()');
 					// Callback execution
-					var result={'www-input':thisInputData,'www-error-code':errorCode,'www-error':errorMessage};
+					var result={'www-input':thisInputData,'www-response-code':responseCode,'www-error':errorMessage};
 					return thisCallback.call(this,result);
 				} else {
-					errorCode=216;
+					responseCode=216;
 					errorMessage='Callback method not found: '+thisFailureCallback+'()';
 					log.push(errorMessage);
 					return false;

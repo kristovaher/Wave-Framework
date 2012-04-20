@@ -136,7 +136,7 @@ class WWW_API {
 			if(isset($apiInputData['www-command'])){
 				$apiState['command']=strtolower($apiInputData['www-command']);
 			} else {
-				return $this->output(array('www-error'=>'API command not set','www-error-code'=>101),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+				return $this->output(array('www-error'=>'API command not set','www-response-code'=>101),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 			}
 			
 			// Existing response is checked from buffer if it exists
@@ -204,22 +204,22 @@ class WWW_API {
 					// Testing if API profile is disabled or not
 					if(isset($this->apiProfiles[$apiState['profile']]['disabled']) && $this->apiProfiles[$apiState['profile']]['disabled']==1){
 						// If profile is set to be disabled
-						return $this->output(array('www-error'=>'API profile is disabled','www-error-code'=>103),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'API profile is disabled','www-response-code'=>103),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					} 
 					
 					// Testing if IP is in valid range
 					if(isset($this->apiProfiles[$apiState['profile']]['ip']) && $this->apiProfiles[$apiState['profile']]['ip']!='*' && !in_array($this->state->data['true-client-ip'],explode(',',$this->apiProfiles[$apiState['profile']]['ip']))){
 						// If profile has IP set and current IP is not allowed
-						return $this->output(array('www-error'=>'API profile not allowed from this IP','www-error-code'=>104),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'API profile not allowed from this IP','www-response-code'=>104),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 					
 					// Returns an error if timestamp validation is required but www-timestamp is not provided						
 					if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout'])){
 						// Timestamp value has to be set and not be empty
 						if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
-							return $this->output(array('www-error'=>'Request validation timestamp is missing','www-error-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+							return $this->output(array('www-error'=>'Request validation timestamp is missing','www-response-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 						} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
-							return $this->output(array('www-error'=>'Request timestamp is too old','www-error-code'=>106),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+							return $this->output(array('www-error'=>'Request timestamp is too old','www-response-code'=>106),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 						}
 					}
 					
@@ -227,7 +227,7 @@ class WWW_API {
 					if(isset($this->apiProfiles[$apiState['profile']]['secret-key'])){
 						// Hash value has to be set and not be empty
 						if(!isset($apiInputData['www-hash']) || $apiInputData['www-hash']==''){
-							return $this->output(array('www-error'=>'Request validation hash is missing','www-error-code'=>108),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+							return $this->output(array('www-error'=>'Request validation hash is missing','www-response-code'=>108),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 						} else {
 							// Validation hash
 							$apiState['hash']=$apiInputData['www-hash'];
@@ -235,7 +235,7 @@ class WWW_API {
 							$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
 						}
 					} else {
-						return $this->output(array('www-error'=>'API profile configuration incorrect: Secret key missing','www-error-code'=>107),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'API profile configuration incorrect: Secret key missing','www-response-code'=>107),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 					
 					// Returns an error if timestamp validation is required but www-timestamp is not provided						
@@ -245,7 +245,7 @@ class WWW_API {
 					}
 					
 				} else {
-					return $this->output(array('www-error'=>'Valid API profile not found','www-error-code'=>102),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+					return $this->output(array('www-error'=>'Valid API profile not found','www-response-code'=>102),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 				}
 
 			}
@@ -293,7 +293,7 @@ class WWW_API {
 					} elseif($apiState['command']!='www-create-session'){
 					
 						// Token is not required for commands that create or destroy existing tokens
-						return $this->output(array('www-error'=>'API token does not exist or is timed out','www-error-code'=>109),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'API token does not exist or is timed out','www-response-code'=>109),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 						
 					}
 					
@@ -330,7 +330,7 @@ class WWW_API {
 					
 					// If validation hashes do not match
 					if($validationHash!=$apiState['hash']){
-						return $this->output(array('www-error'=>'API profile input hash validation failed','www-error-code'=>110),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'API profile input hash validation failed','www-response-code'=>110),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 					
 				// HANDLING CRYPTED INPUT
@@ -353,13 +353,13 @@ class WWW_API {
 									// Merging crypted input with set input data
 									$apiInputData=$decryptedData+$apiInputData;
 								} else {
-									return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-error-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+									return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-response-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 								}
 							} else {
-								return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decryption failed','www-error-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+								return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decryption failed','www-response-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 							}	
 						} else {
-							return $this->output(array('www-error'=>'Problem decrypting encrypted data: No tools to decrypt data','www-error-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							return $this->output(array('www-error'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}
 					
@@ -377,7 +377,7 @@ class WWW_API {
 						// If session token subdirectory does not exist, it is created
 						if(!is_dir($apiState['token-directory'])){
 							if(!mkdir($apiState['token-directory'],0777)){
-								return $this->output(array('www-error'=>'Server configuration error: Cannot create session token folder','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+								return $this->output(array('www-error'=>'Server configuration error: Cannot create session token folder','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 							}
 						}
 						// Token for API access is generated simply from current profile name and request time
@@ -397,7 +397,7 @@ class WWW_API {
 								return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>'infinite'),$apiState);
 							}
 						} else {
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create session token file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create session token file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 
 					} elseif($apiState['command']=='www-destroy-session'){
@@ -407,16 +407,16 @@ class WWW_API {
 							unlink($apiState['token-directory'].$apiState['token-file']);
 						}
 						// Returning success message
-						return $this->output(array('www-result'=>'Token destroyed'),$apiState);
+						return $this->output(array('www-success'=>'Token destroyed'),$apiState);
 					
 					} elseif($apiState['command']=='www-validate-session'){
 						// This simply returns output
-						return $this->output(array('www-result'=>'API profile validation successful'),$apiState);
+						return $this->output(array('www-success'=>'API profile validation successful'),$apiState);
 					}	
 			
 			} else if(in_array($apiState['command'],array('www-create-session','www-destroy-session','www-validate-session'))){
 				// Since public profile is used, the session-related tokens cannot be used
-				return $this->output(array('www-error'=>'API token commands cannot be used with public profile','www-error-code'=>111),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+				return $this->output(array('www-error'=>'API token commands cannot be used with public profile','www-response-code'=>111),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 			}
 		
 		// CACHE HANDLING IF CACHE IS USED
@@ -554,7 +554,7 @@ class WWW_API {
 						require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}
 				}
 				
@@ -567,14 +567,14 @@ class WWW_API {
 					// If command method does not exist, 501 page is returned or error triggered
 					if(!method_exists($controller,$methodName)){
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}
 					// Result of the command is solved with this call
 					// Input data is also submitted to this function
 					$apiResult=$controller->$methodName($apiInputData);
 				} else {
 					// Since an error was detected, system pushes for output immediately
-					return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-error-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+					return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 				}
 				
 				// If returned data type was using output buffer, then that is gathered for the result instead
@@ -587,18 +587,18 @@ class WWW_API {
 					// If cache subdirectory does not exist, it is created
 					if(!is_dir($cacheFolder)){
 						if(!mkdir($cacheFolder,0777)){
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}
 					// If returned data is HTML or text, it is simply written into cache file
 					// Other results are serialized before being written to cache
 					if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
 						if(!file_put_contents($cacheFolder.$cacheFile,$apiResult)){
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					} else {
 						if(!file_put_contents($cacheFolder.$cacheFile,json_encode($apiResult))){
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-error-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}
 				}

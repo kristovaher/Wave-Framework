@@ -23,7 +23,7 @@ class WWW_view_example extends WWW_Factory {
 		if(!$messengerData){
 			$this->stateMessenger('aaabbb');
 			$messengerName='Thomas Moore #'.rand(1,1000);
-			$this->stateMessengerData('name',$messengerName);
+			$this->setStateMessengerData('name',$messengerName);
 		} else {
 			$messengerName=$messengerData['name'];
 		}

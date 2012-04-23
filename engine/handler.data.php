@@ -56,6 +56,8 @@ Author and support: Kristo Vaher - kristo@waher.net
 		$databaseConnection->password=$config['database-password'];
 		$databaseConnection->database=$config['database-name'];
 		$databaseConnection->connect();
+		// Passing the database to State object
+		$state->databaseConnection=$databaseConnection;
 	}
 	
 // LOADING API AND CALLING URL SOLVING/ROUTING CONTROLLER

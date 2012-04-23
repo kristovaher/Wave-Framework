@@ -58,7 +58,7 @@ class WWW_API {
 		
 		// If internal logging is used
 		if($this->state->data['internal-logging']){
-			$this->internalLogging=true;
+			$this->internalLogging=explode(',',$this->state->data['internal-logging']);
 		}
 		
 		// Factory class is loaded, if it doesn't already exist, since MVC classes require it
@@ -83,7 +83,7 @@ class WWW_API {
 	
 	// This writes log data to file, if internal logging is turned on 
 	public function __destruct(){
-		if($this->internalLogging){
+		if($this->internalLogging && !empty($this->internalLog)){
 			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log.tmp',json_encode($this->internalLog)."\n",FILE_APPEND);
 		}
 	}
@@ -106,7 +106,7 @@ class WWW_API {
 	// Returns true, if logging is used
 	public function internalLogEntry($key,$data=false){
 		// Only applies if internal logging is turned on
-		if($this->internalLogging){
+		if($this->internalLogging && (in_array('*',$this->internalLogging) || !in_array('!'.$key,$this->internalLogging) || in_array($key,$this->internalLogging))){
 			// Preparing a log entry object
 			$entry=array($key=>$data);
 			// Adding log entry to log array

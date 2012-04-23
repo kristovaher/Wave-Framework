@@ -246,8 +246,10 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// This setting assigns whether internal API logging/debugging is used
 	// Turning this on allows MVC objects to call $this->internalLogEntry('log key','log entry')
 	// This log can be read with log reader as /tools/log-reader.php?internal
-	// By default this value is set to false
-	// $config['internal-logging']=true;
+	// By default this value is set to false and internal logging is turned off entirely
+	// If this is not set to false, then the value is considered a comma-separated list of values that can be logged internally
+	// When it is set to '*' then everything will be logged. If '!' is set before the log data key, then this will not be logged.
+	// $config['internal-logging']='!input-data,!output-data'; // This disabled automatic API logging and only uses internal logging
 	
 // LIMITER
 

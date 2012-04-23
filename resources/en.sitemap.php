@@ -23,7 +23,7 @@ something else in that part of URL, such as product code.
 * permanent-redirect - This tells URL controller to permanently redirect requests made to this URL
 * hidden - True or false value about whether this URL will be hidden from sitemap.xml generation
 * cache-timeout - Time in seconds about how long cache exists for requests made to this URL, this overwrites default configuration setting
-* usergroups - If this value is not false, then URL controller checks for user credentials. Note that the checking method is not turned on by default in URL controller
+* rights - If this value is not false, then URL controller checks for user credentials. Note that the checking method is not turned off by default in URL controller.
 * view-controller - If this is not defined then /controllers/class.view.php will be used to return the view. In here you can assign a different view for class.{name}.php.
 
 Author and support: Kristo Vaher - kristo@waher.net

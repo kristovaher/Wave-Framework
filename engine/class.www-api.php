@@ -139,18 +139,18 @@ class WWW_API {
 			$apiState=array(
 				'cache-timeout'=>false,
 				'command'=>false,
-				'content-type-header'=>false,
+				'content-type-header'=>(isset($apiInputData['www-content-type']))?$apiInputData['www-content-type']:false,
 				'custom-header'=>false,
 				'hash'=>false,
 				'ip-session'=>false,
 				'last-modified'=>$this->state->data['request-time'],
-				'minify-output'=>false,
+				'minify-output'=>(isset($apiInputData['www-minify']))?$apiInputData['www-minify']:false,
 				'output-crypt-key'=>false,
 				'profile'=>$this->state->data['api-public-profile'],
-				'push-output'=>true,
-				'return-hash'=>false,
-				'return-timestamp'=>false,
-				'return-type'=>'json',
+				'push-output'=>(isset($apiInputData['www-output']))?$apiInputData['www-output']:true,
+				'return-hash'=>(isset($apiInputData['www-return-hash']))?$apiInputData['www-return-hash']:false,
+				'return-timestamp'=>(isset($apiInputData['www-return-timestamp']))?$apiInputData['www-return-timestamp']:false,
+				'return-type'=>(isset($apiInputData['www-return-type']))?$apiInputData['www-return-type']:'json',
 				'secret-key'=>false,
 				'token'=>false,
 				'token-file'=>false,
@@ -174,44 +174,12 @@ class WWW_API {
 				}
 			}
 			
-		// ASSIGNING WWW-* VALUES FROM INPUT TO API STATE
-			
 			// This tests if cache value sent through input is valid
 			if($apiState['command']!='www-create-session' && isset($apiInputData['www-cache-timeout']) && $apiInputData['www-cache-timeout']>=0 && !isset($apiInputData['www-files'])){
 				$apiState['cache-timeout']=$apiInputData['www-cache-timeout'];
 			}
-		
-			// By default the API command returns a JSON string, but another type can be used if defined
-			if(isset($apiInputData['www-return-type'])){
-				$apiState['return-type']=$apiInputData['www-return-type'];
-			}
 			
-			// By default the API assumes that the result is 'echoed/printed' out together with headers, but this behavior can be supressed
-			if(isset($apiInputData['www-output'])){
-				$apiState['push-output']=$apiInputData['www-output'];
-			}
-			
-			// If this is set then user agent requests that API also returns a hash validation check (calculated from input and secret key) and timestamp in the response
-			if(isset($apiInputData['www-return-hash'])){
-				$apiState['return-hash']=$apiInputData['www-return-hash'];
-			}
-			
-			// If this is set then user agent requests that API also returns a hash validation check (calculated from input and secret key) and timestamp in the response
-			if(isset($apiInputData['www-return-timestamp'])){
-				$apiState['return-timestamp']=$apiInputData['www-return-timestamp'];
-			}
-			
-			// This can be used to overwrite the default content type that is returned. Note that this does not affect the data type itself
-			// This can be used to send HTML headers and return JSON string, for example
-			if(isset($apiInputData['www-content-type'])){
-				$apiState['content-type-header']=$apiInputData['www-content-type'];
-			}
-			
-			// Minification can be applied to certain data types, such as CSS, JavaScript, HTML and XML
-			// This is not recommended to be added to all output, but can be useful in some situations
-			if(isset($apiInputData['www-minify'])){
-				$apiState['minify-output']=$apiInputData['www-minify'];
-			}
+		// VALIDATING PROFILE BASED INPUT DATA
 			
 			// API profile data is loaded only if API profile is set and is not set as public profile
 			// If profile is public, then hash validations and certain encryption options are not available
@@ -276,7 +244,7 @@ class WWW_API {
 
 			}
 			
-		// API PROFILE VALIDATION FOR HASH AND TOKENS
+		// API PROFILE HASH AND TOKEN VALIDATION
 		
 			// API profile validation happens only if non-public profile is actually set
 			if($apiState['profile'] && $apiState['profile']!=$this->state->data['api-public-profile']){

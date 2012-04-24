@@ -345,10 +345,10 @@ class WWW_controller_url extends WWW_Factory {
 		// But the commands that it uses are not shown here, so it is commented out
 		// This is essentially the boilerplate startpoint for you to implement authentication
 		// Attempting to get user session
-		// if(isset($data['rights']) && $data['rights']!=false){
-			// $data['user']=$this->api('user-get-session',array('required-rights'=>$data['rights']));
-			// if(!$data['user']){
-				// return array('www-temporary-redirect'=>$siteMapReference['login']['url']);
+		// if(isset($data['rights'])){
+			// $data['user']=$this->api('user-getUserSession',array('rights'=>$data['rights']));
+			// if(!$data['user'] && $data['view']!='login'){
+				// return $this->errorArray('Authentication required',300,array('www-temporary-redirect'=>$siteMapReference['login']['url']));
 			// }
 		// }
 		

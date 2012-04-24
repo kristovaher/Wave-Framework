@@ -300,6 +300,7 @@ class WWW_Wrapper {
 		
 			// This is the input data used
 			$thisInputData=$this->inputData;
+			$thisCryptedData=$this->cryptedData;
 			
 			// Current state settings
 			$thisApiState=$this->apiState;
@@ -353,7 +354,7 @@ class WWW_Wrapper {
 			// If encryption key is set, then this is sent together with crypted data
 			if($thisApiState['apiProfile'] && isset($thisApiState['apiSecretKey']) && isset($thisInputData['www-crypt-output'])){
 				$this->log[]='Crypt output key was set as regular input for non-public profile API request, it is moved to crypted input instead';
-				$this->cryptedData['www-crypt-output']=$thisInputData['www-crypt-output'];
+				$thisCryptedData['www-crypt-output']=$thisInputData['www-crypt-output'];
 				unset($thisInputData['www-crypt-output']);
 			}
 			
@@ -370,18 +371,17 @@ class WWW_Wrapper {
 			
 				// Log entry
 				$this->log[]='API secret key set, hash authentication will be used';
-		
 				// If crypted data array is populated, then this data is encrypted in www-crypt-input key
-				if(!isset($thisInputData['www-crypt-input']) && !empty($this->cryptedData)){
+				if(!isset($thisInputData['www-crypt-input']) && !empty($thisCryptedData)){
 					// This is only possible if API token is set
 					if($thisApiState['apiSecretKey']){
 						// Mcrypt extension is required
 						if(extension_loaded('mcrypt')){
 							// Data is encrypted with Rijndael 256bit encryption
 							if($thisApiState['apiToken']){
-								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),json_encode($this->cryptedData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey'])));
+								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),json_encode($thisCryptedData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey'])));
 							} else {
-								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiSecretKey']),json_encode($this->cryptedData),MCRYPT_MODE_ECB));
+								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiSecretKey']),json_encode($thisCryptedData),MCRYPT_MODE_ECB));
 							}
 							$this->log[]='Crypted input created using JSON encoded input data, token and secret key';
 						} else {
@@ -391,7 +391,6 @@ class WWW_Wrapper {
 						return $this->failureHandler($thisInputData,202,'Crypted input can only be used with a set secret key',$thisApiState['failureCallback']);
 					}
 				}
-				
 				// Validation hash is generated based on current serialization option
 				if(!isset($thisInputData['www-hash'])){
 					

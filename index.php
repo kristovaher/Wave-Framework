@@ -187,6 +187,24 @@ Author and support: Kristo Vaher - kristo@waher.net
 		// There was an error in code
 		// System returns 500 header even as a server error (possible bug in code)
 		header('HTTP/1.1 500 Internal Server Error');
+		
+		// Verbose error shown to developer only
+		if(isset($config['http-authentication-username']) && isset($config['http-authentication-password']) && isset($_SERVER['PHP_AUTH_USER']) && $_SERVER['PHP_AUTH_USER']==$config['http-authentication-username'] && isset($_SERVER['PHP_AUTH_PW']) && $_SERVER['PHP_AUTH_PW']==$config['http-authentication-password']){
+			echo '<p><b>Exception trace:</b></p>';
+			$trace=array_reverse($e->getTrace());
+			foreach($trace as $key=>$t){
+				$key++;
+				echo '<p><b>'.$key.'</b> '.$t['file'].' (line: '.$t['line'].') '.((isset($t['class']))?$t['class'].'->':'').((isset($t['function']))?$t['function']:'').'</p>';
+				if(isset($t['args'])){
+					echo '<pre style="padding-left:50px;">';
+					var_dump($t['args']);
+					echo '</pre>';
+				}
+			}
+			$key++;
+			echo '<p><b>'.$key.'</b> '.$e->getFile().' (line: '.$e->getLine().') '.$e->getMessage().'</p>';
+
+		}
 
 		// Error-hitting request is logged and can be used for debugging later
 		// This message will still be logged regardless whether the logger is used or not

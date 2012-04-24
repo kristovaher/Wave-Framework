@@ -42,6 +42,10 @@ class WWW_Factory {
 		// * useBuffer - This tells API to use buffer (returns data from memory if the same command with -exact- same input has already been sent)
 		// Returns data based on API call
 		final public function api($command,$inputData=array(),$useBuffer=true){
+			// Input data has to be an array
+			if(!is_array($inputData)){
+				throw new Exception('API input data is not an array');
+			}
 			// Setting the set command variable to proper format for API
 			$inputData['www-command']=$command;
 			// This defaults return data type
@@ -244,6 +248,27 @@ class WWW_Factory {
 				return array('www-success'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
 				return array('www-success'=>$message,'www-response-code'=>$responseCode);
+			}
+		}
+		
+		// This is a simple check function that is used to test if an array has www-error or www-success set
+		// It is used to validate responses from standardized controller responses if API is not used to call a method
+		// * data - Data that is checked
+		// Returns either true or false, if www-error or www-success array keys are set, in every other case simply returns the data value itself
+		final public function checkTrueFalse($data){
+			// These values are only checked from an array
+			if(is_array($data)){
+				if(isset($data['www-error'])){
+					return false;
+				} elseif(isset($data['www-success'])){
+					return true;
+				} else {
+					// Since neither was set, system simply returns the original value
+					return $data;
+				}
+			} else {
+				// Since result was not an array, system returns the input data instead, whatever the value is
+				return $data;
 			}
 		}
 		

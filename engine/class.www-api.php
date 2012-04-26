@@ -38,6 +38,17 @@ class WWW_API {
 	// This is for internal testing
 	private $internalLogging=false;
 	private $internalLog=array();
+	
+	// List of illegal methods that cannot be called from API
+	// These are mostly related to Factory class
+	// Note that these methods are all lowercase for comparison purposes
+	private $illegalControllerMethods=array(
+		'__construct','__initialize','__destruct','api','apiconnection','getstate','setstate','getmodel','getcontroller',
+		'getview','errorarray','successarray','checktruefalse','internallogentry','statemessenger','setstatemessengerdata',
+		'unsetstatemessengerdata','getstatemessengerdata','startsession','regeneratesession','destroysession','setsession',
+		'getsession','unsetsession','setcookie','getcookie','unsetcookie','dbsingle','dbmultiple','dbcommand','dblastid',
+		'dbtransaction','dbrollback','dbcommit','dbescape','dbpdo','terminal'
+	);
 			
 	// API requires State object for majority of functionality
 	// * state - Object of WWW_State class
@@ -68,6 +79,8 @@ class WWW_API {
 		
 		// System attempts to load API keys from the default location if they were not defined
 		if(!$apiProfiles){
+			// All keys are stored in an array
+			$apiProfiles=array();
 			// Loading and storing API keys
 			if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.profiles.php')){
 				require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.profiles.php');
@@ -181,19 +194,19 @@ class WWW_API {
 			
 		// VALIDATING PROFILE BASED INPUT DATA
 			
-			// API profile data is loaded only if API profile is set and is not set as public profile
-			// If profile is public, then hash validations and certain encryption options are not available
-			if(isset($apiInputData['www-profile']) && $apiInputData['www-profile']!=$this->state->data['api-public-profile']){
+			// API profile data is loaded only if API validation is used
+			if($apiValidation){
 			
 				// Current API profile is assigned to state
 				// This is useful for controller development if you wish to restrict certain controllers to only certain API profiles
-				$apiState['profile']=$apiInputData['www-profile'];
+				if(isset($apiInputData['www-profile']) && $apiInputData['www-profile']!=$this->state->data['api-public-profile']){
+					$apiState['profile']=$apiInputData['www-profile'];
+				} else {
+					$apiState['profile']=$this->state->data['api-public-profile'];
+				}
 				
 				// This checks whether API profile information is defined in /resources/api.profiles.php file
-				if(isset($this->apiProfiles[$apiInputData['www-profile']])){
-				
-					// Current API profile is assigned to state
-					$apiState['profile']=$apiInputData['www-profile'];
+				if(isset($this->apiProfiles[$apiState['profile']])){
 					
 					// Testing if API profile is disabled or not
 					if(isset($this->apiProfiles[$apiState['profile']]['disabled']) && $this->apiProfiles[$apiState['profile']]['disabled']==1){
@@ -207,35 +220,46 @@ class WWW_API {
 						return $this->output(array('www-error'=>'API profile not allowed from this IP','www-response-code'=>104),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 					
-					// Returns an error if timestamp validation is required but www-timestamp is not provided						
-					if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout'])){
-						// Timestamp value has to be set and not be empty
-						if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
-							return $this->output(array('www-error'=>'Request validation timestamp is missing','www-response-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
-							return $this->output(array('www-error'=>'Request timestamp is too old','www-response-code'=>106),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-						}
+					// Testing if command is allowed
+					if(!isset($this->apiProfiles[$apiState['profile']]['commands']) || ($this->apiProfiles[$apiState['profile']]['commands']!='*' && $apiState['command']!='www-create-session' && !in_array($apiState['command'],explode(',',$this->apiProfiles[$apiState['profile']]['commands'])))){
+						// If profile has IP set and current IP is not allowed
+						return $this->output(array('www-error'=>'API command is not allowed for this profile','www-response-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 					
-					// Returns an error if hash validation is required but www-hash is not provided
-					if(isset($this->apiProfiles[$apiState['profile']]['secret-key'])){
-						// Hash value has to be set and not be empty
-						if(!isset($apiInputData['www-hash']) || $apiInputData['www-hash']==''){
-							return $this->output(array('www-error'=>'Request validation hash is missing','www-response-code'=>108),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+					// These options only affect non-public profiles
+					if($apiState['profile']!=$this->state->data['api-public-profile']){
+					
+						// Returns an error if timestamp validation is required but www-timestamp is not provided						
+						if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout'])){
+							// Timestamp value has to be set and not be empty
+							if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
+								return $this->output(array('www-error'=>'Request validation timestamp is missing','www-response-code'=>106),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+							} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
+								return $this->output(array('www-error'=>'Request timestamp is too old','www-response-code'=>107),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+							}
+						}
+						
+						// Returns an error if hash validation is required but www-hash is not provided
+						if(isset($this->apiProfiles[$apiState['profile']]['secret-key'])){
+							// Hash value has to be set and not be empty
+							if(!isset($apiInputData['www-hash']) || $apiInputData['www-hash']==''){
+								return $this->output(array('www-error'=>'Request validation hash is missing','www-response-code'=>109),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+							} else {
+								// Validation hash
+								$apiState['hash']=$apiInputData['www-hash'];
+								// Secret key
+								$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
+							}
 						} else {
-							// Validation hash
-							$apiState['hash']=$apiInputData['www-hash'];
-							// Secret key
-							$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
+							return $this->output(array('www-error'=>'API profile configuration incorrect: Secret key missing','www-response-code'=>108),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 						}
-					} else {
-						return $this->output(array('www-error'=>'API profile configuration incorrect: Secret key missing','www-response-code'=>107),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
-					}
+						
+						// Returns an error if timestamp validation is required but www-timestamp is not provided						
+						if(isset($this->apiProfiles[$apiState['profile']]['token-timeout']) && $this->apiProfiles[$apiState['profile']]['token-timeout']!=0){
+							// Since this is not null, token based validation is used
+							$apiState['token-timeout']=$this->apiProfiles[$apiState['profile']]['token-timeout'];
+						}
 					
-					// Returns an error if timestamp validation is required but www-timestamp is not provided						
-					if(isset($this->apiProfiles[$apiState['profile']]['token-timeout']) && $this->apiProfiles[$apiState['profile']]['token-timeout']!=0){
-						// Since this is not null, token based validation is used
-						$apiState['token-timeout']=$this->apiProfiles[$apiState['profile']]['token-timeout'];
 					}
 					
 				} else {
@@ -247,7 +271,7 @@ class WWW_API {
 		// API PROFILE HASH AND TOKEN VALIDATION
 		
 			// API profile validation happens only if non-public profile is actually set
-			if($apiState['profile'] && $apiState['profile']!=$this->state->data['api-public-profile']){
+			if($apiValidation && $apiState['profile'] && $apiState['profile']!=$this->state->data['api-public-profile']){
 			
 				// TOKEN CHECKS
 					
@@ -287,7 +311,7 @@ class WWW_API {
 					} elseif($apiState['command']!='www-create-session'){
 					
 						// Token is not required for commands that create or destroy existing tokens
-						return $this->output(array('www-error'=>'API token does not exist or is timed out','www-response-code'=>109),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'API token does not exist or is timed out','www-response-code'=>110),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 						
 					}
 					
@@ -324,7 +348,7 @@ class WWW_API {
 					
 					// If validation hashes do not match
 					if($validationHash!=$apiState['hash']){
-						return $this->output(array('www-error'=>'API profile input hash validation failed','www-response-code'=>110),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						return $this->output(array('www-error'=>'API profile input hash validation failed','www-response-code'=>111),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 					
 				// HANDLING CRYPTED INPUT
@@ -347,13 +371,13 @@ class WWW_API {
 									// Merging crypted input with set input data
 									$apiInputData=$decryptedData+$apiInputData;
 								} else {
-									return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-response-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+									return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 								}
 							} else {
-								return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decryption failed','www-response-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+								return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decryption failed','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 							}	
 						} else {
-							return $this->output(array('www-error'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							return $this->output(array('www-error'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}
 					
@@ -410,7 +434,7 @@ class WWW_API {
 			
 			} else if(in_array($apiState['command'],array('www-create-session','www-destroy-session','www-validate-session'))){
 				// Since public profile is used, the session-related tokens cannot be used
-				return $this->output(array('www-error'=>'API token commands cannot be used with public profile','www-response-code'=>111),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+				return $this->output(array('www-error'=>'API token commands cannot be used with public profile','www-response-code'=>112),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 			}
 		
 		// CACHE HANDLING IF CACHE IS USED
@@ -548,27 +572,33 @@ class WWW_API {
 						require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}
 				}
 				
 				// Second half of the command string is used to solve the function that is called by the command
 				if(isset($commandBits[1])){
+				
 					// Solving method name, dashes are underscored
 					$methodName=str_replace('-','',$commandBits[1]);
+					// Making sure that the command is allowed and throwing an error, if it is not
+					if(in_array(strtolower($methodName),$this->illegalControllerMethods)){
+						// Since an error was detected, system pushes for output immediately
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+					}
 					// New controller is created based on API call
 					$controller=new $className($this);
 					// If command method does not exist, 501 page is returned or error triggered
 					if(!method_exists($controller,$methodName)){
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}
 					// Result of the command is solved with this call
 					// Input data is also submitted to this function
 					$apiResult=$controller->$methodName($apiInputData);
 				} else {
 					// Since an error was detected, system pushes for output immediately
-					return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>113),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
+					return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 				}
 				
 				// If returned data type was using output buffer, then that is gathered for the result instead
@@ -999,28 +1029,26 @@ class WWW_API {
 		
 			// These are only in effect if PHP is returned
 			if($returnType=='php'){
-		
+			
 				// It is possible to re-direct API after submission
 				if(isset($data['www-temporary-redirect'])){
+					// Adding log entry
 					if($useLogger){
-						// Adding log entry
 						$this->apiLoggerData['response-code']=302;
 						$this->apiLoggerData['temporary-redirect']=$data['www-temporary-redirect'];
 					}
 					// Redirection header
 					header('Location: '.$data['www-temporary-redirect'],true,302);
-					
 				} elseif(isset($data['www-permanent-redirect'])){
+					// Adding log entry
 					if($useLogger){
-						// Adding log entry
 						$this->apiLoggerData['response-code']=301;
 						$this->apiLoggerData['permanent-redirect']=$data['www-permanent-redirect'];
 					}
 					// Redirection header
 					header('Location: '.$data['www-permanent-redirect'],true,301);
-					
 				}
-			
+				
 			}
 	
 		// Processing complete

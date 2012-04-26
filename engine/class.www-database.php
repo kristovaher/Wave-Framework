@@ -33,20 +33,11 @@ class WWW_Database {
 	public $database='';
 	public $persistent=false;
 	
-	// Flag for checking whether database connection is active or not
-	public $showErrors=0;
+	// Flag for whether errors are thrown or not
+	public $showErrors=false;
 	
 	// We count the amount of queries in this variable
 	public $queryCounter=0;
-	
-	// Error reporting flag is set during class creation
-	public function __construct(){
-		if(error_reporting()!=0){
-			$this->showErrors=true;
-		} else {
-			$this->showErrors=false;
-		}
-	}
 
 	// Database connection is closed if this object is not used anymore
 	public function __destruct(){
@@ -373,6 +364,20 @@ class WWW_Database {
 				return false;
 			}
 			
+		} else {
+			throw new Exception('Database not connected');
+		}
+	}
+	
+	// This function escapes a string for use in query
+	public function escape($value,$string=true){
+		if($this->connected==1){
+			// This is PDO equivalent of mysql_real_escape_string
+			if($string){
+				return $this->pdo->quote($value,PDO::PARAM_STR);
+			} else {
+				return (int)$value;
+			}
 		} else {
 			throw new Exception('Database not connected');
 		}

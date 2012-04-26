@@ -53,6 +53,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// $config['database-name']='';
 	// $config['database-username']='';
 	// $config['database-password']='';
+	// $config['database-errors']=true;
 
 // SERVER AND CONTENT
 

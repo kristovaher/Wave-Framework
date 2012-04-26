@@ -426,6 +426,11 @@ class WWW_Factory {
 			return $this->WWW_API->state->databaseConnection->commitTransaction();
 		}
 		
+		// This function escapes a string for use in query
+		final public function dbEscape($value,$string=true){
+			return $this->WWW_API->state->databaseConnection->escape($value,$string);
+		}
+		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
 		final public function dbPDO(){

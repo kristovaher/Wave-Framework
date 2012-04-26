@@ -190,6 +190,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 		
 		// Verbose error shown to developer only
 		if(isset($config['http-authentication-username']) && isset($config['http-authentication-password']) && isset($_SERVER['PHP_AUTH_USER']) && $_SERVER['PHP_AUTH_USER']==$config['http-authentication-username'] && isset($_SERVER['PHP_AUTH_PW']) && $_SERVER['PHP_AUTH_PW']==$config['http-authentication-password']){
+			echo '<h1>CRITICAL ERROR</h1>';
 			echo '<p><b>Exception trace:</b></p>';
 			$trace=array_reverse($e->getTrace());
 			foreach($trace as $key=>$t){

@@ -111,7 +111,7 @@ class WWW_controller_url extends WWW_Factory {
 			if($enforceSlash==true && end($requestNodes)!=''){
 				// If GET variables were set, system redirects to proper URL that has a slash in the end and appends the GET variables
 				if(isset($requestNodesRaw[1])){
-					return array('www-permanent-redirect'=>$this->webRoot.$requestNodesRaw[0].'/?'.$requestNodesRaw[1].'/');
+					return array('www-permanent-redirect'=>$this->webRoot.$requestNodesRaw[0].'/?'.$requestNodesRaw[1]);
 				} else {
 					return array('www-permanent-redirect'=>$this->webRoot.$requestNodesRaw[0].'/');
 				}
@@ -133,7 +133,7 @@ class WWW_controller_url extends WWW_Factory {
 							// We unset the first node, as it was not required
 							unset($requestNodes[$nodeKey]);
 							// If GET variables were set, system redirects to URL without the language and appends the GET variables
-							if(isset($requestNodesRaw[1])){
+							if(isset($requestNodesRaw[1])){ 
 								return array('www-permanent-redirect'=>$this->webRoot.implode('/',$requestNodes).'?'.$requestNodesRaw[1]);
 							} else {
 								return array('www-permanent-redirect'=>$this->webRoot.implode('/',$requestNodes));
@@ -146,7 +146,7 @@ class WWW_controller_url extends WWW_Factory {
 						if($nodeKey==0 && $this->enforceLanguageUrl==true){
 							// User agent is redirected to the same URL as before, but with the default language node added
 							if(isset($requestNodesRaw[1])){
-								return array('www-permanent-redirect'=>$this->webRoot.$language.'/'.$requestFormatted.'/?'.$requestNodesRaw[1]);
+								return array('www-permanent-redirect'=>$this->webRoot.$language.'/'.$requestFormatted.'?'.$requestNodesRaw[1]);
 							} else {
 								return array('www-permanent-redirect'=>$this->webRoot.$language.'/'.$requestFormatted);
 							}
@@ -260,9 +260,19 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
 		if(isset($this->siteMapInfo['temporary-redirect']) && $this->siteMapInfo['temporary-redirect']!=''){
-			return array('www-temporary-redirect'=>$this->siteMapInfo['temporary-redirect']);
+			// Query string is also sent, if it has been defined
+			if(isset($requestNodesRaw[1]) && strpos($this->siteMapInfo['temporary-redirect'],'?')===false){
+				return array('www-temporary-redirect'=>$this->siteMapInfo['temporary-redirect'].'?'.$requestNodesRaw[1]);
+			} else {
+				return array('www-temporary-redirect'=>$this->siteMapInfo['temporary-redirect']);
+			}
 		} elseif(isset($this->siteMapInfo['permanent-redirect']) && $this->siteMapInfo['permanent-redirect']!=''){
-			return array('www-permanent-redirect'=>$this->siteMapInfo['permanent-redirect']);
+			// Query string is also sent, if it has been defined
+			if(isset($requestNodesRaw[1]) && strpos($this->siteMapInfo['permanent-redirect'],'?')===false){
+				return array('www-permanent-redirect'=>$this->siteMapInfo['permanent-redirect'].'?'.$requestNodesRaw[1]);
+			} else {
+				return array('www-permanent-redirect'=>$this->siteMapInfo['permanent-redirect']);
+			}
 		}
 		
 		// It is possible to overwrite the default robots setting
@@ -317,29 +327,32 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// System builds usable URL map for views
 		foreach($this->siteMap as $key=>$node){
-			// Since the same view can be referenced in multiple locations
-			if(isset($node['subview'])){
-				$node['view']=$node['view'].'/'.$node['subview'];
+			// Only sitemap nodes with set view will be assigned to reference
+			if(isset($node['view'])){
+				// Since the same view can be referenced in multiple locations
+				if(isset($node['subview'])){
+					$node['view']=$node['view'].'/'.$node['subview'];
+				}
+				// This is used only if view has not yet been defined
+				if(!isset($siteMapReference[$node['view']])){
+					$siteMapReference[$node['view']]=$key;
+				}
+				// Home views do not need a URL node
+				if($node['view']!=$this->viewHome){
+					$url=$key.'/';
+				} else {
+					$url='';
+				}
+				// Storing data from Sitemap file
+				$siteMapReference[$node['view']]=$this->siteMap[$key];
+				// If first language URL is not enforced, then this is taken into account
+				if($data['language']==$this->languages[0] && $this->enforceLanguageUrl==false){
+					$siteMapReference[$node['view']]['url']=$this->webRoot.$url;
+				} else {
+					$siteMapReference[$node['view']]['url']=$this->webRoot.$data['language'].'/'.$url;
+				}
 			}
-			// This is used only if view has not yet been defined
-			if(!isset($siteMapReference[$node['view']])){
-				$siteMapReference[$node['view']]=$key;
-			}
-			// Home views do not need a URL node
-			if($node['view']!=$this->viewHome){
-				$url=$key.'/';
-			} else {
-				$url='';
-			}
-			// Storing data from Sitemap file
-			$siteMapReference[$node['view']]=$this->siteMap[$key];
-			// If first language URL is not enforced, then this is taken into account
-			if($data['language']==$this->languages[0] && $this->enforceLanguageUrl==false){
-				$siteMapReference[$node['view']]['url']=$this->webRoot.$url;
-			} else {
-				$siteMapReference[$node['view']]['url']=$this->webRoot.$data['language'].'/'.$url;
-			}
-		}		
+		}
 		
 		// This is the best place to build your authentication module for web views
 		// But the commands that it uses are not shown here, so it is commented out

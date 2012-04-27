@@ -30,7 +30,7 @@ function dirCleaner($directory){
 	$folders=fileIndex($directory,'folders');
 	
 	// This will loop over all the files if files were found in this directory
-	if(!empty($files)){
+	if($files && !empty($files)){
 		foreach($files as $file){
 			// Attempting to remove the file
 			if(unlink($file)){
@@ -42,7 +42,7 @@ function dirCleaner($directory){
 	}
 	
 	// This will loop over all the folders if folders were found in this directory
-	if(!empty($folders)){
+	if($folders && !empty($folders)){
 		foreach($folders as $folder){
 			// Attempting to remove the folder
 			if(rmdir($folder)){
@@ -62,12 +62,14 @@ function dirCleaner($directory){
 // * directory - Basepath of all files
 // * type - What type of index this is, can be 'all', 'files' or 'folders'
 // Returns an array with all file and folder addresses
-function fileIndex($directory,$type='all'){
+function fileIndex($directory,$type='all',$files=false){
 
 	// File names are stored in this array
 	$index=array();
 	// Scanning the current directory
-	$files=scandir($directory);
+	if(!$files){
+		$files=scandir($directory);
+	}
 	
 	// This will loop over all the files if files were found in this directory
 	if(!empty($files)){
@@ -161,8 +163,29 @@ function systemBackup($source,$target,$filesystemBackup=false){
 
 	// This is to find absolute path of source directory
 	$root=realpath($source).DIRECTORY_SEPARATOR;
+	
+	// Default framework file system
+	$files=array(
+		'controllers',
+		'engine',
+		'filesystem',
+		'models',
+		'overrides',
+		'resources',
+		'tools',
+		'views',
+		'.htaccess',
+		'.version',
+		'config.php',
+		'favicon.ico',
+		'index.php',
+		'license.txt',
+		'nginx.conf',
+		'readme.txt',
+	);
+	
 	// This returns all absolute paths of all files in $source directory
-	$files=fileIndex($root,'files');
+	$files=fileIndex($root,'files',$files);
 	
 	// If files exist
 	if(!empty($files)){
@@ -173,22 +196,24 @@ function systemBackup($source,$target,$filesystemBackup=false){
 			$zip->setArchiveComment('WWW Framework backup created at '.date('d.m.Y H:i:s').' by script run at '.$_SERVER['REQUEST_URI']);
 			// Each file is added to archive
 			foreach($files as $f){
-				//This is the path it will be stored as in archive
-				$archivePath=str_replace($root,'',$f);
-				// Checking for directory filtering
-				$dir=explode(DIRECTORY_SEPARATOR,$archivePath);
-				// Backup ignores filesystem scripts entirely if it is not enabled
-				if($filesystemBackup || $dir[0]!='filesystem'){
-					// Each file is added individually to archive
-					if(!$zip->addFile($f,$archivePath)){
-						// Error is thrown when one file cannot be added
-						throw new Exception('Failed to archive '.$f.'');
-						// Archive is closed and function returns false
-						$zip->close();
-						// Removing incomplete archive
-						unlink($target);
-						// Archive creation failed
-						return false;
+				if(is_readable($f)){
+					//This is the path it will be stored as in archive
+					$archivePath=str_replace($root,'',$f);
+					// Checking for directory filtering
+					$dir=explode(DIRECTORY_SEPARATOR,$archivePath);
+					// Backup ignores filesystem scripts entirely if it is not enabled
+					if($filesystemBackup || $dir[0]!='filesystem'){
+						// Each file is added individually to archive
+						if(!$zip->addFile($f,$archivePath)){
+							// Error is thrown when one file cannot be added
+							throw new Exception('Failed to archive '.$f.'');
+							// Archive is closed and function returns false
+							$zip->close();
+							// Removing incomplete archive
+							unlink($target);
+							// Archive creation failed
+							return false;
+						}
 					}
 				}
 			}

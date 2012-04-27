@@ -41,7 +41,7 @@ class WWW_Factory {
 		// * inputData - If data is input
 		// * useBuffer - This tells API to use buffer (returns data from memory if the same command with -exact- same input has already been sent)
 		// Returns data based on API call
-		final public function api($command,$inputData=array(),$useBuffer=true){
+		final protected function api($command,$inputData=array(),$useBuffer=true){
 			// Input data has to be an array
 			if(!is_array($inputData)){
 				throw new Exception('API input data is not an array');
@@ -63,7 +63,7 @@ class WWW_Factory {
 		// * address - Address of the API file
 		// * userAgent - Custom user agent string
 		// Returns the Wrapper object if successful
-		final public function apiConnection($address){
+		final protected function apiConnection($address){
 			// Address is required
 			if($address && $address!=''){
 				if(!class_exists('WWW_Wrapper') && file_exists(__DIR__.DIRECTORY_SEPARATOR.'class.www-factory.php')){
@@ -82,7 +82,7 @@ class WWW_Factory {
 		// * variable - variable name of State
 		// * subvariable - subvariable of State
 		// Returns requested variable, otherwise returns false
-		final public function getState($variable=false,$subvariable=false){
+		final protected function getState($variable=false,$subvariable=false){
 			return $this->WWW_API->state->getState($variable,$subvariable);
 		}
 		
@@ -90,7 +90,7 @@ class WWW_Factory {
 		// * variable - Variable to be set
 		// * value - Value to be set
 		// If variable was set, this function always returns true
-		final public function setState($variable,$value=true){
+		final protected function setState($variable,$value=true){
 			return $this->WWW_API->state->setState($variable,$value);
 		}
 	
@@ -101,7 +101,7 @@ class WWW_Factory {
 		// * methodName - if set, the function will create the object and return the result of this function of that object
 		// * methodData - if method name is set, this will also submit data to that function call
 		// Returns the object or a result of a function call of that object
-		final public function getModel($model,$methodName=false,$methodData=array()){
+		final protected function getModel($model,$methodName=false,$methodData=array()){
 		
 			// Dynamically creating class name
 			$className='WWW_model_'.$model;
@@ -144,7 +144,7 @@ class WWW_Factory {
 		// * methodName - if set, the function will create the object and return the result of this function of that object
 		// * methodData - if method name is set, this will also submit data to that function call
 		// Returns the object or a result of a function call of that object
-		final public function getController($controller,$methodName=false,$methodData=array()){
+		final protected function getController($controller,$methodName=false,$methodData=array()){
 		
 			// Dynamically creating class name
 			$className='WWW_controller_'.$controller;
@@ -187,7 +187,7 @@ class WWW_Factory {
 		// * methodName - if set, the function will create the object and return the result of this function of that object
 		// * methodData - if method name is set, this will also submit data to that function call
 		// Returns the object or a result of a function call of that object
-		final public function getView($view,$methodName=false,$methodData=array()){
+		final protected function getView($view,$methodName=false,$methodData=array()){
 		
 			// Dynamically creating class name
 			$className='WWW_view_'.$view;
@@ -231,7 +231,7 @@ class WWW_Factory {
 		// * message - Error message
 		// * responseCode - Error code number
 		// Returns an array
-		final public function errorArray($message,$responseCode=300,$customData=false){
+		final protected function errorArray($message,$responseCode=300,$customData=false){
 			if($customData){
 				return array('www-error'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
@@ -243,7 +243,7 @@ class WWW_Factory {
 		// * message - Success message
 		// * responseCode - Response code number
 		// Returns an array
-		final public function successArray($message,$responseCode=400,$customData=false){
+		final protected function successArray($message,$responseCode=400,$customData=false){
 			if($customData){
 				return array('www-success'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
@@ -255,7 +255,7 @@ class WWW_Factory {
 		// It is used to validate responses from standardized controller responses if API is not used to call a method
 		// * data - Data that is checked
 		// Returns either true or false, if www-error or www-success array keys are set, in every other case simply returns the data value itself
-		final public function checkTrueFalse($data){
+		final protected function checkTrueFalse($data){
 			// These values are only checked from an array
 			if(is_array($data)){
 				if(isset($data['www-error'])){
@@ -278,7 +278,7 @@ class WWW_Factory {
 		// * key - Descriptive key that the log entry will be stored under
 		// * data - Data contained in the entry
 		// Returns true, if logging is used
-		final public function internalLogEntry($key,$data=false){
+		final protected function internalLogEntry($key,$data=false){
 			return $this->WWW_API->internalLogEntry($key,$data);
 		}
 		
@@ -287,7 +287,7 @@ class WWW_Factory {
 		// This method sets the request messenger key
 		// * address - Key that messenger data will be saved under
 		// Always returns true
-		final public function stateMessenger($address){
+		final protected function stateMessenger($address){
 			return $this->WWW_API->state->stateMessenger($address);
 		}
 		
@@ -295,14 +295,14 @@ class WWW_Factory {
 		// * data - Key or data array
 		// * value - Value, if data is a key
 		// Returns true or false
-		final public function setStateMessengerData($data,$value=false){
+		final protected function setStateMessengerData($data,$value=false){
 			return $this->WWW_API->state->setMessengerData($data,$value);
 		}
 		
 		// This function removes data from state messenger
 		// * key - Key that will be removed
 		// Returns true if data was set and is now removed
-		final public function unsetStateMessengerData($key){
+		final protected function unsetStateMessengerData($key){
 			return $this->WWW_API->state->unsetMessengerData($key);
 		}
 		
@@ -310,24 +310,24 @@ class WWW_Factory {
 		// * address - Messenger address
 		// * remove - True or false flag whether to delete the request data after returning it
 		// Returns request messenger data
-		final public function getStateMessengerData($address=false,$remove=true){
+		final protected function getStateMessengerData($address=false,$remove=true){
 			return $this->WWW_API->state->getMessengerData($address,$remove);
 		}
 	
 	// SESSION AND COOKIE WRAPPERS
 	
 		// This starts session in current namespace
-		final public function startSession(){
+		final protected function startSession(){
 			return $this->WWW_API->state->startSession();
 		}
 	
 		// This function regenerates ongoing session
-		final public function regenerateSession(){
+		final protected function regenerateSession(){
 			return $this->WWW_API->state->regenerateSession();
 		}
 		
 		// This function regenerates ongoing session
-		final public function destroySession(){
+		final protected function destroySession(){
 			return $this->WWW_API->state->destroySession();
 		}
 	
@@ -335,21 +335,21 @@ class WWW_Factory {
 		// * key - Key of the variable
 		// * value - Value to be set
 		// Returns true
-		final public function setSession($key,$value){
+		final protected function setSession($key,$value){
 			return $this->WWW_API->state->setSession($key,$value);
 		}
 		
 		// Gets a value based on a key from current namespace
 		// * key - Key of the value to be returned
 		// Returns the value if it exists
-		final public function getSession($key){
+		final protected function getSession($key){
 			return $this->WWW_API->state->getSession($key);
 		}
 		
 		// Unsets session variable
 		// * key - Key of the value to be unset
 		// Returns true
-		final public function unsetSession($key){
+		final protected function unsetSession($key){
 			return $this->WWW_API->state->unsetSession($key);
 		}
 		
@@ -358,21 +358,21 @@ class WWW_Factory {
 		// * value - Value to be set
 		// * configuration - Cookie configuration options
 		// Returns true
-		final public function setCookie($key,$value,$configuration=array()){
+		final protected function setCookie($key,$value,$configuration=array()){
 			return $this->WWW_API->state->setCookie($key,$value,$configuration);
 		}
 		
 		// Gets a value based on a key from current cookies
 		// * key - Key of the value to be returned
 		// Returns the value if it exists
-		final public function getCookie($key){
+		final protected function getCookie($key){
 			return $this->WWW_API->state->getCookie($key);
 		}
 		
 		// Unsets cookie
 		// * key - Key of the cookie to be unset
 		// Returns true
-		final public function unsetCookie($key){
+		final protected function unsetCookie($key){
 			return $this->WWW_API->state->unsetCookie($key);
 		}
 		
@@ -382,7 +382,7 @@ class WWW_Factory {
 		// * query - query string, a statement to prepare with PDO
 		// * variables - array of variables to use in prepared statement
 		// Returns result of that query
-		final public function dbSingle($query,$variables=array()){
+		final protected function dbSingle($query,$variables=array()){
 			return $this->WWW_API->state->databaseConnection->single($query,$variables);
 		}
 		
@@ -390,7 +390,7 @@ class WWW_Factory {
 		// * query - query string, a statement to prepare with PDO
 		// * variables - array of variables to use in prepared statement
 		// Returns result of that query
-		final public function dbMultiple($query,$variables=array()){
+		final protected function dbMultiple($query,$variables=array()){
 			return $this->WWW_API->state->databaseConnection->multiple($query,$variables);
 		}
 		
@@ -398,42 +398,42 @@ class WWW_Factory {
 		// * query - query string, a statement to prepare with PDO
 		// * variables - array of variables to use in prepared statement
 		// Returns result of that query
-		final public function dbCommand($query,$variables=array()){
+		final protected function dbCommand($query,$variables=array()){
 			return $this->WWW_API->state->databaseConnection->command($query,$variables);
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
-		final public function dbLastId(){
+		final protected function dbLastId(){
 			return $this->WWW_API->state->databaseConnection->lastId();
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
-		final public function dbTransaction(){
+		final protected function dbTransaction(){
 			return $this->WWW_API->state->databaseConnection->beginTransaction();
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
-		final public function dbRollback(){
+		final protected function dbRollback(){
 			return $this->WWW_API->state->databaseConnection->rollbackTransaction();
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
-		final public function dbCommit(){
+		final protected function dbCommit(){
 			return $this->WWW_API->state->databaseConnection->commitTransaction();
 		}
 		
 		// This function escapes a string for use in query
-		final public function dbEscape($value,$string=true){
+		final protected function dbEscape($value,$string=true){
 			return $this->WWW_API->state->databaseConnection->escape($value,$string);
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
-		final public function dbPDO(){
+		final protected function dbPDO(){
 			return $this->WWW_API->state->databaseConnection->pdo;
 		}
 		
@@ -442,7 +442,7 @@ class WWW_Factory {
 		// This function looks for available terminal/command line option and attempts to execute it
 		// * command - Command to be executed
 		// Returns command result, if available
-		final public function terminal($command){
+		final protected function terminal($command){
 		
 			// Status variable
 			$status=1;

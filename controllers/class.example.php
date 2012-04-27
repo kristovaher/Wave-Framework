@@ -12,7 +12,8 @@ Author and support: Kristo Vaher - kristo@waher.net
 // WWW_Factory is parent class for all MVC classes of WWW
 class WWW_controller_example extends WWW_Factory {
 	
-	/** Simple example call (from API it would be 'example-get' command */
+	// Simple example call (from API it would be 'example-get' command
+	// Please note that only public methods can be called through API, protected and private methods remain hidden
 	public function get(){
 		// New objects can be created through Factory easily
 		$example=$this->getModel('example');

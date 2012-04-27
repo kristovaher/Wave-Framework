@@ -38,17 +38,6 @@ class WWW_API {
 	// This is for internal testing
 	private $internalLogging=false;
 	private $internalLog=array();
-	
-	// List of illegal methods that cannot be called from API
-	// These are mostly related to Factory class
-	// Note that these methods are all lowercase for comparison purposes
-	private $illegalControllerMethods=array(
-		'__construct','__initialize','__destruct','api','apiconnection','getstate','setstate','getmodel','getcontroller',
-		'getview','errorarray','successarray','checktruefalse','internallogentry','statemessenger','setstatemessengerdata',
-		'unsetstatemessengerdata','getstatemessengerdata','startsession','regeneratesession','destroysession','setsession',
-		'getsession','unsetsession','setcookie','getcookie','unsetcookie','dbsingle','dbmultiple','dbcommand','dblastid',
-		'dbtransaction','dbrollback','dbcommit','dbescape','dbpdo','terminal'
-	);
 			
 	// API requires State object for majority of functionality
 	// * state - Object of WWW_State class
@@ -580,16 +569,11 @@ class WWW_API {
 				if(isset($commandBits[1])){
 				
 					// Solving method name, dashes are underscored
-					$methodName=str_replace('-','',$commandBits[1]);
-					// Making sure that the command is allowed and throwing an error, if it is not
-					if(in_array(strtolower($methodName),$this->illegalControllerMethods)){
-						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
-					}
+					$methodName=str_replace('-','_',$commandBits[1]);
 					// New controller is created based on API call
 					$controller=new $className($this);
 					// If command method does not exist, 501 page is returned or error triggered
-					if(!method_exists($controller,$methodName)){
+					if(!method_exists($controller,$methodName) || !is_callable(array($controller,$methodName))){
 						// Since an error was detected, system pushes for output immediately
 						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));
 					}

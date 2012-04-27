@@ -37,6 +37,7 @@ FEATURES
  * On-demand dynamic image resizer and basic image editor
  * On-demand resource compressing, unifying and minifying
  * Automatic sitemap.xml and robots.txt generation
+ * Automatically generated API documentation
  * API wrapper classes that make server to server API communication easy
  * Optional 256bit Rijndael CBC data communication encryption
  * Installation-specific MVC class and resource overrides

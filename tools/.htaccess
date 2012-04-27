@@ -11,5 +11,5 @@ Options +FollowSymLinks
 
 # Adding a GET variable to compatibility.php request
 RewriteEngine on
-RewriteCond %{QUERY_STRING} !=mod_rewrite_enabled
+RewriteCond %{QUERY_STRING} !=rewrite_enabled
 RewriteRule (compatibility\.php)$ ./compatibility.php?rewrite_enabled [L]

@@ -287,5 +287,13 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// This setting sets the server load limit after which requests will be blocked
 	// This is set to 0 and thus not used by default
 	// $config['load-limiter']=80;
+	
+// SESSION
+
+	// Session rights key
+	// Session based validations have a 'key' under which 'rights' are stored
+	// This value can be checked by controllers to determine if current session has proper rights for a specific action or not
+	// This value is set to 'www-rights' by default, if left undefined
+	// $config['session-rights-key']='www-rights';
 
 ?>

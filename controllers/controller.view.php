@@ -33,26 +33,25 @@ class WWW_controller_view extends WWW_Factory {
 		
 		// Meta title can be set in Sitemap and can also be different based on 
 		if(isset($input['www-view-data']['meta-title'])){
-			$metaTitle=$input['www-view-data']['meta-title'];
 			// Here you should add your custom meta title loading, if necessary
 			if(method_exists($viewObject,'getTitle')){
-				$appendTitle=$viewObject->getTitle($input['www-view-data']);
+				$prependTitle=$viewObject->getTitle($input['www-view-data']);
 				// Title is only appended if it exists and is not empty
-				if($appendTitle && $appendTitle!=''){
-					$metaTitle.=$appendTitle.' - '.$metaTitle;
+				if($prependTitle && $prependTitle!=''){
+					$input['www-view-data']['meta-title'].=$prependTitle.' - '.$input['www-view-data']['meta-title'];
 				}
 			}
 		} else {
 			// Project title is an empty string, if it was not defined
-			$metaTitle='';
+			$input['www-view-data']['meta-title']='';
 		}
 		
 		// Project title will be added to the end, if it is set
 		if($input['www-view-data']['project-title']!=''){
-			if($metaTitle!=''){
-				$metaTitle.=' - '.$input['www-view-data']['project-title'];
+			if($input['www-view-data']['meta-title']!=''){
+				$input['www-view-data']['meta-title'].=' - '.$input['www-view-data']['project-title'];
 			} else {
-				$metaTitle=$input['www-view-data']['project-title'];
+				$input['www-view-data']['meta-title']=$input['www-view-data']['project-title'];
 			}
 		}
 		
@@ -95,7 +94,7 @@ class WWW_controller_view extends WWW_Factory {
 			<!DOCTYPE html>
 			<html lang="<?=$input['www-view-data']['language']?>">
 				<head>
-					<title><?=$metaTitle?></title>
+					<title><?=$input['www-view-data']['meta-title']?></title>
 					<!-- UTF-8 -->
 					<meta charset="utf-8">
 					<!-- Useful for mobile applications -->

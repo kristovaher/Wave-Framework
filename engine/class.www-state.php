@@ -77,6 +77,8 @@ class WWW_State	{
 				'request-uri'=>$_SERVER['REQUEST_URI'],
 				'request-time'=>$_SERVER['REQUEST_TIME'],
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
+				'session-rights-key'=>'www-rights',
+				'rights'=>false,
 				'true-request'=>false,
 				'internal-logging'=>false,
 				'fingerprint'=>''
@@ -362,6 +364,60 @@ class WWW_State	{
 					return false;
 				}
 			}
+		}
+		
+	// SESSION RIGHTS
+	
+		// This function checks for session rights
+		// * check - String that is checked against rights array
+		// Returns either true or false, depending whether rights are set or not
+		final public function checkRights($check){
+			// Testing if rights state has been populated or not
+			if(!$this->data['rights']){
+				$this->data['rights']=$this->getSession($this->data['session-rights-key']);
+				// If this session key did not exist, then returning false
+				if(!$this->data['rights']){
+					return false;
+				}
+			}
+			if(is_array($check)){
+				foreach($check as $c){
+					// Returning true or false depending on whether this key exists or not
+					if(!in_array($c,$this->data['rights'])){
+						return false;
+					}
+					return true;
+				}
+			} else {
+				// Returning true or false depending on whether this key exists or not
+				if(in_array($check,$this->data['rights'])){
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		
+		// This function returns all current session rights
+		// Returns an array of rights
+		final public function getRights(){
+			// Testing if rights state has been populated or not
+			if(!$this->data['rights']){
+				$this->data['rights']=$this->getSession($this->data['session-rights-key']);
+			}
+			return $this->data['rights'];
+		}
+		
+		// This function sets current session rights
+		// * rights - An array or a string of rights
+		// Always returns true
+		final public function setRights($rights){
+			if(!is_array($rights)){
+				$rights=explode(',',$rights);
+			}
+			$this->data['rights']=$rights;
+			$this->setSession($this->data['session-rights-key'],$rights);
+			return true;
 		}
 		
 	// SESSION AND COOKIES

@@ -90,14 +90,7 @@ class WWW_API {
 		}
 	}
 	
-	// This function replaces the current API state
-	// * state - new state object
-	public function setState($state){
-		$this->state=$state;
-	}
-	
 	// This function clears current API buffer
-	// * state - new state object
 	public function clearBuffer(){
 		$this->buffer=array();
 	}
@@ -218,6 +211,12 @@ class WWW_API {
 							return $this->output(array('www-error'=>'API command is not allowed for this profile','www-response-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 						}
 					}
+					
+					// Storing rights data in State, if it is set for this profile
+					if(!$this->state->data['rights'] && isset($this->apiProfiles[$apiState['profile']]['rights']) && $this->apiProfiles[$apiState['profile']]['rights']!=false){
+						// Assigning the rights string to API
+						$this->state->data['rights']=explode(',',$this->apiProfiles[$apiState['profile']]['rights']);
+					} 
 					
 					// These options only affect non-public profiles
 					if($apiState['profile']!=$this->state->data['api-public-profile']){

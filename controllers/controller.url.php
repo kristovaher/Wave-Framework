@@ -356,14 +356,14 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// This is the best place to build your authentication module for web views
 		// But the commands that it uses are not shown here, so it is commented out
-		// This is essentially the boilerplate startpoint for you to implement authentication
+		// This is essentially the boilerplate startpoint for you to implement authentication, as the actual login redirection is turned off
 		// Attempting to get user session
-		// if(isset($data['rights'])){
-			// $data['user']=$this->api('user-getUserSession',array('rights'=>$data['rights']));
-			// if(!$data['user'] && $data['view']!='login'){
+		if(isset($data['rights'])){
+			$data['rights']=explode(',',$data['rights']);
+			// if($data['view']!='login' && !$this->checkRights($data['rights'])){
 				// return $this->errorArray('Authentication required',300,array('www-temporary-redirect'=>$siteMapReference['login']['url']));
 			// }
-		// }
+		}
 		
 		// This stores flipped array (for reverse access in views and objects) as a state
 		$data['sitemap']=$siteMapReference;

@@ -23,18 +23,18 @@ something else in that part of URL, such as product code.
 * permanent-redirect - This tells URL controller to permanently redirect requests made to this URL
 * hidden - True or false value about whether this URL will be hidden from sitemap.xml generation
 * cache-timeout - Time in seconds about how long cache exists for requests made to this URL, this overwrites default configuration setting
-* rights - If this value is not false, then URL controller checks for user credentials. Note that the checking method is not turned off by default in URL controller.
+* rights - If this value is not false, then URL controller checks for session rights with that name. Value can be comma-separated. Note that the checking method is not turned off by default in URL controller.
 * view-controller - If this is not defined then /controllers/controller.view.php will be used to return the view. In here you can assign a different view for controller.{name}.php.
 
 Author and support: Kristo Vaher - kristo@waher.net
 */
 
 $siteMap['home']=array('view'=>'home','meta-title'=>'Home!','cache-timeout'=>30);  // URL is the element key and view is the view assigned to be loaded
-$siteMap['example']=array('view'=>'example','unsolved-url-nodes'=>true);  // If unsolved URL nodes are enabled, then 404 is not thrown when URL has further nodes
+$siteMap['example']=array('view'=>'example','unsolved-url-nodes'=>1);  // If unsolved URL nodes are enabled, then 404 is not thrown when URL has further nodes
 $siteMap['example/subview']=array('view'=>'example','subview'=>'alt'); // It is possible to have two different URL's use the same view with a 'slash' making it unique, 'alt' will be stored as 'subview'
 $siteMap['example/robots']=array('view'=>'example','robots'=>''); // This allows to overwrite the default robots setting
 $siteMap['example/redirect']=array('view'=>'example','temporary-redirect'=>'http://www.google.com'); // It is also possible to redirect URL's
-$siteMap['example/hide']=array('view'=>'example','hidden'=>true,'cache-timeout'=>0); // This means that the URL is hidden from sitemap as well as that cache is not used for this view
+$siteMap['example/hide']=array('view'=>'example','hidden'=>1,'cache-timeout'=>0); // This means that the URL is hidden from sitemap as well as that cache is not used for this view
 $siteMap['example/meta']=array('view'=>'example','meta-title'=>'My custom title!','meta-description'=>'Meta description here','meta-keywords'=>'www,framework'); // Meta information can also be listed for page
 	
 ?>

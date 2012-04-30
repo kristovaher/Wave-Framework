@@ -15,7 +15,8 @@ to API profile settings, such as timeouts and IP restrictions.
 Valid for public and non-public profiles:
 * disabled - A true or false setting whether this profile is disabled
 * ip - Either aterisk (*) or comma separated list of IP addresses, this limits what IP's can use this profile
-* commands - Comma-separated list of commands allowed by this API, can be '*' to allow all commands.
+* commands - Comma-separated list of commands allowed by this API, can be '*' to allow all commands
+* rights - Comma-separated list of rights that are checked for when this API is used
 
 Only valid for non-public profiles
 * secret-key - Secret key of the API profile, should be a 32 character string for best security. If not defined, then hash validation is not used.

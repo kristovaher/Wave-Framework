@@ -76,6 +76,11 @@ class WWW_Factory {
 			}
 		}
 	
+		// This function clears current API buffer
+		public function clearBuffer(){
+			$this->WWW_API->clearBuffer();
+		}
+	
 	// STATE DATA SET AND GET
 	
 		// Returns data from State objects data array
@@ -374,6 +379,28 @@ class WWW_Factory {
 		// Returns true
 		final protected function unsetCookie($key){
 			return $this->WWW_API->state->unsetCookie($key);
+		}
+		
+	// SESSION RIGHTS
+	
+		// This function checks for session rights
+		// * check - String that is checked against rights array
+		// Returns either true or false, depending whether rights are set or not
+		final protected function checkRights($check){
+			return $this->WWW_API->state->checkRights($check);
+		}
+		
+		// This function returns all current session rights
+		// Returns an array of rights
+		final protected function getRights(){
+			return $this->WWW_API->state->getRights();
+		}
+		
+		// This function sets current session rights
+		// * rights - An array or a string of rights
+		// Always returns true
+		final protected function setRights($rights){
+			return $this->WWW_API->state->setRights($rights);
 		}
 		
 	// DATABASE WRAPPERS

@@ -370,13 +370,27 @@ class WWW_Database {
 	}
 	
 	// This function escapes a string for use in query
-	public function escape($value,$string=true){
+	public function filter($value,$type='pdo'){
 		if($this->connected==1){
-			// This is PDO equivalent of mysql_real_escape_string
-			if($string){
-				return $this->pdo->quote($value,PDO::PARAM_STR);
-			} else {
-				return (int)$value;
+			switch($type){
+				case 'pdo':
+					return $this->pdo->quote($value,PDO::PARAM_STR);
+					break;
+				case 'int':
+					return (int)$value;
+					break;
+				case 'latin':
+					return preg_replace('/[^a-z]/i','',$value);
+					break;
+				case 'field':
+					return preg_replace('/[^a-z]/i','',$value);
+					break;
+				case 'like':
+					return str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR));
+					break;
+				default:
+					return $value;
+					break;
 			}
 		} else {
 			throw new Exception('Database not connected');

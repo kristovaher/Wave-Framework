@@ -12,7 +12,7 @@ as /example/test/test2/ will return the same view as /example/test/ and keep the
 unsolved URL node, if the setting for URL has it enabled. This can be useful if you store 
 something else in that part of URL, such as product code.
 
-* view - View file to be loaded from /views/class.{view}.php
+* view - View file to be loaded from /views/view.{view}.php
 * meta-title - View controller appends this to Meta title of the page
 * meta-description - Meta description string loaded for this view
 * meta-keywords - List of meta keywords loaded for this view
@@ -24,7 +24,7 @@ something else in that part of URL, such as product code.
 * hidden - True or false value about whether this URL will be hidden from sitemap.xml generation
 * cache-timeout - Time in seconds about how long cache exists for requests made to this URL, this overwrites default configuration setting
 * rights - If this value is not false, then URL controller checks for user credentials. Note that the checking method is not turned off by default in URL controller.
-* view-controller - If this is not defined then /controllers/class.view.php will be used to return the view. In here you can assign a different view for class.{name}.php.
+* view-controller - If this is not defined then /controllers/controller.view.php will be used to return the view. In here you can assign a different view for controller.{name}.php.
 
 Author and support: Kristo Vaher - kristo@waher.net
 */

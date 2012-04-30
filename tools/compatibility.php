@@ -110,7 +110,7 @@ header('Content-Type: text/html;charset=utf-8');
 			if($shortOpenTag && $shortOpenTag==1){
 				$log[]='<span class="bold">SUCCESS</span>: PHP setting short_open_tag is enabled';
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: PHP setting short_open_tag is turned off, default View controller requires this to work properly, if this is not possible then edit /controllers/class.view.php';
+				$log[]='<span class="bold orange">WARNING</span>: PHP setting short_open_tag is turned off, default View controller requires this to work properly, if this is not possible then edit /controllers/controller.view.php';
 			}
 			
 		// ZLIB

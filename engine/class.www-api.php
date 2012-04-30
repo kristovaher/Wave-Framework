@@ -108,7 +108,7 @@ class WWW_API {
 	// Returns true, if logging is used
 	public function internalLogEntry($key,$data=false){
 		// Only applies if internal logging is turned on
-		if($this->internalLogging && (in_array('*',$this->internalLogging) || !in_array('!'.$key,$this->internalLogging) || in_array($key,$this->internalLogging))){
+		if($this->internalLogging && ((in_array('*',$this->internalLogging) && !in_array('!'.$key,$this->internalLogging)) || in_array($key,$this->internalLogging))){
 			// Preparing a log entry object
 			$entry=array($key=>$data);
 			// Adding log entry to log array
@@ -155,6 +155,7 @@ class WWW_API {
 				'return-type'=>(isset($apiInputData['www-return-type']))?$apiInputData['www-return-type']:'json',
 				'secret-key'=>false,
 				'token'=>false,
+				'commands'=>'*',
 				'token-file'=>false,
 				'token-directory'=>false,
 				'token-timeout'=>false
@@ -209,10 +210,13 @@ class WWW_API {
 						return $this->output(array('www-error'=>'API profile not allowed from this IP','www-response-code'=>104),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 					}
 					
-					// Testing if command is allowed
-					if(!isset($this->apiProfiles[$apiState['profile']]['commands']) || ($this->apiProfiles[$apiState['profile']]['commands']!='*' && $apiState['command']!='www-create-session' && !in_array($apiState['command'],explode(',',$this->apiProfiles[$apiState['profile']]['commands'])))){
-						// If profile has IP set and current IP is not allowed
-						return $this->output(array('www-error'=>'API command is not allowed for this profile','www-response-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+					// Profile commands are filtered only if they are set
+					if(isset($this->apiProfiles[$apiState['profile']]['commands']) && $apiState['command']!='www-create-session'){
+						$apiState['commands']=explode(',',$this->apiProfiles[$apiState['profile']]['commands']);
+						if((in_array('*',$apiState['commands']) && in_array('!'.$apiState['command'],$apiState['commands'])) && !in_array($apiState['command'],$apiState['commands'])){
+							// If profile has IP set and current IP is not allowed
+							return $this->output(array('www-error'=>'API command is not allowed for this profile','www-response-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+						}
 					}
 					
 					// These options only affect non-public profiles
@@ -555,10 +559,10 @@ class WWW_API {
 				// Class is defined and loaded, if it is not already defined
 				if(!class_exists($className)){
 					// Overrides can be used for controllers
-					if(file_exists($this->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php')){
-						require($this->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
-					} elseif(file_exists($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php')){
-						require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'class.'.$commandBits[0].'.php');
+					if(file_exists($this->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+						require($this->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
+					} elseif(file_exists($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+						require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
 					} else {
 						// Since an error was detected, system pushes for output immediately
 						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),$apiState+array('custom-header'=>'HTTP/1.1 501 Not Implemented'));

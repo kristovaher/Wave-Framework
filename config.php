@@ -86,14 +86,14 @@ Author and support: Kristo Vaher - kristo@waher.net
 
 	// 404 view name
 	// This is what Index gateway considers as the 404 'view' in case URL does not exist
-	// This view must exist as a /views/class.{home-view}.php file
-	// Default value is '404' and it loads /views/class.404.php file
+	// This view must exist as a /views/view.{home-view}.php file
+	// Default value is '404' and it loads /views/view.404.php file
 	// $config['404-view']='404';
 
 	// Home view name
 	// This is what Index gateway considers as the default 'view' in case URL is set to root
-	// This view must exist as a /views/class.{home-view}.php file
-	// Default value is 'home' and it loads /views/class.home.php file
+	// This view must exist as a /views/view.{home-view}.php file
+	// Default value is 'home' and it loads /views/view.home.php file
 	// $config['home-view']='home';
 	
 	// Web root
@@ -250,7 +250,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// By default this value is set to false and internal logging is turned off entirely
 	// If this is not set to false, then the value is considered a comma-separated list of values that can be logged internally
 	// When it is set to '*' then everything will be logged. If '!' is set before the log data key, then this will not be logged.
-	// $config['internal-logging']='!input-data,!output-data'; // This disabled automatic API logging and only uses internal logging
+	// $config['internal-logging']='*,!input-data,!output-data'; // This disabled automatic API logging and only uses internal logging
 	
 // LIMITER
 

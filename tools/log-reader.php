@@ -99,7 +99,12 @@ header('Content-Type: text/html;charset=utf-8');
 			if(isset($_GET['types'])){
 				$rawTypes=explode(',',$_GET['types']);
 				foreach($rawTypes as $t){
-					$types[$t]=true;
+					$bits=explode('[',$t);
+					if(isset($bits[1])){
+						$types[$t]=str_replace(']','',$bits[1]);
+					} else {
+						$types[$t]=true;
+					}
 				}
 			} else {
 				$types['all']=true;
@@ -123,24 +128,35 @@ header('Content-Type: text/html;charset=utf-8');
 					// Output buffer allows to increase peformance due to multiple echo's
 					ob_start();
 					// Log data is deencoded from JSON string
-					$l=json_decode($l,true);
+					$l=unserialize($l);
 					// Log entry should be an array once decoded
 					if(is_array($l)){
-						echo '<div class="border block">';
-						// Printing out log data
-						foreach($l as $key=>$entry){
-							if(isset($_GET['internal']) || isset($types['all']) || isset($types[$key])){
-								if(!is_array($entry)){
-									echo '<b>'.$key.':</b> '.$entry.'<br/>';
-								} else {
-									echo '<b>'.$key.':</b>';
-									echo '<pre class="small box disabled">';
-									print_r($entry);
-									echo '</pre>';
+						$accepted=true;
+						// Breaking out of the loop if the assigned key value is not the one that is required
+						foreach($types as $key=>$t){
+							if($key!='all' && $t!==true){
+								if(!isset($l[str_replace('['.$t.']','',$key)]) || $l[str_replace('['.$t.']','',$key)]!=$t){
+									$accepted=false;
 								}
 							}
 						}
-						echo '</div>';
+						if($accepted){
+							echo '<div class="border block">';
+							// Printing out log data
+							foreach($l as $key=>$entry){
+								if(isset($_GET['internal']) || isset($types['all']) || isset($types[$key])){
+									if(!is_array($entry)){
+										echo '<b>'.$key.':</b> '.$entry.'<br/>';
+									} else {
+										echo '<b>'.$key.':</b>';
+										echo '<pre class="small box disabled">';
+										print_r($entry);
+										echo '</pre>';
+									}
+								}
+							}
+							echo '</div>';
+						}
 					}
 					// Output buffer flushed to user agent
 					ob_end_flush(); 

@@ -56,14 +56,14 @@ Author and support: Kristo Vaher - kristo@waher.net
 		// Configuration is parsed from INI file in the root of the system
 		$config=parse_ini_file(__ROOT__.'config.ini');
 		// Cache of parsed INI file is stored for later use
-		if(!file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp',json_encode($config))){
+		if(!file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp',serialize($config))){
 			header('HTTP/1.1 500 Internal Server Error');
 			echo '<h1>HTTP/1.1 500 Internal Server Error</h1>';
 			echo '<p>Cannot write cache in filesystem, please make sure filesystem folders are writable.</p>';
 		}
 	} else {
 		// Since INI file has not been changed, configuration is loaded from cache
-		$config=json_decode(file_get_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp'),true);
+		$config=unserialize(file_get_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp'));
 	}
 
 	// Error reporting is turned off by default

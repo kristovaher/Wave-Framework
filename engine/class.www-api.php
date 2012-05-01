@@ -86,12 +86,12 @@ class WWW_API {
 					throw new Exception('Cannot parse INI file: '.$sourceUrl);
 				}
 				// Cache of parsed INI file is stored for later use
-				if(!file_put_contents($cacheUrl,json_encode($apiProfiles))){
+				if(!file_put_contents($cacheUrl,serialize($apiProfiles))){
 					throw new Exception('Cannot store INI file cache at '.$cacheUrl);
 				}
 			} else {
 				// Since INI file has not been changed, profiles are loaded from cache
-				$apiProfiles=json_decode(file_get_contents($cacheUrl),true);
+				$apiProfiles=unserialize(file_get_contents($cacheUrl));
 			}
 		}
 		
@@ -103,7 +103,7 @@ class WWW_API {
 	// This writes log data to file, if internal logging is turned on 
 	public function __destruct(){
 		if($this->internalLogging && !empty($this->internalLog)){
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log.tmp',json_encode($this->internalLog)."\n",FILE_APPEND);
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log.tmp',serialize($this->internalLog)."\n",FILE_APPEND);
 		}
 	}
 	
@@ -190,7 +190,7 @@ class WWW_API {
 			
 			// Existing response is checked from buffer if it exists
 			if($useBuffer){
-				$commandBufferAddress=md5($apiState['command'].json_encode($apiInputData));
+				$commandBufferAddress=md5($apiState['command'].serialize($apiInputData));
 				// If result already exists in buffer then it is simply returned
 				if(isset($this->buffer[$commandBufferAddress])){
 					return $this->buffer[$commandBufferAddress];
@@ -512,7 +512,7 @@ class WWW_API {
 					unset($cacheValidator['www-minify']);
 				}
 				// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
-				$cacheValidator=md5($apiState['command'].json_encode($cacheValidator).$apiState['return-type'].$apiState['push-output']);
+				$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);
 				
 				// Cache filename consists of API command, serialized input data, return type and whether API output is used.
 				$cacheFile=$cacheValidator.'.tmp';
@@ -548,7 +548,7 @@ class WWW_API {
 						if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
 							$apiResult=file_get_contents($cacheFolder.$cacheFile);
 						} else {
-							$apiResult=json_decode(file_get_contents($cacheFolder.$cacheFile),true);
+							$apiResult=unserialize(file_get_contents($cacheFolder.$cacheFile));
 						}
 						
 						// Since cache was used
@@ -635,7 +635,7 @@ class WWW_API {
 							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					} else {
-						if(!file_put_contents($cacheFolder.$cacheFile,json_encode($apiResult))){
+						if(!file_put_contents($cacheFolder.$cacheFile,serialize($apiResult))){
 							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
 						}
 					}

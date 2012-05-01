@@ -21,7 +21,9 @@ Author and support: Kristo Vaher - kristo@waher.net
 // WWW_Factory is parent class for all MVC classes of WWW
 class WWW_controller_url extends WWW_Factory {
 
-	// This is called by index.php gateway when trying to solve request URL to view
+	// This method is called by index.php gateway when trying to solve request URL to view
+	// * www-request - This is the request URL that will be parsed
+	// Returns modified data about the view from sitemap file
 	public function solve($input){
 		
 		// Default view is loaded from State (this is loaded when no URL is defined)
@@ -33,13 +35,11 @@ class WWW_controller_url extends WWW_Factory {
 			$request=$input['www-request'];
 		} else {
 			// Formatting and returning the expected result array
-			return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found','subview'=>'','language'=>$this->getState('language'),'unsolved-url'=>array()));
+			return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
 		}
 		
 		// Web root is the base directory of the website
 		$webRoot=$this->getState('web-root');
-		// System root is the base directory of files on web server
-		$systemRoot=$this->getState('system-root');
 		
 		// This setting will force that even the first language (first in languages array) has to be represented in URL
 		$enforceSlash=$this->getState('enforce-url-end-slash');
@@ -58,7 +58,7 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// To solve the request GET is separated from URL nodes
 		$requestNodesRaw=explode('?',$request,2);
-		// Finding URL map match and module from the request
+		// This array stores all the URL nodes that will be matched against sitemap
 		$urlNodes=array();
 		
 		// This is used for testing if the returned URL should be home or not
@@ -146,7 +146,7 @@ class WWW_controller_url extends WWW_Factory {
 					
 				} else {
 					// Formatting and returning the expected result array
-					return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found','subview'=>'','language'=>$language,'unsolved-url'=>array()));
+					return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
 				}
 
 			}
@@ -156,23 +156,18 @@ class WWW_controller_url extends WWW_Factory {
 		// Notifying State of current language
 		$this->setState('language',$language);
 		
-		// This flag checks if unsolved URL is allowed or not, only URL's with aterisk parameter from URL map allow unsolved URL's
-		$unsolvedUrlAllowed=false;
 		// All nodes of URL's that were not found as modules are stored here
 		$unsolvedUrlNodes=array();
-		
-		// System root that is used for checking if view file exists
-		$systemRoot=$this->getState('system-root');
 		
 		// URL Map is stored in this array
 		$siteMap=$this->getSitemapRaw($language);
 		if(!$siteMap){
 			// Formatting and returning the expected result array
-			return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found','subview'=>'','language'=>$language,'unsolved-url'=>array()));
+			return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
 		}
 		
 		// Array that stores information from sitemap file
-		$siteMapInfo=array();
+		$siteMapInfo=$siteMap[$viewHome];
 		
 		// If home is not expected to be returned
 		if(!$returnHome){
@@ -220,14 +215,6 @@ class WWW_controller_url extends WWW_Factory {
 			
 			}
 		
-		} else {
-			// Setting current page information when returning Home view
-			$siteMapInfo=$siteMap[$viewHome];
-		}
-		
-		// If unsolved URL's are allowed
-		if(isset($siteMapInfo['unsolved-url-nodes']) && $siteMapInfo['unsolved-url-nodes']==true){
-			$unsolvedUrlAllowed=true;
 		}
 		
 		// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
@@ -251,62 +238,70 @@ class WWW_controller_url extends WWW_Factory {
 		if(!empty($unsolvedUrlNodes)){
 			// Unsolved URL's are reversed so that they can be used in the order they were defined in URL
 			$unsolvedUrlNodes=array_reverse($unsolvedUrlNodes);
+			// Storing unsolved URL in State
+			$this->setState('unsolved-url',$unsolvedUrlNodes);
 			// 404 is returned if unsolved URL's were not permitted
-			if($unsolvedUrlAllowed==false){
-				return $this->returnViewData($siteMapInfo+array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found','language'=>$language,'unsolved-url'=>$unsolvedUrlNodes));
+			if(!isset($siteMapInfo['unsolved-url-nodes']) || $siteMapInfo['unsolved-url-nodes']==false){
+				return $this->returnViewData(array('view'=>$view404,'cache-timeout'=>0,'header'=>'HTTP/1.1 404 Not Found')+$siteMapInfo);
 			}
 		}
 			
 		// Formatting and returning the expected result array
-		return $this->returnViewData($siteMapInfo+array('view'=>$view,'language'=>$language,'unsolved-url'=>$unsolvedUrlNodes));
+		return $this->returnViewData($siteMapInfo);
 		
 	}
 	
 	// This function returns view data
 	private function returnViewData($data){
+	
+		// DEFAULTS FOR VIEW DATA
 		
-		// If view controller has not been defined in sitemap configuration
-		if(!isset($data['view-controller'])){
-			$data['view-controller']='view';
-		}
+			// If view controller has not been defined in sitemap configuration
+			if(!isset($data['view-controller'])){
+				$data['view-controller']='view';
+			}
+			
+			// If project title is not set by Sitemap, system defines the State project title as the value
+			if(!isset($data['project-title'])){
+				$data['project-title']=$this->getState('project-title');
+			}
+			
+			// Robots data is also returned to views
+			if(!isset($data['robots'])){
+				$data['robots']=$this->getState('robots');
+			}
+			
+			// Notifying State of view data
+			$this->setState('view-data',$data);
+			
+		// HEADERS
 		
-		// If project title is not set by Sitemap, system defines the State project title as the value
-		if(!isset($data['project-title'])){
-			$data['project-title']=$this->getState('project-title');
-		}
+			// These headers will be set by API
+			$data['www-set-header']=array();
+			
+			if(isset($data['header'])){
+				$data['www-set-header'][]=$data['header'];
+			}
+			
+			// Writing robots data to header
+			if($data['robots']!=''){
+				// This header is not 'official HTTP header', but is widely supported by Google and others
+				$data['www-set-header'][]='X-Robots-Tag: '.$data['robots'];
+			}
+			
+		// HANDLING AND CHECKS
 		
-		// Robots data is also returned to views
-		if(!isset($data['robots'])){
-			$data['robots']=$this->getState('robots');
-		}
-		
-		// Notifying State of view data
-		$this->setState('view-data',$data);
-		
-		// This is the best place to build your authentication module for web views
-		// But the commands that it uses are not shown here, so it is commented out
-		// This is essentially the boilerplate startpoint for you to implement authentication, as the actual login redirection is turned off
-		// Attempting to get user session
-		if(isset($data['rights'])){
-			$data['rights']=explode(',',$data['rights']);
-			// if($data['view']!='login' && !$this->checkRights($data['rights'])){
-				// $siteMapReference=$this->getSitemap();
-				// return $this->errorArray('Authentication required',300,array('www-temporary-redirect'=>$siteMapReference['login']['url']));
-			// }
-		}
-		
-		// These headers will be set by API
-		$data['www-set-header']=array();
-		
-		if(isset($data['header'])){
-			$data['www-set-header'][]=$data['header'];
-		}
-		
-		// Writing robots data to header
-		if(isset($data['robots']) && $data['robots']!=''){
-			// This header is not 'official HTTP header', but is widely supported by Google and others
-			$data['www-set-header'][]='X-Robots-Tag: '.$data['robots'];
-		}
+			// This is the best place to build your authentication module for web views
+			// But the commands that it uses are not shown here, so it is commented out
+			// This is essentially the boilerplate startpoint for you to implement authentication, as the actual login redirection is turned off
+			// Attempting to get user session
+			if(isset($data['rights'])){
+				$data['rights']=explode(',',$data['rights']);
+				// if($data['view']!='login' && !$this->checkRights($data['rights'])){
+					// $siteMapReference=$this->getSitemap();
+					// return $this->errorArray('Authentication required',300,array('www-temporary-redirect'=>$siteMapReference['login']['url']));
+				// }
+			}
 		
 		// Data about the view is returned
 		return $data;

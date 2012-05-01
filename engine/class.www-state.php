@@ -178,7 +178,7 @@ class WWW_State	{
 				}
 			}
 			// Writing messenger data to file
-			if(!file_put_contents($dataFolder.$this->messenger.'.tmp',json_encode($this->messengerData))){
+			if(!file_put_contents($dataFolder.$this->messenger.'.tmp',serialize($this->messengerData))){
 				throw new Exception('Cannot write messenger data');
 			}
 		}
@@ -313,12 +313,12 @@ class WWW_State	{
 						throw new Exception('Cannot parse INI file: '.$sourceUrl);
 					}
 					// Cache of parsed INI file is stored for later use
-					if(!file_put_contents($cacheUrl,json_encode($this->data['translations'][$language]))){
+					if(!file_put_contents($cacheUrl,serialize($this->data['translations'][$language]))){
 						throw new Exception('Cannot store INI file cache at '.$cacheUrl);
 					}
 				} else {
 					// Since INI file has not been changed, translations are loaded from cache
-					$this->data['translations'][$language]=json_decode(file_get_contents($cacheUrl),true);
+					$this->data['translations'][$language]=unserialize(file_get_contents($cacheUrl));
 				}
 			}
 			// Returning translations array
@@ -354,12 +354,12 @@ class WWW_State	{
 						throw new Exception('Cannot parse INI file: '.$sourceUrl);
 					}
 					// Cache of parsed INI file is stored for later use
-					if(!file_put_contents($cacheUrl,json_encode($this->data['sitemap'][$language]))){
+					if(!file_put_contents($cacheUrl,serialize($this->data['sitemap'][$language]))){
 						throw new Exception('Cannot store INI file cache at '.$cacheUrl);
 					}
 				} else {
 					// Since INI file has not been changed, translations are loaded from cache
-					$this->data['sitemap'][$language]=json_decode(file_get_contents($cacheUrl),true);
+					$this->data['sitemap'][$language]=unserialize(file_get_contents($cacheUrl));
 				}
 			}
 			// Returning sitemap array
@@ -427,7 +427,7 @@ class WWW_State	{
 			$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
 			// If this state messenger address already stores data, then it is loaded
 			if(file_exists($dataAddress)){
-				$this->messengerData=json_decode(file_get_contents($dataAddress),true);
+				$this->messengerData=unserialize(file_get_contents($dataAddress));
 			}
 			return true;
 		}
@@ -482,7 +482,7 @@ class WWW_State	{
 				$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
 				if(file_exists($dataAddress)){
 					// Data is stored as encoded JSON
-					$data=json_decode(file_get_contents($dataAddress),true);
+					$data=unserialize(file_get_contents($dataAddress));
 					// Removing messenger data, if flag is set
 					if($remove){
 						unlink($dataAddress);

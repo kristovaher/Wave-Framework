@@ -55,6 +55,11 @@ class WWW_view_example extends WWW_Factory {
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
 					<?=print_r($this->getState('view-data'),true)?>
 				</pre>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Unsolved URL:</h1>
+				<pre>
+					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
+					<?=print_r($this->getState('unsolved-url'),true)?>
+				</pre>
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Data sent to view:</h1>
 				<pre>
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->

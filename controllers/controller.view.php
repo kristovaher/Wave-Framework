@@ -71,7 +71,6 @@ class WWW_controller_view extends WWW_Factory {
 		$coreStyleSheet[]='style.css';
 		
 		// Module-specific Stylesheets is can also be loaded
-		$moduleStylesheet=array();
 		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$viewData['view'].'.style.css')){
 			$moduleStylesheet=$viewData['view'].'.style.css';
 		}

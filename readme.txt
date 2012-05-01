@@ -52,7 +52,7 @@ INSTALLATION
 ------------
 
  1. Unpack the WWW Framework downloaded archive.
- 2. Configuration file in root directory /config.php of the archive should be configured according to your needs. Read more about configuration from Wiki.
+ 2. Configuration file in root directory /config.ini of the archive should be configured according to your needs. Read more about configuration from Wiki.
  3. Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writeable by PHP, for example with command chmod 0777 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 777) or with any other FTP software. This is not required on Windows server.
  4. There is a tool script for checking if your system is compatible for WWW Framework or not. After you have uploaded scripts to server, run the script /tools/compatibility.php. If this script shows any warning messages, then WWW Framework might not work properly.
  5. WWW Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 6a and 6b, depending on your server.

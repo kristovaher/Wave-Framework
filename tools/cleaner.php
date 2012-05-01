@@ -20,7 +20,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 */
 
 // Main configuration file is included
-require('..'.DIRECTORY_SEPARATOR.'config.php');
+$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
 
 // Error reporting is turned off in this script
 error_reporting(0);

@@ -68,13 +68,30 @@ class WWW_API {
 		
 		// System attempts to load API keys from the default location if they were not defined
 		if(!$apiProfiles){
-			// All keys are stored in an array
-			$apiProfiles=array();
-			// Loading and storing API keys
-			if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.profiles.php')){
-				require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.profiles.php');
+			// Profiles can be loaded from overrides folder as well
+			if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.profiles.ini')){
+				$sourceUrl=__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.profiles.ini';
+			} elseif(file_exists(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'api.profiles.ini')){
+				$sourceUrl=__ROOT__.'resources'.DIRECTORY_SEPARATOR.'api.profiles.ini';
 			} else {
-				require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'api.profiles.php');
+				return false;
+			}
+			// This data can also be stored in cache
+			$cacheUrl=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.profiles.tmp';
+			// Including the profiles file
+			if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
+				// Profiles are parsed from INI file in the resources folder
+				$apiProfiles=parse_ini_file($sourceUrl,true);
+				if(!$apiProfiles){
+					throw new Exception('Cannot parse INI file: '.$sourceUrl);
+				}
+				// Cache of parsed INI file is stored for later use
+				if(!file_put_contents($cacheUrl,json_encode($apiProfiles))){
+					throw new Exception('Cannot store INI file cache at '.$cacheUrl);
+				}
+			} else {
+				// Since INI file has not been changed, profiles are loaded from cache
+				$apiProfiles=json_decode(file_get_contents($cacheUrl),true);
 			}
 		}
 		
@@ -161,6 +178,16 @@ class WWW_API {
 				return $this->output(array('www-error'=>'API command not set','www-response-code'=>101),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 			}
 			
+			
+			// This notifies state what language is used
+			if(isset($apiInputData['www-language'])){
+				if(in_array($apiInputData['www-language'],$this->state->data['languages'])){
+					$this->state->data['language']=$apiInputData['www-language'];
+				} else {
+					return $this->output(array('www-error'=>'This language is not defined','www-response-code'=>115),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
+				}
+			}
+			
 			// Existing response is checked from buffer if it exists
 			if($useBuffer){
 				$commandBufferAddress=md5($apiState['command'].json_encode($apiInputData));
@@ -190,7 +217,7 @@ class WWW_API {
 				
 				// This checks whether API profile information is defined in /resources/api.profiles.php file
 				if(isset($this->apiProfiles[$apiState['profile']])){
-					
+				
 					// Testing if API profile is disabled or not
 					if(isset($this->apiProfiles[$apiState['profile']]['disabled']) && $this->apiProfiles[$apiState['profile']]['disabled']==1){
 						// If profile is set to be disabled
@@ -206,7 +233,7 @@ class WWW_API {
 					// Profile commands are filtered only if they are set
 					if(isset($this->apiProfiles[$apiState['profile']]['commands']) && $apiState['command']!='www-create-session'){
 						$apiState['commands']=explode(',',$this->apiProfiles[$apiState['profile']]['commands']);
-						if((in_array('*',$apiState['commands']) && in_array('!'.$apiState['command'],$apiState['commands'])) && !in_array($apiState['command'],$apiState['commands'])){
+						if((in_array('*',$apiState['commands']) && in_array('!'.$apiState['command'],$apiState['commands'])) || (!in_array('*',$apiState['commands']) && !in_array($apiState['command'],$apiState['commands']))){
 							// If profile has IP set and current IP is not allowed
 							return $this->output(array('www-error'=>'API command is not allowed for this profile','www-response-code'=>105),$apiState+array('custom-header'=>'HTTP/1.1 403 Forbidden'));
 						}

@@ -52,7 +52,19 @@ Author and support: Kristo Vaher - kristo@waher.net
 	$config=array();
 
 	// Including the configuration
-	require(__ROOT__.'config.php');
+	if(!file_exists(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp') || filemtime(__ROOT__.'config.ini')>filemtime(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp')){
+		// Configuration is parsed from INI file in the root of the system
+		$config=parse_ini_file(__ROOT__.'config.ini');
+		// Cache of parsed INI file is stored for later use
+		if(!file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp',json_encode($config))){
+			header('HTTP/1.1 500 Internal Server Error');
+			echo '<h1>HTTP/1.1 500 Internal Server Error</h1>';
+			echo '<p>Cannot write cache in filesystem, please make sure filesystem folders are writable.</p>';
+		}
+	} else {
+		// Since INI file has not been changed, configuration is loaded from cache
+		$config=json_decode(file_get_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp'),true);
+	}
 
 	// Error reporting is turned off by default
 	if(isset($config['error-reporting'])){
@@ -123,7 +135,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 			if(in_array($resourceExtension,array('jpeg','jpg','png'))){
 				// Image handler allows for things such as dynamic image loading
 				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.image.php');
-			} elseif(in_array($resourceExtension,array('css','js','txt','csv','xml','html','htm','rss','ini','vcard'))){
+			} elseif(in_array($resourceExtension,array('css','js','txt','csv','xml','html','htm','rss','vcard'))){
 			
 				// Text-based resources are handled by Resource handler, except for two special cases (robots.txt and sitemap.xml)
 				if($resourceFile=='sitemap.xml'){
@@ -137,7 +149,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 					require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.resource.php');
 				}
 				
-			} elseif(in_array($resourceExtension,array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf'))){
+			} elseif(in_array($resourceExtension,array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini'))){
 			
 				// These file extensions are not allowed, thus 403 error is returned
 				// Log category is 'file' due to it being a file with an extension
@@ -190,7 +202,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 		
 		// Verbose error shown to developer only
 		if(isset($config['http-authentication-username']) && isset($config['http-authentication-password']) && isset($_SERVER['PHP_AUTH_USER']) && $_SERVER['PHP_AUTH_USER']==$config['http-authentication-username'] && isset($_SERVER['PHP_AUTH_PW']) && $_SERVER['PHP_AUTH_PW']==$config['http-authentication-password']){
-			echo '<h1>CRITICAL ERROR</h1>';
+			echo '<h1>HTTP/1.1 500 Internal Server Error</h1>';
 			echo '<p><b>Exception trace:</b></p>';
 			$trace=array_reverse($e->getTrace());
 			foreach($trace as $key=>$t){

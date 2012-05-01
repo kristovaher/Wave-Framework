@@ -11,7 +11,7 @@ and is accessible in MVC objects as well. Multiple different states can be used 
 request, but usually just one is used per request. State is only kept for the duration of the 
 request processing and is not stored beyond its use in the request.
 
-* /config.php file settings are loaded into State and can overwrite some State values
+* /config.ini file settings are loaded into State and can overwrite some State values
 * Some state values affect PHP or framework internal settings
 * State also stores database connection information, which is used by MVC objects through Factory
 
@@ -79,6 +79,10 @@ class WWW_State	{
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'session-rights-key'=>'www-rights',
 				'rights'=>false,
+				'translations'=>array(),
+				'sitemap'=>array(),
+				'unsolved-url'=>array(),
+				'view-data'=>array(),
 				'true-request'=>false,
 				'internal-logging'=>false,
 				'fingerprint'=>''
@@ -97,7 +101,7 @@ class WWW_State	{
 			}
 		
 			// If array of configuration data is set during object creation, it is used
-			// This loops over all the configuration options from /config.php file through setState() function
+			// This loops over all the configuration options from /config.ini file through setState() function
 			// That function has key-specific functionality that can be tied to some internal commands and PHP functions
 			if(!empty($config)){
 				$this->setState($config);
@@ -277,6 +281,139 @@ class WWW_State	{
 			// State has been changed
 			return true;
 			
+		}
+		
+	// SITEMAP AND TRANSLATIONS
+
+		// This function returns all the translations for a specific language
+		// * language - Language keyword, if this is not set then returns current language translations
+		// Returns an array of translations and their keywords
+		final public function getTranslations($language=false){
+			// If language is not set, then assuming current language
+			if(!$language){
+				$language=$this->data['language'];
+			}
+			// If translations data is already stored in state
+			if(!isset($this->data['translations'][$language])){
+				// Translations can be loaded from overrides folder as well
+				if(file_exists($this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini')){
+					$sourceUrl=$this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini';
+				} elseif(file_exists($this->data['system-root'].'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini')){
+					$sourceUrl=$this->data['system-root'].'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini';
+				} else {
+					return false;
+				}
+				// This data can also be stored in cache
+				$cacheUrl=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.tmp';
+				// Including the translations file
+				if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
+					// Translations are parsed from INI file in the resources folder
+					$this->data['translations'][$language]=parse_ini_file($sourceUrl);
+					if(!$this->data['translations'][$language]){
+						throw new Exception('Cannot parse INI file: '.$sourceUrl);
+					}
+					// Cache of parsed INI file is stored for later use
+					if(!file_put_contents($cacheUrl,json_encode($this->data['translations'][$language]))){
+						throw new Exception('Cannot store INI file cache at '.$cacheUrl);
+					}
+				} else {
+					// Since INI file has not been changed, translations are loaded from cache
+					$this->data['translations'][$language]=json_decode(file_get_contents($cacheUrl),true);
+				}
+			}
+			// Returning translations array
+			return $this->data['translations'][$language];
+		}
+		
+		// This function returns sitemap data for a specific language
+		// * language - Language keyword, if this is not set then returns current language sitemap
+		// Returns sitemap array of set language
+		final public function getSitemapRaw($language=false){
+		
+			// If language is not set, then assuming current language
+			if(!$language){
+				$language=$this->data['language'];
+			}
+			// If translations data is already stored in state
+			if(!isset($this->data['sitemap'][$language])){
+				// Translations can be loaded from overrides folder as well
+				if(file_exists($this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini')){
+					$sourceUrl=$this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini';
+				} elseif(file_exists($this->data['system-root'].'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini')){
+					$sourceUrl=$this->data['system-root'].'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini';
+				} else {
+					return false;
+				}
+				// This data can also be stored in cache
+				$cacheUrl=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.tmp';
+				// Including the sitemap file
+				if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
+					// Sitemap is parsed from INI file in the resources folder
+					$this->data['sitemap'][$language]=parse_ini_file($sourceUrl,true);
+					if(!$this->data['sitemap'][$language]){
+						throw new Exception('Cannot parse INI file: '.$sourceUrl);
+					}
+					// Cache of parsed INI file is stored for later use
+					if(!file_put_contents($cacheUrl,json_encode($this->data['sitemap'][$language]))){
+						throw new Exception('Cannot store INI file cache at '.$cacheUrl);
+					}
+				} else {
+					// Since INI file has not been changed, translations are loaded from cache
+					$this->data['sitemap'][$language]=json_decode(file_get_contents($cacheUrl),true);
+				}
+			}
+			// Returning sitemap array
+			return $this->data['sitemap'][$language];
+			
+		}
+		
+		// This function returns sitemap data for a specific language
+		// * language - Language keyword, if this is not set then returns current language sitemap
+		// Returns sitemap array of set language
+		final public function getSitemap($language=false){
+			// If language is not set, then assuming current language
+			if(!$language){
+				$language=$this->data['language'];
+			}
+			// If translations data is already stored in state
+			if(!isset($this->data['sitemap'][$language.'-url'])){
+				// Getting raw sitemap data
+				$siteMapRaw=$this->getSitemapRaw($language);
+				if(!$siteMapRaw){
+					return false;
+				}
+				// This is output array
+				$this->data['sitemap'][$language.'-url']=array();
+				// System builds usable URL map for views
+				foreach($siteMapRaw as $key=>$node){
+					// Only sitemap nodes with set view will be assigned to reference
+					if(isset($node['view'])){
+						// Since the same view can be referenced in multiple locations
+						if(isset($node['subview'])){
+							$node['view']=$node['view'].'/'.$node['subview'];
+						}
+						// This is used only if view has not yet been defined
+						if(!isset($this->data['sitemap'][$language.'-url'][$node['view']])){
+							$this->data['sitemap'][$language.'-url'][$node['view']]=$key;
+						}
+						// Home views do not need a URL node
+						if($node['view']!=$this->data['home-view']){
+							$url=$key.'/';
+						} else {
+							$url='';
+						}
+						// Storing data from Sitemap file
+						$this->data['sitemap'][$language.'-url'][$node['view']]=$siteMapRaw[$key];
+						// If first language URL is not enforced, then this is taken into account
+						if($language==$this->data['languages'][0] && $this->data['enforce-first-language-url']==false){
+							$this->data['sitemap'][$language.'-url'][$node['view']]['url']=$this->data['web-root'].$url;
+						} else {
+							$this->data['sitemap'][$language.'-url'][$node['view']]['url']=$this->data['web-root'].$language.'/'.$url;
+						}
+					}
+				}
+			}
+			return $this->data['sitemap'][$language.'-url'];
 		}
 		
 	// REQUEST MESSENGER

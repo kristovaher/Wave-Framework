@@ -35,6 +35,26 @@ class WWW_view_example extends WWW_Factory {
 					<!-- This shows an example API call response -->
 					<?=print_r($apiCall,true)?>
 				</pre>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">View state:</h1>
+				<pre>
+					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
+					<?=print_r($this->getState('view-data'),true)?>
+				</pre>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Sitemap:</h1>
+				<pre>
+					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
+					<?=print_r($this->getSitemap(),true)?>
+				</pre>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Translations:</h1>
+				<pre>
+					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
+					<?=print_r($this->getTranslations(),true)?>
+				</pre>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">View state:</h1>
+				<pre>
+					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
+					<?=print_r($this->getState('view-data'),true)?>
+				</pre>
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Data sent to view:</h1>
 				<pre>
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->

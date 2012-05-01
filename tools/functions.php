@@ -176,7 +176,7 @@ function systemBackup($source,$target,$filesystemBackup=false){
 		'views',
 		'.htaccess',
 		'.version',
-		'config.php',
+		'config.ini',
 		'favicon.ico',
 		'index.php',
 		'license.txt',

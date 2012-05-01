@@ -98,6 +98,27 @@ class WWW_Factory {
 		final protected function setState($variable,$value=true){
 			return $this->WWW_API->state->setState($variable,$value);
 		}
+		
+		// This function returns all the translations for a specific language
+		// * language - Language keyword, if this is not set then returns current language translations
+		// Returns an array of translations and their keywords
+		final protected function getTranslations($language=false){
+			return $this->WWW_API->state->getTranslations($language);
+		}
+		
+		// This function returns sitemap data for a specific language
+		// * language - Language keyword, if this is not set then returns current language sitemap
+		// Returns sitemap array of set language, this sitemap array has been modified for use for building links
+		final protected function getSitemap($language=false){
+			return $this->WWW_API->state->getSitemap($language);
+		}
+		
+		// This function returns sitemap data for a specific language
+		// * language - Language keyword, if this is not set then returns current language sitemap
+		// Returns sitemap array of set language, raw array is just the way it is in sitemap INI file
+		final protected function getSitemapRaw($language=false){
+			return $this->WWW_API->state->getSitemapRaw($language);
+		}
 	
 	// MVC FACTORY
 	

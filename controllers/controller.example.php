@@ -22,7 +22,7 @@ class WWW_controller_example extends WWW_Factory {
 		// Returning the result of controller call
 		return $example->get();
 	}
-
+	
 }
 	
 ?>

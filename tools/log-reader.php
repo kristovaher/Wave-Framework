@@ -4,7 +4,7 @@
 WWW Framework
 Log reader for reading performance logs
 
-This file uses /config.php settings for HTTP authentication. This is a simple script that is 
+This file uses /config.ini settings for HTTP authentication. This is a simple script that is 
 used to read log files stored by WWW_Logger class. It loads a log file defined by specific 
 timestamp formatted as Y-m-d-H. By default it displays information about all the requests 
 that have happened in the current hour, but if GET variable 'log' is supplied in same 
@@ -16,7 +16,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 */
 
 // Main configuration file is included
-require('..'.DIRECTORY_SEPARATOR.'config.php');
+$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
 
 // Error reporting is turned off in this script
 error_reporting(0);

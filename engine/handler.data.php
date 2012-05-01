@@ -102,9 +102,6 @@ Author and support: Kristo Vaher - kristo@waher.net
 			}
 		}
 
-		// Solved request is used to load the view through API
-		$inputData['www-view-data']=$viewData;
-
 		// If index view cache is not configured, it is turned of by default
 		if(isset($viewData['cache-timeout'])){
 			$config['index-view-cache-timeout']=$viewData['cache-timeout'];
@@ -113,7 +110,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 		}
 		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command($inputData+array('www-profile'=>$state->data['api-public-profile'],'www-command'=>$viewData['view-controller'].'-load','www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
+		$api->command($inputData+array('www-command'=>$viewData['view-controller'].'-load','www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
 	
 	}
 	

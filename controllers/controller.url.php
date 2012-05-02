@@ -157,7 +157,7 @@ class WWW_controller_url extends WWW_Factory {
 		$this->setState('language',$language);
 		
 		// All nodes of URL's that were not found as modules are stored here
-		$unsolvedUrlNodes=array();
+		$unsolvedUrl=array();
 		
 		// URL Map is stored in this array
 		$siteMap=$this->getSitemapRaw($language);
@@ -188,13 +188,13 @@ class WWW_controller_url extends WWW_Factory {
 					// Last element from the array is removed and inserted to unsolved nodes array
 					$bit=array_pop($urlNodes);
 					if($bit!=''){
-						$unsolvedUrlNodes[]=$bit;
+						$unsolvedUrl[]=$bit;
 					}
 				}
 			}
 			
 			// If the found view is home view, then we simply redirect to home view without the long url
-			if(empty($unsolvedUrlNodes) && $view==$viewHome){
+			if(empty($unsolvedUrl) && $view==$viewHome){
 			
 				// If first language is used and it is not needed to use language URL in first language
 				if($enforceLanguageUrl==false && $language==$languages[0]){
@@ -234,17 +234,41 @@ class WWW_controller_url extends WWW_Factory {
 			}
 		}
 		
+		// Populating sitemap info with additional details
+		$siteMapInfo['language']=$language;
+		$siteMapInfo['web-root']=$webRoot;
+		
 		// Array of unsolved URL nodes is reversed if it is not empty
-		if(!empty($unsolvedUrlNodes)){
+		if(!empty($unsolvedUrl)){
 			// Unsolved URL's are reversed so that they can be used in the order they were defined in URL
-			$unsolvedUrlNodes=array_reverse($unsolvedUrlNodes);
-			// Storing unsolved URL in State
-			$this->setState('unsolved-url',$unsolvedUrlNodes);
+			$unsolvedUrl=array_reverse($unsolvedUrl);
 			// 404 is returned if unsolved URL's were not permitted
-			if(!isset($siteMapInfo['unsolved-url-nodes']) || $siteMapInfo['unsolved-url-nodes']==false){
+			if(!isset($siteMapInfo['unsolved-url']) || $siteMapInfo['unsolved-url']==false){
+				// Populating sitemap info with additional details
+				$siteMapInfo['unsolved-url']=$unsolvedUrl;
 				return $this->returnViewData(array('view'=>$view404,'cache-timeout'=>0,'header'=>'HTTP/1.1 404 Not Found')+$siteMapInfo);
 			}
+		} else {
+			// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
+			if(isset($siteMapInfo['temporary-redirect']) && $siteMapInfo['temporary-redirect']!=''){
+				// Query string is also sent, if it has been defined
+				if(isset($requestNodesRaw[1]) && strpos($siteMapInfo['temporary-redirect'],'?')===false){
+					return array('www-temporary-redirect'=>$siteMapInfo['temporary-redirect'].'?'.$requestNodesRaw[1]);
+				} else {
+					return array('www-temporary-redirect'=>$siteMapInfo['temporary-redirect']);
+				}
+			} elseif(isset($siteMapInfo['permanent-redirect']) && $siteMapInfo['permanent-redirect']!=''){
+				// Query string is also sent, if it has been defined
+				if(isset($requestNodesRaw[1]) && strpos($siteMapInfo['permanent-redirect'],'?')===false){
+					return array('www-permanent-redirect'=>$siteMapInfo['permanent-redirect'].'?'.$requestNodesRaw[1]);
+				} else {
+					return array('www-permanent-redirect'=>$siteMapInfo['permanent-redirect']);
+				}
+			}
 		}
+		
+		// Populating sitemap info with additional details
+		$siteMapInfo['unsolved-url']=$unsolvedUrl;
 			
 		// Formatting and returning the expected result array
 		return $this->returnViewData($siteMapInfo);

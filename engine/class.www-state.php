@@ -81,7 +81,6 @@ class WWW_State	{
 				'rights'=>false,
 				'translations'=>array(),
 				'sitemap'=>array(),
-				'unsolved-url'=>array(),
 				'view-data'=>array(),
 				'true-request'=>false,
 				'internal-logging'=>false,

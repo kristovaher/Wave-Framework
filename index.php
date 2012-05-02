@@ -77,7 +77,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 
 	// Logger file is used for performance logging for later review
 	// Configuration file can set what type of logging is used
-	if(isset($config['logger']) && $config['logger']!='' && $config['logger']!=false){
+	if(isset($config['logger']) && $config['logger']!=false && (!isset($config['logger-ip']) || $config['logger-ip']=='*' || in_array($_SERVER['REMOTE_ADDR'],explode(',',$config['logger-ip'])))){
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-logger.php');
 		$logger=new WWW_Logger($config['logger'],__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR);
 	}
@@ -85,7 +85,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 // LOADING HTTP REQUEST LIMITER
 
 	// If limiter is configured to be used
-	if(isset($config['limiter']) && $config['limiter']==true){
+	if(isset($config['limiter']) && $config['limiter']){
 
 		// Limiter is used to block requests under specific conditions, like DOS attacks or when server load is too high
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-limiter.php');
@@ -97,24 +97,26 @@ Author and support: Kristo Vaher - kristo@waher.net
 			$limiter->logger=$logger;
 		}
 		// Load limiter blocks access if server load is detected to be too high at the moment of request
-		if(isset($config['load-limiter']) && $config['load-limiter']!=0){
+		if(isset($config['load-limiter']) && $config['load-limiter']){
 			$limiter->limitServerLoad($config['load-limiter']);
 		}
-		// Load limiter blocks access to specific blacklist of IP's
-		if(isset($config['blacklist-limiter']) && $config['blacklist-limiter'] && $config['blacklist-limiter']!=''){
+		// Load limiter allows access for certain IP's or blocks access to specific blacklist of IP's
+		if(isset($config['whitelist-limiter']) && $config['whitelist-limiter']){
+			$limiter->limitWhitelisted($config['whitelist-limiter']);
+		} elseif(isset($config['blacklist-limiter']) && $config['blacklist-limiter']){
 			$limiter->limitBlacklisted($config['blacklist-limiter']);
 		}
 		// If HTTPS limiter is used, the ststem returns a 401 error if the user agent attempts to access the site without HTTPS
-		if(isset($config['https-limiter']) && $config['https-limiter']==true){
+		if(isset($config['https-limiter']) && $config['https-limiter']){
 			$limiter->limitNonSecureRequests(); // By default the user agent is redirected to HTTPS address of the same request
 		}
 		// If HTTP authentication is turned on, the system checks for credentials and returns 401 if failed
-		if(isset($config['http-authentication-limiter']) && $config['http-authentication-limiter']==true){
+		if(isset($config['http-authentication-limiter']) && $config['http-authentication-limiter']){
 			$limiter->limitUnauthorized($config['http-authentication-username'],$config['http-authentication-password']);
 		}
 		// Request limiter keeps track of how many requests per minute are allowed on IP.
 		// If limit is exceeded, then IP is blocked for an hour.
-		if(isset($config['request-limiter']) && $config['request-limiter']!=0){
+		if(isset($config['request-limiter']) && $config['request-limiter']){
 			$limiter->limitRequestCount($config['request-limiter']);
 		}
 

@@ -14,6 +14,7 @@ here for cases where the project developer might not have control over server co
 * Requires /filesystem/limiter/ folder to be writeable by server
 * Request rate limiter
 * Server load limiter (does not work on Windows)
+* Whitelisted IP limiter
 * Blacklisted IP limiter
 * HTTP authentication limiter
 * HTTPS-only limiter
@@ -89,7 +90,7 @@ class WWW_Limiter {
 						if(count($checkData)==1){
 							// Request is logged and can be used for performance review later
 							if($this->logger){
-								$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter'));
+								$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter','reason'=>'Too many requests'));
 								$this->logger->writeLog();
 							}
 							// Block file is created and 403 page thrown to the user agent
@@ -114,7 +115,7 @@ class WWW_Limiter {
 					} else {
 						// Request is logged and can be used for performance review later
 						if($this->logger){
-							$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter'));
+							$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter','reason'=>'Too many requests'));
 							$this->logger->writeLog();
 						}
 						// Returning 403 header
@@ -152,7 +153,7 @@ class WWW_Limiter {
 				if($load[0]>$limit){
 					// Request is logged and can be used for performance review later
 					if($this->logger){
-						$this->logger->setCustomLogData(array('response-code'=>503,'category'=>'limiter'));
+						$this->logger->setCustomLogData(array('response-code'=>503,'category'=>'limiter','reason'=>'Server load exceeded, current load is '.$load[0].', limit is '.$limit));
 						$this->logger->writeLog();
 					}
 					// Returning 503 header
@@ -169,6 +170,33 @@ class WWW_Limiter {
 	
 	}
 	
+	// Checks if current IP is listed in an array of whitelisted IP's
+	// * whiteList - comma-separated list of whitelisted IP addresses
+	// Returns true, if whitelisted, throws 403 error if not whitelisted
+	public function limitWhitelisted($whiteList=''){
+	
+		// This value should be a comma-separated string of blacklisted IP's
+		if($whiteList!=''){
+			// Exploding string of IP's into an array
+			$whiteList=explode(',',$whiteList);
+			// Checking if the user agent IP is set in blacklist array
+			if(empty($whiteList) || !in_array($_SERVER['REMOTE_ADDR'],$whiteList)){
+				// Request is logged and can be used for performance review later
+				if($this->logger){
+					$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter','reason'=>'Not whitelisted'));
+					$this->logger->writeLog();
+				}
+				// Returning 403 data
+				header('HTTP/1.1 403 Forbidden');
+				die();
+			}
+		}
+		
+		// Blacklist processed
+		return true;
+		
+	}
+	
 	// Checks if current IP is listed in an array of blacklisted IP's
 	// * blackList - comma-separated list of blacklisted IP addresses
 	// Returns true, if not blacklisted, throws 403 error if blacklisted
@@ -182,7 +210,7 @@ class WWW_Limiter {
 			if(!empty($blackList) && in_array($_SERVER['REMOTE_ADDR'],$blackList)){
 				// Request is logged and can be used for performance review later
 				if($this->logger){
-					$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter'));
+					$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter','reason'=>'Blacklisted'));
 					$this->logger->writeLog();
 				}
 				// Returning 403 data
@@ -206,11 +234,11 @@ class WWW_Limiter {
 		if(!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$username || !isset($_SERVER['PHP_AUTH_PW']) || $_SERVER['PHP_AUTH_PW']!=$password){
 			// Request is logged and can be used for performance review later
 			if($this->logger){
-				$this->logger->setCustomLogData(array('response-code'=>401,'category'=>'limiter'));
+				$this->logger->setCustomLogData(array('response-code'=>401,'category'=>'limiter','reason'=>'Authorization required'));
 				$this->logger->writeLog();
 			}
 			// Returning 401 headers
-			header('WWW-Authenticate: Basic realm="Login"');
+			header('WWW-Authenticate: Basic realm="'.$_SERVER['HTTP_HOST'].'"');
 			header('HTTP/1.1 401 Unauthorized');
 			die();
 		}
@@ -234,7 +262,7 @@ class WWW_Limiter {
 			} else {
 				// Request is logged and can be used for performance review later
 				if($this->logger){
-					$this->logger->setCustomLogData(array('response-code'=>401,'category'=>'limiter'));
+					$this->logger->setCustomLogData(array('response-code'=>401,'category'=>'limiter','reason'=>'HTTPS required'));
 					$this->logger->writeLog();
 				}
 				// Returning 401 header

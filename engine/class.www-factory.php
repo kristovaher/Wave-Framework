@@ -402,7 +402,26 @@ class WWW_Factory {
 			return $this->WWW_API->state->unsetCookie($key);
 		}
 		
-	// SESSION RIGHTS
+	// SESSION USER AND RIGHTS
+		
+		// This sets user data to current session
+		// * data - Data array set to user
+		final public function setUser($data){
+			return $this->WWW_API->state->setUser($data);
+		}
+		
+		// This returns either entire current user session or a single key from it
+		// * key - Element returned from user data, if not set then returns the entire user data
+		// Returns either the whole data as array or just a single element or false, if not found
+		final public function getUser($key=false){
+			return $this->WWW_API->state->getUser($key);
+		}
+		
+		// This method unsets existing user
+		// Always returns true
+		final public function unsetUser(){
+			return $this->WWW_API->state->unsetUser();
+		}
 	
 		// This function checks for session rights
 		// * check - String that is checked against rights array
@@ -422,6 +441,12 @@ class WWW_Factory {
 		// Always returns true
 		final protected function setRights($rights){
 			return $this->WWW_API->state->setRights($rights);
+		}
+		
+		// This method unsets existing rights
+		// Always returns true
+		final public function unsetRights(){
+			return $this->WWW_API->state->unsetRights();
 		}
 		
 	// DATABASE WRAPPERS

@@ -78,6 +78,7 @@ class WWW_State	{
 				'request-time'=>$_SERVER['REQUEST_TIME'],
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'session-rights-key'=>'www-rights',
+				'session-user-key'=>'www-user',
 				'rights'=>false,
 				'translations'=>array(),
 				'sitemap'=>array(),
@@ -502,7 +503,41 @@ class WWW_State	{
 			}
 		}
 		
-	// SESSION RIGHTS
+	// SESSION USER AND RIGHTS
+	
+		// This sets user data to current session
+		// * data - Data array set to user
+		final public function setUser($data){
+			$this->setSession($this->data['session-user-key'],$data);
+			return true;
+		}
+		
+		// This returns either entire current user session or a single key from it
+		// * key - Element returned from user data, if not set then returns the entire user data
+		// Returns either the whole data as array or just a single element or false, if not found
+		final public function getUser($key=false){
+			$user=$this->getSession($this->data['session-user-key'],$data);
+			if($user){
+				if($key){
+					if(isset($user[$key])){
+						return $user[$key];
+					} else {
+						return false;
+					}
+				} else {
+					return $user;
+				}
+			} else {
+				return false;
+			}
+		}
+		
+		// This method unsets existing user
+		// Always returns true
+		final public function unsetUser(){
+			$this->unsetSession($this->data['session-user-key']);
+			return true;
+		}
 	
 		// This function checks for session rights
 		// * check - String that is checked against rights array
@@ -516,21 +551,26 @@ class WWW_State	{
 					return false;
 				}
 			}
-			if(is_array($check)){
-				foreach($check as $c){
+			// If all rights are set, then rights will not be separately validated and true is assumed
+			if(!in_array('*',$this->data['rights'])){
+				if(is_array($check)){
+					foreach($check as $c){
+						// Returning true or false depending on whether this key exists or not
+						if(!in_array($c,$this->data['rights'])){
+							return false;
+						}
+						return true;
+					}
+				} else {
 					// Returning true or false depending on whether this key exists or not
-					if(!in_array($c,$this->data['rights'])){
+					if(in_array($check,$this->data['rights'])){
+						return true;
+					} else {
 						return false;
 					}
-					return true;
 				}
 			} else {
-				// Returning true or false depending on whether this key exists or not
-				if(in_array($check,$this->data['rights'])){
-					return true;
-				} else {
-					return false;
-				}
+				return true;
 			}
 		}
 		
@@ -553,6 +593,13 @@ class WWW_State	{
 			}
 			$this->data['rights']=$rights;
 			$this->setSession($this->data['session-rights-key'],$rights);
+			return true;
+		}
+		
+		// This method unsets existing rights
+		// Always returns true
+		final public function unsetRights(){
+			$this->unsetSession($this->data['session-rights-key']);
 			return true;
 		}
 		

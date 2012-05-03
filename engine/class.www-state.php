@@ -50,6 +50,7 @@ class WWW_State	{
 				'home-view'=>'home',
 				'404-view'=>'404',
 				'error-reporting'=>0,
+				'error-reporting-ip'=>false,
 				'timezone'=>false,
 				'output-compression'=>'deflate',
 				'http-host'=>$_SERVER['HTTP_HOST'],
@@ -59,7 +60,7 @@ class WWW_State	{
 				'http-accept-language'=>((isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))?explode(',',$_SERVER['HTTP_ACCEPT_LANGUAGE']):array()),
 				'http-authentication'=>false,
 				'http-authentication-username'=>'',
-				'http-if-modified-since'=>((isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))?strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']):false),
+				'http-if-modified-since'=>false,
 				'http-authentication-password'=>'',
 				'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
 				'system-root'=>str_replace('index.php','',((DIRECTORY_SEPARATOR!='/')?str_replace('/',DIRECTORY_SEPARATOR,$this->data['system-root']):$_SERVER['SCRIPT_FILENAME'])),
@@ -116,7 +117,13 @@ class WWW_State	{
 			// Some systems throw deprecated warning if this value is not set
 			if($this->data['timezone']==false){
 				// Some systems throw a deprecated warning without implicitly re-setting default timezone
-				date_default_timezone_set(date_default_timezone_get());
+				date_default_timezone_set('Europe/London');
+				$this->data['timezone']='Europe/London';
+			}
+			
+			// Setting if modified since, if it happens to be set
+			if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $this->data['http-if-modified-since']==false){
+				$this->data['http-if-modified-since']=strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 			}
 			
 			// If default API profile has been changed by configuration, we assign current API profile to default profile as well
@@ -250,16 +257,28 @@ class WWW_State	{
 			// Certain variables are checked that might change system flags
 			switch ($variable) {
 				case 'error-reporting':
-					// Attempting to turn on PHP error-reporting
-					if($value!=0 && $value!=false){
+					if(!$this->data['error-reporting-ip'] || $this->data['error-reporting-ip']!=$_SERVER['REMOTE_ADDR']){
+						// Attempting to turn on PHP error-reporting
+						if($value!=0 && $value!=false){
+							// In some environments the ini_set() function is not enabled
+							if(function_exists('ini_set')){
+								ini_set('display_errors',1);
+								ini_set('error_reporting',$value);
+							}
+							error_reporting($value);
+						} else {
+							error_reporting(0);
+						}
+					}
+					break;
+				case 'error-reporting-ip':
+					if($_SERVER['REMOTE_ADDR']==$value){
 						// In some environments the ini_set() function is not enabled
 						if(function_exists('ini_set')){
 							ini_set('display_errors',1);
-							ini_set('error_reporting',$value);
+							ini_set('error_reporting',E_ALL);
 						}
-						error_reporting($value);
-					} else {
-						error_reporting(0);
+						error_reporting(E_ALL);
 					}
 					break;
 				case 'timezone':

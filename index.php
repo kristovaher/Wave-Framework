@@ -124,11 +124,20 @@ Author and support: Kristo Vaher - kristo@waher.net
 	
 // LOADING HANDLERS
 
-	// Index gateway works differently based on what file is being requested
-	// Handlers for all different modes are stored under /engine/ subfolder
+	// This error handler replaces default PHP error handler and is tied to Exception class
+	function WWW_errorHandler($nr,$message,$file,$line){
+		if(error_reporting()!=0){
+			throw new ErrorException($message,$nr,0,$file,$line);
+		}
+	}
+	// Setting the error handler
+	set_error_handler('WWW_errorHandler');
 
 	// Errors that are encountered within handlers are all logged, so system starts catching for potential errors
 	try {
+	
+		// Index gateway works differently based on what file is being requested
+		// Handlers for all different modes are stored under /engine/ subfolder
 
 		// request has a file extension, then system will attempt to use another handler
 		if(isset($resourceExtension)){
@@ -197,13 +206,25 @@ Author and support: Kristo Vaher - kristo@waher.net
 		}
 		
 	} catch (Exception $e){
+	
+		// Cleaning output buffer, if it exists
+		if(ob_get_level()>=1){
+			ob_end_clean();
+		}
 
 		// There was an error in code
 		// System returns 500 header even as a server error (possible bug in code)
 		header('HTTP/1.1 500 Internal Server Error');
 		
+		// Setting default timezone as current timezone
+		if(!isset($config['timezone'])){
+			$config['timezone']='Europe/London';
+		} 
+		date_default_timezone_set($config['timezone']);
+		
 		// Error report will be stored in this array
 		$errorReport=array();
+		$errorReport[]=date('d.m.Y H:i:s').' GMT';
 		
 		// Input data to error report
 		$error=array();
@@ -229,8 +250,12 @@ Author and support: Kristo Vaher - kristo@waher.net
 		$trace=array_reverse($e->getTrace());
 		foreach($trace as $key=>$t){
 			$error=array();
-			$error['file']=$t['file'];
-			$error['line']=$t['line'];
+			if(isset($t['file'])){
+				$error['file']=$t['file'];
+			}
+			if(isset($t['line'])){
+				$error['line']=$t['line'];
+			}
 			if(isset($t['class'])){
 				$error['class']=$t['class'];
 			}
@@ -252,14 +277,18 @@ Author and support: Kristo Vaher - kristo@waher.net
 		// Logging the error
 		file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.date('d-m-Y-H-i').'.log',print_r($errorReport,true)."\n",FILE_APPEND);
 		
-		// Verbose error shown to developer only
+		// Verbose error is shown to developer only
 		if(isset($config['http-authentication-username']) && isset($config['http-authentication-password']) && isset($_SERVER['PHP_AUTH_USER']) && $_SERVER['PHP_AUTH_USER']==$config['http-authentication-username'] && isset($_SERVER['PHP_AUTH_PW']) && $_SERVER['PHP_AUTH_PW']==$config['http-authentication-password']){
-			echo '<h1>HTTP/1.1 500 Internal Server Error</h1>';
-			echo '<p><b>Exception trace:</b></p>';
+			echo '<h1>ERROR</h1>';
+			echo '<pre>';
+			print_r($error);
+			echo '</pre>';
+			echo '<h2>TRACE</h2>';
 			echo '<pre>';
 			print_r($errorReport);
 			echo '</pre>';
 		} else {
+			// Regular users will be shown a friendly error message
 			echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST</div>';
 			echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">ERROR HAS BEEN LOGGED FOR FURTHER INVESTIGATION</div>';
 		}

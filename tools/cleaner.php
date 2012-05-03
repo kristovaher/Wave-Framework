@@ -27,7 +27,7 @@ error_reporting(0);
 
 // Authentication is always required, all developer tools ignore the http-authentication flag in configuration file
 if(!isset($config['http-authentication-username']) || !isset($config['http-authentication-password']) || !isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$config['http-authentication-username'] || !isset($_SERVER['PHP_AUTH_PW']) || $_SERVER['PHP_AUTH_PW']!=$config['http-authentication-password']){
-	header('WWW-Authenticate: Basic realm="Login"');
+	header('WWW-Authenticate: Basic realm="'.$_SERVER['HTTP_HOST'].'"');
 	header('HTTP/1.1 401 Unauthorized');
 	echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
 	echo '<h2>Username and password need to be provided by the user agent</h2>';
@@ -110,6 +110,12 @@ header('Content-Type: text/html;charset=utf-8');
 			// Clears request data of user agent IP's
 			if(isset($_GET['all']) || isset($_GET['limiter'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'limiter'.DIRECTORY_SEPARATOR;
+				$log=array_merge($log,dirCleaner($directory));
+			}
+
+			// Clears request data of user agent IP's
+			if(isset($_GET['all']) || isset($_GET['errors'])){
+				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR;
 				$log=array_merge($log,dirCleaner($directory));
 			}
 

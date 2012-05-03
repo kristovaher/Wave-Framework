@@ -30,37 +30,37 @@ class WWW_controller_view extends WWW_Factory {
 		unset($input['www-cache-timeout']);
 	
 		// Getting view information
-		$viewData=$this->getState('view-data');
+		$view=$this->getState('view');
 		$systemRoot=$this->getState('system-root');
 	
 		// Getting current view and creating view object
-		$viewObject=$this->getView($viewData['view']);
+		$viewObject=$this->getView($view['view']);
 		
 		// Getting author and copyright, if set in configuration
 		$author=$this->getState('author');
 		$copyright=$this->getState('copyright');
 		
 		// Meta title can be set in Sitemap and can also be different based on 
-		if(isset($viewData['meta-title'])){
+		if(isset($view['meta-title'])){
 			// Here you should add your custom meta title loading, if necessary
 			if(method_exists($viewObject,'getTitle')){
-				$prependTitle=$viewObject->getTitle($viewData);
+				$prependTitle=$viewObject->getTitle($view);
 				// Title is only appended if it exists and is not empty
 				if($prependTitle && $prependTitle!=''){
-					$viewData['meta-title'].=$prependTitle.' - '.$viewData['meta-title'];
+					$view['meta-title'].=$prependTitle.' - '.$view['meta-title'];
 				}
 			}
 		} else {
 			// Project title is an empty string, if it was not defined
-			$viewData['meta-title']='';
+			$view['meta-title']='';
 		}
 		
 		// Project title will be added to the end, if it is set
-		if($viewData['project-title']!=''){
-			if($viewData['meta-title']!=''){
-				$viewData['meta-title'].=' - '.$viewData['project-title'];
+		if($view['project-title']!=''){
+			if($view['meta-title']!=''){
+				$view['meta-title'].=' - '.$view['project-title'];
 			} else {
-				$viewData['meta-title']=$viewData['project-title'];
+				$view['meta-title']=$view['project-title'];
 			}
 		}
 		
@@ -71,8 +71,8 @@ class WWW_controller_view extends WWW_Factory {
 		$coreStyleSheet[]='style.css';
 		
 		// Module-specific Stylesheets is can also be loaded
-		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$viewData['view'].'.style.css')){
-			$moduleStylesheet=$viewData['view'].'.style.css';
+		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$view['view'].'.style.css')){
+			$moduleStylesheet=$view['view'].'.style.css';
 		}
 		
 		// List of JavaScript to load from resources folder
@@ -82,8 +82,8 @@ class WWW_controller_view extends WWW_Factory {
 		$coreJavaScript[]='script.js';
 		
 		// Module-specific JavaScript is can also be loaded
-		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$viewData['view'].'.script.js')){
-			$moduleJavaScript=$viewData['view'].'.script.js';
+		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$view['view'].'.script.js')){
+			$moduleJavaScript=$view['view'].'.script.js';
 		}
 		
 		// HTML frame is generated with meta data and resource files
@@ -91,23 +91,23 @@ class WWW_controller_view extends WWW_Factory {
 			<!DOCTYPE html>
 			<html lang="<?=$this->getState('language')?>">
 				<head>
-					<title><?=$viewData['meta-title']?></title>
+					<title><?=$view['meta-title']?></title>
 					<!-- Base address for relative links -->
 					<base href="<?=$this->getState('web-root')?>"/>
 					<!-- UTF-8 -->
 					<meta charset="utf-8">
 					<!-- Useful for mobile applications -->
 					<meta name="viewport" content="width=device-width"/> 
-					<?php if($viewData['robots']!=''){ ?>
+					<?php if($view['robots']!=''){ ?>
 						<!-- Robots -->
-						<meta content="<?=$viewData['robots']?>" name="robots"/>
+						<meta content="<?=$view['robots']?>" name="robots"/>
 					<?php } ?>
 					<!-- Content information -->
-					<?php if(isset($viewData['meta-keywords'])){ ?>
-						<meta name="Keywords" content="<?=$viewData['meta-keywords']?>"/>
+					<?php if(isset($view['meta-keywords'])){ ?>
+						<meta name="Keywords" content="<?=$view['meta-keywords']?>"/>
 					<?php } ?>
-					<?php if(isset($viewData['meta-description'])){ ?>
-						<meta name="Description" content="<?=$viewData['meta-description']?>"/>
+					<?php if(isset($view['meta-description'])){ ?>
+						<meta name="Description" content="<?=$view['meta-description']?>"/>
 					<?php } ?>
 					<?php if($author){ ?>
 						<meta name="Author" content="<?=$author?>"/>

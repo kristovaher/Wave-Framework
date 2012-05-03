@@ -296,7 +296,7 @@ class WWW_controller_url extends WWW_Factory {
 			}
 			
 			// Notifying State of view data
-			$this->setState('view-data',$data);
+			$this->setState('view',$data);
 			
 		// HEADERS
 		

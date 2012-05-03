@@ -177,7 +177,7 @@ class WWW_Logger {
 			}
 			
 			// Appending the log data at the end of log file or creating it if it does not exist
-			if(!file_put_contents($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp',serialize($logData)."\n",FILE_APPEND)){
+			if(!file_put_contents($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.log',serialize($logData)."\n",FILE_APPEND)){
 				throw new Exception('Cannot write log file');
 			}
 		

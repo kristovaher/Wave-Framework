@@ -103,7 +103,7 @@ class WWW_API {
 	// This writes log data to file, if internal logging is turned on 
 	public function __destruct(){
 		if($this->internalLogging && !empty($this->internalLog)){
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log.tmp',serialize($this->internalLog)."\n",FILE_APPEND);
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log',serialize($this->internalLog)."\n",FILE_APPEND);
 		}
 	}
 	

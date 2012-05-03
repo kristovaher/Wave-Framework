@@ -69,12 +69,12 @@ Author and support: Kristo Vaher - kristo@waher.net
 
 	// This uses current request URI to find out which view should be loaded, by default it uses the request set by State
 	// API check is turned off, since index.php is considered a public gateway
-	$viewData=$api->command(array('www-command'=>'url-solve','www-output'=>0,'www-return-type'=>'php','www-request'=>$state->data['true-request'],'www-cache-timeout'=>$config['index-url-cache-timeout']),false,false,true);
+	$view=$api->command(array('www-command'=>'url-solve','www-output'=>0,'www-return-type'=>'php','www-request'=>$state->data['true-request'],'www-cache-timeout'=>$config['index-url-cache-timeout']),false,false,true);
 
 // CALLING DEFAULT VIEW CONTROLLER IF URL DID NOT ORDER A REDIRECTION
 
 	// If view data includes flags for redirection then the view itself will be ignored
-	if(!isset($viewData['www-temporary-redirect']) && !isset($viewData['www-permanent-redirect'])){
+	if(!isset($view['www-temporary-redirect']) && !isset($view['www-permanent-redirect'])){
 		
 		// All the data sent by the user agent is stored in this variable
 		$inputData=array();
@@ -103,14 +103,14 @@ Author and support: Kristo Vaher - kristo@waher.net
 		}
 
 		// If index view cache is not configured, it is turned of by default
-		if(isset($viewData['cache-timeout'])){
-			$config['index-view-cache-timeout']=$viewData['cache-timeout'];
+		if(isset($view['cache-timeout'])){
+			$config['index-view-cache-timeout']=$view['cache-timeout'];
 		} elseif(!isset($config['index-view-cache-timeout'])){
 			$config['index-view-cache-timeout']=0;
 		}
 		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command($inputData+array('www-command'=>$viewData['view-controller'].'-load','www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
+		$api->command($inputData+array('www-command'=>$view['view-controller'].'-load','www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
 	
 	}
 	

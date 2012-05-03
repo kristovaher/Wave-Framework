@@ -33,15 +33,6 @@ $config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
 // Error reporting is turned off in this script
 error_reporting(0);
 
-// Authentication is always required, all developer tools ignore the http-authentication flag in configuration file
-if(!isset($config['http-authentication-username']) || !isset($config['http-authentication-password']) || !isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$config['http-authentication-username'] || !isset($_SERVER['PHP_AUTH_PW']) || $_SERVER['PHP_AUTH_PW']!=$config['http-authentication-password']){
-	header('WWW-Authenticate: Basic realm="Login"');
-	header('HTTP/1.1 401 Unauthorized');
-	echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
-	echo '<h2>Username and password need to be provided by the user agent</h2>';
-	die();
-}
-
 // Requiring some maintenance functions
 require('.'.DIRECTORY_SEPARATOR.'functions.php');
 
@@ -340,6 +331,15 @@ header('Content-Type: text/html;charset=utf-8');
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'test.tmp');
 			} else {
 				$log[]='<span class="bold orange">WARNING</span>: /filesystem/logs/ is not writable, this warning can be ignored if performance logging is not used by Index gateway';
+			}
+			
+			// FILESYSTEM ERRORS
+			// This stores all Logger generated log files
+			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+				$log[]='<span class="bold">SUCCESS</span>: /filesystem/errors/ is writable';
+				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.'test.tmp');
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: /filesystem/errors/ is not writable, it is recommended to keep this folder writable, since it is useful for debugging purposes';
 			}
 			
 			// FILESYSTEM SESSIONS

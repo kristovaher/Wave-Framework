@@ -14,9 +14,6 @@ class WWW_view_example extends WWW_Factory {
 
 	// WWW_controller_url calls this function as output for page content
 	public function render($input){
-	
-		// Showing how to make an API call within the view
-		$apiCall=$this->api('example-get');
 		
 		// This shows how to use state messenger
 		$messengerData=$this->getStateMessengerData('aaabbb',false);
@@ -30,15 +27,15 @@ class WWW_view_example extends WWW_Factory {
 		
 		?>
 			<div style="padding:30px;width:600px;margin-left:auto;margin-right:auto;">
-				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">An example API response:</h1>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Input data sent to view:</h1>
 				<pre>
-					<!-- This shows an example API call response -->
-					<?=print_r($apiCall,true)?>
+					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
+					<?=print_r($input,true)?>
 				</pre>
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">View state:</h1>
 				<pre>
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
-					<?=print_r($this->getState('view-data'),true)?>
+					<?=print_r($this->getState('view'),true)?>
 				</pre>
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Sitemap:</h1>
 				<pre>
@@ -50,20 +47,10 @@ class WWW_view_example extends WWW_Factory {
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
 					<?=print_r($this->getTranslations(),true)?>
 				</pre>
-				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">View state:</h1>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">An example API response:</h1>
 				<pre>
-					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
-					<?=print_r($this->getState('view-data'),true)?>
-				</pre>
-				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Unsolved URL:</h1>
-				<pre>
-					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
-					<?=print_r($this->getState('unsolved-url'),true)?>
-				</pre>
-				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Data sent to view:</h1>
-				<pre>
-					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
-					<?=print_r($input,true)?>
+					<!-- This shows an example API call response -->
+					<?=print_r($this->api('example-get'),true)?>
 				</pre>
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">State messenger data:</h1>
 				<pre>

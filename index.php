@@ -202,23 +202,66 @@ Author and support: Kristo Vaher - kristo@waher.net
 		// System returns 500 header even as a server error (possible bug in code)
 		header('HTTP/1.1 500 Internal Server Error');
 		
+		// Error report will be stored in this array
+		$errorReport=array();
+		
+		// Input data to error report
+		$error=array();
+		if(isset($_GET) && !empty($_GET)){
+			$error['get']=$_GET;
+		}
+		if(isset($_POST) && !empty($_POST)){
+			$error['post']=$_GET;
+		}
+		if(isset($_FILES) && !empty($_FILES)){
+			$error['files']=$_GET;
+		}
+		if(isset($_COOKIES) && !empty($_COOKIES)){
+			$error['cookies']=$_GET;
+		}
+		if(isset($_SESSION) && !empty($_SESSION)){
+			$error['session']=$_GET;
+		}
+		$error['server']=$_SERVER;
+		$errorReport[]=$error;
+		
+		// Getting error trace
+		$trace=array_reverse($e->getTrace());
+		foreach($trace as $key=>$t){
+			$error=array();
+			$error['file']=$t['file'];
+			$error['line']=$t['line'];
+			if(isset($t['class'])){
+				$error['class']=$t['class'];
+			}
+			if(isset($t['function'])){
+				$error['function']=$t['function'];
+			}
+			if(isset($t['args'])){
+				$error['args']=$t['args'];
+			}
+			$errorReport[]=$error;
+		}
+		// Writing current error and file to the array as well
+		$error=array();
+		$error['file']=$e->getFile();
+		$error['line']=$e->getLine();
+		$error['message']=$e->getMessage();
+		$errorReport[]=$error;
+		
+		// Logging the error
+		file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.date('d-m-Y-H-i').'.log',print_r($errorReport,true)."\n",FILE_APPEND);
+		
 		// Verbose error shown to developer only
 		if(isset($config['http-authentication-username']) && isset($config['http-authentication-password']) && isset($_SERVER['PHP_AUTH_USER']) && $_SERVER['PHP_AUTH_USER']==$config['http-authentication-username'] && isset($_SERVER['PHP_AUTH_PW']) && $_SERVER['PHP_AUTH_PW']==$config['http-authentication-password']){
 			echo '<h1>HTTP/1.1 500 Internal Server Error</h1>';
 			echo '<p><b>Exception trace:</b></p>';
-			$trace=array_reverse($e->getTrace());
-			foreach($trace as $key=>$t){
-				$key++;
-				echo '<p><b>'.$key.'</b> '.$t['file'].' (line: '.$t['line'].') '.((isset($t['class']))?$t['class'].'->':'').((isset($t['function']))?$t['function']:'').'</p>';
-				if(isset($t['args'])){
-					echo '<pre style="padding-left:50px;">';
-					var_dump($t['args']);
-					echo '</pre>';
-				}
-			}
-			$key++;
-			echo '<p><b>'.$key.'</b> '.$e->getFile().' (line: '.$e->getLine().') '.$e->getMessage().'</p>';
-
+			echo '<pre>';
+			print_r($errorReport);
+			echo '</pre>';
+		} else {
+			echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST</div>';
+			echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">ERROR HAS BEEN LOGGED FOR FURTHER INVESTIGATION</div>';
 		}
 
 		// Error-hitting request is logged and can be used for debugging later

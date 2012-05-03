@@ -23,7 +23,7 @@ error_reporting(0);
 
 // Authentication is always required, all developer tools ignore the http-authentication flag in configuration file
 if(!isset($config['http-authentication-username']) || !isset($config['http-authentication-password']) || !isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$config['http-authentication-username'] || !isset($_SERVER['PHP_AUTH_PW']) || $_SERVER['PHP_AUTH_PW']!=$config['http-authentication-password']){
-	header('WWW-Authenticate: Basic realm="Login"');
+	header('WWW-Authenticate: Basic realm="'.$_SERVER['HTTP_HOST'].'"');
 	header('HTTP/1.1 401 Unauthorized');
 	echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
 	echo '<h2>Username and password need to be provided by the user agent</h2>';

@@ -80,9 +80,11 @@ class WWW_State	{
 				'session-rights-key'=>'www-rights',
 				'session-user-key'=>'www-user',
 				'rights'=>false,
+				'user'=>false,
 				'translations'=>array(),
+				'sitemap-raw'=>array(),
 				'sitemap'=>array(),
-				'view-data'=>array(),
+				'view'=>array(),
 				'true-request'=>false,
 				'internal-logging'=>false,
 				'fingerprint'=>''
@@ -287,8 +289,9 @@ class WWW_State	{
 
 		// This function returns all the translations for a specific language
 		// * language - Language keyword, if this is not set then returns current language translations
+		// * keyword - If only single keyword needs to be returned
 		// Returns an array of translations and their keywords
-		final public function getTranslations($language=false){
+		final public function getTranslations($language=false,$keyword=false){
 			// If language is not set, then assuming current language
 			if(!$language){
 				$language=$this->data['language'];
@@ -321,21 +324,31 @@ class WWW_State	{
 					$this->data['translations'][$language]=unserialize(file_get_contents($cacheUrl));
 				}
 			}
-			// Returning translations array
-			return $this->data['translations'][$language];
+			// Returning keyword, if it is requested
+			if($keyword){
+				if(isset($this->data['translations'][$language][$keyword])){
+					return $this->data['translations'][$language][$keyword];
+				} else {
+					return false;
+				}
+			} else {
+				// If keyword was not set, then returning entire array
+				return $this->data['translations'][$language];
+			}
 		}
 		
 		// This function returns sitemap data for a specific language
 		// * language - Language keyword, if this is not set then returns current language sitemap
+		// * keyword - If only a single URL node needs to be returned
 		// Returns sitemap array of set language
-		final public function getSitemapRaw($language=false){
+		final public function getSitemapRaw($language=false,$keyword=false){
 		
 			// If language is not set, then assuming current language
 			if(!$language){
 				$language=$this->data['language'];
 			}
 			// If translations data is already stored in state
-			if(!isset($this->data['sitemap'][$language])){
+			if(!isset($this->data['sitemap-raw'][$language])){
 				// Translations can be loaded from overrides folder as well
 				if(file_exists($this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini')){
 					$sourceUrl=$this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini';
@@ -349,41 +362,51 @@ class WWW_State	{
 				// Including the sitemap file
 				if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
 					// Sitemap is parsed from INI file in the resources folder
-					$this->data['sitemap'][$language]=parse_ini_file($sourceUrl,true);
-					if(!$this->data['sitemap'][$language]){
+					$this->data['sitemap-raw'][$language]=parse_ini_file($sourceUrl,true);
+					if(!$this->data['sitemap-raw'][$language]){
 						throw new Exception('Cannot parse INI file: '.$sourceUrl);
 					}
 					// Cache of parsed INI file is stored for later use
-					if(!file_put_contents($cacheUrl,serialize($this->data['sitemap'][$language]))){
+					if(!file_put_contents($cacheUrl,serialize($this->data['sitemap-raw'][$language]))){
 						throw new Exception('Cannot store INI file cache at '.$cacheUrl);
 					}
 				} else {
 					// Since INI file has not been changed, translations are loaded from cache
-					$this->data['sitemap'][$language]=unserialize(file_get_contents($cacheUrl));
+					$this->data['sitemap-raw'][$language]=unserialize(file_get_contents($cacheUrl));
 				}
 			}
-			// Returning sitemap array
-			return $this->data['sitemap'][$language];
+			// Returning keyword, if it is requested
+			if($keyword){
+				if(isset($this->data['sitemap-raw'][$language][$keyword])){
+					return $this->data['sitemap-raw'][$language][$keyword];
+				} else {
+					return false;
+				}
+			} else {
+				// If keyword was not set, then returning entire array
+				return $this->data['sitemap-raw'][$language];
+			}
 			
 		}
 		
 		// This function returns sitemap data for a specific language
 		// * language - Language keyword, if this is not set then returns current language sitemap
+		// * keyword - If only a single URL node needs to be returned
 		// Returns sitemap array of set language
-		final public function getSitemap($language=false){
+		final public function getSitemap($language=false,$keyword=false){
 			// If language is not set, then assuming current language
 			if(!$language){
 				$language=$this->data['language'];
 			}
 			// If translations data is already stored in state
-			if(!isset($this->data['sitemap'][$language.'-url'])){
+			if(!isset($this->data['sitemap'][$language])){
 				// Getting raw sitemap data
 				$siteMapRaw=$this->getSitemapRaw($language);
 				if(!$siteMapRaw){
 					return false;
 				}
 				// This is output array
-				$this->data['sitemap'][$language.'-url']=array();
+				$this->data['sitemap'][$language]=array();
 				// System builds usable URL map for views
 				foreach($siteMapRaw as $key=>$node){
 					// Only sitemap nodes with set view will be assigned to reference
@@ -393,8 +416,8 @@ class WWW_State	{
 							$node['view']=$node['view'].'/'.$node['subview'];
 						}
 						// This is used only if view has not yet been defined
-						if(!isset($this->data['sitemap'][$language.'-url'][$node['view']])){
-							$this->data['sitemap'][$language.'-url'][$node['view']]=$key;
+						if(!isset($this->data['sitemap'][$language][$node['view']])){
+							$this->data['sitemap'][$language][$node['view']]=$key;
 						}
 						// Home views do not need a URL node
 						if($node['view']!=$this->data['home-view']){
@@ -403,17 +426,27 @@ class WWW_State	{
 							$url='';
 						}
 						// Storing data from Sitemap file
-						$this->data['sitemap'][$language.'-url'][$node['view']]=$siteMapRaw[$key];
+						$this->data['sitemap'][$language][$node['view']]=$siteMapRaw[$key];
 						// If first language URL is not enforced, then this is taken into account
 						if($language==$this->data['languages'][0] && $this->data['enforce-first-language-url']==false){
-							$this->data['sitemap'][$language.'-url'][$node['view']]['url']=$this->data['web-root'].$url;
+							$this->data['sitemap'][$language][$node['view']]['url']=$this->data['web-root'].$url;
 						} else {
-							$this->data['sitemap'][$language.'-url'][$node['view']]['url']=$this->data['web-root'].$language.'/'.$url;
+							$this->data['sitemap'][$language][$node['view']]['url']=$this->data['web-root'].$language.'/'.$url;
 						}
 					}
 				}
 			}
-			return $this->data['sitemap'][$language.'-url'];
+			// Returning keyword, if it is requested
+			if($keyword){
+				if(isset($this->data['sitemap'][$language][$keyword])){
+					return $this->data['sitemap'][$language][$keyword];
+				} else {
+					return false;
+				}
+			} else {
+				// If keyword was not set, then returning entire array
+				return $this->data['sitemap'][$language];
+			}
 		}
 		
 	// REQUEST MESSENGER
@@ -508,7 +541,10 @@ class WWW_State	{
 		// This sets user data to current session
 		// * data - Data array set to user
 		final public function setUser($data){
+			// Setting the session
 			$this->setSession($this->data['session-user-key'],$data);
+			// Setting the state variable
+			$this->data['user']=$data;
 			return true;
 		}
 		
@@ -516,26 +552,36 @@ class WWW_State	{
 		// * key - Element returned from user data, if not set then returns the entire user data
 		// Returns either the whole data as array or just a single element or false, if not found
 		final public function getUser($key=false){
-			$user=$this->getSession($this->data['session-user-key'],$data);
-			if($user){
-				if($key){
-					if(isset($user[$key])){
-						return $user[$key];
-					} else {
-						return false;
-					}
+			// Testing if rights state has been populated or not
+			if(!$this->data['user']){
+				$this->data['user']=$this->getSession($this->data['session-user-key']);
+				// If this session key did not exist, then returning false
+				if(!$this->data['user']){
+					return false;
+				}
+			}
+			// If key is set
+			if($key){
+				if(isset($this->data['user'][$key])){
+					// Returning key data
+					return $this->data['user'][$key];
 				} else {
-					return $user;
+					return false;
 				}
 			} else {
-				return false;
+				// Returning entire user array
+				return $this->data['user'];
 			}
+
 		}
 		
 		// This method unsets existing user
 		// Always returns true
 		final public function unsetUser(){
+			// Unsetting the session
 			$this->unsetSession($this->data['session-user-key']);
+			// Unsetting the state variable
+			$this->data['user']=false;
 			return true;
 		}
 	
@@ -591,15 +637,20 @@ class WWW_State	{
 			if(!is_array($rights)){
 				$rights=explode(',',$rights);
 			}
-			$this->data['rights']=$rights;
+			// Setting the session variable
 			$this->setSession($this->data['session-rights-key'],$rights);
+			// Setting the state variable
+			$this->data['rights']=$rights;
 			return true;
 		}
 		
 		// This method unsets existing rights
 		// Always returns true
 		final public function unsetRights(){
+			// Unsetting the session
 			$this->unsetSession($this->data['session-rights-key']);
+			// Unsetting the state variable
+			$this->data['rights']=false;
 			return true;
 		}
 		
@@ -642,7 +693,7 @@ class WWW_State	{
 		}
 		
 		// This sets session variable in current session namespace
-		// * key - Key of the variable
+		// * key - Key of the variable, can be an array
 		// * value - Value to be set
 		// Returns true
 		final public function setSession($key,$value){
@@ -650,7 +701,14 @@ class WWW_State	{
 			if(!$this->sessionStarted){
 				$this->startSession();
 			}
-			$_SESSION[$this->data['session-namespace']][$key]=$value;
+			// Multiple values can be set if key is an array
+			if(is_array($key)){
+				foreach($key as $k=>$v){
+					$_SESSION[$this->data['session-namespace']][$k]=$v;
+				}
+			} else {
+				$_SESSION[$this->data['session-namespace']][$key]=$value;
+			}
 			return true;
 		}
 		
@@ -662,31 +720,55 @@ class WWW_State	{
 			if(!$this->sessionStarted){
 				$this->startSession();
 			}
-			if(isset($_SESSION[$this->data['session-namespace']][$key])){
-				return $_SESSION[$this->data['session-namespace']][$key];
+			// Multiple keys can be returned
+			if(is_array($key)){
+				// This array will hold multiple values
+				$return=array();
+				// This array will hold multiple values
+				foreach($key as $val){
+					if(isset($_SESSION[$this->data['session-namespace']][$val])){
+						$return[$val]=$_SESSION[$this->data['session-namespace']][$val];
+					} else {
+						$return[$val]=false;
+					}
+				}
+				return $return;
 			} else {
-				return false;
-			}	
+				if(isset($_SESSION[$this->data['session-namespace']][$key])){
+					return $_SESSION[$this->data['session-namespace']][$key];
+				} else {
+					return false;
+				}
+			}
 		}
 		
 		// Unsets session variable
-		// * key - Key of the value to be unset
+		// * key - Key of the value to be unset, can be an array
 		// Returns true
 		final public function unsetSession($key){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
 				$this->startSession();
 			}
-			if(isset($_SESSION[$this->data['session-namespace']][$key])){
-				unset($_SESSION[$this->data['session-namespace']][$key]);
+			// Can unset multiple values
+			if(is_array($key)){
+				foreach($key as $value){
+					if(isset($_SESSION[$this->data['session-namespace']][$value])){
+						unset($_SESSION[$this->data['session-namespace']][$value]);
+					}
+				}
 			} else {
-				return false;
+				if(isset($_SESSION[$this->data['session-namespace']][$key])){
+					unset($_SESSION[$this->data['session-namespace']][$key]);
+				} else {
+					return false;
+				}
 			}
 			return true;
 		}
 		
 		// This sets session variable
-		// * key - Key of the variable
+		// * key - Key of the variable, can be an array
 		// * value - Value to be set, can also be an array
 		// * configuration - Cookie configuration options
 		// Returns true
@@ -707,37 +789,77 @@ class WWW_State	{
 			if(!isset($configuration['httponly'])){
 				$configuration['httponly']=false;
 			}
-			// Value can be an array, in which case the values set will be an array
-			if(is_array($value)){
-				foreach($value as $index=>$val){
-					setcookie($key.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+			// Can set multiple values
+			if(is_array($key)){
+				foreach($key as $k=>$v){
+					// Value can be an array, in which case the values set will be an array
+					if(is_array($v)){
+						foreach($v as $index=>$val){
+							setcookie($k.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+						}
+					} else {
+						// Setting the cookie
+						setcookie($k,$v,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+					}
 				}
 			} else {
-				// Setting the cookie
-				setcookie($key,$value,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+				// Value can be an array, in which case the values set will be an array
+				if(is_array($value)){
+					foreach($value as $index=>$val){
+						setcookie($key.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+					}
+				} else {
+					// Setting the cookie
+					setcookie($key,$value,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+				}
 			}
 		}
 		
 		// Gets a value based on a key from current cookies
-		// * key - Key of the value to be returned
+		// * key - Key of the value to be returned, can be an array
 		// Returns the value if it exists
 		final public function getCookie($key){
-			if(isset($_COOKIE[$key])){
-				return $_COOKIE[$key];
+			// Multiple keys can be returned
+			if(is_array($key)){
+				// This array will hold multiple values
+				$return=array();
+				foreach($key as $val){
+					if(isset($_COOKIE[$val])){
+						$return[$val]=$_COOKIE[$val];
+					} else {
+						$return[$val]=false;
+					}
+				}
+				return $return;
 			} else {
-				return false;
-			}	
+				// Returning single cookie value
+				if(isset($_COOKIE[$key])){
+					return $_COOKIE[$key];
+				} else {
+					return false;
+				}
+			}
 		}
 		
 		// Unsets session variable
 		// * key - Key of the value to be unset
 		// Returns true
 		final public function unsetCookie($key){
-			if(isset($_COOKIE[$key])){
-				// Removes cookie by setting its duration to 0
-				setcookie($key,'',($this->data['request-time']-3600));
+			// Can set multiple values
+			if(is_array($key)){
+				foreach($key as $value){
+					if(isset($_COOKIE[$value])){
+						// Removes cookie by setting its duration to 0
+						setcookie($value,'',($this->data['request-time']-3600));
+					}
+				}
 			} else {
-				return false;
+				if(isset($_COOKIE[$key])){
+					// Removes cookie by setting its duration to 0
+					setcookie($key,'',($this->data['request-time']-3600));
+				} else {
+					return false;
+				}
 			}
 			return true;
 		}

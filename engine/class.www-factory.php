@@ -101,23 +101,26 @@ class WWW_Factory {
 		
 		// This function returns all the translations for a specific language
 		// * language - Language keyword, if this is not set then returns current language translations
+		// * keyword - If only single keyword needs to be returned
 		// Returns an array of translations and their keywords
-		final protected function getTranslations($language=false){
-			return $this->WWW_API->state->getTranslations($language);
+		final protected function getTranslations($language=false,$keyword=false){
+			return $this->WWW_API->state->getTranslations($language,$keyword);
 		}
 		
 		// This function returns sitemap data for a specific language
 		// * language - Language keyword, if this is not set then returns current language sitemap
+		// * keyword - If only a single URL node needs to be returned
 		// Returns sitemap array of set language, this sitemap array has been modified for use for building links
-		final protected function getSitemap($language=false){
-			return $this->WWW_API->state->getSitemap($language);
+		final protected function getSitemap($language=false,$keyword=false){
+			return $this->WWW_API->state->getSitemap($language,$keyword);
 		}
 		
 		// This function returns sitemap data for a specific language
 		// * language - Language keyword, if this is not set then returns current language sitemap
+		// * keyword - If only a single URL node needs to be returned
 		// Returns sitemap array of set language, raw array is just the way it is in sitemap INI file
-		final protected function getSitemapRaw($language=false){
-			return $this->WWW_API->state->getSitemapRaw($language);
+		final protected function getSitemapRaw($language=false,$keyword=false){
+			return $this->WWW_API->state->getSitemapRaw($language,$keyword);
 		}
 	
 	// MVC FACTORY
@@ -256,9 +259,10 @@ class WWW_Factory {
 		// This is simply used to return an error from MVC elements, it generates a proper return array
 		// * message - Error message
 		// * responseCode - Error code number
+		// * customData - Additional data returned
 		// Returns an array
 		final protected function errorArray($message,$responseCode=300,$customData=false){
-			if($customData){
+			if(is_array($customData)){
 				return array('www-error'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
 				return array('www-error'=>$message,'www-response-code'=>$responseCode);
@@ -268,9 +272,10 @@ class WWW_Factory {
 		// This is simply used to return a success array from MVC elements, it generates a proper return array
 		// * message - Success message
 		// * responseCode - Response code number
+		// * customData - Additional data returned
 		// Returns an array
 		final protected function successArray($message,$responseCode=400,$customData=false){
-			if($customData){
+			if(is_array($customData)){
 				return array('www-success'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
 				return array('www-success'=>$message,'www-response-code'=>$responseCode);
@@ -358,7 +363,7 @@ class WWW_Factory {
 		}
 	
 		// This sets session variable in current session namespace
-		// * key - Key of the variable
+		// * key - Key of the variable, can be an array
 		// * value - Value to be set
 		// Returns true
 		final protected function setSession($key,$value){
@@ -366,21 +371,21 @@ class WWW_Factory {
 		}
 		
 		// Gets a value based on a key from current namespace
-		// * key - Key of the value to be returned
+		// * key - Key of the value to be returned, can be an array
 		// Returns the value if it exists
 		final protected function getSession($key){
 			return $this->WWW_API->state->getSession($key);
 		}
 		
 		// Unsets session variable
-		// * key - Key of the value to be unset
+		// * key - Key of the value to be unset, can be an array
 		// Returns true
 		final protected function unsetSession($key){
 			return $this->WWW_API->state->unsetSession($key);
 		}
 		
 		// This sets session variable
-		// * key - Key of the variable
+		// * key - Key of the variable, can be an array
 		// * value - Value to be set
 		// * configuration - Cookie configuration options
 		// Returns true
@@ -389,14 +394,14 @@ class WWW_Factory {
 		}
 		
 		// Gets a value based on a key from current cookies
-		// * key - Key of the value to be returned
+		// * key - Key of the value to be returned, can be an array
 		// Returns the value if it exists
 		final protected function getCookie($key){
 			return $this->WWW_API->state->getCookie($key);
 		}
 		
 		// Unsets cookie
-		// * key - Key of the cookie to be unset
+		// * key - Key of the cookie to be unset, can be an array
 		// Returns true
 		final protected function unsetCookie($key){
 			return $this->WWW_API->state->unsetCookie($key);

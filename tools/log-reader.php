@@ -23,7 +23,7 @@ error_reporting(0);
 
 // Authentication is always required, all developer tools ignore the http-authentication flag in configuration file
 if(!isset($config['http-authentication-username']) || !isset($config['http-authentication-password']) || !isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$config['http-authentication-username'] || !isset($_SERVER['PHP_AUTH_PW']) || $_SERVER['PHP_AUTH_PW']!=$config['http-authentication-password']){
-	header('WWW-Authenticate: Basic realm="Login"');
+	header('WWW-Authenticate: Basic realm="'.$_SERVER['HTTP_HOST'].'"');
 	header('HTTP/1.1 401 Unauthorized');
 	echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
 	echo '<h2>Username and password need to be provided by the user agent</h2>';
@@ -79,7 +79,7 @@ header('Content-Type: text/html;charset=utf-8');
 		if(isset($_GET['internal'])){
 
 			// Actual log address
-			$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log.tmp';
+			$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log';
 
 		} else {
 
@@ -114,7 +114,7 @@ header('Content-Type: text/html;charset=utf-8');
 			$logSubfolder=substr($logFileName,0,10);
 			
 			// Actual log address
-			$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp';
+			$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.log';
 
 		}
 

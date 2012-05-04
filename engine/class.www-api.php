@@ -83,11 +83,11 @@ class WWW_API {
 				// Profiles are parsed from INI file in the resources folder
 				$apiProfiles=parse_ini_file($sourceUrl,true);
 				if(!$apiProfiles){
-					throw new Exception('Cannot parse INI file: '.$sourceUrl);
+					trigger_error('Cannot parse INI file: '.$sourceUrl,E_USER_ERROR);
 				}
 				// Cache of parsed INI file is stored for later use
 				if(!file_put_contents($cacheUrl,serialize($apiProfiles))){
-					throw new Exception('Cannot store INI file cache at '.$cacheUrl);
+					trigger_error('Cannot store INI file cache at '.$cacheUrl,E_USER_ERROR);
 				}
 			} else {
 				// Since INI file has not been changed, profiles are loaded from cache
@@ -103,7 +103,7 @@ class WWW_API {
 	// This writes log data to file, if internal logging is turned on 
 	public function __destruct(){
 		if($this->internalLogging && !empty($this->internalLog)){
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log',serialize($this->internalLog)."\n",FILE_APPEND);
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log',json_encode($this->internalLog)."\n",FILE_APPEND);
 		}
 	}
 	
@@ -1150,7 +1150,8 @@ class WWW_API {
 			$result=array();
 			
 			// First element of the array is output
-			$first=array_shift(array_slice($apiResult,0,1,true));
+			$tmp=array_slice($apiResult,0,1,true);
+			$first=array_shift($tmp);
 			
 			// If the first array element is also an array then multidimensional CSV will be output
 			if(is_array($first)){

@@ -44,7 +44,7 @@ class WWW_Factory {
 		final protected function api($command,$inputData=array(),$useBuffer=true){
 			// Input data has to be an array
 			if(!is_array($inputData)){
-				throw new Exception('API input data is not an array');
+				trigger_error('API input data is not an array',E_USER_ERROR);
 			}
 			// Setting the set command variable to proper format for API
 			$inputData['www-command']=$command;
@@ -146,7 +146,7 @@ class WWW_Factory {
 					require($this->WWW_API->state->data['system-root'].'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
 				} else {
 					// Error is thrown if class was not found
-					throw new Exception('Model ['.$model.'] does not exist');
+					trigger_error('Model ['.$model.'] does not exist',E_USER_ERROR);
 				}
 			}
 			
@@ -162,7 +162,7 @@ class WWW_Factory {
 					return $tempObject->$methodName($methodData);
 				} else {
 					// Error is thrown if method was not found
-					throw new Exception('Model ['.$model.'] method ['.$methodName.'] does not exist');
+					trigger_error('Model ['.$model.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
 				}
 			}
 			
@@ -189,7 +189,7 @@ class WWW_Factory {
 					require($this->WWW_API->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
 				} else {
 					// Error is thrown if class was not found
-					throw new Exception('Controller ['.$controller.'] does not exist');
+					trigger_error('Controller ['.$controller.'] does not exist',E_USER_ERROR);
 				}
 			}
 			
@@ -205,7 +205,7 @@ class WWW_Factory {
 					return $tempObject->$methodName($methodData);
 				} else {
 					// Error is thrown if method was not found
-					throw new Exception('Controller ['.$controller.'] method ['.$methodName.'] does not exist');
+					trigger_error('Controller ['.$controller.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
 				}
 			}
 			
@@ -232,7 +232,7 @@ class WWW_Factory {
 					require($this->WWW_API->state->data['system-root'].'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
 				} else {
 					// Error is thrown if class was not found
-					throw new Exception('View ['.$view.'] does not exist');
+					trigger_error('View ['.$view.'] does not exist',E_USER_ERROR);
 				}
 			}
 			
@@ -248,7 +248,7 @@ class WWW_Factory {
 					return $tempObject->$methodName($methodData);
 				} else {
 					// Error is thrown if method was not found
-					throw new Exception('View ['.$view.'] method ['.$methodName.'] does not exist');
+					trigger_error('View ['.$view.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
 				}
 			}
 			

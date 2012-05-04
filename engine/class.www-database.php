@@ -63,10 +63,10 @@ class WWW_Database {
 					if($this->pdo){
 						$this->connected=1;
 					} else {
-						throw new Exception('Cannot connect to database');
+						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
 				} else {
-					throw new Exception('PDO MySQL extension not enabled');
+					trigger_error('PDO MySQL extension not enabled',E_USER_ERROR);
 				}
 				break;
 			case 'sqlite':
@@ -76,10 +76,10 @@ class WWW_Database {
 					if($this->pdo){
 						$this->connected=1;
 					} else {
-						throw new Exception('Cannot connect to database');
+						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
 				} else {
-					throw new Exception('PDO SQLite extension not enabled');
+					trigger_error('PDO SQLite extension not enabled',E_USER_ERROR);
 				}
 				break;
 			case 'postgresql':
@@ -90,10 +90,10 @@ class WWW_Database {
 						$this->pdo->exec('SET NAMES \'UTF8\'');
 						$this->connected=1;
 					} else {
-						throw new Exception('Cannot connect to database');
+						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
 				} else {
-					throw new Exception('PDO PostgreSQL extension not enabled');
+					trigger_error('PDO PostgreSQL extension not enabled',E_USER_ERROR);
 				}
 				break;
 			case 'oracle':
@@ -103,10 +103,10 @@ class WWW_Database {
 					if($this->pdo){
 						$this->connected=1;
 					} else {
-						throw new Exception('Cannot connect to database');
+						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
 				} else {
-					throw new Exception('PDO Oracle extension not enabled');
+					trigger_error('PDO Oracle extension not enabled',E_USER_ERROR);
 				}
 				break;
 			case 'mssql':
@@ -117,15 +117,15 @@ class WWW_Database {
 						$this->pdo->exec('SET NAMES \'UTF8\'');
 						$this->connected=1;
 					} else {
-						throw new Exception('Cannot connect to database');
+						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
 				} else {
-					throw new Exception('PDO MSSQL extension not enabled');
+					trigger_error('PDO MSSQL extension not enabled',E_USER_ERROR);
 				}
 				break;
 			default:
 				// Error is triggered for all other database types
-				throw new Exception('This database type is not supported');
+				trigger_error('This database type is not supported',E_USER_ERROR);
 				break;
 		}
 	}
@@ -181,7 +181,7 @@ class WWW_Database {
 			}
 					
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 		
 	}
@@ -218,7 +218,7 @@ class WWW_Database {
 			}
 
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 		
 	}
@@ -259,7 +259,7 @@ class WWW_Database {
 			}
 					
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 		
 	}
@@ -275,11 +275,11 @@ class WWW_Database {
 				$errors=$query->errorInfo();
 				if($errors && !empty($errors)){
 					// PDO errorInfo carries verbose error as third in the index
-					throw new Exception('Query failed: '.$errors[2].'');
+					trigger_error('Query failed: '.$errors[2],E_USER_ERROR);
 				}
 			}
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 		
 		// Since error was not triggered, it simply returns true
@@ -305,7 +305,7 @@ class WWW_Database {
 			}
 
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 	}
 	
@@ -325,7 +325,7 @@ class WWW_Database {
 			}
 			
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 	}
 	
@@ -345,7 +345,7 @@ class WWW_Database {
 			}
 			
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 	}
 	
@@ -365,7 +365,7 @@ class WWW_Database {
 			}
 			
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 	}
 	
@@ -393,7 +393,7 @@ class WWW_Database {
 					break;
 			}
 		} else {
-			throw new Exception('Database not connected');
+			trigger_error('Database not connected',E_USER_ERROR);
 		}
 	}
 

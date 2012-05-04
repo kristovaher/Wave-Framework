@@ -48,7 +48,7 @@ class WWW_Logger {
 			$this->logDir=$logDir;
 		} else {
 			// Assigned folder is not detected as being a folder
-			throw new Exception('Assigned log folder does not exist');
+			trigger_error('Assigned log folder does not exist',E_USER_ERROR);
 		}
 		
 	}
@@ -173,13 +173,13 @@ class WWW_Logger {
 			$logSubfolder=substr($logFileName,0,10);
 			if(!is_dir($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR)){
 				if(!mkdir($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR,0777)){
-					throw new Exception('Cannot create log folder');
+					trigger_error('Cannot create log folder',E_USER_ERROR);
 				}
 			}
 			
 			// Appending the log data at the end of log file or creating it if it does not exist
-			if(!file_put_contents($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.log',serialize($logData)."\n",FILE_APPEND)){
-				throw new Exception('Cannot write log file');
+			if(!file_put_contents($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.log',json_encode($logData)."\n",FILE_APPEND)){
+				trigger_error('Cannot write log file',E_USER_ERROR);
 			}
 		
 		// Logging process is finished

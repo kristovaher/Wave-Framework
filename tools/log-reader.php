@@ -128,7 +128,7 @@ header('Content-Type: text/html;charset=utf-8');
 					// Output buffer allows to increase peformance due to multiple echo's
 					ob_start();
 					// Log data is deencoded from JSON string
-					$l=unserialize($l);
+					$l=json_decode($l,true);
 					// Log entry should be an array once decoded
 					if(is_array($l)){
 						$accepted=true;

@@ -66,7 +66,7 @@ class WWW_Imager {
 					}
 					break;
 				default:
-					throw new Exception('File format not supported');
+					trigger_error('File format not supported',E_USER_ERROR);
 					break;
 			}
 		
@@ -135,7 +135,7 @@ class WWW_Imager {
 					}
 					break;
 				default:
-					throw new Exception('This output extension is not supported');
+					trigger_error('This output extension is not supported',E_USER_ERROR);
 					break;
 			}
 			
@@ -177,7 +177,7 @@ class WWW_Imager {
 					}
 					break;
 				default:
-					throw new Exception('This output extension is not supported');
+					trigger_error('This output extension is not supported',E_USER_ERROR);
 					break;
 			}
 			
@@ -227,7 +227,7 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
 				if(!is_numeric($left)){
-					throw new Exception('This left position is not supported');
+					trigger_error('This left position is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -250,7 +250,7 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
 				if(!is_numeric($top)){
-					throw new Exception('This top position is not supported');
+					trigger_error('This top position is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -319,7 +319,7 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
 				if(!is_numeric($left)){
-					throw new Exception('This left position is not supported');
+					trigger_error('This left position is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -341,7 +341,7 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
 				if(!is_numeric($top)){
-					throw new Exception('This top position is not supported');
+					trigger_error('This top position is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -423,7 +423,7 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
 				if(!is_numeric($left)){
-					throw new Exception('This left position is not supported');
+					trigger_error('This left position is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -445,7 +445,7 @@ class WWW_Imager {
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
 				if(!is_numeric($top)){
-					throw new Exception('This top position is not supported');
+					trigger_error('This top position is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -677,13 +677,13 @@ class WWW_Imager {
 				$settingsRequired=11;
 				break;
 			default:
-				throw new Exception($requestedType.' filter is not available');
+				trigger_error($requestedType.' filter is not available',E_USER_ERROR);
 				break;
 		}
 		
 		// If incorrect number of settings are used then error is thrown
 		if(count($settings)!=$settingsRequired){
-			throw new Exception('Incorrect amount of filter settings for '.$requestedType.', '.count($settings).' set but '.$settingsRequired.' required');
+			trigger_error('Incorrect amount of filter settings for '.$requestedType.', '.count($settings).' set but '.$settingsRequired.' required',E_USER_ERROR);
 		}
 		
 		// If alpha setting is used, then the resulting image will be 'merged'

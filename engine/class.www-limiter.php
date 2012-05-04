@@ -41,7 +41,7 @@ class WWW_Limiter {
 			$this->logDir=$logDir;
 		} else {
 			// Assigned folder is not detected as being a folder
-			throw new Exception('Assigned limiter folder does not exist');
+			trigger_error('Assigned limiter folder does not exist',E_USER_ERROR);
 		}
 		
 	}
@@ -65,7 +65,7 @@ class WWW_Limiter {
 			if(!is_dir($this->logDir)){
 				// Error is returned if creating the limiter folder with proper permissions does not work
 				if(!mkdir($this->logDir,0777)){
-					throw new Exception('Cannot create limiter folder');
+					trigger_error('Cannot create limiter folder',E_USER_ERROR);
 				}
 			}
 			

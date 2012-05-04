@@ -206,7 +206,7 @@ function systemBackup($source,$target,$filesystemBackup=false){
 						// Each file is added individually to archive
 						if(!$zip->addFile($f,$archivePath)){
 							// Error is thrown when one file cannot be added
-							throw new Exception('Failed to archive '.$f.'');
+							trigger_error('Failed to archive '.$f,E_USER_ERROR);
 							// Archive is closed and function returns false
 							$zip->close();
 							// Removing incomplete archive

@@ -246,7 +246,7 @@ class WWW_Wrapper {
 						$this->inputFiles[$key]=$loc;
 						$this->log[]='Input file "'.$key.'" location set to: '.$loc;
 					} else {
-						throw new Exception('File location not defined or file does not exist in that location: '.$loc);
+						trigger_error('File location not defined or file does not exist in that location: '.$loc,E_USER_ERROR);
 					}
 				}
 			} else {
@@ -255,7 +255,7 @@ class WWW_Wrapper {
 					$this->inputFiles[$file]=$location;
 					$this->log[]='Input file "'.$file.'" location set to: '.$location;
 				} else {
-					throw new Exception('File location not defined or file does not exist in that location: '.$location);
+					trigger_error('File location not defined or file does not exist in that location: '.$location,E_USER_ERROR);
 				}
 			}
 			return true;

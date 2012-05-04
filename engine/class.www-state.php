@@ -49,8 +49,6 @@ class WWW_State	{
 				'resource-cache-timeout'=>31536000,
 				'home-view'=>'home',
 				'404-view'=>'404',
-				'error-reporting'=>0,
-				'error-reporting-ip'=>false,
 				'timezone'=>false,
 				'output-compression'=>'deflate',
 				'http-host'=>$_SERVER['HTTP_HOST'],
@@ -183,12 +181,12 @@ class WWW_State	{
 			$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
 			if(!is_dir($dataFolder)){
 				if(!mkdir($dataFolder,0777)){
-					throw new Exception('Cannot create messenger folder');
+					trigger_error('Cannot create messenger folder',E_USER_ERROR);
 				}
 			}
 			// Writing messenger data to file
 			if(!file_put_contents($dataFolder.$this->messenger.'.tmp',serialize($this->messengerData))){
-				throw new Exception('Cannot write messenger data');
+				trigger_error('Cannot write messenger data',E_USER_ERROR);
 			}
 		}
 	}
@@ -256,31 +254,6 @@ class WWW_State	{
 			
 			// Certain variables are checked that might change system flags
 			switch ($variable) {
-				case 'error-reporting':
-					if(!$this->data['error-reporting-ip'] || $this->data['error-reporting-ip']!=$_SERVER['REMOTE_ADDR']){
-						// Attempting to turn on PHP error-reporting
-						if($value!=0 && $value!=false){
-							// In some environments the ini_set() function is not enabled
-							if(function_exists('ini_set')){
-								ini_set('display_errors',1);
-								ini_set('error_reporting',$value);
-							}
-							error_reporting($value);
-						} else {
-							error_reporting(0);
-						}
-					}
-					break;
-				case 'error-reporting-ip':
-					if($_SERVER['REMOTE_ADDR']==$value){
-						// In some environments the ini_set() function is not enabled
-						if(function_exists('ini_set')){
-							ini_set('display_errors',1);
-							ini_set('error_reporting',E_ALL);
-						}
-						error_reporting(E_ALL);
-					}
-					break;
 				case 'timezone':
 					// Attempting to set default timezone
 					date_default_timezone_set($value);
@@ -332,11 +305,11 @@ class WWW_State	{
 					// Translations are parsed from INI file in the resources folder
 					$this->data['translations'][$language]=parse_ini_file($sourceUrl);
 					if(!$this->data['translations'][$language]){
-						throw new Exception('Cannot parse INI file: '.$sourceUrl);
+						trigger_error('Cannot parse INI file: '.$sourceUrl,E_USER_ERROR);
 					}
 					// Cache of parsed INI file is stored for later use
 					if(!file_put_contents($cacheUrl,serialize($this->data['translations'][$language]))){
-						throw new Exception('Cannot store INI file cache at '.$cacheUrl);
+						trigger_error('Cannot store INI file cache at '.$cacheUrl,E_USER_ERROR);
 					}
 				} else {
 					// Since INI file has not been changed, translations are loaded from cache
@@ -383,11 +356,11 @@ class WWW_State	{
 					// Sitemap is parsed from INI file in the resources folder
 					$this->data['sitemap-raw'][$language]=parse_ini_file($sourceUrl,true);
 					if(!$this->data['sitemap-raw'][$language]){
-						throw new Exception('Cannot parse INI file: '.$sourceUrl);
+						trigger_error('Cannot parse INI file: '.$sourceUrl,E_USER_ERROR);
 					}
 					// Cache of parsed INI file is stored for later use
 					if(!file_put_contents($cacheUrl,serialize($this->data['sitemap-raw'][$language]))){
-						throw new Exception('Cannot store INI file cache at '.$cacheUrl);
+						trigger_error('Cannot store INI file cache at '.$cacheUrl,E_USER_ERROR);
 					}
 				} else {
 					// Since INI file has not been changed, translations are loaded from cache

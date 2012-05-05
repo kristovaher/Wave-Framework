@@ -15,6 +15,7 @@ files situated in /tools/read-log.php.
 * Logger expects /filesystem/logs/ to be writeable
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_Logger {

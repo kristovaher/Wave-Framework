@@ -18,6 +18,7 @@ within MVC objects through Factory class.
 * Custom callbacks for setting headers, cookies, sessions and redirecting user agent
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_API {

@@ -16,6 +16,7 @@ request processing and is not stored beyond its use in the request.
 * State also stores database connection information, which is used by MVC objects through Factory
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_State	{

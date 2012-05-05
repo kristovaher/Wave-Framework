@@ -25,6 +25,7 @@ written to.
 * Filesystem folder writability
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 // Main configuration file is included

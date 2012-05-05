@@ -20,6 +20,7 @@ here for cases where the project developer might not have control over server co
 * HTTPS-only limiter
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_Limiter {

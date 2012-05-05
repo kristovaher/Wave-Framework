@@ -15,6 +15,7 @@ has validations with JSON encoded string and numeric conversions.
 * Outside connections must be allowed in server for this to be used with file_get_contents()
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_Wrapper {

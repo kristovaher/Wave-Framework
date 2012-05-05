@@ -16,6 +16,7 @@ be accessed. Handlers for Index gateway are stored in /engine/ subfolder.
 * Loads robots.txt and sitemap.xml through handlers
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 // SOLVING THE HTTP REQUEST
@@ -37,15 +38,17 @@ Author and support: Kristo Vaher - kristo@waher.net
 	// Currently known location of the file in filesystem
 	// Double replacement occurs since some environments give document root with the slash in the end, some don't (like Windows)
 	$resourceRequest=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR,$_SERVER['DOCUMENT_ROOT'].$resourceAddress);
-	// Getting directory, filename and extension information about current resource address
-	$resourceInfo=pathinfo($resourceRequest);
-	// Solving the folder that user agent is loading resource from
-	$resourceFolder=$resourceInfo['dirname'].DIRECTORY_SEPARATOR;
-	// Assigning file information
-	$resourceFile=$resourceInfo['basename'];
-	// If extension was detected then this too is used
-	if(isset($resourceInfo['extension'])){
-		$resourceExtension=$resourceInfo['extension'];
+	if(!is_dir($resourceRequest)){
+		// Getting directory, filename and extension information about current resource address
+		$resourceInfo=pathinfo($resourceRequest);
+		// Solving the folder that user agent is loading resource from
+		$resourceFolder=$resourceInfo['dirname'].DIRECTORY_SEPARATOR;
+		// Assigning file information
+		$resourceFile=$resourceInfo['basename'];
+		// If extension was detected then this too is used
+		if(isset($resourceInfo['extension'])){
+			$resourceExtension=$resourceInfo['extension'];
+		}
 	}
 	
 // LOADING CONFIGURATION

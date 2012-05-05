@@ -1,5 +1,5 @@
 
-# WWW - PHP micro-framework
+# WWW Framework
 # Apache configuration
 # 
 # Apache commands are stored in this file, including the loading of RewriteEngine, which is 
@@ -8,6 +8,7 @@
 # solve.
 # 
 # Author and support: Kristo Vaher - kristo@waher.net
+# License: GNU Lesser General Public License Version 3
 
 # This is required on some server setups for RewriteEngine to work properly
 # But this can also throw 500 errors on some hosting environments, if it does then remove it

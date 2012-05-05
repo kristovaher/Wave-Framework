@@ -8,4 +8,5 @@ by WWW_controller_view if it is detected and found for the view it loads. This f
 loaded after other Javascript files.
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: This file can be copied, changed and re-published under another license without any restrictions
 */

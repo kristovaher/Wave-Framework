@@ -11,6 +11,7 @@ should be checked every now and then to test and make sure that there are no out
 * Reads files from /filesystem/errors folder
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 // Main configuration file is included

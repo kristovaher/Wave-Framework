@@ -10,6 +10,7 @@ loaded by Index gateway for all requests. Generally it is useful to not have a g
 in a system, as it can make testing more difficult, but it can be useful at times.
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: This file can be copied, changed and re-published under another license without any restrictions
 */
 	
 ?>

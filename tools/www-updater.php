@@ -10,6 +10,7 @@ This script is useful to store in other update-related commands, such as file ri
 changes and so on.
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 // It is always recommended to have this file return a plain-text log where each log entry is on a new line

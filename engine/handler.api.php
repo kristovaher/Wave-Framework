@@ -16,6 +16,7 @@ if set by www-return-type, such as xml, text or serializedarray.
 * Loads State and establishes database connection (if used)
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 //INITIALIZATION

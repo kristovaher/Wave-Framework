@@ -13,6 +13,7 @@ backup of just the system files. Files are stored in /filesystem/backups/ folder
 * It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 // Main configuration file is included

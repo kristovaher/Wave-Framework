@@ -14,6 +14,7 @@ but can also be used for other image editing in the system since it can be loade
 * Basic layering of filters
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_Imager {

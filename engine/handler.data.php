@@ -15,6 +15,7 @@ loaded when no other handlers can be used to solve the user agent request.
 * Loads State and establishes database connection (if used)
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 // INITIALIZATION

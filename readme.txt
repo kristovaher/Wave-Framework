@@ -4,6 +4,11 @@ WWW FRAMEWORK
 
 API-focused web and infosystems PHP micro-framework
 
+ABOUT THIS README
+-----------------
+
+This ReadMe file, that you are reading right now, is specifically about the WWW Framework. Unless it has been modified or mentioned anywhere, this ReadMe has no details about the website or web service that has been built on WWW Framework. To get details about the website or web service, you should either refer to another ReadMe file, if provided, or ask the authors of the website or the web service.
+
 ABOUT
 -----
 
@@ -89,7 +94,11 @@ http://plus.google.com/102632377636999004385/
 LICENSE
 -------
 
-This framework is released as open source and its components (with the exception of external components included in this package and detailed in the next section) are released under GNU Lesser General Public License Version 3. Full license document is included in the archive as license.txt file.
+This framework is released as open source and its components (with the exception of external components included in this package and detailed in the next section) are released under GNU Lesser General Public License Version 3. This license means that you can use this Framework for any purpose and attach it to any website or web service without requiring to apply the same license to the system it is attached to, as long as the copyright and license notes remain with the framework. Full license document is included in the archive as license.txt file.
+
+Note that some files, such as files in /models/, /views/, /controllers/ and /resources/ subfolder, are not restricted by GNU LGPL v3 license. These files can be copied, changed and re-published under another license without any restrictions, unless stated differently in the file header.
+
+If you are reading this and this framework has been set up on a web server somewhere and used as a framework for a web system, then note that only WWW Framework itself is covered by the GNU LGPL v3 license. Other components of the website or web service itself may be covered by another license and may not be open source like WWW Framework itself is. Every readable file of this framework carries specific copyright and license notes in their headers. If you are not sure, then please refer to the headers of files to see if they carry another license.
 
 ADDITIONAL COMPONENTS
 ---------------------

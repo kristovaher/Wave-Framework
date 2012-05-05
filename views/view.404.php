@@ -9,6 +9,7 @@ view for current request. This can be used to customize page-specific page-not-f
 however this view is not used for missing files and other static resources.
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: This file can be copied, changed and re-published under another license without any restrictions
 */
 
 // WWW_Factory is parent class for all MVC classes of WWW

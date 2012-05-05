@@ -9,6 +9,7 @@ Differently from PHP API Wrapper, JavaScript API Wrapper does not support sendin
 encrypted data.
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 function WWW_Wrapper(address){

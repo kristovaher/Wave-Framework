@@ -14,6 +14,7 @@ carries with itself currently used API.
 * Factory also allows loading of API Wrapper for communicating with other WWW Framework API's
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_Factory {

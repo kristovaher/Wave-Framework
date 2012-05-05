@@ -13,6 +13,7 @@ is always good to test before deploying minified resources to live systems.
 * This class attempts to minify CSS, JavaScript, HTML and XML
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_Minifier {

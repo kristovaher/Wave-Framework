@@ -15,6 +15,7 @@ last query.
 * MySQL, SQLite, PostgreSQL, Oracle, MS SQL supported
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 class WWW_Database {

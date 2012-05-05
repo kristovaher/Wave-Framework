@@ -15,6 +15,7 @@ through FTP.
 * It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
 
 Author and support: Kristo Vaher - kristo@waher.net
+License: GNU Lesser General Public License Version 3
 */
 
 // This function clears a folder and all of its subfolders and is run recursively

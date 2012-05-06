@@ -73,7 +73,7 @@ header('Content-Type: text/html;charset=utf-8');
 			if(isset($_GET['cutoff'])){
 				$cutoff=$_GET['cutoff'];
 			} else {
-				$cutoff=0;
+				$cutoff=time();
 			}
 
 			// Header

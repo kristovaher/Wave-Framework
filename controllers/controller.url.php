@@ -282,8 +282,8 @@ class WWW_controller_url extends WWW_Factory {
 		// DEFAULTS FOR VIEW DATA
 		
 			// If view controller has not been defined in sitemap configuration
-			if(!isset($data['view-controller'])){
-				$data['view-controller']='view';
+			if(!isset($data['controller'])){
+				$data['controller']='view';
 			}
 			
 			// If project title is not set by Sitemap, system defines the State project title as the value

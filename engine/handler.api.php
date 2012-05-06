@@ -52,8 +52,8 @@ License: GNU Lesser General Public License Version 3
 		$databaseConnection->username=$config['database-username'];
 		$databaseConnection->password=$config['database-password'];
 		$databaseConnection->database=$config['database-name'];
-		$databaseConnection->showErrors=((isset($config['database-errors']))?$config['database-errors']:(($state->data['error-reporting']!=0)?true:false));
-		$databaseConnection->connect();
+		$databaseConnection->showErrors=((isset($config['database-errors']))?$config['database-errors']:false);
+		$databaseConnection->dbConnect();
 		// Passing the database to State object
 		$state->databaseConnection=$databaseConnection;
 	}

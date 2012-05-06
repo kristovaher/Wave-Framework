@@ -106,6 +106,7 @@ if(empty($_GET)){
 		if(empty($_GET)){
 			echo '<p class="bold">There are no outstanding errors</p>';
 		} elseif(isset($_GET['error'])){
+			echo '<h3 onclick="if(confirm(\'Are you sure?\')){ document.location.href=document.location.href+\'&done\'; }" class="red bold" style="cursor:pointer;">Click to delete this error log</h3>';
 			// Getting error data
 			$errorData=file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error']);
 			$errorData=explode("\n",$errorData);
@@ -129,7 +130,6 @@ if(empty($_GET)){
 					echo '</div>';
 				}
 			}
-			echo '<h3 onclick="if(confirm(\'Are you sure?\')){ document.location.href=document.location.href+\'&done\'; }" class="red bold" style="cursor:pointer;">Click to delete this error log</h3>';
 		}
 		
 		// Footer

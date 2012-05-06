@@ -42,13 +42,13 @@ class WWW_Database {
 
 	// Database connection is closed if this object is not used anymore
 	public function __destruct(){
-		$this->disconnect();
+		$this->dbDisconnect();
 	}
 
 	// Connects to database based on set configuration
 	// * persistent - Whether database connection is persistent or not
 	// Throws errors if database connection fails
-	public function connect($persistent=false){
+	public function dbConnect($persistent=false){
 	
 		// Persistent or not
 		if($persistent==true){
@@ -133,7 +133,7 @@ class WWW_Database {
 	
 	// Disconnects from database, if connected
 	// Returns false if no connection was present
-	public function disconnect($resetQueryCounter=false){
+	public function dbDisconnect($resetQueryCounter=false){
 	
 		// This is only executed if existing connection is detected
 		if($this->connected==1 && !$this->persistent){
@@ -155,7 +155,7 @@ class WWW_Database {
 	// * query - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
 	// Returns the result in an array or returns false when query failed
-	public function multiple($query,$variables=array()){
+	public function dbMultiple($query,$variables=array()){
 	
 		if($this->connected==1){
 		
@@ -177,7 +177,7 @@ class WWW_Database {
 				return $return;
 			} else {
 				// Checking for an error, if there was one
-				$this->checkError($query);
+				$this->dbErrorCheck($query);
 				return false;
 			}
 					
@@ -192,7 +192,7 @@ class WWW_Database {
 	// * query - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
 	// Returns the result in an array or returns false when query failed
-	public function single($query,$variables=array()){
+	public function dbSingle($query,$variables=array()){
 	
 		if($this->connected==1){
 		
@@ -214,7 +214,7 @@ class WWW_Database {
 				return $return;
 			} else {
 				// Checking for an error, if there was one
-				$this->checkError($query);
+				$this->dbErrorCheck($query);
 				return false;
 			}
 
@@ -229,7 +229,7 @@ class WWW_Database {
 	// * query - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
 	// Returns the amount of rows that were affected by the query
-	public function command($query,$variables=array()){
+	public function dbCommand($query,$variables=array()){
 	
 		if($this->connected==1){
 		
@@ -255,7 +255,7 @@ class WWW_Database {
 				}
 			} else {
 				// Checking for an error, if there was one
-				$this->checkError($query);
+				$this->dbErrorCheck($query);
 				return false;
 			}
 					
@@ -268,7 +268,7 @@ class WWW_Database {
 	// Triggers a PHP error if MySQL encounters error in the query
 	// * query - query object from PDO
 	// Triggers an error if there was an error
-	private function checkError($query){
+	private function dbErrorCheck($query){
 	
 		if($this->connected==1){
 			if($this->showErrors==1){
@@ -276,7 +276,7 @@ class WWW_Database {
 				$errors=$query->errorInfo();
 				if($errors && !empty($errors)){
 					// PDO errorInfo carries verbose error as third in the index
-					trigger_error('Query failed: '.$errors[2],E_USER_ERROR);
+					trigger_error('Query failed: '.$errors[2],E_USER_WARNING);
 				}
 			}
 		} else {
@@ -290,7 +290,7 @@ class WWW_Database {
 	
 	// Used to get the last inserted ID from database
 	// Returns last ID if found, returns false if last ID was not found
-	public function lastId(){
+	public function dbLastId(){
 		if($this->connected==1){
 		
 			// Query total is being counted for performance review
@@ -312,7 +312,7 @@ class WWW_Database {
 	
 	// Begins transaction if transactions are supported
 	// Returns true if transaction is started
-	public function beginTransaction(){
+	public function dbTransaction(){
 		if($this->connected==1){
 		
 			// Query total is being counted for performance review
@@ -332,7 +332,7 @@ class WWW_Database {
 	
 	// Commits transaction if transactions are supported
 	// Returns true if transaction is commited
-	public function commitTransaction(){
+	public function dbCommit(){
 		if($this->connected==1){
 		
 			// Query total is being counted for performance review
@@ -352,7 +352,7 @@ class WWW_Database {
 	
 	// Rolls back the changes from transaction
 	// Returns true if transaction is rolled back
-	public function rollbackTransaction(){
+	public function dbRollback(){
 		if($this->connected==1){
 		
 			// Query total is being counted for performance review
@@ -371,7 +371,7 @@ class WWW_Database {
 	}
 	
 	// This function escapes a string for use in query
-	public function filter($value,$type='pdo'){
+	public function dbFilter($value,$type='pdo'){
 		if($this->connected==1){
 			switch($type){
 				case 'pdo':

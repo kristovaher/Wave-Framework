@@ -20,8 +20,9 @@ License: GNU Lesser General Public License Version 3
 
 // This function clears a folder and all of its subfolders and is run recursively
 // * directory - Directory of the file to be moved
+// * olderThan - Timestamp that will act as a cut-off point of the file modification date, if file is older than that timestamp, it is deleted
 // Returns plain text log
-function dirCleaner($directory){
+function dirCleaner($directory,$cutoff=0){
 
 	// Log will be stored in this array
 	$log=array();
@@ -33,11 +34,16 @@ function dirCleaner($directory){
 	// This will loop over all the files if files were found in this directory
 	if($files && !empty($files)){
 		foreach($files as $file){
-			// Attempting to remove the file
-			if(unlink($file)){
-				$log[]='DELETED '.$file;
+			// Testing if file modification date is older than the $cutoff timestamp 
+			if(filemtime($file)<=$cutoff){
+				// Attempting to remove the file
+				if(unlink($file)){
+					$log[]='DELETED '.$file;
+				} else {
+					$log[]='FAILED '.$file;
+				}
 			} else {
-				$log[]='FAILED '.$file;
+				$log[]='KEPT '.$file;
 			}
 		}
 	}
@@ -45,11 +51,17 @@ function dirCleaner($directory){
 	// This will loop over all the folders if folders were found in this directory
 	if($folders && !empty($folders)){
 		foreach($folders as $folder){
-			// Attempting to remove the folder
-			if(rmdir($folder)){
-				$log[]='DELETED '.$folder;
+			// Testing if the directory is empty
+			$contents=scandir($folder);
+			if(count($contents)<=2){
+				// Attempting to remove the folder
+				if(rmdir($folder)){
+					$log[]='DELETED '.$folder;
+				} else {
+					$log[]='FAILED '.$folder;
+				}
 			} else {
-				$log[]='FAILED '.$folder;
+				$log[]='NOT EMPTY '.$folder;
 			}
 		}
 	}

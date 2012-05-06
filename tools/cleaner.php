@@ -69,6 +69,12 @@ header('Content-Type: text/html;charset=utf-8');
 		if(!isset($_GET) || empty($_GET)){
 			echo '<p class="bold">Cleaner mode is not defined as a GET variable</p>';
 		} else {
+		
+			if(isset($_GET['cutoff'])){
+				$cutoff=$_GET['cutoff'];
+			} else {
+				$cutoff=0;
+			}
 
 			// Header
 			echo '<h1>Filesystem cleaner</h1>';
@@ -87,55 +93,55 @@ header('Content-Type: text/html;charset=utf-8');
 			// Clears /filesystem/cache/output/
 			if(isset($_GET['all']) || isset($_GET['output'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Clears images cache
 			if(isset($_GET['all']) || isset($_GET['images'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Clears cache of JavaScript and CSS
 			if(isset($_GET['all']) || isset($_GET['resources'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Clears cache of JavaScript and CSS
 			if(isset($_GET['all']) || isset($_GET['messenger'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Clears request data of user agent IP's
 			if(isset($_GET['all']) || isset($_GET['limiter'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'limiter'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Clears request data of user agent IP's
 			if(isset($_GET['all']) || isset($_GET['errors'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Clears system log
 			if(isset($_GET['all']) || isset($_GET['logs'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Clears API session tokens
 			if(isset($_GET['all']) || isset($_GET['sessions'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Clears folder from everything that might be stored here
 			if(isset($_GET['all']) || isset($_GET['tmp'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR;
-				$log=array_merge($log,dirCleaner($directory));
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
 			}
 
 			// Printing out log, if it is not empty

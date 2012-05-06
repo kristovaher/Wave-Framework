@@ -196,7 +196,7 @@ License: GNU Lesser General Public License Version 3
 			$errorReport[]=$error;
 			
 			// Logging the error, the error filename is calculated from current error message (this makes sure there are no duplicates, if the error message is the same).
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.md5(serialize($error)).'.log',json_encode($errorReport)."\n",FILE_APPEND);
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.md5($error['file'].$error['message']).'.log',json_encode($errorReport)."\n",FILE_APPEND);
 				
 			// As long as the error level is set to display errors of this type				
 			if($fatalError){

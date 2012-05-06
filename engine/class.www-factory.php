@@ -259,10 +259,10 @@ class WWW_Factory {
 		
 		// This is simply used to return an error from MVC elements, it generates a proper return array
 		// * message - Error message
-		// * responseCode - Error code number
 		// * customData - Additional data returned
+		// * responseCode - Error code number
 		// Returns an array
-		final protected function errorArray($message,$responseCode=300,$customData=false){
+		final protected function errorArray($message='OK',$customData=false,$responseCode=300){
 			if(is_array($customData)){
 				return array('www-error'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
@@ -272,10 +272,10 @@ class WWW_Factory {
 		
 		// This is simply used to return a success array from MVC elements, it generates a proper return array
 		// * message - Success message
-		// * responseCode - Response code number
 		// * customData - Additional data returned
+		// * responseCode - Response code number
 		// Returns an array
-		final protected function successArray($message,$responseCode=400,$customData=false){
+		final protected function successArray($message='Error',$customData=false,$responseCode=400){
 			if(is_array($customData)){
 				return array('www-success'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
@@ -456,13 +456,43 @@ class WWW_Factory {
 		}
 		
 	// DATABASE WRAPPERS
+	
+		// This function is used to create a new database object
+		// * type - Database type
+		// * host - Database host
+		// * database - Database name
+		// * username - Database username
+		// * password - Database password
+		// * showErrors - True or false flag regarding whether to show errors
+		// * autoConnect - True or false flag regarding whether it should automatically connect to that database
+		// Returns WWW_Database object
+		final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$autoConnect=true){
+			// Requiring database class files, if class has not been defined
+			if(!class_exists('WWW_Database')){
+				// Including the required class and creating the object
+				require($this->WWW_API->state['system-root'].'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
+			}
+			$databaseConnection=new WWW_Database();
+			// Assigning database variables and creating the connection
+			$databaseConnection->type=$type;
+			$databaseConnection->host=$host;
+			$databaseConnection->username=$username;
+			$databaseConnection->password=$password;
+			$databaseConnection->database=$database;
+			$databaseConnection->showErrors=$showErrors;
+			if($autoConnect){
+				$databaseConnection->dbConnect();
+			}
+			// Passing the database to State object
+			return $databaseConnection;
+		}
 			
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// * query - query string, a statement to prepare with PDO
 		// * variables - array of variables to use in prepared statement
 		// Returns result of that query
 		final protected function dbSingle($query,$variables=array()){
-			return $this->WWW_API->state->databaseConnection->single($query,$variables);
+			return $this->WWW_API->state->databaseConnection->dbSingle($query,$variables);
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
@@ -470,7 +500,7 @@ class WWW_Factory {
 		// * variables - array of variables to use in prepared statement
 		// Returns result of that query
 		final protected function dbMultiple($query,$variables=array()){
-			return $this->WWW_API->state->databaseConnection->multiple($query,$variables);
+			return $this->WWW_API->state->databaseConnection->dbMultiple($query,$variables);
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
@@ -478,36 +508,36 @@ class WWW_Factory {
 		// * variables - array of variables to use in prepared statement
 		// Returns result of that query
 		final protected function dbCommand($query,$variables=array()){
-			return $this->WWW_API->state->databaseConnection->command($query,$variables);
+			return $this->WWW_API->state->databaseConnection->dbCommand($query,$variables);
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
 		final protected function dbLastId(){
-			return $this->WWW_API->state->databaseConnection->lastId();
+			return $this->WWW_API->state->databaseConnection->dbLastId();
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
 		final protected function dbTransaction(){
-			return $this->WWW_API->state->databaseConnection->beginTransaction();
+			return $this->WWW_API->state->databaseConnection->dbTransaction();
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
 		final protected function dbRollback(){
-			return $this->WWW_API->state->databaseConnection->rollbackTransaction();
+			return $this->WWW_API->state->databaseConnection->dbRollback();
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
 		final protected function dbCommit(){
-			return $this->WWW_API->state->databaseConnection->commitTransaction();
+			return $this->WWW_API->state->databaseConnection->dbCommit();
 		}
 		
 		// This function escapes a string for use in query
 		final protected function dbFilter($value,$type='pdo'){
-			return $this->WWW_API->state->databaseConnection->filter($value,$type);
+			return $this->WWW_API->state->databaseConnection->dbFilter($value,$type);
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class

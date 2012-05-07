@@ -29,6 +29,14 @@ if(!isset($config['http-authentication-username']) || !isset($config['http-authe
 	die();
 }
 
+// Required timezone setting
+if(!isset($config['timezone'])){
+	// Setting GMT as the default timezone
+	$config['timezone']='Europe/London';
+}
+// Setting the timezone
+date_default_timezone_set($config['timezone']);
+
 // Requiring some maintenance functions
 require('.'.DIRECTORY_SEPARATOR.'functions.php');
 
@@ -54,7 +62,7 @@ if(empty($_GET)){
 	$errorLogs=scandir('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR);
 	// If it found error messages of any kind
 	if(count($errorLogs)>2){
-		header('Location: '.$_SERVER['REQUEST_URI'].'?error='.$errorLogs[2]);
+		header('Location: debugger.php?error='.$errorLogs[2]);
 		die();
 	}
 } elseif(isset($_GET['error']) && isset($_GET['done'])){
@@ -63,15 +71,13 @@ if(empty($_GET)){
 		unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error']);
 	}
 	// User will be redirected back to initial site
-	$tmp=explode('?',$_SERVER['REQUEST_URI']);
-	header('Location: '.array_shift($tmp));
+	header('Location: debugger.php');
 	die();
 } elseif(isset($_GET['error'])){
 	// If error is found
 	if(!file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error'])){
 		// User will be redirected back to initial site
-		$tmp=explode('?',$_SERVER['REQUEST_URI']);
-		header('Location: '.array_shift($tmp));
+		header('Location: debugger.php');
 		die();
 	}
 }
@@ -133,7 +139,7 @@ if(empty($_GET)){
 		}
 		
 		// Footer
-		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' for '.$_SERVER['HTTP_HOST'].'</p>';
+		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' GMT '.date('P').' for '.$_SERVER['HTTP_HOST'].'</p>';
 	
 		?>
 	</body>

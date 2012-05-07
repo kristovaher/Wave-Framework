@@ -30,7 +30,7 @@ class WWW_Database {
 	public $type='mysql';
 	public $username='';
 	public $password='';
-	public $host='';
+	public $host='localhost';
 	public $database='';
 	public $persistent=false;
 	
@@ -40,6 +40,18 @@ class WWW_Database {
 	// We count the amount of queries in this variable
 	public $queryCounter=0;
 
+	// These parameters are set during object construction
+	public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=false,$persistent=false){
+		// Assigning construct elements to object parameters
+		$this->type=$type;
+		$this->host=$host;
+		$this->database=$database;
+		$this->username=$username;
+		$this->password=$password;
+		$this->showErrors=$showErrors;
+		$this->persistent=$persistent;
+	}
+	
 	// Database connection is closed if this object is not used anymore
 	public function __destruct(){
 		$this->dbDisconnect();
@@ -157,32 +169,31 @@ class WWW_Database {
 	// Returns the result in an array or returns false when query failed
 	public function dbMultiple($query,$variables=array()){
 	
-		if($this->connected==1){
+		// Attempting to connect to database, if not connected
+		if($this->connected!=1){
+			$this->dbConnect($this->persistent);
+		}
 		
-			// Query total is being counted for performance review
-			$this->queryCounter++;
+		// Query total is being counted for performance review
+		$this->queryCounter++;
 
-			// Preparing a query and executing it
-			$query=$this->pdo->prepare($query);
-			$result=$query->execute($variables);
-			
-			// If there is a result then it is fetched and returned
-			if($result){
-				// All data is returned as associative array
-				$return=$query->fetchAll(PDO::FETCH_ASSOC);
-				// Closing the resource
-				$query->closeCursor();
-				unset($query);
-				// Associative array is returned
-				return $return;
-			} else {
-				// Checking for an error, if there was one
-				$this->dbErrorCheck($query);
-				return false;
-			}
-					
+		// Preparing a query and executing it
+		$query=$this->pdo->prepare($query);
+		$result=$query->execute($variables);
+		
+		// If there is a result then it is fetched and returned
+		if($result){
+			// All data is returned as associative array
+			$return=$query->fetchAll(PDO::FETCH_ASSOC);
+			// Closing the resource
+			$query->closeCursor();
+			unset($query);
+			// Associative array is returned
+			return $return;
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			// Checking for an error, if there was one
+			$this->dbErrorCheck($query);
+			return false;
 		}
 		
 	}
@@ -194,32 +205,31 @@ class WWW_Database {
 	// Returns the result in an array or returns false when query failed
 	public function dbSingle($query,$variables=array()){
 	
-		if($this->connected==1){
+		// Attempting to connect to database, if not connected
+		if($this->connected!=1){
+			$this->dbConnect($this->persistent);
+		}
 		
-			// Query total is being counted for performance review
-			$this->queryCounter++;
+		// Query total is being counted for performance review
+		$this->queryCounter++;
 
-			// Preparing a query and executing it
-			$query=$this->pdo->prepare($query);
-			$result=$query->execute($variables);
-			
-			// If there is a result then it is fetched and returned
-			if($result){
-				// All data is returned as associative array
-				$return=$query->fetch(PDO::FETCH_ASSOC);
-				// Closing the resource
-				$query->closeCursor();
-				unset($query);
-				// Associative array is returned
-				return $return;
-			} else {
-				// Checking for an error, if there was one
-				$this->dbErrorCheck($query);
-				return false;
-			}
-
+		// Preparing a query and executing it
+		$query=$this->pdo->prepare($query);
+		$result=$query->execute($variables);
+		
+		// If there is a result then it is fetched and returned
+		if($result){
+			// All data is returned as associative array
+			$return=$query->fetch(PDO::FETCH_ASSOC);
+			// Closing the resource
+			$query->closeCursor();
+			unset($query);
+			// Associative array is returned
+			return $return;
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			// Checking for an error, if there was one
+			$this->dbErrorCheck($query);
+			return false;
 		}
 		
 	}
@@ -231,36 +241,35 @@ class WWW_Database {
 	// Returns the amount of rows that were affected by the query
 	public function dbCommand($query,$variables=array()){
 	
-		if($this->connected==1){
+		// Attempting to connect to database, if not connected
+		if($this->connected!=1){
+			$this->dbConnect($this->persistent);
+		}
 		
-			// Query total is being counted for performance review
-			$this->queryCounter++;
+		// Query total is being counted for performance review
+		$this->queryCounter++;
 
-			// Preparing a query and executing it
-			$query=$this->pdo->prepare($query);
-			$result=$query->execute($variables);
-			
-			// If there is a result then it is fetched and returned
-			if($result){
-				// Result of this query is the amount of rows affected by it
-				$rowCount=$query->rowCount();
-				// Closing the resource
-				$query->closeCursor();
-				unset($query);
-				// If, for some reason, the amount of affected rows was not returned, system simply returns true
-				if($rowCount){
-					return $rowCount;
-				} else {
-					return true;
-				}
+		// Preparing a query and executing it
+		$query=$this->pdo->prepare($query);
+		$result=$query->execute($variables);
+		
+		// If there is a result then it is fetched and returned
+		if($result){
+			// Result of this query is the amount of rows affected by it
+			$rowCount=$query->rowCount();
+			// Closing the resource
+			$query->closeCursor();
+			unset($query);
+			// If, for some reason, the amount of affected rows was not returned, system simply returns true
+			if($rowCount){
+				return $rowCount;
 			} else {
-				// Checking for an error, if there was one
-				$this->dbErrorCheck($query);
-				return false;
+				return true;
 			}
-					
 		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+			// Checking for an error, if there was one
+			$this->dbErrorCheck($query);
+			return false;
 		}
 		
 	}
@@ -270,6 +279,7 @@ class WWW_Database {
 	// Triggers an error if there was an error
 	private function dbErrorCheck($query){
 	
+		// This method requires database to be connected
 		if($this->connected==1){
 			if($this->showErrors==1){
 				// Checking if there is error information stored for this request
@@ -291,6 +301,8 @@ class WWW_Database {
 	// Used to get the last inserted ID from database
 	// Returns last ID if found, returns false if last ID was not found
 	public function dbLastId(){
+	
+		// This method requires database to be connected
 		if($this->connected==1){
 		
 			// Query total is being counted for performance review
@@ -308,31 +320,35 @@ class WWW_Database {
 		} else {
 			trigger_error('Database not connected',E_USER_ERROR);
 		}
+		
 	}
 	
 	// Begins transaction if transactions are supported
 	// Returns true if transaction is started
 	public function dbTransaction(){
-		if($this->connected==1){
-		
-			// Query total is being counted for performance review
-			$this->queryCounter++;
-			
-			// Begins transaction
-			if($this->pdo->beginTransaction()){
-				return true;
-			} else {
-				return false;
-			}
-			
-		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+	
+		// Attempting to connect to database, if not connected
+		if($this->connected!=1){
+			$this->dbConnect($this->persistent);
 		}
+		
+		// Query total is being counted for performance review
+		$this->queryCounter++;
+		
+		// Begins transaction
+		if($this->pdo->beginTransaction()){
+			return true;
+		} else {
+			return false;
+		}
+			
 	}
 	
 	// Commits transaction if transactions are supported
 	// Returns true if transaction is commited
 	public function dbCommit(){
+	
+		// This method requires database to be connected
 		if($this->connected==1){
 		
 			// Query total is being counted for performance review
@@ -353,6 +369,8 @@ class WWW_Database {
 	// Rolls back the changes from transaction
 	// Returns true if transaction is rolled back
 	public function dbRollback(){
+	
+		// This method requires database to be connected
 		if($this->connected==1){
 		
 			// Query total is being counted for performance review
@@ -368,34 +386,34 @@ class WWW_Database {
 		} else {
 			trigger_error('Database not connected',E_USER_ERROR);
 		}
+		
 	}
 	
 	// This function escapes a string for use in query
 	public function dbFilter($value,$type='pdo'){
-		if($this->connected==1){
-			switch($type){
-				case 'pdo':
-					return $this->pdo->quote($value,PDO::PARAM_STR);
-					break;
-				case 'int':
-					return (int)$value;
-					break;
-				case 'latin':
-					return preg_replace('/[^a-z]/i','',$value);
-					break;
-				case 'field':
-					return preg_replace('/[^a-z]/i','',$value);
-					break;
-				case 'like':
-					return str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR));
-					break;
-				default:
-					return $value;
-					break;
-			}
-		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
+	
+		// Filtering is done based on filter type
+		switch($type){
+			case 'pdo':
+				return $this->pdo->quote($value,PDO::PARAM_STR);
+				break;
+			case 'int':
+				return (int)$value;
+				break;
+			case 'latin':
+				return preg_replace('/[^a-z]/i','',$value);
+				break;
+			case 'field':
+				return preg_replace('/[^a-z]/i','',$value);
+				break;
+			case 'like':
+				return str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR));
+				break;
+			default:
+				return $value;
+				break;
 		}
+		
 	}
 
 }

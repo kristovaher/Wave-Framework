@@ -113,8 +113,7 @@ class WWW_Logger {
 			}
 			// Stores request datetime in format 'Y-m-d H:i:s'.
 			if($this->loggedData=='*' || in_array('datetime',$this->loggedData)){ 
-				date_default_timezone_set('Europe/London');
-				$logData['datetime']=date('Y-m-d H:i:s').' GMT';
+				$logData['datetime']=date('Y-m-d H:i:s').' GMT '.date('P');
 			}
 			// Stores IP of the user agent that made the request.
 			if($this->loggedData=='*' || in_array('ip',$this->loggedData)){ 

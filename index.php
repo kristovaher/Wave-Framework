@@ -148,8 +148,8 @@ License: GNU Lesser General Public License Version 3
 			$errorCheck=error_get_last();
 		}
 		
-		// If there was an error
-		if($errorCheck!=null){
+		// If there is an error and it is not a deprecated Line 0 error (which sporadically is thrown in PHP 5.3.4)
+		if($errorCheck && ($errorCheck['line']!=0 || $errorCheck['type']<E_DEPRECATED)){
 		
 			// Detecting if error is fatal - thus if error message should be shown to the user
 			$fatalError=false;
@@ -159,7 +159,8 @@ License: GNU Lesser General Public License Version 3
 					
 			// Error report will be stored in this array
 			$errorReport=array();
-			$errorReport[]=date('d.m.Y H:i:s').' GMT';
+			// Setting GMT as the error-reporting timezone
+			$errorReport[]=date('d.m.Y H:i:s');
 			
 			// Input data to error report
 			$error=array();

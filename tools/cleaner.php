@@ -35,6 +35,14 @@ if(!isset($config['http-authentication-username']) || !isset($config['http-authe
 	die();
 }
 
+// Required timezone setting
+if(!isset($config['timezone'])){
+	// Setting GMT as the default timezone
+	$config['timezone']='Europe/London';
+}
+// Setting the timezone
+date_default_timezone_set($config['timezone']);
+
 // Requiring some maintenance functions
 require('.'.DIRECTORY_SEPARATOR.'functions.php');
 
@@ -157,7 +165,7 @@ header('Content-Type: text/html;charset=utf-8');
 		}
 		
 		// Footer
-		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' for '.$_SERVER['HTTP_HOST'].'</p>';
+		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' GMT '.date('P').' for '.$_SERVER['HTTP_HOST'].'</p>';
 	
 		?>
 	</body>

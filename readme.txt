@@ -7,7 +7,7 @@ API-focused web and infosystems PHP micro-framework
 ABOUT THIS README
 -----------------
 
-This ReadMe file, that you are reading right now, is specifically about the WWW Framework. Unless it has been modified or mentioned anywhere, this ReadMe has no details about the website or web service that has been built on WWW Framework. To get details about the website or web service, you should either refer to another ReadMe file, if provided, or ask the authors of the website or the web service.
+This ReadMe file, that you are reading right now, is specifically about the WWW Framework. Unless it has been modified or mentioned anywhere, this ReadMe has no details about the website or web service that has been built on WWW Framework. To get details about the website or web service, you should either refer to another ReadMe file, if provided, file headers or ask the authors of the website or the web service.
 
 ABOUT
 -----

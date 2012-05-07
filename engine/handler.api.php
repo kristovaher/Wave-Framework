@@ -41,19 +41,11 @@ License: GNU Lesser General Public License Version 3
 	
 // DATABASE
 
-	// If database name is set then database controller is loaded
+	// Connecting to database, if configuration is set
 	if(isset($config['database-name']) && $config['database-name']!='' && isset($config['database-type']) && isset($config['database-host']) && isset($config['database-username']) && isset($config['database-password'])){
 		// Including the required class and creating the object
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
-		$databaseConnection=new WWW_Database();
-		// Assigning database variables and creating the connection
-		$databaseConnection->type=$config['database-type'];
-		$databaseConnection->host=$config['database-host'];
-		$databaseConnection->username=$config['database-username'];
-		$databaseConnection->password=$config['database-password'];
-		$databaseConnection->database=$config['database-name'];
-		$databaseConnection->showErrors=((isset($config['database-errors']))?$config['database-errors']:false);
-		$databaseConnection->dbConnect();
+		$databaseConnection=new WWW_Database($config['database-type'],$config['database-host'],$config['database-name'],$config['database-username'],$config['database-password'],((isset($config['database-errors']))?$config['database-errors']:false),((isset($config['database-persistent']))?$config['database-persistent']:false));
 		// Passing the database to State object
 		$state->databaseConnection=$databaseConnection;
 	}

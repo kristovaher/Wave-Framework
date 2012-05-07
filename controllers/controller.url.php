@@ -16,7 +16,7 @@ website with beautiful URL's with WWW framework.
 * Returns view based data, such as translations, sitemap and view settings, to view through data handler
 
 Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
+License: This file can be copied, changed and re-published under another license without any restrictions
 */
 
 // WWW_Factory is parent class for all MVC classes of WWW
@@ -236,6 +236,12 @@ class WWW_controller_url extends WWW_Factory {
 		}
 		
 		// Populating sitemap info with additional details
+		$siteMapInfo['request-url']='/'.$requestNodesRaw[0];
+		if(isset($requestNodesRaw[1])){
+			$siteMapInfo['request-parameters']=$requestNodesRaw[1];
+		} else {
+			$siteMapInfo['request-parameters']='';
+		}
 		$siteMapInfo['language']=$language;
 		$siteMapInfo['web-root']=$webRoot;
 		

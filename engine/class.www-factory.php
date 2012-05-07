@@ -464,25 +464,15 @@ class WWW_Factory {
 		// * username - Database username
 		// * password - Database password
 		// * showErrors - True or false flag regarding whether to show errors
-		// * autoConnect - True or false flag regarding whether it should automatically connect to that database
+		// * persistentConnection - True of false flag regarding whether connection is assigned to be permanent
 		// Returns WWW_Database object
-		final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$autoConnect=true){
+		final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$persistentConnection=false){
 			// Requiring database class files, if class has not been defined
 			if(!class_exists('WWW_Database')){
 				// Including the required class and creating the object
 				require($this->WWW_API->state['system-root'].'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
 			}
-			$databaseConnection=new WWW_Database();
-			// Assigning database variables and creating the connection
-			$databaseConnection->type=$type;
-			$databaseConnection->host=$host;
-			$databaseConnection->username=$username;
-			$databaseConnection->password=$password;
-			$databaseConnection->database=$database;
-			$databaseConnection->showErrors=$showErrors;
-			if($autoConnect){
-				$databaseConnection->dbConnect();
-			}
+			$databaseConnection=new WWW_Database($type,$host,$database,$username,$password,$showErrors,$persistentConnection);
 			// Passing the database to State object
 			return $databaseConnection;
 		}

@@ -31,6 +31,14 @@ License: GNU Lesser General Public License Version 3
 // Main configuration file is included
 $config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
 
+// Required timezone setting
+if(!isset($config['timezone'])){
+	// Setting GMT as the default timezone
+	$config['timezone']='Europe/London';
+}
+// Setting the timezone
+date_default_timezone_set($config['timezone']);
+
 // Error reporting is turned off in this script
 error_reporting(0);
 
@@ -388,7 +396,7 @@ header('Content-Type: text/html;charset=utf-8');
 		echo '</p>';
 
 		// Footer
-		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' for '.$_SERVER['HTTP_HOST'].'</p>';
+		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' GMT '.date('P').' for '.$_SERVER['HTTP_HOST'].'</p>';
 	
 		?>
 	</body>

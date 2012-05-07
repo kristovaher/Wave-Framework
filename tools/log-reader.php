@@ -31,6 +31,14 @@ if(!isset($config['http-authentication-username']) || !isset($config['http-authe
 	die();
 }
 
+// Required timezone setting
+if(!isset($config['timezone'])){
+	// Setting GMT as the default timezone
+	$config['timezone']='Europe/London';
+}
+// Setting the timezone
+date_default_timezone_set($config['timezone']);
+
 // Requiring some maintenance functions
 require('.'.DIRECTORY_SEPARATOR.'functions.php');
 
@@ -47,11 +55,76 @@ foreach($versionsRaw as $ver){
 // Log is printed out in plain text format
 header('Content-Type: text/html;charset=utf-8');
 
+// Checking if logger attempts to read internal log
+if(isset($_GET['internal'])){
+
+	// Actual log address
+	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log';
+	
+	// If file is set for deletion
+	if(isset($_GET['delete']) && file_exists($logAddress)){
+		unlink($logAddress);
+		// Redirecting to link without delete flag set
+		header('Location: log-reader.php?internal');
+		die();
+	}
+
+} else {
+
+	// Log reader can access any log file created by the system
+	if(isset($_GET['log'])){
+		// User agent requested input URL is validated against hostile characters
+		$logFileName=preg_replace('/[^A-Za-z\-\_0-9\/]/i','',$_GET['log']);
+	} else {
+		// By default the results are returned from current hour
+		header('Location: log-reader.php?log='.date('Y-m-d-H'));
+		die();
+	}
+		
+	// This stores the array types to print out
+	$types=array();
+
+	// You can print out only some log information
+	if(isset($_GET['types'])){
+		$rawTypes=explode(',',$_GET['types']);
+		foreach($rawTypes as $t){
+			$bits=explode('[',$t);
+			if(isset($bits[1])){
+				$types[$t]=str_replace(']','',$bits[1]);
+			} else {
+				$types[$t]=true;
+			}
+		}
+	} else {
+		$types['all']=true;
+	}
+
+	// Every day the logs are stored under different log subfolder
+	$logSubfolder=substr($logFileName,0,10);
+	
+	// Actual log address
+	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.log';
+	
+	// If file is set for deletion
+	if(isset($_GET['delete']) && file_exists($logAddress)){
+		unlink($logAddress);
+		unset($_GET['delete']);
+		// Redirecting to link without delete flag set
+		if(!empty($_GET)){
+			header('Location: log-reader.php?'.http_build_query($_GET));
+		} else {
+			header('Location: log-reader.php');
+		}
+		die();
+	}
+	
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Log reader</title>
+		<title><?=(isset($_GET['internal']))?'Internal log':'Log reader'?></title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width"/> 
 		<link type="text/css" href="style.css" rel="stylesheet" media="all"/>
@@ -76,51 +149,11 @@ header('Content-Type: text/html;charset=utf-8');
 		
 		echo '<h2>Log</h2>';
 
-		// Checking if logger attempts to read internal log
-		if(isset($_GET['internal'])){
-
-			// Actual log address
-			$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log';
-
-		} else {
-
-			// Log reader can access any log file created by the system
-			if(isset($_GET['log'])){
-				// User agent requested input URL is validated against hostile characters
-				$logFileName=preg_replace('/[^A-Za-z\-\_0-9\/]/i','',$_GET['log']);
-			} else {
-				// By default the results are returned from current hour
-				$logFileName=date('Y-m-d-H');
-			}
-				
-			// This stores the array types to print out
-			$types=array();
-
-			// You can print out only some log information
-			if(isset($_GET['types'])){
-				$rawTypes=explode(',',$_GET['types']);
-				foreach($rawTypes as $t){
-					$bits=explode('[',$t);
-					if(isset($bits[1])){
-						$types[$t]=str_replace(']','',$bits[1]);
-					} else {
-						$types[$t]=true;
-					}
-				}
-			} else {
-				$types['all']=true;
-			}
-
-			// Every day the logs are stored under different log subfolder
-			$logSubfolder=substr($logFileName,0,10);
-			
-			// Actual log address
-			$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.log';
-
-		}
-
 			// All logs are stored in /log/ folder, if a folder does not exist
 			if(file_exists($logAddress)){
+			
+				// File delete link
+				echo '<h3 onclick="if(confirm(\'Are you sure?\')){ document.location.href=document.location.href+\'&delete\'; }" class="red bold" style="cursor:pointer;">Click to delete this log</h3>';
 
 				// Log files are stored as JSON serialized arrays, separated with line-breaks
 				$log=explode("\n",file_get_contents($logAddress));
@@ -169,7 +202,7 @@ header('Content-Type: text/html;charset=utf-8');
 			}
 		
 		// Footer
-		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' for '.$_SERVER['HTTP_HOST'].'</p>';
+		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' GMT '.date('P').' for '.$_SERVER['HTTP_HOST'].'</p>';
 	
 		?>
 	</body>

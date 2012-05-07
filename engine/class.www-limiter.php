@@ -91,13 +91,17 @@ class WWW_Limiter {
 						if(count($checkData)==1){
 							// Request is logged and can be used for performance review later
 							if($this->logger){
-								$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter','reason'=>'Too many requests'));
+								$this->logger->setCustomLogData(array('response-code'=>429,'category'=>'limiter','reason'=>'Too many requests'));
 								$this->logger->writeLog();
 							}
 							// Block file is created and 403 page thrown to the user agent
 							file_put_contents($this->logDir.$logFilename.'.tmp','BLOCKED');
 							// Returning proper header
-							header('HTTP/1.1 403 Forbidden');
+							header('HTTP/1.1 429 Too Many Requests');
+							header('Retry-After: '.$duration);
+							// Response to be displayed in browser
+							echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">HTTP/1.1 429 Too Many Requests</div>';
+							echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">YOUR IP HAS MADE TOO MANY REQUESTS TO THIS SERVER, TRY AGAIN IN '.$duration.' SECONDS</div>';
 							die();
 						}
 						
@@ -109,18 +113,25 @@ class WWW_Limiter {
 					
 				} else {
 				
+					// The time when lock was created
+					$blockDuration=filemtime($this->logDir.$logFilename.'.tmp');
 					// If the file that has blocked the requests is older than the limit duration, then block is deleted, otherwise 403 page is shown
-					if(time()-filemtime($this->logDir.$logFilename.'.tmp')>=$duration){
+					if(time()-$blockDuration>=$duration){
 						// Block file is removed
 						unlink($this->logDir.$logFilename.'.tmp');
 					} else {
 						// Request is logged and can be used for performance review later
 						if($this->logger){
-							$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter','reason'=>'Too many requests'));
+							$this->logger->setCustomLogData(array('response-code'=>429,'category'=>'limiter','reason'=>'Too many requests'));
 							$this->logger->writeLog();
 						}
 						// Returning 403 header
-						header('HTTP/1.1 403 Forbidden');
+						$retryAfter=($duration-(time()-$blockDuration));
+						header('HTTP/1.1 429 Too Many Requests');
+						header('Retry-After: '.$retryAfter);
+						// Response to be displayed in browser
+						echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">HTTP/1.1 429 Too Many Requests</div>';
+						echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">YOUR IP HAS MADE TOO MANY REQUESTS TO THIS SERVER, TRY AGAIN IN '.$retryAfter.' SECONDS</div>';
 						die();
 					}
 					
@@ -159,6 +170,9 @@ class WWW_Limiter {
 					}
 					// Returning 503 header
 					header('HTTP/1.1 503 Service Unavailable');
+					// Response to be displayed in browser
+					echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">HTTP/1.1 503 Service Unavailable</div>';
+					echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">SERVER IS UNDER A LOT OF STRESS, YOUR REQUEST IS CURRENTLY BLOCKED, PLEASE TRY AGAIN LATER</div>';
 					die();
 				}
 			} else {
@@ -189,6 +203,9 @@ class WWW_Limiter {
 				}
 				// Returning 403 data
 				header('HTTP/1.1 403 Forbidden');
+				// Response to be displayed in browser
+				echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">HTTP/1.1 403 Forbidden</div>';
+				echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">YOUR IP IS NOT ALLOWED TO USE THIS SERVICE</div>';
 				die();
 			}
 		}
@@ -216,6 +233,9 @@ class WWW_Limiter {
 				}
 				// Returning 403 data
 				header('HTTP/1.1 403 Forbidden');
+				// Response to be displayed in browser
+				echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">HTTP/1.1 403 Forbidden</div>';
+				echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">YOUR IP IS NOT ALLOWED TO USE THIS SERVICE</div>';
 				die();
 			}
 		}
@@ -241,6 +261,9 @@ class WWW_Limiter {
 			// Returning 401 headers
 			header('WWW-Authenticate: Basic realm="'.$_SERVER['HTTP_HOST'].'"');
 			header('HTTP/1.1 401 Unauthorized');
+			// Response to be displayed in browser
+			echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">HTTP/1.1 401 Unauthorized</div>';
+			echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">AUTHORIZATION DETAILS ARE REQUIRED</div>';
 			die();
 		}
 		
@@ -268,6 +291,9 @@ class WWW_Limiter {
 				}
 				// Returning 401 header
 				header('HTTP/1.1 401 Unauthorized');
+				// Response to be displayed in browser
+				echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">HTTP/1.1 401 Unauthorized</div>';
+				echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">HTTPS CONNECTION IS REQUIRED</div>';
 			}
 			// Script is halted
 			die();

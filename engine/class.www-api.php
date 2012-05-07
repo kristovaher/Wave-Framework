@@ -1243,15 +1243,37 @@ class WWW_API {
 					foreach($value as $subkey=>$subvalue){
 						// If this sub-value is another array then it is imploded with commas
 						if(is_array($subvalue)){
-							$result[]=$subkey.'='.implode(',',$subvalue);
+							foreach($subvalue as $subsubkey=>$subsubvalue){
+								// If another array is set as a value
+								if(is_array($subsubvalue)){
+									foreach($subsubvalue as $k=>$v){
+										if(is_array($v)){
+											$subsubvalue[$k]=str_replace('"','\"',serialize($v));
+										} else {
+											$subsubvalue[$k]=str_replace('"','\"',$v);
+										}
+									}
+									$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'['.preg_replace('/[^a-zA-Z0-9]/i','',$subsubkey).']="'.implode(',',$subsubvalue).'"';
+								} else {
+									$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'['.preg_replace('/[^a-zA-Z0-9]/i','',$subsubkey).']="'.str_replace('"','\"',$subsubvalue).'"';
+								}
+							}
 						} else {
 							// If the value was not an array, then value is simply output in INI format
-							$result[]=$subkey.'='.$subvalue;
+							if(is_numeric($subvalue)){
+								$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'='.$subvalue;
+							} else {
+								$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'="'.str_replace('"','\"',$subvalue).'"';
+							}
 						}
 					}
 				} else {
 					// If the value was not an array, then value is simply output in INI format
-					$result[]=$key.'='.$value;
+					if(is_numeric($subvalue)){
+						$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$key).'='.$value;
+					} else {
+						$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$key).'="'.str_replace('"','\"',$value).'"';
+					}
 				}
 			}
 			

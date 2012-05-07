@@ -16,7 +16,7 @@ website with beautiful URL's with WWW framework.
 * Returns view based data, such as translations, sitemap and view settings, to view through data handler
 
 Author and support: Kristo Vaher - kristo@waher.net
-License: This file can be copied, changed and re-published under another license without any restrictions
+License: GNU Lesser General Public License Version 3
 */
 
 // WWW_Factory is parent class for all MVC classes of WWW
@@ -284,6 +284,16 @@ class WWW_controller_url extends WWW_Factory {
 			// If view controller has not been defined in sitemap configuration
 			if(!isset($data['controller'])){
 				$data['controller']='view';
+			}
+			
+			// If view subview has not been defined in sitemap configuration
+			if(!isset($data['subview'])){
+				$data['subview']='';
+			}
+			
+			// If view hidden state has not been defined in sitemap configuration
+			if(!isset($data['hidden'])){
+				$data['hidden']=0;
 			}
 			
 			// If project title is not set by Sitemap, system defines the State project title as the value

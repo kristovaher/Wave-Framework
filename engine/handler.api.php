@@ -74,7 +74,7 @@ License: GNU Lesser General Public License Version 3
 		// Testing if namespace cookie has been set, if it has then checking for session variables
 		if(isset($_COOKIE[$state->data['session-namespace']])){
 			// Starting sessions
-			$state->sessionStart();
+			$state->startSession();
 			// Checking for session variables
 			if(isset($_SESSION[$state->data['session-namespace']]) && !empty($_SESSION[$state->data['session-namespace']])){ 
 				$inputData['www-session']=$_SESSION[$state->data['session-namespace']]; 

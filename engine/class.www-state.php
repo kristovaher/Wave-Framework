@@ -653,10 +653,17 @@ class WWW_State	{
 	// SESSION AND COOKIES
 	
 		// This starts session in current namespace
-		final public function startSession(){
+		// * secure - If secure cookie is used
+		// * httponly - If cookie is HTTP only
+		// Returns true
+		final public function startSession($secure=false,$httpOnly){
 			// Making sure that sessions have not already been started
 			if(!session_id()){
+				// Defining session name
 				session_name($this->data['session-namespace']);
+				// Setting session cookie parameters
+				session_set_cookie_params(0,$this->data['web-root'],$this->data['http-host'],$secure,$httpOnly);
+				// Starting sessions
 				session_start();
 			}
 			// Flag for session state
@@ -684,7 +691,10 @@ class WWW_State	{
 			// Regenerating session id
 			session_destroy();
 			// Unsetting session cookie
-			$this->unsetCookie($this->data['session-namespace']);
+			$cookieParams=session_get_cookie_params();
+			setcookie($this->data['session-namespace'],'',($this->data['request-time']-3600),$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
+			// Session state flag
+			$this->sessionStarted=false;
 			return true;
 		}
 		
@@ -692,7 +702,7 @@ class WWW_State	{
 		// * key - Key of the variable, can be an array
 		// * value - Value to be set
 		// Returns true
-		final public function setSession($key,$value){
+		final public function setSession($key=false,$value=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
 				$this->startSession();
@@ -700,10 +710,15 @@ class WWW_State	{
 			// Multiple values can be set if key is an array
 			if(is_array($key)){
 				foreach($key as $k=>$v){
+					// setting value based on key
 					$_SESSION[$this->data['session-namespace']][$k]=$v;
 				}
-			} else {
+			} elseif($key){
+				// Setting value based on key
 				$_SESSION[$this->data['session-namespace']][$key]=$value;
+			} else {
+				// If key is false, then replacing the entire session variable
+				$_SESSION[$this->data['session-namespace']]=$value;
 			}
 			return true;
 		}
@@ -711,7 +726,7 @@ class WWW_State	{
 		// Gets a value based on a key from current namespace
 		// * key - Key of the value to be returned
 		// Returns the value if it exists
-		final public function getSession($key){
+		final public function getSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
 				$this->startSession();
@@ -722,6 +737,7 @@ class WWW_State	{
 				$return=array();
 				// This array will hold multiple values
 				foreach($key as $val){
+					// Getting value based on key
 					if(isset($_SESSION[$this->data['session-namespace']][$val])){
 						$return[$val]=$_SESSION[$this->data['session-namespace']][$val];
 					} else {
@@ -729,9 +745,17 @@ class WWW_State	{
 					}
 				}
 				return $return;
-			} else {
+			} elseif($key){
+				// Return data from specific key
 				if(isset($_SESSION[$this->data['session-namespace']][$key])){
 					return $_SESSION[$this->data['session-namespace']][$key];
+				} else {
+					return false;
+				}
+			} else {
+				// Return entire session data, if key was not set
+				if(isset($_SESSION[$this->data['session-namespace']])){
+					return $_SESSION[$this->data['session-namespace']];
 				} else {
 					return false;
 				}
@@ -741,7 +765,7 @@ class WWW_State	{
 		// Unsets session variable
 		// * key - Key of the value to be unset, can be an array
 		// Returns true
-		final public function unsetSession($key){
+		final public function unsetSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
 				$this->startSession();
@@ -753,12 +777,31 @@ class WWW_State	{
 						unset($_SESSION[$this->data['session-namespace']][$value]);
 					}
 				}
-			} else {
+				//If session array is empty
+				if(empty($_SESSION[$this->data['session-namespace']])){
+					// Destroying the session
+					$this->destroySession();
+				}
+			} elseif($key){
+				// If key is set
 				if(isset($_SESSION[$this->data['session-namespace']][$key])){
 					unset($_SESSION[$this->data['session-namespace']][$key]);
+					//If session array is empty
+					if(empty($_SESSION[$this->data['session-namespace']])){
+						// Destroying the session
+						$this->destroySession();
+					}
 				} else {
+					//If session array is empty
+					if(empty($_SESSION[$this->data['session-namespace']])){
+						// Destroying the session
+						$this->destroySession();
+					}
 					return false;
 				}
+			} else {
+				// Destroying the session
+				$this->destroySession();
 			}
 			return true;
 		}

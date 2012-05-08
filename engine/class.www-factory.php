@@ -304,6 +304,18 @@ class WWW_Factory {
 			}
 		}
 		
+	// CACHE ALLOW/DISALLOW
+	
+	// This function allows to disable caching of current result, no matter what
+	// Essentially this allows the result to be loaded from cache, but not 'written' into cache
+	// * state - True or false flag
+	// Always return true
+	final protected function disableCache($state){
+		// This is stored as a flag
+		$this->WWW_API->noCache=$state;
+		return true;
+	}
+		
 	// INTERNAL LOG ENTRY WRAPPER
 	
 		// This function is used to add data to internal log, if it is turned on
@@ -328,7 +340,15 @@ class WWW_Factory {
 		// * value - Value, if data is a key
 		// Returns true or false
 		final protected function setStateMessengerData($data,$value=false){
-			return $this->WWW_API->state->setMessengerData($data,$value);
+			// Attempting to get the result
+			$result=$this->WWW_API->state->setMessengerData($data,$value);
+			if($result){
+				// Setting no-cache flag to true
+				$this->WWW_API->noCache=true;
+				// Returning the result
+				return $result;
+			}
+			return false;
 		}
 		
 		// This function removes data from state messenger
@@ -343,7 +363,15 @@ class WWW_Factory {
 		// * remove - True or false flag whether to delete the request data after returning it
 		// Returns request messenger data
 		final protected function getStateMessengerData($address=false,$remove=true){
-			return $this->WWW_API->state->getMessengerData($address,$remove);
+			// Attempting to get the result
+			$result=$this->WWW_API->state->getMessengerData($address,$remove);
+			if($result){
+				// Setting no-cache flag to true
+				$this->WWW_API->noCache=true;
+				// Returning the result
+				return $result;
+			}
+			return false;
 		}
 	
 	// SESSION AND COOKIE WRAPPERS
@@ -403,9 +431,10 @@ class WWW_Factory {
 		
 		// Unsets cookie
 		// * key - Key of the cookie to be unset, can be an array
+		// * config - Additional configuration options about the cookie, such as path
 		// Returns true
-		final protected function unsetCookie($key){
-			return $this->WWW_API->state->unsetCookie($key);
+		final protected function unsetCookie($key,$config=array()){
+			return $this->WWW_API->state->unsetCookie($key,$config);
 		}
 		
 	// SESSION USER AND RIGHTS

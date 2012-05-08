@@ -173,8 +173,8 @@ License: GNU Lesser General Public License Version 3
 			if(isset($_FILES) && !empty($_FILES)){
 				$error['files']=$_FILES;
 			}
-			if(isset($_COOKIES) && !empty($_COOKIES)){
-				$error['cookies']=$_COOKIES;
+			if(isset($_COOKIE) && !empty($_COOKIE)){
+				$error['cookies']=$_COOKIE;
 			}
 			if(isset($_SESSION) && !empty($_SESSION)){
 				$error['session']=$_SESSION;

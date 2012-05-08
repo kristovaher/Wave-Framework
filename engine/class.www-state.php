@@ -177,7 +177,7 @@ class WWW_State	{
 	// It is used to store request messenger data in filesystem
 	final public function __destruct(){
 		// Only applies if request messenger actually holds data
-		if($this->messenger){
+		if($this->messenger && !empty($this->messengerData)){
 			// Finding data folder
 			$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
 			if(!is_dir($dataFolder)){
@@ -463,6 +463,7 @@ class WWW_State	{
 		// * value - Value, if data is a key
 		// Returns true or false
 		final public function setMessengerData($data,$value=false){
+			// If messenger address is set
 			if($this->messenger){
 				// If data is an array, then it adds data recursively
 				if(is_array($data)){
@@ -484,6 +485,7 @@ class WWW_State	{
 		// * key - Key that will be removed
 		// Returns true if data was set and is now removed
 		final public function unsetMessengerData($key){
+			// If messenger address is set
 			if($this->messenger){
 				if(isset($this->messengerData[$key])){
 					unset($this->messengerData[$key]);
@@ -501,6 +503,7 @@ class WWW_State	{
 		// * remove - True or false flag whether to delete the request data after returning it
 		// Returns request messenger data
 		final public function getMessengerData($address=false,$remove=true){
+			// If messenger address is set
 			if($address){
 				// File is stored in file system as hashed
 				$address=md5($address);
@@ -836,20 +839,34 @@ class WWW_State	{
 		
 		// Unsets session variable
 		// * key - Key of the value to be unset
+		// * config - Additional configuration options about the cookie, such as path
 		// Returns true
-		final public function unsetCookie($key){
+		final public function unsetCookie($key,$config=array()){
+			// Checking for configuration options
+			if(!isset($configuration['path'])){
+				$configuration['path']=$this->data['web-root'];
+			}
+			if(!isset($configuration['domain'])){
+				$configuration['domain']=$this->data['http-host'];
+			}
+			if(!isset($configuration['secure'])){
+				$configuration['secure']=false;
+			}
+			if(!isset($configuration['httponly'])){
+				$configuration['httponly']=false;
+			}
 			// Can set multiple values
 			if(is_array($key)){
 				foreach($key as $value){
 					if(isset($_COOKIE[$value])){
 						// Removes cookie by setting its duration to 0
-						setcookie($value,'',($this->data['request-time']-3600));
+						setcookie($value,'',($this->data['request-time']-3600),$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
 					}
 				}
 			} else {
 				if(isset($_COOKIE[$key])){
 					// Removes cookie by setting its duration to 0
-					setcookie($key,'',($this->data['request-time']-3600));
+					setcookie($key,'',($this->data['request-time']-3600),$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
 				} else {
 					return false;
 				}

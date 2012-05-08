@@ -36,6 +36,9 @@ class WWW_API {
 	// This stores WWW_State object
 	public $state=false;
 	
+	// This is a no-cache flag
+	public $noCache=false;
+	
 	// This is for internal testing
 	private $internalLogging=false;
 	private $internalLog=array();
@@ -623,26 +626,35 @@ class WWW_API {
 				
 				// If cache timeout was set then the result is stored as a cache in the filesystem
 				if($apiState['cache-timeout']){
-					// If cache subdirectory does not exist, it is created
-					if(!is_dir($cacheFolder)){
-						if(!mkdir($cacheFolder,0777)){
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+					// If State has not disallowed cache
+					if($this->noCache==false){
+						// If cache subdirectory does not exist, it is created
+						if(!is_dir($cacheFolder)){
+							if(!mkdir($cacheFolder,0777)){
+								return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							}
 						}
-					}
-					// If returned data is HTML or text, it is simply written into cache file
-					// Other results are serialized before being written to cache
-					if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
-						if(!file_put_contents($cacheFolder.$cacheFile,$apiResult)){
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+						// If returned data is HTML or text, it is simply written into cache file
+						// Other results are serialized before being written to cache
+						if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
+							if(!file_put_contents($cacheFolder.$cacheFile,$apiResult)){
+								return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							}
+						} else {
+							if(!file_put_contents($cacheFolder.$cacheFile,serialize($apiResult))){
+								return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
+							}
 						}
 					} else {
-						if(!file_put_contents($cacheFolder.$cacheFile,serialize($apiResult))){
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),$apiState+array('custom-header'=>'HTTP/1.1 500 Internal Server Error'));
-						}
+						// Setting cache timeout to 0, since cache is not stored
+						$apiState['cache-timeout']=0;
 					}
 				}
 				
 			}
+			
+			// Resetting the no-cache flag
+			$this->noCache=false;
 		
 		// SENDING RESULT TO OUTPUT
 		

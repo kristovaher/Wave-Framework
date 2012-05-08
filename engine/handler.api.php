@@ -69,10 +69,10 @@ License: GNU Lesser General Public License Version 3
 	if(isset($_FILES) && !empty($_FILES)){ 
 		$inputData['www-files']=$_FILES;
 	}
-	if(isset($_COOKIES) && !empty($_COOKIES)){ 
-		$inputData['www-cookies']=$_COOKIES;
+	if(isset($_COOKIE) && !empty($_COOKIE)){ 
+		$inputData['www-cookies']=$_COOKIE;
 		// Testing if namespace cookie has been set, if it has then checking for session variables
-		if(isset($_COOKIES[$state->data['session-namespace']])){
+		if(isset($_COOKIE[$state->data['session-namespace']])){
 			// Starting sessions
 			$state->sessionStart();
 			// Checking for session variables

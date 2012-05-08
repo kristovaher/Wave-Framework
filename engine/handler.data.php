@@ -82,15 +82,15 @@ License: GNU Lesser General Public License Version 3
 		if(isset($_FILES) && !empty($_FILES)){ 
 			$inputData['www-files']=$_FILES;
 		}
-		if(isset($_COOKIES) && !empty($_COOKIES)){ 
-			$inputData['www-cookies']=$_COOKIES;
+		if(isset($_COOKIE) && !empty($_COOKIE)){ 
+			$inputData['www-cookies']=$_COOKIE;
 			// Testing if namespace cookie has been set, if it has then checking for session variables
-			if(isset($_COOKIES[$state->data['session-namespace']])){
+			if(isset($_COOKIE[$state->data['session-namespace']])){
 				// Starting sessions
-				$state->sessionStart();
+				$state->startSession();
 				// Checking for session variables
 				if(isset($_SESSION[$state->data['session-namespace']]) && !empty($_SESSION[$state->data['session-namespace']])){ 
-					$inputData['www-session']=$_SESSION[$state->data['session-namespace']]; 
+					$inputData['www-session']=$_SESSION[$state->data['session-namespace']];
 				}
 			}
 		}
@@ -103,7 +103,7 @@ License: GNU Lesser General Public License Version 3
 		}
 		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command($inputData+array('www-command'=>$view['controller'].'-load','www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
+		$api->command($inputData+array('www-command'=>$view['controller'].'-load','www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
 	
 	}
 	

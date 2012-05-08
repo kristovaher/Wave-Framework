@@ -963,7 +963,7 @@ class WWW_API {
 			if(isset($data['www-set-cookie']) && is_array($data['www-set-cookie'])){
 				foreach($data['www-set-cookie'] as $cookie){
 					// Cookies require name and value to be set
-					if(isset($cookie['name']) && isset($cookie['value'])){
+					if(isset($cookie['name'],$cookie['value'])){
 						$this->state->setCookie($cookie['name'],$cookie['value']);
 					}
 				}
@@ -985,7 +985,7 @@ class WWW_API {
 			if(isset($data['www-set-session'])){
 				// Session value must be an array
 				foreach($data['www-set-session'] as $session){
-					if(isset($session['name']) && isset($session['value'])){
+					if(isset($session['name'],$session['value'])){
 						$this->state->setSession($session['name'],$session['value']);
 					}
 				}

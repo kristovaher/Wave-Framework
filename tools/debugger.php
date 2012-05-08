@@ -65,7 +65,7 @@ if(empty($_GET)){
 		header('Location: debugger.php?error='.$errorLogs[2]);
 		die();
 	}
-} elseif(isset($_GET['error']) && isset($_GET['done'])){
+} elseif(isset($_GET['error'],$_GET['done'])){
 	// If error is considered to be 'fixed' then it will be removed, if it exists
 	if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error'])){
 		unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error']);

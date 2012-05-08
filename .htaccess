@@ -17,6 +17,9 @@ Options +FollowSymLinks
 # RewriteEngine is required to make Index gateway work correctly
 RewriteEngine on
 
+# Files from static folder are served directly
+RewriteRule ^resources/static/ - [L]
+
 # Everything that is not a PHP file is redirected to index.php
 # If you do not wish to redirect all to index.php, then write different RewriteRules for this reason
 # Everything redirected through Index gateway will make a small hit on performance, but offer better handling and control in PHP

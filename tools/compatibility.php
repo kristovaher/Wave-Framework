@@ -227,7 +227,7 @@ header('Content-Type: text/html;charset=utf-8');
 						if(isset($_GET['rewrite_enabled'])){
 							$log[]='<span class="bold">SUCCESS</span>: Apache mod_rewrite extension is supported';
 						} else {
-							$log[]='<span class="bold">SUCCESS</span>: Apache mod_rewrite extension is not supported, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+							$log[]='<span class="bold orange">WARNING</span>: Apache mod_rewrite extension is not supported, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
 						}
 					} else {
 						$log[]='<span class="bold orange">WARNING</span>: Cannot test if mod_rewrite and RewriteEngine are enabled, .htaccess file is missing from /tools/ folder, this warning can be ignored if Index gateway is not used';
@@ -248,7 +248,7 @@ header('Content-Type: text/html;charset=utf-8');
 				if(isset($_GET['rewrite_enabled'])){
 					$log[]='<span class="bold">SUCCESS</span>: Nginx HttpRewriteModule is supported';
 				} else {
-					$log[]='<span class="bold">SUCCESS</span>: Apache HttpRewriteModule is not supported, Index gateway and rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+					$log[]='<span class="bold orange">WARNING</span>: Nginx HttpRewriteModule is not supported, Index gateway and rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
 				}
 				
 			} else {

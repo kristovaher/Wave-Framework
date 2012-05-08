@@ -62,7 +62,7 @@ class WWW_State	{
 				'http-if-modified-since'=>false,
 				'http-authentication-password'=>'',
 				'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
-				'system-root'=>str_replace('index.php','',((DIRECTORY_SEPARATOR!='/')?str_replace('/',DIRECTORY_SEPARATOR,$this->data['system-root']):$_SERVER['SCRIPT_FILENAME'])),
+				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
 				'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 				'enforce-url-end-slash'=>true,
 				'enforce-first-language-url'=>true,
@@ -88,18 +88,13 @@ class WWW_State	{
 				'true-request'=>false,
 				'internal-logging'=>false,
 				'fingerprint'=>''
-			);
-			
-			
+			);			
 			
 		// ASSIGNING STATE FROM CONFIGURATION FILE
 		
 			// Removing full stop from the beginning of both directory URL's
 			if($this->data['web-root'][0]=='.'){
 				$this->data['web-root'][0]='';
-			}
-			if($this->data['system-root'][0]=='.'){
-				$this->data['system-root'][0]='';
 			}
 		
 			// If array of configuration data is set during object creation, it is used
@@ -146,7 +141,7 @@ class WWW_State	{
 			// If configuration has not sent a request string then State solves it using request-uri
 			if(!$this->data['true-request']){
 				// If install is at www.example.com/w/ subfolder and user requests www.example.com/w/en/page/ then this would be parsed to 'en/page/'
-				$this->data['true-request']=preg_replace('/(^'.str_replace('/','\/',$this->data['web-root']).')/i','',$this->data['request-uri']);
+				$this->data['true-request']=preg_replace('/(^'.preg_quote($this->data['web-root'],'/').')/i','',$this->data['request-uri']);
 			}
 			
 			// IP may be forwarded, this can check for such an occasion

@@ -353,7 +353,7 @@ class WWW_Wrapper {
 			
 			
 			// If encryption key is set, then this is sent together with crypted data
-			if($thisApiState['apiProfile'] && isset($thisApiState['apiSecretKey']) && isset($thisInputData['www-crypt-output'])){
+			if($thisApiState['apiProfile'] && isset($thisApiState['apiSecretKey'],$thisInputData['www-crypt-output'])){
 				$this->log[]='Crypt output key was set as regular input for non-public profile API request, it is moved to crypted input instead';
 				$thisCryptedData['www-crypt-output']=$thisInputData['www-crypt-output'];
 				unset($thisInputData['www-crypt-output']);

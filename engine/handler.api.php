@@ -42,7 +42,7 @@ License: GNU Lesser General Public License Version 3
 // DATABASE
 
 	// Connecting to database, if configuration is set
-	if(isset($config['database-name']) && $config['database-name']!='' && isset($config['database-type']) && isset($config['database-host']) && isset($config['database-username']) && isset($config['database-password'])){
+	if(isset($config['database-name'],$config['database-type'],$config['database-host'],$config['database-username'],$config['database-password'])){
 		// Including the required class and creating the object
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
 		$databaseConnection=new WWW_Database($config['database-type'],$config['database-host'],$config['database-name'],$config['database-username'],$config['database-password'],((isset($config['database-errors']))?$config['database-errors']:false),((isset($config['database-persistent']))?$config['database-persistent']:false));

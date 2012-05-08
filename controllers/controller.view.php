@@ -25,10 +25,8 @@ class WWW_controller_view extends WWW_Factory {
 	// This is called by index.php gateway when initializing view
 	public function load($input){
 	
-		// Unsetting input data that was used only by API
-		unset($input['www-command']);
-		unset($input['www-return-type']);
-		unset($input['www-cache-timeout']);
+		// Unsetting input data that are only used by API and are accessible elsewhere by the user
+		unset($input['www-command'],$input['www-return-type'],$input['www-cache-timeout'],$input['www-request'],$input['www-cookie'],$input['www-session']);
 	
 		// Getting view information
 		$view=$this->getState('view');

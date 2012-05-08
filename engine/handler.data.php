@@ -83,7 +83,7 @@ License: GNU Lesser General Public License Version 3
 			$inputData['www-files']=$_FILES;
 		}
 		if(isset($_COOKIE) && !empty($_COOKIE)){ 
-			$inputData['www-cookies']=$_COOKIE;
+			$inputData['www-cookie']=$_COOKIE;
 			// Testing if namespace cookie has been set, if it has then checking for session variables
 			if(isset($_COOKIE[$state->data['session-namespace']])){
 				// Starting sessions

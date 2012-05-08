@@ -342,20 +342,8 @@ class WWW_API {
 					
 					// Validation hash is calculated from input data
 					$validationData=$apiInputData;
-					// Unsetting validation hash itself from input
-					unset($validationData['www-hash']);
 					// Session input is not considered for validation hash and is unset
-					if(isset($validationData['www-session'])){
-						unset($validationData['www-session']);
-					}
-					// Cookie input is not considered for validation hash and is unset
-					if(isset($validationData['www-cookies'])){
-						unset($validationData['www-cookies']);
-					}
-					// Files input is not considered for validation hash and is unset
-					if(isset($validationData['www-files'])){
-						unset($validationData['www-files']);
-					}
+					unset($validationData['www-hash'],$validationData['www-session'],$validationData['www-cookie'],$validationData['www-files']);
 					
 					// If token is set then this is used for validation as long as the command is not www-create-session
 					if($apiState['token'] && $apiState['command']!='www-create-session'){
@@ -476,45 +464,8 @@ class WWW_API {
 				// Calculating cache validation string
 				$cacheValidator=$apiInputData;
 				// If session namespace is defined, it is removed from cookies for cache validation
-				if(isset($cacheValidator['www-cookies'][$this->state->data['session-namespace']])){
-					unset($cacheValidator['www-cookies'][$this->state->data['session-namespace']]);
-				}
-				// Unsetting hash from cache validation, if set
-				if(isset($cacheValidator['www-hash'])){
-					unset($cacheValidator['www-hash']);
-				}
-				// Unsetting timestamp from cache validation, if set
-				if(isset($cacheValidator['www-timestamp'])){
-					unset($cacheValidator['www-timestamp']);
-				}
-				// Unsetting output crypt key from cache validation, if set
-				if(isset($cacheValidator['www-crypt-output'])){
-					unset($cacheValidator['www-crypt-output']);
-				}
-				// Unsetting output crypt key from cache validation, if set
-				if(isset($cacheValidator['www-crypt-input'])){
-					unset($cacheValidator['www-crypt-input']);
-				}
-				// Unsetting cache timeout from cache validation, if set
-				if(isset($cacheValidator['www-cache-timeout'])){
-					unset($cacheValidator['www-cache-timeout']);
-				}
-				// Unsetting return hash request from cache validation, if set
-				if(isset($cacheValidator['www-return-hash'])){
-					unset($cacheValidator['www-return-hash']);
-				}
-				// Unsetting return hash request from cache validation, if set
-				if(isset($cacheValidator['www-return-timestamp'])){
-					unset($cacheValidator['www-return-timestamp']);
-				}
-				// Unsetting content type overwrite from cache validation, if set
-				if(isset($cacheValidator['www-content-type'])){
-					unset($cacheValidator['www-content-type']);
-				}
-				// Unsetting minification flag from cache validation, if set
-				if(isset($cacheValidator['www-minify'])){
-					unset($cacheValidator['www-minify']);
-				}
+				unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-hash'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-crypt-input'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify']);
+
 				// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 				$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);
 				

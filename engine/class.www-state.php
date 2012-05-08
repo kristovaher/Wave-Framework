@@ -656,7 +656,7 @@ class WWW_State	{
 		// * secure - If secure cookie is used
 		// * httponly - If cookie is HTTP only
 		// Returns true
-		final public function startSession($secure=false,$httpOnly){
+		final public function startSession($secure=false,$httpOnly=false){
 			// Making sure that sessions have not already been started
 			if(!session_id()){
 				// Defining session name

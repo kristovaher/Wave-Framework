@@ -1232,7 +1232,7 @@ class WWW_API {
 					}
 				} else {
 					// If the value was not an array, then value is simply output in INI format
-					if(is_numeric($subvalue)){
+					if(is_numeric($value)){
 						$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$key).'='.$value;
 					} else {
 						$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$key).'="'.str_replace('"','\"',$value).'"';

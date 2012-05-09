@@ -58,6 +58,11 @@ class WWW_view_example extends WWW_Factory {
 					<!-- This shows data stored in state messenger -->
 					<?=print_r($messengerData,true)?>
 				</pre>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">State:</h1>
+				<pre>
+					<!-- This shows an example API call response -->
+					<?=print_r($this->getState(),true)?>
+				</pre>
 			</div>
 		<?php
 		

@@ -37,10 +37,14 @@ class WWW_Logger {
 	// It is good to initiate Logger as early as possible
 	// * loggerDir - location of Logger script relative to the script that loads Logger
 	// * logDir - location of directory to store log files at
-	public function __construct($loggedData='*',$logDir){
+	public function __construct($loggedData='*',$logDir,$microTime=false){
 	
 		// We record the start time of the request
-		$this->requestMicrotime=microtime(true);
+		if(!$microTime){
+			$this->requestMicrotime=microtime(true);
+		} else {
+			$this->requestMicrotime=$microTime;
+		}
 		// Comma separated list of keys that log should store
 		$this->loggedData=$loggedData;
 		// Checking if log directory is valid
@@ -151,7 +155,7 @@ class WWW_Logger {
 			}
 			// This stores how long the request took in seconds.
 			if($this->loggedData=='*' || in_array('execution-time',$this->loggedData)){ 
-				$logData['execution-time']=number_format((microtime(true)-$this->requestMicrotime),10);
+				$logData['execution-time']=number_format((microtime(true)-$this->requestMicrotime),6);
 			}
 			// This stores the peak usage of memory during the request.
 			if($this->loggedData=='*' || in_array('memory-peak-usage',$this->loggedData)){ 

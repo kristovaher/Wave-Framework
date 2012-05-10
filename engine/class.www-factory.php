@@ -326,6 +326,12 @@ class WWW_Factory {
 			return $this->WWW_API->internalLogEntry($key,$data);
 		}
 		
+		// This method writes to internal log the duration from the start object was constructed or from the last time this function was called
+		// * key - Identifier for splitTime group, API is always initialized at the start of API construct
+		final protected function splitTime($key='api'){
+			return $this->WWW_API->splitTime($key);
+		}
+		
 	// STATE MESSENGER WRAPPERS
 	
 		// This method sets the request messenger key
@@ -555,8 +561,11 @@ class WWW_Factory {
 		}
 		
 		// This function escapes a string for use in query
-		final protected function dbFilter($value,$type='pdo'){
-			return $this->WWW_API->state->databaseConnection->dbFilter($value,$type);
+		// * value - Input value
+		// * type - Method of quoting, either 'escape', 'integer', 'latin', 'field' or 'like'
+		// * stripQuotes - Whether the resulting quotes will be stripped from the string, if they get set
+		final protected function dbQuote($value,$type='escape',$stripQuotes=false){
+			return $this->WWW_API->state->databaseConnection->dbQuote($value,$type);
 		}
 		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class

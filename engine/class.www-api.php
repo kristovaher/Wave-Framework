@@ -32,6 +32,9 @@ class WWW_API {
 	// Logger state stores information about current API use
 	// This is later fished by Logger object for system-wide log
 	public $apiLoggerData=array();
+	
+	// This stores performance microtime
+	private $microtime=array();
 
 	// This stores WWW_State object
 	public $state=false;
@@ -133,6 +136,19 @@ class WWW_API {
 		} else {
 			return false;
 		}
+	}
+	
+	// This method writes to internal log the duration from the start object was constructed or from the last time this function was called
+	// * key - Identifier for splitTime group, API is always initialized at the start of API construct
+	public function splitTime($key='api'){
+		// Checking if split time exists
+		if(isset($this->microtime[$key])){
+			$this->internalLogEntry('splitTime for ['.$key.']','Seconds since last call: '.number_format((microtime(true)-$this->microtime[$key]),6));
+		} else {
+			$this->internalLogEntry('splitTime for ['.$key.']','Seconds since last call: 0.000000 seconds');
+		}
+		// Setting new microtime
+		$this->microtime[$key]=microtime(true);
 	}
 	
 	// The main function of API
@@ -646,6 +662,10 @@ class WWW_API {
 		// If error is set and the returned data is in PHP format, then we simply return false
 		// This is used for benefit when API calls are made within MVC objects as you can easily check if you encountered an error or not
 		if($apiState['return-type']=='php' && isset($apiResult['www-error'])){
+			// Throwing a PHP warning, if the error is either system or API wrapper specific
+			if(isset($apiResult['www-response-code']) && $apiResult['www-response-code']<300){
+				trigger_error($apiResult['www-error'],E_USER_WARNING);
+			}
 			return false;
 		}
 		

@@ -21,8 +21,11 @@ License: GNU Lesser General Public License Version 3
 
 // SOLVING THE HTTP REQUEST
 
+	// For performance logging
+	$microTime=microtime(true);
+
 	// Custom error-handling and reporting is used
-	// Make sure to check for errors with /tools/debugger.php script
+	// Make sure to check for errors with /tools/debugger.php script (especially when you encounter a critical error page)
 	error_reporting(0);
 
 	// Getting resource without GET string
@@ -88,7 +91,7 @@ License: GNU Lesser General Public License Version 3
 	// Configuration file can set what type of logging is used
 	if(isset($config['logger']) && $config['logger']!=false && (!isset($config['logger-ip']) || $config['logger-ip']=='*' || in_array($_SERVER['REMOTE_ADDR'],explode(',',$config['logger-ip'])))){
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-logger.php');
-		$logger=new WWW_Logger($config['logger'],__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR);
+		$logger=new WWW_Logger($config['logger'],__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR,$microTime);
 	}
 	
 // LOADING HTTP REQUEST LIMITER

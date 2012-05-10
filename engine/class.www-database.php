@@ -164,10 +164,10 @@ class WWW_Database {
 
 	// Sends query to database and returns associative array of all results
 	// Meant for SELECT queries
-	// * query - query string, a statement to prepare with PDO
+	// * queryString - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
 	// Returns the result in an array or returns false when query failed
-	public function dbMultiple($query,$variables=array()){
+	public function dbMultiple($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
 		if($this->connected!=1){
@@ -178,7 +178,7 @@ class WWW_Database {
 		$this->queryCounter++;
 
 		// Preparing a query and executing it
-		$query=$this->pdo->prepare($query);
+		$query=$this->pdo->prepare($queryString);
 		$result=$query->execute($variables);
 		
 		// If there is a result then it is fetched and returned
@@ -192,7 +192,7 @@ class WWW_Database {
 			return $return;
 		} else {
 			// Checking for an error, if there was one
-			$this->dbErrorCheck($query);
+			$this->dbErrorCheck($query,$queryString);
 			return false;
 		}
 		
@@ -200,10 +200,10 @@ class WWW_Database {
 
 	// Sends query to database and returns associative array of first returned row
 	// Meant for SELECT queries
-	// * query - query string, a statement to prepare with PDO
+	// * queryString - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
 	// Returns the result in an array or returns false when query failed
-	public function dbSingle($query,$variables=array()){
+	public function dbSingle($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
 		if($this->connected!=1){
@@ -214,7 +214,7 @@ class WWW_Database {
 		$this->queryCounter++;
 
 		// Preparing a query and executing it
-		$query=$this->pdo->prepare($query);
+		$query=$this->pdo->prepare($queryString);
 		$result=$query->execute($variables);
 		
 		// If there is a result then it is fetched and returned
@@ -228,7 +228,7 @@ class WWW_Database {
 			return $return;
 		} else {
 			// Checking for an error, if there was one
-			$this->dbErrorCheck($query);
+			$this->dbErrorCheck($query,$queryString);
 			return false;
 		}
 		
@@ -236,10 +236,10 @@ class WWW_Database {
 
 	// Executes a specific database query 
 	// Meant for INSERT, UPDATE, DELETE queries
-	// * query - query string, a statement to prepare with PDO
+	// * queryString - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
 	// Returns the amount of rows that were affected by the query
-	public function dbCommand($query,$variables=array()){
+	public function dbCommand($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
 		if($this->connected!=1){
@@ -250,7 +250,7 @@ class WWW_Database {
 		$this->queryCounter++;
 
 		// Preparing a query and executing it
-		$query=$this->pdo->prepare($query);
+		$query=$this->pdo->prepare($queryString);
 		$result=$query->execute($variables);
 		
 		// If there is a result then it is fetched and returned
@@ -268,7 +268,7 @@ class WWW_Database {
 			}
 		} else {
 			// Checking for an error, if there was one
-			$this->dbErrorCheck($query);
+			$this->dbErrorCheck($query,$queryString);
 			return false;
 		}
 		
@@ -276,8 +276,9 @@ class WWW_Database {
 	
 	// Triggers a PHP error if MySQL encounters error in the query
 	// * query - query object from PDO
+	// * queryString - query string
 	// Triggers an error if there was an error
-	private function dbErrorCheck($query){
+	private function dbErrorCheck($query,$queryString=false){
 	
 		// This method requires database to be connected
 		if($this->connected==1){
@@ -286,7 +287,11 @@ class WWW_Database {
 				$errors=$query->errorInfo();
 				if($errors && !empty($errors)){
 					// PDO errorInfo carries verbose error as third in the index
-					trigger_error('Query failed: '.$errors[2],E_USER_WARNING);
+					if($queryString){
+						trigger_error('QUERY:'."\n".$queryString."\n".'FAILED:'."\n".$errors[2],E_USER_WARNING);
+					} else {
+						trigger_error('QUERY FAILED:'."\n".$errors[2],E_USER_WARNING);
+					}
 				}
 			}
 		} else {
@@ -390,24 +395,35 @@ class WWW_Database {
 	}
 	
 	// This function escapes a string for use in query
-	public function dbFilter($value,$type='pdo'){
+	// * value - Input value
+	// * type - Method of quoting, either 'escape', 'integer', 'latin', 'field' or 'like'
+	// * stripQuotes - Whether the resulting quotes will be stripped from the string, if they get set
+	public function dbQuote($value,$type='escape',$stripQuotes=false){
 	
 		// Filtering is done based on filter type
 		switch($type){
-			case 'pdo':
-				return $this->pdo->quote($value,PDO::PARAM_STR);
+			case 'escape':
+				if($stripQuotes){
+					return substr($this->pdo->quote($value,PDO::PARAM_STR),1,-1);
+				} else {
+					return $this->pdo->quote($value,PDO::PARAM_STR);
+				}
 				break;
-			case 'int':
+			case 'integer':
 				return (int)$value;
 				break;
 			case 'latin':
 				return preg_replace('/[^a-z]/i','',$value);
 				break;
 			case 'field':
-				return preg_replace('/[^a-z]/i','',$value);
+				return preg_replace('/[^a-z\-\_]/i','',$value);
 				break;
 			case 'like':
-				return str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR));
+				if($stripQuotes){
+					return str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR));
+				} else {
+					return str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR));
+				}
 				break;
 			default:
 				return $value;

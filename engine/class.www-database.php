@@ -412,6 +412,9 @@ class WWW_Database {
 			case 'integer':
 				return (int)$value;
 				break;
+			case 'float':
+				return (float)$value;
+				break;
 			case 'latin':
 				return preg_replace('/[^a-z]/i','',$value);
 				break;

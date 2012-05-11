@@ -337,11 +337,31 @@ class WWW_controller_url extends WWW_Factory {
 			// This is essentially the boilerplate startpoint for you to implement authentication, as the actual login redirection is turned off
 			// Attempting to get user session
 			if(isset($data['rights'])){
-				$data['rights']=explode(',',$data['rights']);
-				// if($data['view']!='login' && !$this->checkRights($data['rights'])){
-					// $siteMapReference=$this->getSitemap();
-					// return $this->errorArray('Authentication required',300,array('www-temporary-redirect'=>$siteMapReference['login']['url']));
-				// }
+				// Testing if user session exists
+				$user=$this->getUser();
+				if($data['rights']!=''){
+					$data['rights']=explode(',',$data['rights']);
+					$failed=false;
+					if($user){
+						// Double-checking user account validity from database
+						// $userData=$this->dbSingle('SELECT * FROM users WHERE id=? AND deleted=0',array($user['id']));
+						// if($userData){
+							// $this->setUser($userData);
+							// $this->setRights(explode(',',$userData['rights']));
+							// if(!$this->checkRights($data['rights'])){
+								// $failed=true;
+							// }
+						// } else {
+							// $failed=true;
+						// }
+					} else {
+						$failed=true;
+					}
+					if($failed){
+						// $siteMapReference=$this->getSitemap();
+						// return $this->errorArray('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
+					}
+				}
 			}
 		
 		// Data about the view is returned

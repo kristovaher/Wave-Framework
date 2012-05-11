@@ -47,6 +47,7 @@ class WWW_State	{
 				'api-profile'=>'public',
 				'api-token-timeout'=>3600,
 				'api-timestamp-timeout'=>30,
+				'base-url'=>false,
 				'resource-cache-timeout'=>31536000,
 				'home-view'=>'home',
 				'404-view'=>'404',
@@ -91,17 +92,23 @@ class WWW_State	{
 			);			
 			
 		// ASSIGNING STATE FROM CONFIGURATION FILE
-		
-			// Removing full stop from the beginning of both directory URL's
-			if($this->data['web-root'][0]=='.'){
-				$this->data['web-root'][0]='';
-			}
+			
 		
 			// If array of configuration data is set during object creation, it is used
 			// This loops over all the configuration options from /config.ini file through setState() function
 			// That function has key-specific functionality that can be tied to some internal commands and PHP functions
 			if(!empty($config)){
 				$this->setState($config);
+			}
+		
+			// Removing full stop from the beginning of both directory URL's
+			if($this->data['web-root'][0]=='.'){
+				$this->data['web-root'][0]='';
+			}
+			
+			// Finding base URL
+			if(!$this->data['base-url']){
+				$this->data['base-url']=(($this->data['https-mode'])?'https://':'http://').$this->data['http-host'].$this->data['web-root'];
 			}
 			
 		// CHECKING FOR SERVER OR PHP SPECIFIC CONFIGURATION OPTIONS

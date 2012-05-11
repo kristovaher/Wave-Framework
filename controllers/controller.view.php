@@ -92,7 +92,7 @@ class WWW_controller_view extends WWW_Factory {
 				<head>
 					<title><?=$view['meta-title']?></title>
 					<!-- Base address for relative links -->
-					<base href="<?=$this->getState('web-root')?>"/>
+					<base href="<?=$this->getState('base-url')?>"/>
 					<!-- UTF-8 -->
 					<meta charset="utf-8">
 					<!-- Useful for mobile applications -->

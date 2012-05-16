@@ -21,6 +21,7 @@ class WWW_Factory {
 
 	// API object is stored here
 	private $WWW_API=false;
+	private $WWW_API_callIndex=0;
 
 	// When a model, view or controller is created, it can be loaded with existing state or API
 	// * api - WWW_API object
@@ -57,6 +58,9 @@ class WWW_Factory {
 			if(!isset($inputData['www-output'])){
 				$inputData['www-output']=0;
 			}
+			// This is the call index after the API call is made
+			$this->WWW_API_callIndex=$this->WWW_API->callIndex;
+			// Returning the result from API
 			return $this->WWW_API->command($inputData,$useBuffer,false);
 		}
 		
@@ -255,6 +259,32 @@ class WWW_Factory {
 			
 		}
 		
+		// This function attempts to get an object from /resources/classes/ folder
+		// Class has to be defined in format class.{class}.php
+		// * className - Class name
+		// Returns either the object or result of the method call from the object
+		final protected function getObject($className){
+			
+			// It's made sure that the class has not already been defined
+			if(!class_exists($className)){
+				// Class file can be loaded from /overrides/ directories, if set
+				if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+					// Requiring override file
+					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$className.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+					// Requiring original file
+					require($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
+				} else {
+					// Error is thrown if class was not found
+					trigger_error('Class ['.$className.'] does not exist',E_USER_ERROR);
+				}
+			}
+			
+			// Returning object
+			return new $className();
+			
+		}
+		
 	// CUSTOM RETURNED ARRAYS
 		
 		// This is simply used to return an error from MVC elements, it generates a proper return array
@@ -304,17 +334,24 @@ class WWW_Factory {
 			}
 		}
 		
-	// CACHE ALLOW/DISALLOW
+	// CACHE
 	
-	// This function allows to disable caching of current result, no matter what
-	// Essentially this allows the result to be loaded from cache, but not 'written' into cache
-	// * state - True or false flag
-	// Always return true
-	final protected function disableCache($state){
-		// This is stored as a flag
-		$this->WWW_API->noCache=$state;
-		return true;
-	}
+		// This function allows to disable caching of current result, no matter what
+		// Essentially this allows the result to be loaded from cache, but not 'written' into cache
+		// * state - True or false flag
+		// Always return true
+		final protected function disableCache($state){
+			// This is stored as a flag
+			$this->WWW_API->noCache[$this->WWW_API_callIndex]=$state;
+			return true;
+		}
+		
+		// This method allows to remove tagged cache files from filesystem
+		// * tags - comma separated list of tag(s) that the cache was stored under
+		// Always returns true
+		final protected function clearCache($tags){
+			return $this->WWW_API->clearCache($tags);
+		}
 		
 	// INTERNAL LOG ENTRY WRAPPER
 	
@@ -350,7 +387,7 @@ class WWW_Factory {
 			$result=$this->WWW_API->state->setMessengerData($data,$value);
 			if($result){
 				// Setting no-cache flag to true
-				$this->WWW_API->noCache=true;
+				$this->WWW_API->noCache[$this->WWW_API_callIndex]=true;
 				// Returning the result
 				return $result;
 			}
@@ -373,7 +410,7 @@ class WWW_Factory {
 			$result=$this->WWW_API->state->getMessengerData($address,$remove);
 			if($result){
 				// Setting no-cache flag to true
-				$this->WWW_API->noCache=true;
+				$this->WWW_API->noCache[$this->WWW_API_callIndex]=true;
 				// Returning the result
 				return $result;
 			}
@@ -443,7 +480,7 @@ class WWW_Factory {
 			return $this->WWW_API->state->unsetCookie($key,$config);
 		}
 		
-	// SESSION USER AND RIGHTS
+	// SESSION USER AND PERMISSIONS
 		
 		// This sets user data to current session
 		// * data - Data array set to user
@@ -464,30 +501,30 @@ class WWW_Factory {
 			return $this->WWW_API->state->unsetUser();
 		}
 	
-		// This function checks for session rights
-		// * check - String that is checked against rights array
-		// Returns either true or false, depending whether rights are set or not
-		final protected function checkRights($check){
-			return $this->WWW_API->state->checkRights($check);
+		// This function checks for session permissions
+		// * check - String that is checked against permissions array
+		// Returns either true or false, depending whether permissions are set or not
+		final protected function checkPermissions($check){
+			return $this->WWW_API->state->checkPermissions($check);
 		}
 		
-		// This function returns all current session rights
-		// Returns an array of rights
-		final protected function getRights(){
-			return $this->WWW_API->state->getRights();
+		// This function returns all current session permissions
+		// Returns an array of permissions
+		final protected function getPermissions(){
+			return $this->WWW_API->state->getPermissions();
 		}
 		
-		// This function sets current session rights
-		// * rights - An array or a string of rights
+		// This function sets current session permissions
+		// * permissions - An array or a string of permissions
 		// Always returns true
-		final protected function setRights($rights){
-			return $this->WWW_API->state->setRights($rights);
+		final protected function setPermissions($permissions){
+			return $this->WWW_API->state->setPermissions($permissions);
 		}
 		
-		// This method unsets existing rights
+		// This method unsets existing permissions
 		// Always returns true
-		final public function unsetRights(){
-			return $this->WWW_API->state->unsetRights();
+		final public function unsetPermissions(){
+			return $this->WWW_API->state->unsetPermissions();
 		}
 		
 	// DATABASE WRAPPERS
@@ -580,34 +617,7 @@ class WWW_Factory {
 		// * command - Command to be executed
 		// Returns command result, if available
 		final protected function terminal($command){
-		
-			// Status variable
-			$status=1;
-		
-			// Checking all possibleterminal functions
-			if(function_exists('system')){
-				ob_start();
-				system($command,$status);
-				$output=ob_get_contents();
-				ob_end_clean();
-			} elseif(function_exists('passthru')){
-				ob_start();
-				passthru($command,$status);
-				$output=ob_get_contents();
-				ob_end_clean();
-			} elseif(function_exists('exec')){
-				exec($command,$output,$status);
-				$output=implode("\n",$output);
-			} elseif(function_exists('shell_exec')){
-				$output=shell_exec($command);
-			} else {
-				// No function was available, returning false
-				return false;
-			}
-
-			// Returning result
-			return array('output'=>$output,'status'=>$return_var);
-			
+			return $this->WWW_API->state->terminal($command);			
 		}
 
 }

@@ -32,7 +32,7 @@ class WWW_Imager {
 	// Loads image from filesystem to object
 	// * location - Source file location in file system
 	// Returns true if successful, false if failed
-	public function input($location){
+	public function input($location,$extension=false){
 	
 		// Checking if file actually exists in file system
 		if(file_exists($location)){
@@ -84,9 +84,9 @@ class WWW_Imager {
 	// Outputs the image to filesystem or to output
 	// * location - new file location in file system. If not set, then returns file data to output
 	// * quality - Quality percentage, higher is better
-	// * extension - Output file extension or type
+	// * format - Output file extension or type
 	// Returns true if successful
-	public function output($location=false,$quality=90,$extension=false){
+	public function output($location=false,$quality=90,$format=false){
 	
 		// Making sure quality is between acceptable values
 		if($quality<0 || $quality>100){ 
@@ -94,17 +94,17 @@ class WWW_Imager {
 			$quality=90; 
 		}
 	
-		// If output extension is not set, then system uses extension based on IMAGETYPE_XXX value
-		if(!$extension){
+		// If output format is not set, then system uses format based on IMAGETYPE_XXX value
+		if(!$format){
 			switch($this->type){
 				case IMAGETYPE_JPEG:
-					$extension='jpg';
+					$format='jpg';
 					break;
 				case IMAGETYPE_PNG:
-					$extension='png';
+					$format='png';
 					break;
 				case IMAGETYPE_GIF:
-					$extension='gif';
+					$format='gif';
 					break;
 			}
 		}
@@ -113,7 +113,7 @@ class WWW_Imager {
 		if($location){
 		
 			// Different file types have different compression levels for quality
-			switch($extension){
+			switch($format){
 				case 'jpg':
 					if(imagejpeg($this->resource,$location,$quality)){
 						return true;
@@ -136,14 +136,14 @@ class WWW_Imager {
 					}
 					break;
 				default:
-					trigger_error('This output extension is not supported',E_USER_ERROR);
+					trigger_error('This output format is not supported',E_USER_ERROR);
 					break;
 			}
 			
 		} else {
 		
 			// Different file types have different compression levels for quality
-			switch($extension){
+			switch($format){
 				case 'jpg':
 					// Second parameter of null means that image is pushed to output buffer instead of stored in file
 					if(imagejpeg($this->resource,null,$quality)){
@@ -157,7 +157,7 @@ class WWW_Imager {
 					break;
 				case 'png':
 					// PNG format has compression from 0-9 with 0 being the best, so quality is updated accordingly
-					if(imagepng($this->resource,null,(10-round($quality/10)))){
+					if(imagepng($this->resource,null,(9-floor($quality/10)))){
 						header('Content-Type: image/png');
 						return true;
 					} else {
@@ -178,7 +178,7 @@ class WWW_Imager {
 					}
 					break;
 				default:
-					trigger_error('This output extension is not supported',E_USER_ERROR);
+					trigger_error('This output format is not supported',E_USER_ERROR);
 					break;
 			}
 			

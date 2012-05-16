@@ -78,9 +78,9 @@ class WWW_State	{
 				'request-uri'=>$_SERVER['REQUEST_URI'],
 				'request-time'=>$_SERVER['REQUEST_TIME'],
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
-				'session-rights-key'=>'www-rights',
+				'session-permissions-key'=>'www-permissions',
 				'session-user-key'=>'www-user',
-				'rights'=>false,
+				'permissions'=>false,
 				'user'=>false,
 				'translations'=>array(),
 				'sitemap-raw'=>array(),
@@ -534,7 +534,7 @@ class WWW_State	{
 			}
 		}
 		
-	// SESSION USER AND RIGHTS
+	// SESSION USER AND PERMISSIONS
 	
 		// This sets user data to current session
 		// * data - Data array set to user
@@ -550,7 +550,7 @@ class WWW_State	{
 		// * key - Element returned from user data, if not set then returns the entire user data
 		// Returns either the whole data as array or just a single element or false, if not found
 		final public function getUser($key=false){
-			// Testing if rights state has been populated or not
+			// Testing if permissions state has been populated or not
 			if(!$this->data['user']){
 				$this->data['user']=$this->getSession($this->data['session-user-key']);
 				// If this session key did not exist, then returning false
@@ -583,31 +583,31 @@ class WWW_State	{
 			return true;
 		}
 	
-		// This function checks for session rights
-		// * check - String that is checked against rights array
-		// Returns either true or false, depending whether rights are set or not
-		final public function checkRights($check){
-			// Testing if rights state has been populated or not
-			if(!$this->data['rights']){
-				$this->data['rights']=$this->getSession($this->data['session-rights-key']);
+		// This function checks for session permissions
+		// * check - String that is checked against permissions array
+		// Returns either true or false, depending whether permissions are set or not
+		final public function checkPermissions($check){
+			// Testing if permissions state has been populated or not
+			if(!$this->data['permissions']){
+				$this->data['permissions']=$this->getSession($this->data['session-permissions-key']);
 				// If this session key did not exist, then returning false
-				if(!$this->data['rights']){
+				if(!$this->data['permissions']){
 					return false;
 				}
 			}
-			// If all rights are set, then rights will not be separately validated and true is assumed
-			if(!in_array('*',$this->data['rights'])){
+			// If all permissions are set, then permissions will not be separately validated and true is assumed
+			if(!in_array('*',$this->data['permissions'])){
 				if(is_array($check)){
 					foreach($check as $c){
 						// Returning true or false depending on whether this key exists or not
-						if(!in_array($c,$this->data['rights'])){
+						if(!in_array($c,$this->data['permissions'])){
 							return false;
 						}
 						return true;
 					}
 				} else {
 					// Returning true or false depending on whether this key exists or not
-					if(in_array($check,$this->data['rights'])){
+					if(in_array($check,$this->data['permissions'])){
 						return true;
 					} else {
 						return false;
@@ -618,37 +618,37 @@ class WWW_State	{
 			}
 		}
 		
-		// This function returns all current session rights
-		// Returns an array of rights
-		final public function getRights(){
-			// Testing if rights state has been populated or not
-			if(!$this->data['rights']){
-				$this->data['rights']=$this->getSession($this->data['session-rights-key']);
+		// This function returns all current session permissions
+		// Returns an array of permissions
+		final public function getPermissions(){
+			// Testing if permissions state has been populated or not
+			if(!$this->data['permissions']){
+				$this->data['permissions']=$this->getSession($this->data['session-permissions-key']);
 			}
-			return $this->data['rights'];
+			return $this->data['permissions'];
 		}
 		
-		// This function sets current session rights
-		// * rights - An array or a string of rights
+		// This function sets current session permissions
+		// * permissions - An array or a string of permissions
 		// Always returns true
-		final public function setRights($rights){
-			if(!is_array($rights)){
-				$rights=explode(',',$rights);
+		final public function setPermissions($permissions){
+			if(!is_array($permissions)){
+				$permissions=explode(',',$permissions);
 			}
 			// Setting the session variable
-			$this->setSession($this->data['session-rights-key'],$rights);
+			$this->setSession($this->data['session-permissions-key'],$permissions);
 			// Setting the state variable
-			$this->data['rights']=$rights;
+			$this->data['permissions']=$permissions;
 			return true;
 		}
 		
-		// This method unsets existing rights
+		// This method unsets existing permissions
 		// Always returns true
-		final public function unsetRights(){
+		final public function unsetPermissions(){
 			// Unsetting the session
-			$this->unsetSession($this->data['session-rights-key']);
+			$this->unsetSession($this->data['session-permissions-key']);
 			// Unsetting the state variable
-			$this->data['rights']=false;
+			$this->data['permissions']=false;
 			return true;
 		}
 		
@@ -917,6 +917,42 @@ class WWW_State	{
 				}
 			}
 			return true;
+		}
+	
+	// TERMINAL
+	
+		// This function looks for available terminal/command line option and attempts to execute it
+		// * command - Command to be executed
+		// Returns command result, if available
+		final protected function terminal($command){
+		
+			// Status variable
+			$status=1;
+		
+			// Checking all possibleterminal functions
+			if(function_exists('system')){
+				ob_start();
+				system($command,$status);
+				$output=ob_get_contents();
+				ob_end_clean();
+			} elseif(function_exists('passthru')){
+				ob_start();
+				passthru($command,$status);
+				$output=ob_get_contents();
+				ob_end_clean();
+			} elseif(function_exists('exec')){
+				exec($command,$output,$status);
+				$output=implode("\n",$output);
+			} elseif(function_exists('shell_exec')){
+				$output=shell_exec($command);
+			} else {
+				// No function was available, returning false
+				return false;
+			}
+
+			// Returning result
+			return array('output'=>$output,'status'=>$return_var);
+			
 		}
 	
 }

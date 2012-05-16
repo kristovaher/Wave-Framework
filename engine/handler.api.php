@@ -27,14 +27,6 @@ License: GNU Lesser General Public License Version 3
 		die();
 	}
 
-	// This functions file is not required, but can be used for system wide functions
-	// If you want to include additional libraries, do so here
-	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'functions.php')){
-		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'functions.php');
-	} else {
-		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'functions.php');
-	}
-
 	// State class is used by API and Factory created objects to keep track of request state
 	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-state.php');
 	$state=new WWW_State($config);
@@ -48,6 +40,16 @@ License: GNU Lesser General Public License Version 3
 		$databaseConnection=new WWW_Database($config['database-type'],$config['database-host'],$config['database-name'],$config['database-username'],$config['database-password'],((isset($config['database-errors']))?$config['database-errors']:false),((isset($config['database-persistent']))?$config['database-persistent']:false));
 		// Passing the database to State object
 		$state->databaseConnection=$databaseConnection;
+	}
+	
+// AUTOLOAD FUNCTIONALITY
+
+	// This functions file is not required, but can be used for system wide functions
+	// If you want to include additional libraries, do so here
+	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php')){
+		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
+	} else {
+		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
 	}
 	
 // LOADING API AND GATHERING INPUT DATA

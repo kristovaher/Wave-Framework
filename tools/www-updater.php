@@ -6,7 +6,7 @@ WWW Framework Updater script
 
 This is an update script template, if file with this name is added to root archive of update zip 
 files that is given to /tools/updater.php, then this script is also executed (and then removed). 
-This script is useful to store in other update-related commands, such as file rights, database 
+This script is useful to store in other update-related commands, such as file permissions, database 
 changes and so on.
 
 Author and support: Kristo Vaher - kristo@waher.net

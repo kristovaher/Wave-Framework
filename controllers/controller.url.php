@@ -217,24 +217,7 @@ class WWW_controller_url extends WWW_Factory {
 			}
 		
 		}
-		
-		// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
-		if(isset($siteMapInfo['temporary-redirect']) && $siteMapInfo['temporary-redirect']!=''){
-			// Query string is also sent, if it has been defined
-			if(isset($requestNodesRaw[1]) && strpos($siteMapInfo['temporary-redirect'],'?')===false){
-				return array('www-temporary-redirect'=>$siteMapInfo['temporary-redirect'].'?'.$requestNodesRaw[1]);
-			} else {
-				return array('www-temporary-redirect'=>$siteMapInfo['temporary-redirect']);
-			}
-		} elseif(isset($siteMapInfo['permanent-redirect']) && $siteMapInfo['permanent-redirect']!=''){
-			// Query string is also sent, if it has been defined
-			if(isset($requestNodesRaw[1]) && strpos($siteMapInfo['permanent-redirect'],'?')===false){
-				return array('www-permanent-redirect'=>$siteMapInfo['permanent-redirect'].'?'.$requestNodesRaw[1]);
-			} else {
-				return array('www-permanent-redirect'=>$siteMapInfo['permanent-redirect']);
-			}
-		}
-		
+				
 		// Populating sitemap info with additional details
 		$siteMapInfo['request-url']='/'.$requestNodesRaw[0];
 		if(isset($requestNodesRaw[1])){
@@ -336,32 +319,42 @@ class WWW_controller_url extends WWW_Factory {
 			// But the commands that it uses are not shown here, so it is commented out
 			// This is essentially the boilerplate startpoint for you to implement authentication, as the actual login redirection is turned off
 			// Attempting to get user session
-			if(isset($data['rights'])){
+			if(isset($data['permissions'])){
+			
+				// Permissions are exploded into an array from comma separated string in sitemap file
+				$data['permissions']=explode(',',$data['permissions']);
+				// This method automatically removes all empty entries from the array
+				$data['permissions']=array_filter($data['permissions']);
+				
+				// This flag, if changed, will redirect user to log-in screen
+				$failed=false;
+				
 				// Testing if user session exists
 				$user=$this->getUser();
-				if($data['rights']!=''){
-					$data['rights']=explode(',',$data['rights']);
-					$failed=false;
-					if($user){
-						// Double-checking user account validity from database
-						// $userData=$this->dbSingle('SELECT * FROM users WHERE id=? AND deleted=0',array($user['id']));
-						// if($userData){
-							// $this->setUser($userData);
-							// $this->setRights(explode(',',$userData['rights']));
-							// if(!$this->checkRights($data['rights'])){
-								// $failed=true;
-							// }
-						// } else {
+				if($user){
+					// Double-checking user account validity from database
+					// $userData=$this->dbSingle('SELECT * FROM users WHERE id=? AND deleted=0',array($user['id']));
+					// if($userData){
+						// Updating user session data from database (good if it has changed)
+						// $this->setUser($userData);
+						// Setting user permissions based on most recent information from database
+						// $this->setpermissions(explode(',',$userData['permissions']));
+						// Testing if permissions are included
+						// if(!empty($data['permissions']) && !$this->checkPermissions($data['permissions'])){
 							// $failed=true;
 						// }
-					} else {
-						$failed=true;
-					}
-					if($failed){
-						// $siteMapReference=$this->getSitemap();
-						// return $this->errorArray('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
-					}
+					// } else {
+						// $failed=true;
+					// }
+				} else {
+					$failed=true;
 				}
+				
+				if($failed){
+					// $siteMapReference=$this->getSitemap();
+					// return $this->errorArray('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
+				}
+				
 			}
 		
 		// Data about the view is returned

@@ -26,14 +26,6 @@ License: GNU Lesser General Public License Version 3
 		die();
 	}
 
-	// This functions file is not required, but can be used for system wide functions
-	// If you want to include additional libraries, do so here
-	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'functions.php')){
-		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'functions.php');
-	} else {
-		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'functions.php');
-	}
-
 	// If index URL cache is not configured, it is turned off by default
 	if(!isset($config['index-url-cache-timeout'])){
 		$config['index-url-cache-timeout']=0;
@@ -52,6 +44,16 @@ License: GNU Lesser General Public License Version 3
 		$databaseConnection=new WWW_Database($config['database-type'],$config['database-host'],$config['database-name'],$config['database-username'],$config['database-password'],((isset($config['database-errors']))?$config['database-errors']:false),((isset($config['database-persistent']))?$config['database-persistent']:false));
 		// Passing the database to State object
 		$state->databaseConnection=$databaseConnection;
+	}
+	
+// AUTOLOAD FUNCTIONALITY
+
+	// This functions file is not required, but can be used for system wide functions
+	// If you want to include additional libraries, do so here
+	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php')){
+		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
+	} else {
+		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
 	}
 	
 // LOADING API AND CALLING URL SOLVING/ROUTING CONTROLLER

@@ -105,7 +105,7 @@ License: GNU Lesser General Public License Version 3
 		}
 		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command($inputData+array('www-command'=>$view['controller'].'-load','www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout']),false,false,true);
+		$api->command(array('www-command'=>$view['controller'].'-load','www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout'])+$inputData,false,false,true);
 	
 	}
 	
@@ -113,7 +113,7 @@ License: GNU Lesser General Public License Version 3
 
 	// API gathers its own log data internally and it is given to Logger to be logged
 	if(isset($logger)){
-		$logger->setCustomLogData($api->apiLoggerData+array('category'=>'data','database-query-counter'=>((isset($databaseConnection))?$databaseConnection->queryCounter:0)));
+		$logger->setCustomLogData(array('category'=>'data','database-query-counter'=>((isset($databaseConnection))?$databaseConnection->queryCounter:0))+$api->apiLoggerData);
 		$logger->writeLog();
 	}
 

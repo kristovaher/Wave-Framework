@@ -51,6 +51,7 @@ class WWW_Wrapper {
 	private $curlEnabled=false;
 	private $log=array();
 	private $criticalError=false;
+	private $cookieContainer=false;
 	
 	// User agent
 	private $userAgent='WWWFramework/2.0.0 (PHP)';
@@ -106,6 +107,55 @@ class WWW_Wrapper {
 		public function clearLog(){
 			$this->log=array();
 			return true;
+		}
+		
+		// This method allows to set cookie method for cURL calls
+		// If set to 'false' then cookies are turned off
+		// * location - Location for cookie file in file system
+		// Returns true, if successfully set or false if failed
+		public function setCookieContainer($location=false){
+			// If value is anything but false
+			if($location){
+				// Testing if file exists or attempting to create that file
+				if(file_exists($location) && is_writable($location)){
+					$this->cookieContainer=$location;
+					$this->log[]='Cookie container set to: '.$location;
+					return true;
+				} elseif(file_put_contents($location,'')){
+					$this->cookieContainer=$location;
+					$this->log[]='Cookie container set to: '.$location;
+					return true;
+				} else {
+					// Cookie container is not accessible
+					$this->cookieContainer=false;
+					$this->log[]='Cannot set cookie container to: '.$location;
+					return false;
+				}
+			} else {
+				$this->cookieContainer=false;
+				$this->log[]='Cookies are turned off';
+				return true;
+			}
+		}
+		
+		// This method empties the cookie jar file, if it exists
+		// * location - Location of cookies file, if this is not set then uses currently defined cookie file
+		// Returns true, if success and false if failed
+		public function clearCookieContainer($location=false){
+			if(!$location){
+				$location=$this->cookieContainer;
+			}
+			if($location){
+				if(file_exists($location) && is_writable($location) && file_put_contents($location,'')){
+					$this->log[]='Cookies cleared';
+					return true;
+				} else {
+					$this->log[]='Cannot clear cookies';
+					return false;
+				}
+			} else {
+				return false;
+			}
 		}
 		
 	// INPUT
@@ -458,6 +508,12 @@ class WWW_Wrapper {
 							CURLOPT_COOKIESESSION=>true,
 							CURLOPT_SSL_VERIFYPEER=>false
 						);
+						// Cookies
+						if($this->cookieContainer){
+							curl_setopt_array($cURL,array(CURLOPT_COOKIESESSION=>false,CURLOPT_COOKIEFILE=>$this->cookieContainer,CURLOPT_COOKIEJAR=>$this->cookieContainer));
+						} else {
+							curl_setopt($cURL,CURLOPT_COOKIESESSION,true);
+						}
 						// If last modified header is sent
 						if($thisApiState['lastModified']){
 							curl_setopt($cURL,CURLOPT_HTTPHEADER,array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',$thisApiState['lastModified']).' GMT'));
@@ -532,6 +588,12 @@ class WWW_Wrapper {
 							CURLOPT_COOKIESESSION=>true,
 							CURLOPT_SSL_VERIFYPEER=>false
 						);
+						// Cookies
+						if($this->cookieContainer){
+							curl_setopt_array($cURL,array(CURLOPT_COOKIESESSION=>false,CURLOPT_COOKIEFILE=>$this->cookieContainer,CURLOPT_COOKIEJAR=>$this->cookieContainer));
+						} else {
+							curl_setopt($cURL,CURLOPT_COOKIESESSION,true);
+						}
 						// If last modified header is sent
 						if($thisApiState['lastModified']){
 							curl_setopt($cURL,CURLOPT_HTTPHEADER,array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',$thisApiState['lastModified']).' GMT'));

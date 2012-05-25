@@ -80,8 +80,8 @@ class WWW_State	{
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'session-permissions-key'=>'www-permissions',
 				'session-user-key'=>'www-user',
-				'permissions'=>false,
-				'user'=>false,
+				'user-data'=>false,
+				'user-permissions'=>false,
 				'translations'=>array(),
 				'sitemap-raw'=>array(),
 				'sitemap'=>array(),
@@ -484,17 +484,19 @@ class WWW_State	{
 		}
 		
 		// This function removes data from state messenger
-		// * key - Key that will be removed
+		// * key - Key that will be removed, if set to false then removes the entire data
 		// Returns true if data was set and is now removed
-		final public function unsetMessengerData($key){
+		final public function unsetMessengerData($key=false){
 			// If messenger address is set
-			if($this->messenger){
+			if($this->messenger && $key){
 				if(isset($this->messengerData[$key])){
 					unset($this->messengerData[$key]);
 					return true;
 				} else {
 					return false;
 				}
+			} elseif($this->messenger){
+				$this->messengerData=array();			
 			} else {
 				return false;
 			}
@@ -542,7 +544,7 @@ class WWW_State	{
 			// Setting the session
 			$this->setSession($this->data['session-user-key'],$data);
 			// Setting the state variable
-			$this->data['user']=$data;
+			$this->data['user-data']=$data;
 			return true;
 		}
 		
@@ -551,24 +553,24 @@ class WWW_State	{
 		// Returns either the whole data as array or just a single element or false, if not found
 		final public function getUser($key=false){
 			// Testing if permissions state has been populated or not
-			if(!$this->data['user']){
-				$this->data['user']=$this->getSession($this->data['session-user-key']);
+			if(!$this->data['user-data']){
+				$this->data['user-data']=$this->getSession($this->data['session-user-key']);
 				// If this session key did not exist, then returning false
-				if(!$this->data['user']){
+				if(!$this->data['user-data']){
 					return false;
 				}
 			}
 			// If key is set
 			if($key){
-				if(isset($this->data['user'][$key])){
+				if(isset($this->data['user-data'][$key])){
 					// Returning key data
-					return $this->data['user'][$key];
+					return $this->data['user-data'][$key];
 				} else {
 					return false;
 				}
 			} else {
 				// Returning entire user array
-				return $this->data['user'];
+				return $this->data['user-data'];
 			}
 
 		}
@@ -579,7 +581,7 @@ class WWW_State	{
 			// Unsetting the session
 			$this->unsetSession($this->data['session-user-key']);
 			// Unsetting the state variable
-			$this->data['user']=false;
+			$this->data['user-data']=false;
 			return true;
 		}
 	
@@ -588,26 +590,26 @@ class WWW_State	{
 		// Returns either true or false, depending whether permissions are set or not
 		final public function checkPermissions($check){
 			// Testing if permissions state has been populated or not
-			if(!$this->data['permissions']){
-				$this->data['permissions']=$this->getSession($this->data['session-permissions-key']);
+			if(!$this->data['user-permissions']){
+				$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
 				// If this session key did not exist, then returning false
-				if(!$this->data['permissions']){
+				if(!$this->data['user-permissions']){
 					return false;
 				}
 			}
 			// If all permissions are set, then permissions will not be separately validated and true is assumed
-			if(!in_array('*',$this->data['permissions'])){
+			if(!in_array('*',$this->data['user-permissions'])){
 				if(is_array($check)){
 					foreach($check as $c){
 						// Returning true or false depending on whether this key exists or not
-						if(!in_array($c,$this->data['permissions'])){
+						if(!in_array($c,$this->data['user-permissions'])){
 							return false;
 						}
 						return true;
 					}
 				} else {
 					// Returning true or false depending on whether this key exists or not
-					if(in_array($check,$this->data['permissions'])){
+					if(in_array($check,$this->data['user-permissions'])){
 						return true;
 					} else {
 						return false;
@@ -622,10 +624,10 @@ class WWW_State	{
 		// Returns an array of permissions
 		final public function getPermissions(){
 			// Testing if permissions state has been populated or not
-			if(!$this->data['permissions']){
-				$this->data['permissions']=$this->getSession($this->data['session-permissions-key']);
+			if(!$this->data['user-permissions']){
+				$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
 			}
-			return $this->data['permissions'];
+			return $this->data['user-permissions'];
 		}
 		
 		// This function sets current session permissions
@@ -638,7 +640,7 @@ class WWW_State	{
 			// Setting the session variable
 			$this->setSession($this->data['session-permissions-key'],$permissions);
 			// Setting the state variable
-			$this->data['permissions']=$permissions;
+			$this->data['user-permissions']=$permissions;
 			return true;
 		}
 		
@@ -648,7 +650,7 @@ class WWW_State	{
 			// Unsetting the session
 			$this->unsetSession($this->data['session-permissions-key']);
 			// Unsetting the state variable
-			$this->data['permissions']=false;
+			$this->data['user-permissions']=false;
 			return true;
 		}
 		

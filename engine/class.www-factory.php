@@ -395,9 +395,9 @@ class WWW_Factory {
 		}
 		
 		// This function removes data from state messenger
-		// * key - Key that will be removed
+		// * key - Key that will be removed, if set to false then removes the entire current state messenger
 		// Returns true if data was set and is now removed
-		final protected function unsetStateMessengerData($key){
+		final protected function unsetStateMessengerData($key=false){
 			return $this->WWW_API->state->unsetMessengerData($key);
 		}
 		

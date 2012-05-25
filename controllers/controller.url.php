@@ -352,7 +352,8 @@ class WWW_controller_url extends WWW_Factory {
 				
 				if($failed){
 					// $siteMapReference=$this->getSitemap();
-					// return $this->errorArray('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
+					// Success array is used since technically URL solving has been a 'success'
+					// return $this->successArray('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
 				}
 				
 			}

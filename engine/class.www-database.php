@@ -316,7 +316,7 @@ class WWW_Database {
 			// Checks for last existing inserted row's unique ID
 			$lastId=$this->pdo->lastInsertId();
 			// Last ID is found, it is returned, otherwise it returns false
-			if(!$lastId && $lastId!=0){
+			if($lastId){
 				return $lastId;
 			} else {
 				return false;

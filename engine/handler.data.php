@@ -106,7 +106,7 @@ License: GNU Lesser General Public License Version 3
 		
 		// API check is turned off, since index.php is considered a public gateway
 		$api->command(array('www-command'=>$view['controller'].'-load','www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-timeout'=>$config['index-view-cache-timeout'])+$inputData,false,false,true);
-	
+
 	}
 	
 // LOGGER

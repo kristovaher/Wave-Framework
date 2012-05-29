@@ -523,11 +523,7 @@ class WWW_API {
 							}
 							
 							// System loads the result from cache file based on return data type
-							if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
-								$apiResult=file_get_contents($cacheFolder.$cacheFile);
-							} else {
-								$apiResult=unserialize(file_get_contents($cacheFolder.$cacheFile));
-							}
+							$apiResult=unserialize(file_get_contents($cacheFolder.$cacheFile));
 							
 							// Since cache was used
 							$this->apiLoggerData['cache-used']=true;
@@ -552,10 +548,6 @@ class WWW_API {
 				// If cache was not used and command result is not yet defined, system will execute the API command
 				if(!$apiResult){
 				
-					// HTML and text data types can be echoed/printed in their view files, result of this is gathered by output buffer
-					if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
-						ob_start();
-					}
 					// API command is solved into bits to be parsed
 					$commandBits=explode('-',$apiState['command'],2);
 					// Class name is found based on command
@@ -585,21 +577,26 @@ class WWW_API {
 							// Since an error was detected, system pushes for output immediately
 							return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),array('custom-header'=>'HTTP/1.1 501 Not Implemented')+$apiState);
 						}
+						// If output is set, then gathering every possible echoed result from method call
+						if($apiState['push-output']){
+							ob_start();
+						}
 						// Result of the command is solved with this call
 						// Input data is also submitted to this function
 						$apiResult=$controller->$methodName($apiInputData);
-						// If the method had no result, then it is assumed that the result is simply 'true'
+						// If the method does not return anything in the result, then building an API result array
 						if($apiResult==null){
-							$apiResult=1;
+							$apiResult=array('www-success'=>'OK','www-response-code'=>400);
+						} elseif(!is_array($apiResult)){
+							$apiResult=array('www-success'=>'OK','www-response-code'=>400,'www-data'=>$apiResult);
+						}
+						// Catching everything that was echoed and adding to array
+						if($apiState['push-output'] && ob_get_length()>0){
+							$apiResult['www-output']=ob_get_clean();
 						}
 					} else {
 						// Since an error was detected, system pushes for output immediately
 						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),array('custom-header'=>'HTTP/1.1 501 Not Implemented')+$apiState);
-					}
-					
-					// If returned data type was using output buffer, then that is gathered for the result instead
-					if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
-						$apiResult=ob_get_clean();
 					}
 					
 					// If cache timeout was set then the result is stored as a cache in the filesystem
@@ -612,17 +609,9 @@ class WWW_API {
 									return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
 								}
 							}
-							
-							// If returned data is HTML or text, it is simply written into cache file
-							// Other results are serialized before being written to cache
-							if($apiState['return-type']=='html' || $apiState['return-type']=='text'){
-								if(!file_put_contents($cacheFolder.$cacheFile,$apiResult)){
-									return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
-								}
-							} else {
-								if(!file_put_contents($cacheFolder.$cacheFile,serialize($apiResult))){
-									return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
-								}
+							// Results are serialized before being written to cache
+							if(!file_put_contents($cacheFolder.$cacheFile,serialize($apiResult))){
+								return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
 							}
 						} else {
 							// Setting cache timeout to 0, since cache is not stored
@@ -678,11 +667,7 @@ class WWW_API {
 				
 			// If internal logging is enabled
 			if($this->internalLogging){
-				if($apiState['return-type']=='html' || $apiState['return-type']=='xml' || $apiState['return-type']=='rss'){
-					$this->internalLogEntry('output-data','['.strtoupper($apiState['return-type']). ' DATA RETURNED]');
-				} else {
-					$this->internalLogEntry('output-data',$apiResult);
-				}
+				$this->internalLogEntry('output-data',$apiResult);
 			}
 			
 			// This filters the result through various PHP and header specific commands
@@ -735,6 +720,14 @@ class WWW_API {
 						// Encodes the resulting array in JSON
 						$apiResult=json_encode($apiResult);
 						break;
+					case 'html':
+						// This converts result into an output string
+						$apiResult=$this->toString($apiResult);
+						break;
+					case 'text':
+						// This converts result into an output string
+						$apiResult=$this->toString($apiResult);
+						break;
 					case 'binary':
 						// If the result is empty string or empty array or false, then binary returns a 0, otherwise it returns 1
 						$apiResult=$this->toBinary($apiResult);
@@ -771,7 +764,7 @@ class WWW_API {
 				}
 			
 			// IF OUTPUT IS REQUESTED TO BE CRYPTED
-				if($apiState['return-type']!='php' && $apiState['push-output'] && $apiState['output-crypt-key'] && !$errorFound){
+				if($apiState['push-output'] && $apiState['output-crypt-key'] && !$errorFound){
 					// Returned result will be with plain text instead of requested format, but only if header is not already overwritten
 					if(!$apiState['content-type-header']){
 						$apiState['content-type-header']='Content-Type: text/plain;charset=utf-8';
@@ -1065,31 +1058,21 @@ class WWW_API {
 		// Returns text XML string
 		private function toXML($apiResult,$type=false){
 			
-			// If result is an array, then separate processing is required
-			if(is_array($apiResult)){
-				// Different XML header is used based on whether it is an RSS or not
-				if(!$type){
-					$xml='<?xml version="1.0" encoding="utf-8"?><www>';
-				} elseif($type=='rss'){
-					$xml='<?xml version="1.0" encoding="utf-8"?><rss version="2.0">';
-				}
-				// This is the recursive function used
-				$xml.=$this->toXMLnode($apiResult);
-				if(!$type){
-					$xml.='</www>';
-				} else {
-					$xml.='</rss>';
-				}
-				return $xml;
-			} else {
-				// System returns a simple XML string since the result was not an array
-				if(!$type){
-					return '<?xml version="1.0" encoding="utf-8"?><www>'.htmlspecialchars($apiResult).'</www>';
-				} elseif($type=='rss'){
-					return '<?xml version="1.0" encoding="utf-8"?><rss version="2.0">'.htmlspecialchars($apiResult).'></rss>';
-				}
+			// Different XML header is used based on whether it is an RSS or not
+			if(!$type){
+				$xml='<?xml version="1.0" encoding="utf-8"?><www>';
+			} elseif($type=='rss'){
+				$xml='<?xml version="1.0" encoding="utf-8"?><rss version="2.0">';
 			}
-			
+			// This is the recursive function used
+			$xml.=$this->toXMLnode($apiResult);
+			if(!$type){
+				$xml.='</www>';
+			} else {
+				$xml.='</rss>';
+			}
+			return $xml;
+				
 		}
 		
 		// This creates single XML node and is used by toXML() method
@@ -1132,58 +1115,50 @@ class WWW_API {
 		// * apiResult - data returned from API call
 		// Returns text CSV string
 		private function toCSV($apiResult){
-		
-			// If result is an array then 
-			if(is_array($apiResult)){
 			
-				// Resulting rows are stored in this value
-				$result=array();
+			// Resulting rows are stored in this value
+			$result=array();
+			
+			// First element of the array is output
+			$tmp=array_slice($apiResult,0,1,true);
+			$first=array_shift($tmp);
+			
+			// If the first array element is also an array then multidimensional CSV will be output
+			if(is_array($first)){
+			
+				// System assumes that in a multidimensional array the keys are the column names
+				$result[]=implode("\t",array_keys($first));
 				
-				// First element of the array is output
-				$tmp=array_slice($apiResult,0,1,true);
-				$first=array_shift($tmp);
-				
-				// If the first array element is also an array then multidimensional CSV will be output
-				if(is_array($first)){
-				
-					// System assumes that in a multidimensional array the keys are the column names
-					$result[]=implode("\t",array_keys($first));
-					
-					// Rows will be processed as a result
-					foreach($apiResult as $subResult){		
-						foreach($subResult as $key=>$subSubResult){
-							// If result is still an array, then the values are imploded with commas
-							if(is_array($subSubResult)){
-								$subSubResult=implode(',',$subSubResult);
-							}
-							// Potential characters will be replaced
-							$subResult[$key]=str_replace(array("\n","\t","\r"),array('\n','\t',''),$subSubResult);
+				// Rows will be processed as a result
+				foreach($apiResult as $subResult){		
+					foreach($subResult as $key=>$subSubResult){
+						// If result is still an array, then the values are imploded with commas
+						if(is_array($subSubResult)){
+							$subSubResult=implode(',',$subSubResult);
 						}
-						// Rows are separated with a tab character
-						$result[]=implode("\t",$subResult);
+						// Potential characters will be replaced
+						$subResult[$key]=str_replace(array("\n","\t","\r"),array('\n','\t',''),$subSubResult);
 					}
-					
-				} else {
-				
-					// Since first element was not an array, it is assumed that other rows are not either
-					foreach($apiResult as $subResult){
-						// If other rows are an array, then the result is imploded with a comma
-						if(is_array($subResult)){
-							$result[]=str_replace(array("\n","\t","\r"),array('\n','\t',''),implode(',',$subResult));
-						} else {
-							$result[]=str_replace(array("\n","\t","\r"),array('\n','\t',''),$subResult);
-						}
-					}
-					
+					// Rows are separated with a tab character
+					$result[]=implode("\t",$subResult);
 				}
 				
-				// Result is imploded and returned
-				return implode("\n",$result);
-				
 			} else {
-				// Result was not an array, so we write the result as a single line
-				return str_replace(array("\n","\t","\r"),array('\n','\t',''),$apiResult);
+			
+				// Since first element was not an array, it is assumed that other rows are not either
+				foreach($apiResult as $subResult){
+					// If other rows are an array, then the result is imploded with a comma
+					if(is_array($subResult)){
+						$result[]=str_replace(array("\n","\t","\r"),array('\n','\t',''),implode(',',$subResult));
+					} else {
+						$result[]=str_replace(array("\n","\t","\r"),array('\n','\t',''),$subResult);
+					}
+				}
+				
 			}
+			
+			// Result is imploded and returned
+			return implode("\n",$result);
 			
 		}
 		
@@ -1191,88 +1166,80 @@ class WWW_API {
 		// * apiResult - data returned from API call
 		// Returns either a 1 or a 0
 		private function toBinary($apiResult){
-		
-			// Separate check depending on whether result was an array or not
-			if(is_array($apiResult)){
-				// If result is an array and it is not empty, then result is considered 'true'
-				if(!empty($apiResult)){
-					return 1;
-				} else {
-					return 0;
-				}
+			// Based on the returned array, system 'assumes' whether the action was a success or not
+			if(isset($apiResult['www-success']) || (!isset($apiResult['www-success'],$apiResult['www-error']) && !empty($apiResult))){
+				return 1;
 			} else {
-				// If result was not an array and is not false or is not empty, then it is considered 'true'
-				if($apiResult!=false && trim($apiResult)!=''){
-					return 1;
-				} else {
-					return 0;
-				}
+				return 0;
 			}
-			
+		}
+		
+		// This simply echoes out 'www-output' key from the result array
+		// * apiResult - data returned from API call
+		// Returns a string
+		private function toString($apiResult){
+			// If result is an array and it is not empty, then result is considered 'true'
+			if(isset($apiResult['www-output'])){
+				return $apiResult['www-output'];
+			} else {
+				return '';
+			}
 		}
 		
 		// Converts the result array to a useful INI file
 		// * apiResult - data returned from API call
 		// Returns text string formatted as INI file
 		private function toINI($apiResult){
-		
-			// INI file is only processed properly if the result is an array
-			if(is_array($apiResult)){
 			
-				// Rows of INI file are stored in this variable
-				$result=array();
-				
-				// Every array value is parsed separately
-				foreach($apiResult as $key=>$value){
-					// Separate handling based on whether the value is an array or not
-					if(is_array($value)){
-						// If value is an array then INI group is created for the value
-						$result[]='['.$key.']';
-						// All of the group values are output
-						foreach($value as $subkey=>$subvalue){
-							// If this sub-value is another array then it is imploded with commas
-							if(is_array($subvalue)){
-								foreach($subvalue as $subsubkey=>$subsubvalue){
-									// If another array is set as a value
-									if(is_array($subsubvalue)){
-										foreach($subsubvalue as $k=>$v){
-											if(is_array($v)){
-												$subsubvalue[$k]=str_replace('"','\"',serialize($v));
-											} else {
-												$subsubvalue[$k]=str_replace('"','\"',$v);
-											}
+			// Rows of INI file are stored in this variable
+			$result=array();
+			
+			// Every array value is parsed separately
+			foreach($apiResult as $key=>$value){
+				// Separate handling based on whether the value is an array or not
+				if(is_array($value)){
+					// If value is an array then INI group is created for the value
+					$result[]='['.$key.']';
+					// All of the group values are output
+					foreach($value as $subkey=>$subvalue){
+						// If this sub-value is another array then it is imploded with commas
+						if(is_array($subvalue)){
+							foreach($subvalue as $subsubkey=>$subsubvalue){
+								// If another array is set as a value
+								if(is_array($subsubvalue)){
+									foreach($subsubvalue as $k=>$v){
+										if(is_array($v)){
+											$subsubvalue[$k]=str_replace('"','\"',serialize($v));
+										} else {
+											$subsubvalue[$k]=str_replace('"','\"',$v);
 										}
-										$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'['.preg_replace('/[^a-zA-Z0-9]/i','',$subsubkey).']="'.implode(',',$subsubvalue).'"';
-									} else {
-										$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'['.preg_replace('/[^a-zA-Z0-9]/i','',$subsubkey).']="'.str_replace('"','\"',$subsubvalue).'"';
 									}
-								}
-							} else {
-								// If the value was not an array, then value is simply output in INI format
-								if(is_numeric($subvalue)){
-									$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'='.$subvalue;
+									$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'['.preg_replace('/[^a-zA-Z0-9]/i','',$subsubkey).']="'.implode(',',$subsubvalue).'"';
 								} else {
-									$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'="'.str_replace('"','\"',$subvalue).'"';
+									$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'['.preg_replace('/[^a-zA-Z0-9]/i','',$subsubkey).']="'.str_replace('"','\"',$subsubvalue).'"';
 								}
 							}
-						}
-					} else {
-						// If the value was not an array, then value is simply output in INI format
-						if(is_numeric($value)){
-							$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$key).'='.$value;
 						} else {
-							$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$key).'="'.str_replace('"','\"',$value).'"';
+							// If the value was not an array, then value is simply output in INI format
+							if(is_numeric($subvalue)){
+								$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'='.$subvalue;
+							} else {
+								$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$subkey).'="'.str_replace('"','\"',$subvalue).'"';
+							}
 						}
 					}
+				} else {
+					// If the value was not an array, then value is simply output in INI format
+					if(is_numeric($value)){
+						$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$key).'='.$value;
+					} else {
+						$result[]=preg_replace('/[^a-zA-Z0-9]/i','',$key).'="'.str_replace('"','\"',$value).'"';
+					}
 				}
-				
-				// Result is imploded into line-breaks for INI format
-				return implode("\n",$result);
-				
-			} else {
-				// Just the resulting string is returned since the result was not an array
-				return $apiResult;
 			}
+			
+			// Result is imploded into line-breaks for INI format
+			return implode("\n",$result);
 			
 		}
 		

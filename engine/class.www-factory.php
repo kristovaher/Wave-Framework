@@ -292,7 +292,7 @@ class WWW_Factory {
 		// * customData - Additional data returned
 		// * responseCode - Error code number
 		// Returns an array
-		final protected function errorArray($message='OK',$customData=false,$responseCode=300){
+		final protected function errorArray($message='Error',$customData=false,$responseCode=300){
 			if(is_array($customData)){
 				return array('www-error'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
@@ -305,7 +305,7 @@ class WWW_Factory {
 		// * customData - Additional data returned
 		// * responseCode - Response code number
 		// Returns an array
-		final protected function successArray($message='Error',$customData=false,$responseCode=400){
+		final protected function successArray($message='OK',$customData=false,$responseCode=400){
 			if(is_array($customData)){
 				return array('www-success'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {

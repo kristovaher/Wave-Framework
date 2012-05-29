@@ -22,10 +22,10 @@ class WWW_view_404 extends WWW_Factory {
 		// This view is loaded when URL Controller is unable to find a proper view
 		
 		// This simply prints out a 404 message when no proper view was found
-		echo '<h1>404</h1>';
+		?>
+			<h1>404</h1>
+		<?php
 		
-		// It is always recommended to return a value from a function
-		return true;
 	}
 
 }

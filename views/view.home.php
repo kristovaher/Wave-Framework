@@ -30,8 +30,6 @@ class WWW_view_home extends WWW_Factory {
 			</div>
 		<?php
 		
-		// It is always recommended to return a value from a function
-		return true;
 	}
 
 }

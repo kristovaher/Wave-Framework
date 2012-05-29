@@ -268,22 +268,16 @@ class WWW_controller_url extends WWW_Factory {
 	// This function returns view data
 	private function returnViewData($data){
 	
+		// VIEW DEFAULTS
+			
+			$data+=array(
+				'controller'=>'view',
+				'method'=>'render',
+				'subview'=>'',
+				'hidden'=>0
+			);
+	
 		// DEFAULTS FOR VIEW DATA
-		
-			// If view controller has not been defined in sitemap configuration
-			if(!isset($data['controller'])){
-				$data['controller']='view';
-			}
-			
-			// If view subview has not been defined in sitemap configuration
-			if(!isset($data['subview'])){
-				$data['subview']='';
-			}
-			
-			// If view hidden state has not been defined in sitemap configuration
-			if(!isset($data['hidden'])){
-				$data['hidden']=0;
-			}
 			
 			// If project title is not set by Sitemap, system defines the State project title as the value
 			if(!isset($data['project-title'])){

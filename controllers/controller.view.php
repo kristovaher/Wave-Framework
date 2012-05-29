@@ -132,14 +132,11 @@ class WWW_controller_view extends WWW_Factory {
 				<body>
 				<?php
 					// View object is rendered
-					$viewObject->render($input);
+					$result=$viewObject->$view['method']($input);
 				?>
 				</body>
 			</html>
 		<?php
-		
-		// Processing complete
-		return true;
 	
 	}
 	

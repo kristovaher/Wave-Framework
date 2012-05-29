@@ -266,12 +266,6 @@ class WWW_API {
 							}
 						}
 						
-						// Storing permissions data in State, if it is set for this profile
-						if(!$this->state->data['permissions'] && isset($this->apiProfiles[$apiState['profile']]['permissions']) && $this->apiProfiles[$apiState['profile']]['permissions']!=false){
-							// Assigning the permissions string to API
-							$this->state->data['permissions']=explode(',',$this->apiProfiles[$apiState['profile']]['permissions']);
-						} 
-						
 						// These options only affect non-public profiles
 						if($apiState['profile']!=$this->state->data['api-public-profile']){
 						
@@ -588,14 +582,14 @@ class WWW_API {
 						} elseif(!is_array($apiResult)){
 							$apiResult=array('www-success'=>'OK','www-response-code'=>400,'www-output'=>$apiResult);
 						}
-						// Catching everything that was echoed and adding to array
+						// Catching everything that was echoed and adding to array, unless output is already populated
 						if(ob_get_length()>0){
-							// If string was returned from previous result, then the result of that is pushed to 'data' instead of output
-							if(isset($apiResult['www-data'])){
-								$apiResult['www-returned-data']=$apiResult['www-data'];
+							// If string was returned from previous result, then output buffer is ignored
+							if(!isset($apiResult['www-data'])){
+								$apiResult['www-data']=ob_get_clean();
+							} else {
+								ob_end_clean();
 							}
-							// Adding output buffer results to result array
-							$apiResult['www-data']=ob_get_clean();
 						} else {
 							ob_end_clean();
 						}
@@ -718,54 +712,56 @@ class WWW_API {
 				}
 			
 			// DATA CONVERSION FROM RESULT TO REQUESTED FORMAT
+			
+				// If actual output is already detected
+				if(isset($apiResult['www-data'])){
+				
+					// Actual output is stored in www-output key
+					$apiResult=$apiResult['www-data'];
+					
+				} else {
 		
-				// Data is custom-formatted based on request
-				switch($apiState['return-type']){
-					case 'json':
-						// Encodes the resulting array in JSON
-						$apiResult=json_encode($apiResult);
-						break;
-					case 'html':
-						// This converts result into an output string
-						$apiResult=$this->toString($apiResult);
-						break;
-					case 'text':
-						// This converts result into an output string
-						$apiResult=$this->toString($apiResult);
-						break;
-					case 'binary':
-						// If the result is empty string or empty array or false, then binary returns a 0, otherwise it returns 1
-						$apiResult=$this->toBinary($apiResult);
-						break;
-					case 'xml':
-						// Result array is turned into an XML string
-						$apiResult=$this->toXML($apiResult);
-						break;
-					case 'rss':
-						// Result array is turned into an XML string
-						// The data should be formatted based on RSS 2.0 specification
-						$apiResult=$this->toXML($apiResult,'rss');
-						break;
-					case 'csv':
-						// Result array is turned into a CSV file
-						$apiResult=$this->toCSV($apiResult);
-						break;
-					case 'serializedarray':
-						// Array is simply serialized
-						$apiResult=serialize($apiResult);
-						break;
-					case 'querystring':
-						// Array is built into serialized query string
-						$apiResult=http_build_query($apiResult);
-						break;
-					case 'ini':
-						// This converts result into an INI string
-						$apiResult=$this->toINI($apiResult);
-						break;
-					case 'php':
-						// If PHP is used, then it can not be 'echoed' out due to being a PHP variable, so this is turned off
-						$apiState['push-output']=false;
-						break;
+					// Data is custom-formatted based on request
+					switch($apiState['return-type']){
+						case 'json':
+							// Encodes the resulting array in JSON
+							$apiResult=json_encode($apiResult);
+							break;
+						case 'binary':
+							// If the result is empty string or empty array or false, then binary returns a 0, otherwise it returns 1
+							$apiResult=$this->toBinary($apiResult);
+							break;
+						case 'xml':
+							// Result array is turned into an XML string
+							$apiResult=$this->toXML($apiResult);
+							break;
+						case 'rss':
+							// Result array is turned into an XML string
+							// The data should be formatted based on RSS 2.0 specification
+							$apiResult=$this->toXML($apiResult,'rss');
+							break;
+						case 'csv':
+							// Result array is turned into a CSV file
+							$apiResult=$this->toCSV($apiResult);
+							break;
+						case 'serializedarray':
+							// Array is simply serialized
+							$apiResult=serialize($apiResult);
+							break;
+						case 'querystring':
+							// Array is built into serialized query string
+							$apiResult=http_build_query($apiResult);
+							break;
+						case 'ini':
+							// This converts result into an INI string
+							$apiResult=$this->toINI($apiResult);
+							break;
+						case 'php':
+							// If PHP is used, then it can not be 'echoed' out due to being a PHP variable, so this is turned off
+							$apiState['push-output']=false;
+							break;
+					}
+				
 				}
 			
 			// IF OUTPUT IS REQUESTED TO BE CRYPTED
@@ -1176,18 +1172,6 @@ class WWW_API {
 				return 1;
 			} else {
 				return 0;
-			}
-		}
-		
-		// This simply echoes out 'www-data' key from the result array
-		// * apiResult - data returned from API call
-		// Returns a string
-		private function toString($apiResult){
-			// If result is an array and it is not empty, then result is considered 'true'
-			if(isset($apiResult['www-data'])){
-				return $apiResult['www-data'];
-			} else {
-				return '';
 			}
 		}
 		

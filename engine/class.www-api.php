@@ -577,10 +577,8 @@ class WWW_API {
 							// Since an error was detected, system pushes for output immediately
 							return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),array('custom-header'=>'HTTP/1.1 501 Not Implemented')+$apiState);
 						}
-						// If output is set, then gathering every possible echoed result from method call
-						if($apiState['push-output']){
-							ob_start();
-						}
+						// Gathering every possible echoed result from method call
+						ob_start();
 						// Result of the command is solved with this call
 						// Input data is also submitted to this function
 						$apiResult=$controller->$methodName($apiInputData);
@@ -588,11 +586,18 @@ class WWW_API {
 						if($apiResult==null){
 							$apiResult=array('www-success'=>'OK','www-response-code'=>400);
 						} elseif(!is_array($apiResult)){
-							$apiResult=array('www-success'=>'OK','www-response-code'=>400,'www-data'=>$apiResult);
+							$apiResult=array('www-success'=>'OK','www-response-code'=>400,'www-output'=>$apiResult);
 						}
 						// Catching everything that was echoed and adding to array
-						if($apiState['push-output'] && ob_get_length()>0){
-							$apiResult['www-output']=ob_get_clean();
+						if(ob_get_length()>0){
+							// If string was returned from previous result, then the result of that is pushed to 'data' instead of output
+							if(isset($apiResult['www-data'])){
+								$apiResult['www-returned-data']=$apiResult['www-data'];
+							}
+							// Adding output buffer results to result array
+							$apiResult['www-data']=ob_get_clean();
+						} else {
+							ob_end_clean();
 						}
 					} else {
 						// Since an error was detected, system pushes for output immediately
@@ -1174,13 +1179,13 @@ class WWW_API {
 			}
 		}
 		
-		// This simply echoes out 'www-output' key from the result array
+		// This simply echoes out 'www-data' key from the result array
 		// * apiResult - data returned from API call
 		// Returns a string
 		private function toString($apiResult){
 			// If result is an array and it is not empty, then result is considered 'true'
-			if(isset($apiResult['www-output'])){
-				return $apiResult['www-output'];
+			if(isset($apiResult['www-data'])){
+				return $apiResult['www-data'];
 			} else {
 				return '';
 			}

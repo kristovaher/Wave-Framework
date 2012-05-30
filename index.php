@@ -89,9 +89,9 @@ License: GNU Lesser General Public License Version 3
 
 	// Logger file is used for performance logging for later review
 	// Configuration file can set what type of logging is used
-	if(isset($config['logger']) && $config['logger']!=false && (!isset($config['logger-ip']) || $config['logger-ip']=='*' || in_array($_SERVER['REMOTE_ADDR'],explode(',',$config['logger-ip'])))){
+	if(isset($config['logger']) && $config['logger']!=false && (!isset($config['logger-ip']) || $config['logger-ip']=='*' || in_array($_SERVER['REMOTE_ADDR'],explode(',',$config['logger-ip']))) && ($config['logger']=='*' || preg_match($config['logger'],$_SERVER['REQUEST_URI']))){
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-logger.php');
-		$logger=new WWW_Logger($config['logger'],__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR,$microTime);
+		$logger=new WWW_Logger(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR,$microTime);
 	}
 	
 // LOADING HTTP REQUEST LIMITER

@@ -100,7 +100,7 @@ License: GNU Lesser General Public License Version 3
 
 	// Logger notifications
 	if(isset($logger)){
-		$logger->setCustomLogData(array('category'=>'API['.$apiHandler.']','api-profile'=>$state->data['api-profile'],'database-query-count'=>(($databaseConnection)?$databaseConnection->queryCounter:0))+$api->apiLoggerData);
+		$logger->setCustomLogData(array('category'=>'API['.$apiHandler.']','api-profile'=>$state->data['api-profile'],'database-query-count'=>((isset($databaseConnection))?$databaseConnection->queryCounter:0))+$api->apiLoggerData);
 		$logger->writeLog();
 	}
 

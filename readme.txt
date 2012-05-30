@@ -36,17 +36,17 @@ FEATURES
  * Input and output data is fully UTF-8
  * PDO-specific database controller for general-use database connections
  * Smart Index gateway that handles all HTTP requests
- * Full cache control for all types of dynamic and static requests
+ * Full taggable cache control for all types of dynamic and static requests
  * View and URL controllers that support multiple languages and clean URL's
  * jQuery JavaScript framework supported
  * On-demand dynamic image resizer and basic image editor
  * On-demand resource compressing, unifying and minifying
  * Automatic sitemap.xml and robots.txt generation
  * Automatically generated API documentation
- * API wrapper classes that make server to server API communication easy
+ * API wrapper classes that make browser and server to server communication easy
  * Optional 256bit Rijndael CBC data communication encryption
  * Installation-specific MVC class and resource overrides
- * Request limiter that can block HTTP requests under various conditions
+ * Request limiter that can block HTTP requests under certain conditions
  * Request logger that can be used for detailed performance grading of HTTP requests
  * Backup, update and filesystem maintenance tools
  * Compatibility script that tests support for server setup

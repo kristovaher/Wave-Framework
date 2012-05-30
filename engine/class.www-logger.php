@@ -26,18 +26,15 @@ class WWW_Logger {
 	// Directory of log files
 	private $logDir;
 	
-	// This variable stores the type of log data that is stored in the end, regardless of custom data sent to logger
-	// This should be a comma-separated list of keys
-	private $loggedData;
-	
 	// This stores custom data sent to logger
 	public $logData=array('response-code'=>200);
 	
 	// Default values are assigned when Logger is constructed
 	// It is good to initiate Logger as early as possible
-	// * loggerDir - location of Logger script relative to the script that loads Logger
 	// * logDir - location of directory to store log files at
-	public function __construct($loggedData='*',$logDir,$microTime=false){
+	// * microTime - Starting microtime
+	// Initializes the class
+	public function __construct($logDir,$microTime=false){
 	
 		// We record the start time of the request
 		if(!$microTime){
@@ -45,8 +42,6 @@ class WWW_Logger {
 		} else {
 			$this->requestMicrotime=$microTime;
 		}
-		// Comma separated list of keys that log should store
-		$this->loggedData=$loggedData;
 		// Checking if log directory is valid
 		if(is_dir($logDir)){
 			// Log directory is assigned
@@ -74,96 +69,86 @@ class WWW_Logger {
 	// Returns true if entry written to log, triggers an error if file cannot be written
 	public function writeLog(){
 	
-		// If logged data setting is not set to '*', then it loads the setting by exploding the setting string
-		if($this->loggedData!='*'){
-			$this->loggedData=explode(',',$this->loggedData);
-		}
-	
 		// All log data is gathered to this variable
 		$logData=array();
-
-		// DYNAMIC LOG DATA
-		
-			// Dynamic log data will be inserted here
-			foreach($this->logData as $key=>$value){
-				if($this->loggedData=='*' || in_array($key,$this->loggedData)){
-					if($value===true){
-						$logData[$key]='true';
-					} elseif($value===false){
-						$logData[$key]='false';
-					} else {
-						$logData[$key]=$value;
-					}
-				}
-			}
 		
 		// STATIC LOG DATA
 		
 			// Unique request identifier set by the server.
-			if($this->loggedData=='*' || in_array('request-id',$this->loggedData)){ 
-				if(isset($_SERVER['UNIQUE_ID'])){ $logData['request-id']=$_SERVER['UNIQUE_ID']; } // This is not supported on Windows
-			}
+			if(isset($_SERVER['UNIQUE_ID'])){ $logData['request-id']=$_SERVER['UNIQUE_ID']; } // This is not supported on Windows
+			
 			// This stores the URI that user agent requested.
-			if($this->loggedData=='*' || in_array('request',$this->loggedData)){ 
-				$logData['request']=$_SERVER['REQUEST_URI'];
-			}
+			$logData['request']=$_SERVER['REQUEST_URI'];
+			
 			// Timestamp of the request in milliseconds.
-			if($this->loggedData=='*' || in_array('microtime',$this->loggedData)){ 
-				$logData['microtime']=$this->requestMicrotime;
-			}
+			$logData['microtime']=$this->requestMicrotime;
+
 			// UNIX timestamp of the request time.
-			if($this->loggedData=='*' || in_array('time',$this->loggedData)){ 
-				$logData['time']=$_SERVER['REQUEST_TIME'];
-			}
+			$logData['time']=$_SERVER['REQUEST_TIME'];
+			
 			// Stores request datetime in format 'Y-m-d H:i:s'.
-			if($this->loggedData=='*' || in_array('datetime',$this->loggedData)){ 
-				$logData['datetime']=date('Y-m-d H:i:s').' GMT '.date('P');
-			}
+			$logData['datetime']=date('Y-m-d H:i:s').' GMT '.date('P');
+			
 			// Stores IP of the user agent that made the request.
-			if($this->loggedData=='*' || in_array('ip',$this->loggedData)){ 
-				$logData['ip']=$_SERVER['REMOTE_ADDR'];
-			}
+			$logData['ip']=$_SERVER['REMOTE_ADDR'];
+			
 			// This stores user agent string of the user agent.
-			if($this->loggedData=='*' || in_array('user-agent',$this->loggedData)){ 
-				$logData['user-agent']=(isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:'Unknown';
-			}
+			$logData['user-agent']=(isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:'Unknown';
+
 			// This stores user agent string of the user agent.
-			if($this->loggedData=='*' || in_array('referrer',$this->loggedData)){
-				if(isset($_SERVER['HTTP_REFERER'])){
-					$logData['referrer']=$_SERVER['HTTP_REFERER'];
-				}
+			if(isset($_SERVER['HTTP_REFERER'])){
+				$logData['referrer']=$_SERVER['HTTP_REFERER'];
 			}
+				
 			// GET variables submitted by user agent.
-			if(($this->loggedData=='*' || in_array('get',$this->loggedData)) && (isset($_GET) && !empty($_GET))){ 
+			if(isset($_GET) && !empty($_GET)){ 
 				$logData['get']=$_GET;
 			}
+			
 			// POST variables submitted by user agent
-			if(($this->loggedData=='*' || in_array('post',$this->loggedData)) && (isset($_POST) && !empty($_POST))){ 
+			if(isset($_POST) && !empty($_POST)){ 
 				$logData['post']=$_POST;
 			}
+			
 			// FILES variables submitted by user agent
-			if(($this->loggedData=='*' || in_array('files',$this->loggedData)) && (isset($_FILES) && !empty($_FILES))){ 
+			if(isset($_FILES) && !empty($_FILES)){
 				$logData['files']=$_FILES;
 			}
+			
 			// SESSION variables submitted by user agent
-			if(($this->loggedData=='*' || in_array('session',$this->loggedData)) && (isset($_SESSION) && !empty($_SESSION))){ 
+			if(isset($_SESSION) && !empty($_SESSION)){ 
 				$logData['session']=$_SESSION;
 			}
+			
 			// COOKIE variables submitted by user agent
-			if(($this->loggedData=='*' || in_array('cookie',$this->loggedData)) && (isset($_COOKIE) && !empty($_COOKIE))){ 
+			if(isset($_COOKIE) && !empty($_COOKIE)){ 
 				$logData['cookie']=$_COOKIE;
 			}
+			
 			// This stores how long the request took in seconds.
-			if($this->loggedData=='*' || in_array('execution-time',$this->loggedData)){ 
-				$logData['execution-time']=number_format((microtime(true)-$this->requestMicrotime),6);
-			}
+			$logData['execution-time']=number_format((microtime(true)-$this->requestMicrotime),6);
+			
 			// This stores the peak usage of memory during the request.
-			if($this->loggedData=='*' || in_array('memory-peak-usage',$this->loggedData)){ 
-				$logData['memory-peak-usage']=memory_get_peak_usage(); // In bytes, divide by 1048576 to get megabytes
+			$logData['memory-peak-usage']=memory_get_peak_usage(); // In bytes, divide by 1048576 to get megabytes
+
+			// CPU load - This is not available on Windows
+			if(function_exists('getrusage')){
+				$load=getrusage();
+				$logData['cpu-user-usage']=number_format($load['ru_utime.tv_sec']+$load['ru_utime.tv_usec']/1000000,6);
+				// Disregarding potentially incorrectly reported numbers
+				if($logData['cpu-user-usage']>$logData['execution-time']){
+					unset($logData['cpu-user-usage']);
+				}
+				$logData['cpu-system-usage']=number_format($load['ru_stime.tv_sec']+$load['ru_stime.tv_usec']/1000000,6);
+				// Disregarding potentially incorrectly reported numbers
+				if($logData['cpu-system-usage']>$logData['execution-time']){
+					unset($logData['cpu-system-usage']);
+				}
 			}
+			
 			// This stores system load number (that is one minute old).
 			// This is not supported on Windows
-			if(($this->loggedData=='*' || in_array('system-load',$this->loggedData)) && function_exists('sys_getloadavg')){ 
+			if(function_exists('sys_getloadavg')){
 				$load=sys_getloadavg(); //last 1, 5 and 15 minutes (number of processes in run queue)
 				$logData['system-load']=$load[0];
 			}

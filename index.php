@@ -1,7 +1,7 @@
 <?php
 
 /* 
-WWW Framework
+Wave Framework
 Index gateway
 
 Index gateway is a file where majority of requests are forwarded by Apache and /.htaccess file. 

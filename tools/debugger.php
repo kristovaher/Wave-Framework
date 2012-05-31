@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Error message debugger
 
 This is a script that collects error messages that have been written to filesystem. It also provides method 

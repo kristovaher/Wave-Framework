@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 System backup creator
 
 This script creates backup of entire system together with filesystem or just a backup of the main core 
@@ -9,7 +9,7 @@ files. The type of backup depends on GET variable. 'all' creates backup of every
 backup of just the system files. Files are stored in /filesystem/backups/ folder.
 
 * Uses Zip extension to archive the files
-* Name of the archive is {Y-m-d-H-i-s}.zip.tmp (tmp forbids access over URL's, since WWW Framework does not allow requesting tmp files)
+* Name of the archive is {Y-m-d-H-i-s}.zip.tmp (tmp forbids access over URL's, since Wave Framework does not allow requesting tmp files)
 * It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
 
 Author and support: Kristo Vaher - kristo@waher.net

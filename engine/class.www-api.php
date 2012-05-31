@@ -1,13 +1,13 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 API class
 
 This is a class that is used for routing all of API commands through, it deals with validation 
 and caching, calling the proper controller and returning data with right headers and the right 
 format. API has encryption and input-output data validations, as well as some framework specific 
-callbacks. There is usually just one instance of this object in WWW Framework and it can be used 
+callbacks. There is usually just one instance of this object in Wave Framework and it can be used 
 within MVC objects through Factory class.
 
 * Either uses existing State object or creates a new one
@@ -44,6 +44,9 @@ class WWW_API {
 	
 	// This is a counter of how often API call has been made
 	public $callIndex=0;
+	
+	// This stores locations of cache files for every API call
+	public $cacheIndex=array();
 	
 	// This is an array that is used to test whether certain API calls can be cached or not
 	public $noCache=array();
@@ -490,8 +493,13 @@ class WWW_API {
 					$cacheFile=$cacheValidator.'.tmp';
 					// Setting cache folder
 					$cacheFolder=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.substr($cacheFile,0,2).DIRECTORY_SEPARATOR;
+					
 					// If cache file exists, it will be parsed and set as API value
 					if(file_exists($cacheFolder.$cacheFile)){
+					
+						// Setting the path of cache file, since it exists
+						$this->cacheIndex[$this->callIndex]=$cacheFolder.$cacheFile;
+					
 						// Current cache timeout is used to return to browser information about how long browser should store this result
 						$apiState['last-modified']=filemtime($cacheFolder.$cacheFile);
 						
@@ -565,7 +573,7 @@ class WWW_API {
 						// Solving method name, dashes are underscored
 						$methodName=str_replace('-','_',$commandBits[1]);
 						// New controller is created based on API call
-						$controller=new $className($this);
+						$controller=new $className($this,$this->callIndex);
 						// If command method does not exist, 501 page is returned or error triggered
 						if(!method_exists($controller,$methodName) || !is_callable(array($controller,$methodName))){
 							// Since an error was detected, system pushes for output immediately
@@ -1168,7 +1176,7 @@ class WWW_API {
 		// Returns either a 1 or a 0
 		private function toBinary($apiResult){
 			// Based on the returned array, system 'assumes' whether the action was a success or not
-			if(isset($apiResult['www-success']) || (!isset($apiResult['www-success'],$apiResult['www-error']) && !empty($apiResult))){
+			if(isset($apiResult['www-success']) || (!isset($apiResult['www-success']) && !isset($apiResult['www-error']) && !empty($apiResult))){
 				return 1;
 			} else {
 				return 0;
@@ -1289,6 +1297,28 @@ class WWW_API {
 		// This function clears current API buffer
 		public function clearBuffer(){
 			$this->buffer=array();
+		}
+		
+		// This function checks for previous cache
+		// * key - Current API index
+		// Returns previous cache array
+		public function getOldCache($key){
+			if(isset($this->cacheIndex[$key])){
+				return unserialize(file_get_contents($this->cacheIndex[$key]));
+			} else {
+				return false;
+			}
+		}
+		
+		// This function checks for previous cache
+		// * key - Current API index
+		// Returns previous cache array
+		public function getOldCacheTime($key){
+			if(isset($this->cacheIndex[$key])){
+				return filemtime($this->cacheIndex[$key]);
+			} else {
+				return false;
+			}
 		}
 	
 	// INTERNAL LOGGING

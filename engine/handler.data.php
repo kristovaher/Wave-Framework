@@ -1,7 +1,7 @@
 <?php
 
 /* 
-WWW Framework
+Wave Framework
 Index gateway data handler
 
 Index gateway data handler is in functionality similar to api handler, except it uses API calls that 
@@ -69,7 +69,7 @@ License: GNU Lesser General Public License Version 3
 // CALLING DEFAULT VIEW CONTROLLER IF URL DID NOT ORDER A REDIRECTION
 
 	// If view data includes flags for redirection then the view itself will be ignored
-	if($view && !isset($view['www-temporary-redirect'],$view['www-permanent-redirect'])){
+	if($view && !isset($view['www-temporary-redirect']) && !isset($view['www-permanent-redirect'])){
 		
 		// All the data sent by the user agent is stored in this variable
 		$inputData=array();

@@ -1,6 +1,6 @@
 	
 /*
-WWW Framework
+Wave Framework
 General JavaScript
 
 This is general use JavaScript file. Main JavaScript functionality should go here and this file is loaded by default by View controller.

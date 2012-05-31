@@ -1,7 +1,7 @@
 <?php
 
 /* 
-WWW Framework
+Wave Framework
 Index gateway API handler
 
 Index gateway API handler takes all the input from GET, POST, FILES, SESSION and COOKIE variables 

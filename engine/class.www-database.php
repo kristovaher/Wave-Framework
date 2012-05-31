@@ -1,11 +1,11 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Database class
 
 Simple database class that has presently only support for MySQL. It is not required to use 
-WWW_Database with WWW framework at all, but should it be required, it is available. This 
+WWW_Database with Wave Framework at all, but should it be required, it is available. This 
 class uses PDO database class to simplify some of the database commands. It includes
 functions for returning data from database as a single row or multiple rows as associative 
 arrays as well as get information about last inserted ID and number of rows affected by 

@@ -1,10 +1,10 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 General use functions and autoload actions
 
-By default, this file is empty as no libraries are used or loaded by WWW framework. But if 
+By default, this file is empty as no libraries are used or loaded by Wave Framework. But if 
 you wish to add system-wide functions, then this file can be used for that purpose as it is 
 loaded by Index gateway for all requests. Generally it is useful to not have a general library
 in a system, as it can make testing more difficult, but it can be useful at times.

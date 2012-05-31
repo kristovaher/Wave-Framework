@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Logger class
 
 This is an optional class that is used to log requests on system by Index gateway. 

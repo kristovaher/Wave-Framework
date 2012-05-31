@@ -1,10 +1,10 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Server compatibility script
 
-This script checks if installation is ready for WWW Framework. It checks for PHP version, whether 
+This script checks if installation is ready for Wave Framework. It checks for PHP version, whether 
 Apache mod_rewrite RewriteEngine or Nginx URL rewriting is turned on and whether filesystem can be 
 written to.
 
@@ -85,7 +85,7 @@ header('Content-Type: text/html;charset=utf-8');
 		echo '<div class="border box">';
 			echo '<span class="bold">SUCCESS</span> Everything is OK<br/>';
 			echo '<span class="bold orange">WARNING</span> Some functionality might not work or is unavailable<br/>';
-			echo '<span class="bold red">FAILURE</span> WWW Framework is not meant to work on this system';
+			echo '<span class="bold red">FAILURE</span> Wave Framework is not meant to work on this system';
 		echo '</div>';
 		
 		echo '<h2>Details</h2>';
@@ -99,10 +99,10 @@ header('Content-Type: text/html;charset=utf-8');
 				if(version_compare($phpVersion,'5.3.0')>=0){
 					$log[]='<span class="bold">SUCCESS</span>: PHP is running version 5.3 or newer';
 				} else {
-					$log[]='<span class="bold red"><span class="bold red">FAILURE</span></span>: PHP is running older version than 5.3, WWW Framework has not been tested on older versions of PHP';
+					$log[]='<span class="bold red"><span class="bold red">FAILURE</span></span>: PHP is running older version than 5.3, Wave Framework has not been tested on older versions of PHP';
 				}
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: Unable to detect PHP version number, WWW Framework requires PHP version 5.3 or above';
+				$log[]='<span class="bold orange">WARNING</span>: Unable to detect PHP version number, Wave Framework requires PHP version 5.3 or above';
 			}
 			
 		// SHORT OPEN TAG
@@ -124,7 +124,7 @@ header('Content-Type: text/html;charset=utf-8');
 			if(extension_loaded('apc')){
 				$log[]='<span class="bold">SUCCESS</span>: APC is supported';
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: APC PHP extension is not supported, this is not required by WWW Framework, but can improve performance, if supported';
+				$log[]='<span class="bold orange">WARNING</span>: APC PHP extension is not supported, this is not required by Wave Framework, but can improve performance, if supported';
 			}
 			
 		// CURL AND URL OPEN
@@ -132,9 +132,9 @@ header('Content-Type: text/html;charset=utf-8');
 				$log[]='<span class="bold">SUCCESS</span>: cURL is supported';
 			} else {
 				if(ini_get('allow_url_fopen')==1){
-					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported, this is not required by WWW Framework, but is useful when making API requests to other systems that include POST data';
+					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported, this is not required by Wave Framework, but is useful when making API requests to other systems that include POST data';
 				} else {
-					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported and allow_url_fopen setting is also off, these are not required by WWW Framework, but without them you cannot make API requests to other networks';
+					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported and allow_url_fopen setting is also off, these are not required by Wave Framework, but without them you cannot make API requests to other networks';
 				}
 			}
 
@@ -305,7 +305,7 @@ header('Content-Type: text/html;charset=utf-8');
 			
 			// FILESYSTEM MESSENGER
 			// All the certificates and encryption keys should be stored here
-			// WWW Framework itself does not use this folder and this should be used by developer, if necessary
+			// Wave Framework itself does not use this folder and this should be used by developer, if necessary
 			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.'test.tmp','1')){
 				$log[]='<span class="bold">SUCCESS</span>: /filesystem/messenger/ is writable';
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.'test.tmp');
@@ -315,7 +315,7 @@ header('Content-Type: text/html;charset=utf-8');
 			
 			// FILESYSTEM KEYS
 			// All the certificates and encryption keys should be stored here
-			// WWW Framework itself does not use this folder and this should be used by developer, if necessary
+			// Wave Framework itself does not use this folder and this should be used by developer, if necessary
 			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'keys'.DIRECTORY_SEPARATOR.'test.tmp','1')){
 				$log[]='<span class="bold">SUCCESS</span>: /filesystem/keys/ is writable';
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'keys'.DIRECTORY_SEPARATOR.'test.tmp');
@@ -362,7 +362,7 @@ header('Content-Type: text/html;charset=utf-8');
 			
 			// FILESYSTEM TEMPORARY FILES
 			// Various temporary files should be stored here
-			// WWW Framework itself does not use this folder and this should be used by developer, if necessary
+			// Wave Framework itself does not use this folder and this should be used by developer, if necessary
 			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.'test.tmp','1')){
 				$log[]='<span class="bold">SUCCESS</span>: /filesystem/tmp/ is writable';
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.'test.tmp');
@@ -372,7 +372,7 @@ header('Content-Type: text/html;charset=utf-8');
 			
 			// FILESYSTEM USERDATA
 			// Various user uploaded files should be stored here
-			// WWW Framework itself does not use this folder and this should be used by developer, if necessary
+			// Wave Framework itself does not use this folder and this should be used by developer, if necessary
 			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'userdata'.DIRECTORY_SEPARATOR.'test.tmp','1')){
 				$log[]='<span class="bold">SUCCESS</span>: /filesystem/userdata/ is writable';
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'userdata'.DIRECTORY_SEPARATOR.'test.tmp');
@@ -382,7 +382,7 @@ header('Content-Type: text/html;charset=utf-8');
 			
 			// FILESYSTEM DATA
 			// Various databases (like SQLite) should be stored here
-			// WWW Framework itself does not use this folder and this should be used by developer, if necessary
+			// Wave Framework itself does not use this folder and this should be used by developer, if necessary
 			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'test.tmp','1')){
 				$log[]='<span class="bold">SUCCESS</span>: /filesystem/data/ is writable';
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR.'test.tmp');

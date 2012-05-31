@@ -1,10 +1,10 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 State class
 
-State is always required by WWW Framework. It is used by API and some handlers. State is used 
+State is always required by Wave Framework. It is used by API and some handlers. State is used 
 to keep track of system state and its changes, such as relevant PHP settings. It allows changing 
 changing these settings, and thus affecting API or PHP configuration. State is assigned in API 
 and is accessible in MVC objects as well. Multiple different states can be used by the same 
@@ -42,7 +42,7 @@ class WWW_State	{
 	
 			// A lot of default State variables are loaded from PHP settings, others are simply pre-defined
 			$this->data=array(
-				'project-title'=>'WWW Framework',
+				'project-title'=>'Wave Framework',
 				'api-public-profile'=>'public',
 				'api-profile'=>'public',
 				'api-token-timeout'=>3600,

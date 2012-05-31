@@ -1,10 +1,10 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Filesystem cleaner
 
-This script is used to clear WWW system generated cache. It should be used for debugging purposes 
+This script is used to clear system generated cache. It should be used for debugging purposes 
 during development. This script can be configured by running it with a GET variable. Possible 
 values are 'all' (clears everything), 'output' (clears /filesystem/cache/output/), 'images' 
 (clears images cache), 'resources' (clears cache of JavaScript and CSS), 'limiter' (clears 

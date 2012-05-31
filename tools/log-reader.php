@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Log reader for reading performance logs
 
 This file uses /config.ini settings for HTTP authentication. This is a simple script that is 

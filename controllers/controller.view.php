@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 MVC Controller class
 
 View class is used by index.php to load view from /views/ folder and output it to the requesting 
@@ -19,7 +19,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 License: This file can be copied, changed and re-published under another license without any restrictions
 */
 
-// WWW_Factory is parent class for all MVC classes of WWW
+// WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_controller_view extends WWW_Factory {
 
 	// This is called by index.php gateway when initializing view

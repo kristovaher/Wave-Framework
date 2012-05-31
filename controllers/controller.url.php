@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 MVC Controller class
 
 This class is used by index.php gateway to solve current URL request. It uses the URL string 
@@ -11,7 +11,7 @@ the language that WWW_controller_url detects is being used. This class also deal
 such as slashes at the end of URL's and whether first language of the sytem needs to have a 
 URL node in the request string or not. It also redirects the user agent in case URL is 
 incorrectly formatted. This class is optional and only needed if one intends to build a 
-website with beautiful URL's with WWW framework.
+website with beautiful URL's with Wave Framework.
 
 * Returns view based data, such as translations, sitemap and view settings, to view through data handler
 

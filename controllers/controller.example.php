@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 MVC Controller class
 
 Minimal example controller for demonstration purposes
@@ -10,7 +10,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 License: This file can be copied, changed and re-published under another license without any restrictions
 */
 
-// WWW_Factory is parent class for all MVC classes of WWW
+// WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_controller_example extends WWW_Factory {
 	
 	// Simple example call (from API it would be called as 'example-get' command)

@@ -1,3 +1,16 @@
+
+/* 
+Wave Framework
+Developer tools stylesheet
+
+It is possible to load view specific stylesheet, this file is included among HTML resources 
+by WWW_controller_view if it is detected and found for the view it loads. This file is 
+loaded after other stylesheet files.
+
+Author and support: Kristo Vaher - kristo@waher.net
+License: This file can be copied, changed and re-published under another license without any restrictions
+*/
+
 html,body {
 	background-color: #f2f2f2; 
 	background-image: linear-gradient(top, #d9d9d9, #f2f2f2); 

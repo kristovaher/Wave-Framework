@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Image editor class
 
 This class is used to handle basic image editing, mostly for file resizes and cropping. This 

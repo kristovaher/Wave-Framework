@@ -1,10 +1,10 @@
 	
 /*
-WWW Framework
-WWW API connection wrapper class for JavaScript
+Wave Framework
+Wave API connection wrapper class for JavaScript
 
-This class should be used when you wish to communicate with WWW Framework that is set up in another 
-server. This class is independent from WWW Framework itself and can be used by other servers alone. 
+This class should be used when you wish to communicate with Wave Framework that is set up in another 
+server. This class is independent from Wave Framework itself and can be used by other servers alone. 
 Differently from PHP API Wrapper, JavaScript API Wrapper does not support sending and receiving 
 encrypted data.
 
@@ -47,7 +47,7 @@ function WWW_Wrapper(address){
 	var userAgent='WWWFramework/2.0.0 (JavaScript)';
 		
 	// Log entry
-	log.push('WWW API Wrapper object created with API address: '+address);
+	log.push('Wave API Wrapper object created with API address: '+address);
 	
 	// SETTINGS
 		

@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Factory class
 
 Factory class is required for MVC objects. Factory is used as factory class for supporting the 
@@ -11,7 +11,7 @@ carries with itself currently used API.
 * Factory can dynamically load and return new classes of its own per demand
 * All child classes can access system state and API objects
 * Factory also acts as a wrapper for database calls
-* Factory also allows loading of API Wrapper for communicating with other WWW Framework API's
+* Factory also allows loading of API Wrapper for communicating with other Wave Framework API's
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -25,11 +25,13 @@ class WWW_Factory {
 
 	// When a model, view or controller is created, it can be loaded with existing state or API
 	// * api - WWW_API object
-	final public function __construct($api=false){
+	final public function __construct($api=false,$callIndex=0){
 		// API is passed to the object, if defined
 		if($api){ 
 			$this->WWW_API=$api; 
 		}
+		// API call index
+		$this->WWW_API_callIndex=$callIndex;
 		// This acts as __construct() for the MVC objects
 		if(method_exists($this,'__initialize')){
 			$this->__initialize();
@@ -58,8 +60,6 @@ class WWW_Factory {
 			if(!isset($inputData['www-output'])){
 				$inputData['www-output']=0;
 			}
-			// This is the call index after the API call is made
-			$this->WWW_API_callIndex=$this->WWW_API->callIndex;
 			// Returning the result from API
 			return $this->WWW_API->command($inputData,$useBuffer,false);
 		}
@@ -158,10 +158,10 @@ class WWW_Factory {
 			// Object is returned if no specific method name is called
 			if(!$methodName){
 				// If method name was not defined then this function returns the entire class with current State and API set
-				return new $className($this->WWW_API);
+				return new $className($this->WWW_API,$this->WWW_API_callIndex);
 			} else {
 				// If method name was set, then this function creates a new temporary object
-				$tempObject=new $className($this->WWW_API);
+				$tempObject=new $className($this->WWW_API,$this->WWW_API_callIndex);
 				// If method exists, then the result of this method is returned as a result
 				if(method_exists($tempObject,$methodName)){
 					return $tempObject->$methodName($methodData);
@@ -201,10 +201,10 @@ class WWW_Factory {
 			// Object is returned if no specific method name is called
 			if(!$methodName){
 				// If method name was not defined then this function returns the entire class with current State and API set
-				return new $className($this->WWW_API);
+				return new $className($this->WWW_API,$this->WWW_API_callIndex);
 			} else {
 				// If method name was set, then this function creates a new temporary object
-				$tempObject=new $className($this->WWW_API);
+				$tempObject=new $className($this->WWW_API,$this->WWW_API_callIndex);
 				// If method exists, then the result of this method is returned as a result
 				if(method_exists($tempObject,$methodName)){
 					return $tempObject->$methodName($methodData);
@@ -244,10 +244,10 @@ class WWW_Factory {
 			// Object is returned if no specific method name is called
 			if(!$methodName){
 				// If method name was not defined then this function returns the entire class with current State and API set
-				return new $className($this->WWW_API);
+				return new $className($this->WWW_API,$this->WWW_API_callIndex);
 			} else {
 				// If method name was set, then this function creates a new temporary object
-				$tempObject=new $className($this->WWW_API);
+				$tempObject=new $className($this->WWW_API,$this->WWW_API_callIndex);
 				// If method exists, then the result of this method is returned as a result
 				if(method_exists($tempObject,$methodName)){
 					return $tempObject->$methodName($methodData);
@@ -340,7 +340,7 @@ class WWW_Factory {
 		// Essentially this allows the result to be loaded from cache, but not 'written' into cache
 		// * state - True or false flag
 		// Always return true
-		final protected function disableCache($state){
+		final protected function disableCache($state=true){
 			// This is stored as a flag
 			$this->WWW_API->noCache[$this->WWW_API_callIndex]=$state;
 			return true;
@@ -352,6 +352,19 @@ class WWW_Factory {
 		final protected function clearCache($tags){
 			return $this->WWW_API->clearCache($tags);
 		}
+		
+		// This method returns old cache for current method, if it exists
+		// Returns an array from cache
+		final protected function getOldCache(){
+			return $this->WWW_API->getOldCache($this->WWW_API_callIndex);
+		}
+		
+		// This method returns old cache timestamp for current method, if it exists
+		// Returns UNIX timestamp
+		final protected function getOldCacheTime(){
+			return $this->WWW_API->getOldCacheTime($this->WWW_API_callIndex);
+		}
+		
 		
 	// INTERNAL LOG ENTRY WRAPPER
 	

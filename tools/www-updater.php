@@ -1,8 +1,8 @@
 <?php
 
 /*
-WWW Framework
-WWW Framework Updater script
+Wave Framework
+Wave Framework Updater script
 
 This is an update script template, if file with this name is added to root archive of update zip 
 files that is given to /tools/updater.php, then this script is also executed (and then removed). 
@@ -22,7 +22,7 @@ error_reporting(0);
 // Updater script calls this function always with specific version numbers that can be used within the script
 if(isset($_GET['www-version'],$_GET['system-version'])){
 	// add here various functionality that is required for this version
-	echo 'Doing version update on WWW Framework version '.$_GET['www-version'].' and system version '.$_GET['system-version'];
+	echo 'Doing version update on Wave Framework version '.$_GET['www-version'].' and system version '.$_GET['system-version'];
 } else {
 	// Version numbers are required
 	echo 'Cannot run updater without version numbers';

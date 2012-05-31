@@ -1,10 +1,10 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Maintenance function library
 
-This script includes various general-use functions that are used by developer tools in WWW Framework 
+This script includes various general-use functions that are used by developer tools in Wave Framework 
 that are stored in /tools/ folder. This includes scripts such as directory cleaner and mass-file mover 
 through FTP.
 
@@ -206,7 +206,7 @@ function systemBackup($source,$target,$filesystemBackup=false){
 		$zip=new ZipArchive;
 		if($zip->open($target,ZipArchive::CREATE)){
 			// Archive comment notes the creation date and time
-			$zip->setArchiveComment('WWW Framework backup created at '.date('d.m.Y H:i:s').' by script run at '.$_SERVER['REQUEST_URI']);
+			$zip->setArchiveComment('Wave Framework backup created at '.date('d.m.Y H:i:s').' by script run at '.$_SERVER['REQUEST_URI']);
 			// Each file is added to archive
 			foreach($files as $f){
 				if(is_readable($f)){

@@ -1,13 +1,13 @@
 <?php
 
 /*
-WWW Framework
-WWW API connection wrapper class
+Wave Framework
+Wave API connection wrapper class
 
-This class should be used when you wish to communicate with WWW Framework that is set up in another 
-server. This class is independent from WWW Framework itself and can be used by other servers alone. 
+This class should be used when you wish to communicate with Wave Framework that is set up in another 
+server. This class is independent from Wave Framework itself and can be used by other servers alone. 
 This class allows sending and receiving encrypted data as well as sending files and creating session 
-tokens in a system set up with WWW Framework. This class also requires PHP 5.3.3 or newer due to 
+tokens in a system set up with Wave Framework. This class also requires PHP 5.3.3 or newer due to 
 has validations with JSON encoded string and numeric conversions.
 
 * cURL is used for requests by default. POST and file upload requests are only possible with cURL
@@ -20,7 +20,7 @@ License: GNU Lesser General Public License Version 3
 
 class WWW_Wrapper {
 
-	// HTTP address of WWW-Framework-based API
+	// HTTP address of Wave Framework API
 	private $apiAddress;
 	
 	// This is current API state
@@ -60,7 +60,7 @@ class WWW_Wrapper {
 	// * apiAddress - Full URL is required, like http://www.example.com/www.api
 	// Object is created
 	public function __construct($apiAddress){
-		// This should be URL to API of WWW Framework
+		// This should be URL to API of Wave Framework
 		$this->apiAddress=$apiAddress;
 		// This checks for cURL support, which is required for making POST requests
 		// cURL is also faster than file_get_contents() method
@@ -84,7 +84,7 @@ class WWW_Wrapper {
 			$this->log[]=$this->errorMessage;
 		}
 		// Log entry
-		$this->log[]='WWW API Wrapper object created with API address: '.$apiAddress;
+		$this->log[]='Wave API Wrapper object created with API address: '.$apiAddress;
 	}
 	
 	// SETTINGS

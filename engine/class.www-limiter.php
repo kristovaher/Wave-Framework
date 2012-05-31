@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Request limiter class
 
 This is an optional class that is used to limit requests based on user agent by Index gateway. 

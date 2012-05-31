@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 Minifier class
 
 Minifier is used to minify text data without breaking functionality of that text. This is useful to be 

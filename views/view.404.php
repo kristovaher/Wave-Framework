@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 MVC View class
 
 This view is called by WWW_controller_view if WWW_controller_url could not find a matching 
@@ -12,7 +12,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 License: This file can be copied, changed and re-published under another license without any restrictions
 */
 
-// WWW_Factory is parent class for all MVC classes of WWW
+// WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_view_404 extends WWW_Factory {
 
 	// WWW_controller_url calls this function as output for page content

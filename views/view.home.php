@@ -1,7 +1,7 @@
 <?php
 
 /*
-WWW Framework
+Wave Framework
 MVC View class
 
 This view is loaded when WWW_controller_view finds root or home page as the view file. Name 
@@ -12,7 +12,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 License: This file can be copied, changed and re-published under another license without any restrictions
 */
 
-// WWW_Factory is parent class for all MVC classes of WWW
+// WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_view_home extends WWW_Factory {
 
 	// WWW_controller_url calls this function as output for page content

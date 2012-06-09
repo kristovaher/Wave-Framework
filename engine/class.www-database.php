@@ -192,7 +192,7 @@ class WWW_Database {
 			return $return;
 		} else {
 			// Checking for an error, if there was one
-			$this->dbErrorCheck($query,$queryString);
+			$this->dbErrorCheck($query,$queryString,$variables);
 			return false;
 		}
 		
@@ -228,7 +228,7 @@ class WWW_Database {
 			return $return;
 		} else {
 			// Checking for an error, if there was one
-			$this->dbErrorCheck($query,$queryString);
+			$this->dbErrorCheck($query,$queryString,$variables);
 			return false;
 		}
 		
@@ -268,7 +268,7 @@ class WWW_Database {
 			}
 		} else {
 			// Checking for an error, if there was one
-			$this->dbErrorCheck($query,$queryString);
+			$this->dbErrorCheck($query,$queryString,$variables);
 			return false;
 		}
 		
@@ -277,8 +277,9 @@ class WWW_Database {
 	// Triggers a PHP error if MySQL encounters error in the query
 	// * query - query object from PDO
 	// * queryString - query string
+	// * variables - Variables sent to query
 	// Triggers an error if there was an error
-	private function dbErrorCheck($query,$queryString=false){
+	private function dbErrorCheck($query,$queryString=false,$variables=array()){
 	
 		// This method requires database to be connected
 		if($this->connected==1){
@@ -287,10 +288,10 @@ class WWW_Database {
 				$errors=$query->errorInfo();
 				if($errors && !empty($errors)){
 					// PDO errorInfo carries verbose error as third in the index
-					if($queryString){
-						trigger_error('QUERY:'."\n".$queryString."\n".'FAILED:'."\n".$errors[2],E_USER_WARNING);
+					if(!empty($variables)){
+						trigger_error('QUERY:'."\n".$this->dbDebug($queryString,$variables)."\n".'FAILED:'."\n".$errors[2],E_USER_WARNING);
 					} else {
-						trigger_error('QUERY FAILED:'."\n".$errors[2],E_USER_WARNING);
+						trigger_error('QUERY:'."\n".$queryString."\n".'FAILED:'."\n".$errors[2],E_USER_WARNING);
 					}
 				}
 			}
@@ -301,6 +302,60 @@ class WWW_Database {
 		// Since error was not triggered, it simply returns true
 		return true;
 		
+	}
+	
+	// This method creates a new array of specific keys from a result array
+	// * array - Array to filter from
+	// * key - Key to return
+	// * unique - If returned array should only have unique values
+	// Returns an array
+	public function dbArray($array,$key,$unique=true){
+		$result=array();
+		// This method only works on an array
+		if(is_array($array)){
+			foreach($array as $ar){
+				if(is_array($ar)){
+					// If the key is set, then adds to the array
+					if(isset($ar[$key])){
+						$result[]=$ar[$key];
+					}
+				} else {
+					// This is used in case the array sent to dbArray is from dbSingle
+					if(isset($array[$key])){
+						$result[]=$array[$key];
+					}
+					break;
+				}
+			}
+			// If only unique values are accepted
+			if($unique){
+				$result=array_unique($result);
+			}
+		}
+		return $result;
+	}
+	
+	// This function attempts to 'simulate' the way PDO builds a query
+	// * query - Query string
+	// * variables - Values sent to PDO
+	// Returns 'prepared' query string
+	public function dbDebug($query,$variables){
+		// Attempt to simulate PDO query-building
+		$keys=array();
+		$values=array();
+		foreach($variables as $key=>$value){
+			if(is_string($key)){
+				$keys[]='/:'.$key.'/';
+			} else {
+				$keys[]='/[?]/';
+			}
+			if(is_numeric($value)){
+				$values[]=intval($value);
+			} else {
+				$values[]=$this->pdo->quote($value);
+			}
+		}
+		return preg_replace($keys,$values,$query,1);
 	}
 	
 	// Used to get the last inserted ID from database

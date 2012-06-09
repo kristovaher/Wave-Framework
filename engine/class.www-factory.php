@@ -618,6 +618,15 @@ class WWW_Factory {
 			return $this->WWW_API->state->databaseConnection->dbQuote($value,$type);
 		}
 		
+		// This method creates a new array of specific keys from a result array
+		// * array - Array to filter from
+		// * key - Key to return
+		// * unique - If returned array should only have unique values
+		// Returns an array
+		public function dbArray($array,$key,$unique=true){
+			return $this->WWW_API->state->databaseConnection->dbArray($array,$key,$unique);
+		}
+		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
 		final protected function dbPDO(){

@@ -54,10 +54,10 @@ class WWW_Limiter {
 	public function limitRequestCount($limit=400,$duration=3600){
 	
 		// Limiter is only used if limit is set higher than 0 and request does not originate from the same server
-		if($limit!=0 && $_SERVER['REMOTE_ADDR']!=$_SERVER['SERVER_ADDR']){
+		if($limit!=0 && __IP__!=$_SERVER['SERVER_ADDR']){
 		
 			// Log filename is hashed user agents IP
-			$logFilename=md5($_SERVER['REMOTE_ADDR']);
+			$logFilename=md5(__IP__);
 			// Subfolder name is derived from log filename
 			$cacheSubfolder=substr($logFilename,0,2);
 			
@@ -195,7 +195,7 @@ class WWW_Limiter {
 			// Exploding string of IP's into an array
 			$whiteList=explode(',',$whiteList);
 			// Checking if the user agent IP is set in blacklist array
-			if(empty($whiteList) || !in_array($_SERVER['REMOTE_ADDR'],$whiteList)){
+			if(empty($whiteList) || !in_array(__IP__,$whiteList)){
 				// Request is logged and can be used for performance review later
 				if($this->logger){
 					$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter','reason'=>'Not whitelisted'));
@@ -225,7 +225,7 @@ class WWW_Limiter {
 			// Exploding string of IP's into an array
 			$blackList=explode(',',$blackList);
 			// Checking if the user agent IP is set in blacklist array
-			if(!empty($blackList) && in_array($_SERVER['REMOTE_ADDR'],$blackList)){
+			if(!empty($blackList) && in_array(__IP__,$blackList)){
 				// Request is logged and can be used for performance review later
 				if($this->logger){
 					$this->logger->setCustomLogData(array('response-code'=>403,'category'=>'limiter','reason'=>'Blacklisted'));

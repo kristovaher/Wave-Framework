@@ -85,11 +85,29 @@ License: GNU Lesser General Public License Version 3
 	// Setting the timezone
 	date_default_timezone_set($config['timezone']);
 	
+	// Trusted proxies and IP address
+	if(isset($config['trusted-proxies'])){
+		$config['trusted-proxies']=explode(',',$config['trusted-proxies']);
+	} else {
+		$config['trusted-proxies']=array('*');
+	}
+	
+	// IP may be forwarded (such as when website is used through a proxy), this can check for such an occasion
+	if(isset($_SERVER['HTTP_CLIENT_IP']) && (in_array('*',$config['trusted-proxies']) || in_array($_SERVER['REMOTE_ADDR'],$config['trusted-proxies']))){
+		$tmp=explode(',',$_SERVER['HTTP_CLIENT_IP']);
+		define('__IP__',$tmp[0]);
+	} elseif(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && (in_array('*',$config['trusted-proxies']) || in_array($_SERVER['REMOTE_ADDR'],$config['trusted-proxies']))){
+		$tmp=explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
+		define('__IP__',$tmp[0]);
+	} else {
+		define('__IP__',$_SERVER['REMOTE_ADDR']);
+	}
+	
 // LOADING LOGGER
 
 	// Logger file is used for performance logging for later review
 	// Configuration file can set what type of logging is used
-	if(isset($config['logger']) && $config['logger']!=false && (!isset($config['logger-ip']) || $config['logger-ip']=='*' || in_array($_SERVER['REMOTE_ADDR'],explode(',',$config['logger-ip']))) && ($config['logger']=='*' || preg_match($config['logger'],$_SERVER['REQUEST_URI']))){
+	if(isset($config['logger']) && $config['logger']!=false && (!isset($config['logger-ip']) || $config['logger-ip']=='*' || in_array(__IP__,explode(',',$config['logger-ip']))) && ($config['logger']=='*' || preg_match($config['logger'],$_SERVER['REQUEST_URI']))){
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-logger.php');
 		$logger=new WWW_Logger(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR,$microTime);
 	}

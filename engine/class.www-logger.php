@@ -90,7 +90,18 @@ class WWW_Logger {
 			$logData['datetime']=date('Y-m-d H:i:s').' GMT '.date('P');
 			
 			// Stores IP of the user agent that made the request.
-			$logData['ip']=$_SERVER['REMOTE_ADDR'];
+			$logData['ip']=__IP__;
+			
+			// Additional IP's
+			if(isset($_SERVER['HTTP_CLIENT_IP'])){
+				$logData['forwarded-client-ip']=$_SERVER['HTTP_CLIENT_IP'];
+			}
+			if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])){
+				$logData['forwarded-client-ip']=$_SERVER['HTTP_X_FORWARDED_FOR'];
+			}
+			if(__IP__!=$_SERVER['REMOTE_ADDR']){
+				$logData['remote-addr']=$_SERVER['REMOTE_ADDR'];
+			}
 			
 			// This stores user agent string of the user agent.
 			$logData['user-agent']=(isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:'Unknown';

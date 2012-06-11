@@ -71,9 +71,9 @@ class WWW_State	{
 				'language'=>false,
 				'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'client-user-agent'=>((isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:''),
-				'client-ip'=>$_SERVER['REMOTE_ADDR'],
-				'true-client-ip'=>$_SERVER['REMOTE_ADDR'],
+				'client-ip'=>__IP__,
 				'server-ip'=>$_SERVER['SERVER_ADDR'],
+				'trusted-proxies'=>array(),
 				'request-id'=>((isset($_SERVER['UNIQUE_ID']))?$_SERVER['UNIQUE_ID']:''),
 				'request-uri'=>$_SERVER['REQUEST_URI'],
 				'request-time'=>$_SERVER['REQUEST_TIME'],
@@ -150,18 +150,11 @@ class WWW_State	{
 				// If install is at www.example.com/w/ subfolder and user requests www.example.com/w/en/page/ then this would be parsed to 'en/page/'
 				$this->data['true-request']=preg_replace('/(^'.preg_quote($this->data['web-root'],'/').')/i','',$this->data['request-uri']);
 			}
-			
-			// IP may be forwarded, this can check for such an occasion
-			if(!empty($_SERVER['HTTP_CLIENT_IP'])){
-				$this->data['true-client-ip']=$_SERVER['HTTP_CLIENT_IP'];
-			} elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
-				$this->data['true-client-ip']=$_SERVER['HTTP_X_FORWARDED_FOR'];
-			}
 		
 		// FINGERPRINTING
 		
 			// Fingerprint is created based on data sent by user agent, this can be useful for light detection without cookies
-			$fingerprint=$this->data['true-client-ip'].$this->data['client-ip'];
+			$fingerprint=$this->data['client-ip'];
 			$fingerprint.=$this->data['client-user-agent'];
 			$fingerprint.=(isset($_SERVER['HTTP_ACCEPT']))?$_SERVER['HTTP_ACCEPT']:'';
 			$fingerprint.=(isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))?$_SERVER['HTTP_ACCEPT_LANGUAGE']:'';

@@ -478,7 +478,7 @@ class WWW_Database {
 				break;
 			case 'like':
 				if($stripQuotes){
-					return str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR));
+					return substr(str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR)),1,-1);
 				} else {
 					return str_replace(array('%','_'),array('\%','\_'),$this->pdo->quote($value,PDO::PARAM_STR));
 				}

@@ -74,7 +74,7 @@ class WWW_API {
 		
 		// If internal logging is used
 		if($this->state->data['internal-logging'] && $this->state->data['internal-logging']!=''){
-			$this->internalLogging=explode(',',$this->state->data['internal-logging']);
+			$this->internalLogging=$this->state->data['internal-logging'];
 		}
 		
 		// Factory class is loaded, if it doesn't already exist, since MVC classes require it

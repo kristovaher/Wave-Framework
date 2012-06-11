@@ -260,12 +260,6 @@ class WWW_State	{
 						$this->data[$variable]=false;
 					}
 					break;
-				case 'languages':
-					// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
-					if($value!=false && $value!=''){
-						$this->data[$variable]=explode(',',$value);
-					}
-					break;
 			}
 			
 			// State has been changed

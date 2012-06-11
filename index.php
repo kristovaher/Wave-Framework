@@ -64,14 +64,34 @@ License: GNU Lesser General Public License Version 3
 
 	// Including the configuration
 	if(!file_exists(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp') || filemtime(__ROOT__.'config.ini')>filemtime(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp')){
+		
 		// Configuration is parsed from INI file in the root of the system
 		$config=parse_ini_file(__ROOT__.'config.ini');
+		
+		// Trusted proxies and IP address
+		if(isset($config['trusted-proxies'])){
+			$config['trusted-proxies']=explode(',',$config['trusted-proxies']);
+		}
+		// List of logger IP's
+		if(isset($config['logger-ip'])){
+			$config['logger-ip']=explode(',',$config['logger-ip']);
+		}
+		// List of languages
+		if(isset($config['languages'])){
+			$config['languages']=explode(',',$config['languages']);
+		}
+		// Internal logging flags
+		if(isset($config['internal-logging'])){
+			$config['internal-logging']=explode(',',$config['internal-logging']);
+		}
+		
 		// Cache of parsed INI file is stored for later use
 		if(!file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp',serialize($config))){
 			header('HTTP/1.1 500 Internal Server Error');
 			echo '<h1>HTTP/1.1 500 Internal Server Error</h1>';
 			echo '<p>Cannot write cache in filesystem, please make sure filesystem folders are writable.</p>';
 		}
+		
 	} else {
 		// Since INI file has not been changed, configuration is loaded from cache
 		$config=unserialize(file_get_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp'));
@@ -107,7 +127,7 @@ License: GNU Lesser General Public License Version 3
 
 	// Logger file is used for performance logging for later review
 	// Configuration file can set what type of logging is used
-	if(isset($config['logger']) && $config['logger']!=false && (!isset($config['logger-ip']) || $config['logger-ip']=='*' || in_array(__IP__,explode(',',$config['logger-ip']))) && ($config['logger']=='*' || preg_match($config['logger'],$_SERVER['REQUEST_URI']))){
+	if(isset($config['logger']) && $config['logger']!=false && (!isset($config['logger-ip']) || in_array('*',$config['logger-ip']) || in_array(__IP__,$config['logger-ip'])) && ($config['logger']=='*' || preg_match($config['logger'],$_SERVER['REQUEST_URI']))){
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-logger.php');
 		$logger=new WWW_Logger(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR,$microTime);
 	}

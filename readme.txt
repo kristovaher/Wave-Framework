@@ -51,6 +51,7 @@ FEATURES
  * Backup, update and filesystem maintenance tools
  * Compatibility script that tests support for server setup
  * Supports Apache and Nginx servers in Linux and Windows environments
+ * Supports APC extension
  * Licensed under GNU Lesser General Public License Version 3
  
 INSTALLATION

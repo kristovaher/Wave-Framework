@@ -303,6 +303,15 @@ header('Content-Type: text/html;charset=utf-8');
 				$log[]='<span class="bold red"><span class="bold red">FAILURE</span></span>: /filesystem/cache/resources/ is not writable';
 			}
 			
+			// FILESYSTEM CUSTOM CACHE
+			// Cache created through Factory cache methods
+			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+				$log[]='<span class="bold">SUCCESS</span>: /filesystem/cache/custom/ is writable';
+				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.'test.tmp');
+			} else {
+				$log[]='<span class="bold red"><span class="bold red">FAILURE</span></span>: /filesystem/cache/custom/ is not writable';
+			}
+			
 			// FILESYSTEM MESSENGER
 			// All the certificates and encryption keys should be stored here
 			// Wave Framework itself does not use this folder and this should be used by developer, if necessary

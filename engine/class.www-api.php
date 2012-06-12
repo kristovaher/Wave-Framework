@@ -21,7 +21,7 @@ Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
 */
 
-class WWW_API {
+final class WWW_API {
 	
 	// This stores API command results in a buffer
 	private $commandBuffer=array();
@@ -42,6 +42,9 @@ class WWW_API {
 	// This stores WWW_State object
 	public $state=false;
 	
+	// This flag checks stores APC state
+	public $apc=false;
+	
 	// This is a counter of how often API call has been made
 	public $callIndex=0;
 	
@@ -59,7 +62,7 @@ class WWW_API {
 	// * state - Object of WWW_State class
 	// * apiProfiles - Array of API profile information, array should be in format such as in /resources/api.profiles.php
 	// Throws an error if profiles and profile file is inaccessible or Factory class cannot be loaded
-	public function __construct($state=false,$apiProfiles=false){
+	final public function __construct($state=false,$apiProfiles=false){
 
 		// API expects to be able to use State object
 		if($state){
@@ -82,6 +85,11 @@ class WWW_API {
 			require(__DIR__.DIRECTORY_SEPARATOR.'class.www-factory.php');
 		}
 		
+		// If APC is enabled
+		if(extension_loaded('apc') && ini_get('apc.enabled')==1 && $this->state->data['apc']==1){
+			$this->apc=true;
+		}
+		
 		// System attempts to load API keys from the default location if they were not defined
 		if(!$apiProfiles){
 			// Profiles can be loaded from overrides folder as well
@@ -94,17 +102,16 @@ class WWW_API {
 			}
 			// This data can also be stored in cache
 			$cacheUrl=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.profiles.tmp';
-			// Including the profiles file
-			if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
+			// Testing if cache for profiles already exists
+			$cacheTime=$this->cacheTime($cacheUrl);
+			// If source file has been modified since cache creation
+			if(!$cacheTime || filemtime($sourceUrl)>$cacheTime){
 				// Profiles are parsed from INI file in the resources folder
 				$apiProfiles=parse_ini_file($sourceUrl,true);
-				// Cache of parsed INI file is stored for later use
-				if(!file_put_contents($cacheUrl,serialize($apiProfiles))){
-					trigger_error('Cannot store INI file cache at '.$cacheUrl,E_USER_ERROR);
-				}
+				$this->setCache($cacheUrl,$apiProfiles);
 			} else {
-				// Since INI file has not been changed, profiles are loaded from cache
-				$apiProfiles=unserialize(file_get_contents($cacheUrl));
+				// Returning data from cache
+				$apiProfiles=$this->getCache($cacheUrl);
 			}
 		}
 		
@@ -123,26 +130,23 @@ class WWW_API {
 		}
 		// This data can also be stored in cache
 		$cacheUrl=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.observers.tmp';
-		// Including the profiles file
-		if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
+
+		// Testing if cache for observers already exists
+		$cacheTime=$this->cacheTime($cacheUrl);
+		// If source file has been modified since cache creation
+		if(!$cacheTime || filemtime($sourceUrl)>$cacheTime){
 			// Profiles are parsed from INI file in the resources folder
-			$apiObservers=parse_ini_file($sourceUrl,true);
-			// Cache of parsed INI file is stored for later use
-			if(!file_put_contents($cacheUrl,serialize($apiObservers))){
-				trigger_error('Cannot store INI file cache at '.$cacheUrl,E_USER_ERROR);
-			}
+			$this->apiObservers=parse_ini_file($sourceUrl,true);
+			$this->setCache($cacheUrl,$this->apiObservers);
 		} else {
-			// Since INI file has not been changed, profiles are loaded from cache
-			$apiObservers=unserialize(file_get_contents($cacheUrl));
+			// Returning data from cache
+			$this->apiObservers=$this->getCache($cacheUrl);
 		}
-		
-		// Assigning API profiles
-		$this->apiObservers=$apiObservers;
 		
 	}
 	
 	// This writes log data to file, if internal logging is turned on 
-	public function __destruct(){
+	final public function __destruct(){
 		if($this->internalLogging && !empty($this->internalLog)){
 			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log',json_encode($this->internalLog)."\n",FILE_APPEND);
 		}
@@ -156,7 +160,7 @@ class WWW_API {
 		// * apiValidation - internally called API does not need to be hash validated, unless necessary
 		// * useLogger - Whether logger array is updated during execution
 		// Returns the result of the API call, depending on command and classes it loads
-		public function command($apiInputData=array(),$useBuffer=false,$apiValidation=true,$useLogger=false){
+		final public function command($apiInputData=array(),$useBuffer=false,$apiValidation=true,$useLogger=false){
 		
 			// Increasing the counter of API calls
 			$this->callIndex++;
@@ -501,7 +505,7 @@ class WWW_API {
 						$this->cacheIndex[$this->callIndex]=$cacheFolder.$cacheFile;
 					
 						// Current cache timeout is used to return to browser information about how long browser should store this result
-						$apiState['last-modified']=filemtime($cacheFolder.$cacheFile);
+						$apiState['last-modified']=$this->cacheTime($cacheFolder.$cacheFile);
 						
 						// If server detects its cache to still within cache limit
 						if($apiState['last-modified']>=($this->state->data['request-time']-$apiState['cache-timeout'])){
@@ -525,7 +529,7 @@ class WWW_API {
 							}
 							
 							// System loads the result from cache file based on return data type
-							$apiResult=unserialize(file_get_contents($cacheFolder.$cacheFile));
+							$apiResult=$this->getCache($cacheFolder.$cacheFile);
 							
 							// Since cache was used
 							$this->apiLoggerData['cache-used']=true;
@@ -616,10 +620,8 @@ class WWW_API {
 									return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
 								}
 							}
-							// Results are serialized before being written to cache
-							if(!file_put_contents($cacheFolder.$cacheFile,serialize($apiResult))){
-								return $this->output(array('www-error'=>'Server configuration error: Cannot create cache file','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
-							}
+							// Cache is stored in serialized form
+							$this->setCache($cacheFolder.$cacheFile,$apiResult);
 						} else {
 							// Setting cache timeout to 0, since cache is not stored
 							$apiState['cache-timeout']=0;
@@ -670,7 +672,7 @@ class WWW_API {
 		// * apiState - Various flags from command execution
 		// * useLogger - If logger is used
 		// Returns final-formatted data
-		private function output($apiResult,$apiState,$useLogger=true){
+		final private function output($apiResult,$apiState,$useLogger=true){
 				
 			// If internal logging is enabled
 			if($this->internalLogging){
@@ -962,7 +964,7 @@ class WWW_API {
 		// * data - Data array
 		// * useLogger - If logger is used
 		// Always returns true after filtering
-		private function apiCallbacks($data,$useLogger,$returnType){
+		final private function apiCallbacks($data,$useLogger,$returnType){
 		
 			// HEADERS
 			
@@ -1065,7 +1067,7 @@ class WWW_API {
 		// Formats the API result array to XML string
 		// * apiResult - data returned from API call
 		// Returns text XML string
-		private function toXML($apiResult,$type=false){
+		final private function toXML($apiResult,$type=false){
 			
 			// Different XML header is used based on whether it is an RSS or not
 			if(!$type){
@@ -1087,7 +1089,7 @@ class WWW_API {
 		// This creates single XML node and is used by toXML() method
 		// * data - Data entity from array
 		// Returns formatted data
-		private function toXMLnode($data){
+		final private function toXMLnode($data){
 			// By default the result is empty
 			$return='';
 			foreach($data as $key=>$val){
@@ -1123,7 +1125,7 @@ class WWW_API {
 		// Formats the API result array to CSV string
 		// * apiResult - data returned from API call
 		// Returns text CSV string
-		private function toCSV($apiResult){
+		final private function toCSV($apiResult){
 			
 			// Resulting rows are stored in this value
 			$result=array();
@@ -1174,7 +1176,7 @@ class WWW_API {
 		// Checks if the string or array is not empty, in which case it returns 1, otherwise it returns 0
 		// * apiResult - data returned from API call
 		// Returns either a 1 or a 0
-		private function toBinary($apiResult){
+		final private function toBinary($apiResult){
 			// Based on the returned array, system 'assumes' whether the action was a success or not
 			if(isset($apiResult['www-success']) || (!isset($apiResult['www-success']) && !isset($apiResult['www-error']) && !empty($apiResult))){
 				return 1;
@@ -1186,7 +1188,7 @@ class WWW_API {
 		// Converts the result array to a useful INI file
 		// * apiResult - data returned from API call
 		// Returns text string formatted as INI file
-		private function toINI($apiResult){
+		final private function toINI($apiResult){
 			
 			// Rows of INI file are stored in this variable
 			$result=array();
@@ -1247,7 +1249,7 @@ class WWW_API {
 		// * key - key used for encryption
 		// * secretKey - used for calculating initialization vector (IV), if this is not set then ECB mode is used
 		// Returns encrypted data
-		private function encryptRijndael256($data,$key,$secretKey=false){
+		final public function encryptRijndael256($data,$key,$secretKey=false){
 			if($secretKey){
 				return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($key),$data,MCRYPT_MODE_CBC,md5($secretKey)));
 			} else {
@@ -1260,7 +1262,7 @@ class WWW_API {
 		// * key - key used for decryption
 		// * secretKey - used for calculating initialization vector (IV), if this is not set then ECB mode is used
 		// Returns decrypted data
-		private function decryptRijndael256($data,$key,$secretKey=false){
+		final public function decryptRijndael256($data,$key,$secretKey=false){
 			if($secretKey){
 				return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($key),base64_decode($data),MCRYPT_MODE_CBC,md5($secretKey)));
 			} else {
@@ -1274,7 +1276,7 @@ class WWW_API {
 		// This method allows to remove tagged cache files from filesystem
 		// * tags - comma separated list of tag(s) that the cache was stored under
 		// Always returns true
-		final protected function clearCache($tags){
+		final public function unsetTaggedCache($tags){
 			// Multiple tags can be removed at the same time
 			$tags=explode(',',$tags);
 			foreach($tags as $tag){
@@ -1283,10 +1285,8 @@ class WWW_API {
 					// Tag file can have links to multiple cache files
 					$links=explode("\n",file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.md5($tag).'.tmp'));
 					foreach($links as $link){
-						if($link!='' && file_exists($link)){
-							// Removing the cache file
-							unlink($link);
-						}
+						// This deletes cache file or removes if from APC storage
+						$this->unsetCache($link);
 					}
 					// Removing the tag link file itself
 					unlink($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.md5($tag).'.tmp');
@@ -1295,16 +1295,16 @@ class WWW_API {
 		}
 		
 		// This function clears current API buffer
-		public function clearBuffer(){
+		final public function clearBuffer(){
 			$this->buffer=array();
 		}
 		
 		// This function checks for previous cache
 		// * key - Current API index
 		// Returns previous cache array
-		public function getOldCache($key){
+		final public function getOldCache($key){
 			if(isset($this->cacheIndex[$key])){
-				return unserialize(file_get_contents($this->cacheIndex[$key]));
+				return $this->getCache($this->cacheIndex[$key]);
 			} else {
 				return false;
 			}
@@ -1313,11 +1313,111 @@ class WWW_API {
 		// This function checks for previous cache
 		// * key - Current API index
 		// Returns previous cache array
-		public function getOldCacheTime($key){
+		final public function getOldCacheTime($key){
 			if(isset($this->cacheIndex[$key])){
-				return filemtime($this->cacheIndex[$key]);
+				return $this->cacheTime($this->cacheIndex[$key]);
 			} else {
 				return false;
+			}
+		}
+		
+		// This function writes a value to cache with a specific address
+		// * keyUrl - Key or address where cache should be stored
+		// * value - Value to be stored
+		// Returns true if success, throws an error if failed
+		final public function setCache($keyAddress,$value,$custom=false){
+			// User cache does not have an address
+			if($custom){
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+			}
+			// Testing for APC presence
+			if($this->apc){
+				// Storing the value in APC storage
+				if(!apc_store($keyAddress,$value)){
+					trigger_error('Cannot store INI file cache in APC at '.$keyAddress,E_USER_ERROR);
+				}
+				// APC requires additional field to store the timestamp of cache
+				apc_store($keyAddress.'-time',time());
+			} else {
+				// Attempting to write cache in filesystem
+				if(!file_put_contents($keyAddress,serialize($value))){
+					trigger_error('Cannot store INI file cache at '.$keyAddress,E_USER_ERROR);
+				}
+			}
+			return true;
+		}
+		
+		// Fetches data from cache
+		// * keyAddress - Address to store cache at
+		// Returns the value, if found
+		final public function getCache($keyAddress,$custom=false){
+			// User cache does not have an address
+			if($custom){
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+			}
+			// Testing for APC presence
+			if($this->apc){
+				return apc_fetch($keyAddress);
+			} else {
+				// Testing if file exists
+				if(file_exists($keyAddress)){
+					return unserialize(file_get_contents($keyAddress));
+				} else {
+					return false;
+				}
+			}
+		}
+		
+		// This function returns the timestamp when the cache was created
+		// * keyAddress - Address to store cache at
+		// Returns timestamp of cache, if found and false, if failed
+		final public function cacheTime($keyAddress,$custom=false){
+			// User cache does not have an address
+			if($custom){
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+			}
+			// Testing for APC presence
+			if($this->apc){
+				if(apc_exists(array($keyAddress,$keyAddress.'-time'))){
+					return apc_fetch($keyAddress.'-time');
+				} else {
+					return false;
+				}
+			} else {
+				// Testing if cache file exists
+				if(file_exists($keyAddress)){
+					return filemtime($keyAddress);
+				} else {
+					return false;
+				}
+			}
+		}
+		
+		// This function removes cache
+		// * keyAddress - Address where cache is stored
+		// Returns true, if success, false if failed
+		final public function unsetCache($keyAddress,$custom=false){
+			// User cache does not have an address
+			if($custom){
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+			}
+			// Testing for APC presence
+			if($this->apc){
+				// Testing if key exists
+				if(apc_exists($keyAddress)){
+					apc_delete($keyAddress);
+					apc_delete($keyAddress.'-time');
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				// Testing if cache file exists
+				if(file_exists($keyAddress)){
+					return unlink($keyAddress);
+				} else {
+					return false;
+				}
 			}
 		}
 	
@@ -1327,7 +1427,7 @@ class WWW_API {
 		// * key - Descriptive key that the log entry will be stored under
 		// * data - Data contained in the entry
 		// Returns true, if logging is used
-		public function internalLogEntry($key,$data=false){
+		final public function internalLogEntry($key,$data=false){
 			// Only applies if internal logging is turned on
 			if($this->internalLogging && ((in_array('*',$this->internalLogging) && !in_array('!'.$key,$this->internalLogging)) || in_array($key,$this->internalLogging))){
 				// Preparing a log entry object
@@ -1346,7 +1446,7 @@ class WWW_API {
 	
 		// This method writes to internal log the duration from the start object was constructed or from the last time this function was called
 		// * key - Identifier for splitTime group, API is always initialized at the start of API construct
-		public function splitTime($key='api'){
+		final public function splitTime($key='api'){
 			// Checking if split time exists
 			if(isset($this->splitTimes[$key])){
 				$this->internalLogEntry('splitTime for ['.$key.']','Seconds since last call: '.number_format((microtime(true)-$this->splitTimes[$key]),6));

@@ -42,6 +42,7 @@ class WWW_State	{
 	
 			// A lot of default State variables are loaded from PHP settings, others are simply pre-defined
 			$this->data=array(
+				'apc'=>1,
 				'project-title'=>'Wave Framework',
 				'api-public-profile'=>'public',
 				'api-profile'=>'public',

@@ -117,6 +117,12 @@ header('Content-Type: text/html;charset=utf-8');
 			}
 
 			// Clears cache of JavaScript and CSS
+			if(isset($_GET['all']) || isset($_GET['custom'])){
+				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR;
+				$log=array_merge($log,dirCleaner($directory,$cutoff));
+			}
+
+			// Clears cache of JavaScript and CSS
 			if(isset($_GET['all']) || isset($_GET['messenger'])){
 				$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR;
 				$log=array_merge($log,dirCleaner($directory,$cutoff));

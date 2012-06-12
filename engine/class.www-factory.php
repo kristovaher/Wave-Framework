@@ -82,7 +82,7 @@ class WWW_Factory {
 		}
 	
 		// This function clears current API buffer
-		public function clearBuffer(){
+		final protected function clearBuffer(){
 			$this->WWW_API->clearBuffer();
 		}
 	
@@ -349,8 +349,8 @@ class WWW_Factory {
 		// This method allows to remove tagged cache files from filesystem
 		// * tags - comma separated list of tag(s) that the cache was stored under
 		// Always returns true
-		final protected function clearCache($tags){
-			return $this->WWW_API->clearCache($tags);
+		final protected function unsetTaggedCache($tags){
+			return $this->WWW_API->unsetTaggedCache($tags);
 		}
 		
 		// This method returns old cache for current method, if it exists
@@ -365,6 +365,55 @@ class WWW_Factory {
 			return $this->WWW_API->getOldCacheTime($this->WWW_API_callIndex);
 		}
 		
+		// This function writes a value to cache with a specific address
+		// * keyUrl - Key or address where cache should be stored
+		// * value - Value to be stored
+		// Returns true if success, throws an error if failed
+		final protected function setCache($keyAddress,$value){
+			return $this->WWW_API->setCache($keyAddress,$value,true);
+		}
+		
+		// Fetches data from cache
+		// * keyAddress - Address to store cache at
+		// Returns the value, if found
+		final protected function getCache($keyAddress){
+			return $this->WWW_API->getCache($keyAddress,true);
+		}
+		
+		// This function returns the timestamp when the cache was created
+		// * keyAddress - Address to store cache at
+		// Returns timestamp of cache, if found and false, if failed
+		final protected function cacheTime($keyAddress){
+			return $this->WWW_API->cacheTime($keyAddress,true);
+		}
+		
+		
+		// This function removes cache
+		// * keyAddress - Address where cache is stored
+		// Returns true, if success, false if failed
+		final protected function unsetCache($keyAddress){
+			return $this->WWW_API->unsetCache($keyAddress,true);
+		}
+		
+	// ENCRYPTION AND DECRYPTION
+	
+		// Function encrypts data based on Rijndael 256bit encryption
+		// * data - data to be encrypted
+		// * key - key used for encryption
+		// * secretKey - used for calculating initialization vector (IV), if this is not set then ECB mode is used
+		// Returns encrypted data
+		final protected function encryptRijndael256($data,$key,$secretKey=false){
+			$this->WWW_API->encryptRijndael256($data,$key,$secretKey);
+		}
+		
+		// Function decrypts data based on Rijndael 256bit encryption
+		// * data - data to be decrypted
+		// * key - key used for decryption
+		// * secretKey - used for calculating initialization vector (IV), if this is not set then ECB mode is used
+		// Returns decrypted data
+		final protected function decryptRijndael256($data,$key,$secretKey=false){
+			$this->WWW_API->decryptRijndael256($data,$key,$secretKey);
+		}		
 		
 	// INTERNAL LOG ENTRY WRAPPER
 	

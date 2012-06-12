@@ -488,7 +488,7 @@ final class WWW_API {
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-cache-tag'],$cacheValidator['www-hash'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify']);
+					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify']);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);
@@ -631,10 +631,13 @@ final class WWW_API {
 				}
 				
 				// If cache tag is set then system stores link to cache file
-				if(isset($apiInputData['www-cache-tag'],$cacheFolder,$cacheFile) && $apiInputData['www-cache-tag']!=''){
-					$cacheTags=explode(',',$apiInputData['www-cache-tag']);
+				// if(isset($apiInputData['www-cache-tags'])){
+					// echo $apiInputData['www-cache-tags'];die();
+				// }
+				if(isset($apiInputData['www-cache-tags'],$cacheFolder,$cacheFile) && $apiInputData['www-cache-tags']!=''){
+					$cacheTags=explode(',',$apiInputData['www-cache-tags']);
 					foreach($cacheTags as $tag){
-						if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
+						if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
 							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache tag index','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
 						}
 					}
@@ -1281,22 +1284,25 @@ final class WWW_API {
 			$tags=explode(',',$tags);
 			foreach($tags as $tag){
 				// If this tag has actually been used, it has a file in the filesystem
-				if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.md5($tag).'.tmp')){
+				if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp')){
 					// Tag file can have links to multiple cache files
-					$links=explode("\n",file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.md5($tag).'.tmp'));
+					$links=explode("\n",file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp'));
 					foreach($links as $link){
 						// This deletes cache file or removes if from APC storage
 						$this->unsetCache($link);
 					}
 					// Removing the tag link file itself
-					unlink($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.md5($tag).'.tmp');
+					unlink($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp');
 				}
 			}
+			return true;
 		}
 		
 		// This function clears current API buffer
+		// Always returns true
 		final public function clearBuffer(){
 			$this->buffer=array();
+			return true;
 		}
 		
 		// This function checks for previous cache
@@ -1446,6 +1452,7 @@ final class WWW_API {
 	
 		// This method writes to internal log the duration from the start object was constructed or from the last time this function was called
 		// * key - Identifier for splitTime group, API is always initialized at the start of API construct
+		// Returns current microtime
 		final public function splitTime($key='api'){
 			// Checking if split time exists
 			if(isset($this->splitTimes[$key])){
@@ -1455,6 +1462,8 @@ final class WWW_API {
 			}
 			// Setting new microtime
 			$this->splitTimes[$key]=microtime(true);
+			// Returning current microtime
+			return $this->splitTimes[$key];
 		}
 		
 	// DATA HANDLING

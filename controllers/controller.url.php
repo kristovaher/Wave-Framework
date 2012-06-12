@@ -279,6 +279,11 @@ class WWW_controller_url extends WWW_Factory {
 	
 		// DEFAULTS FOR VIEW DATA
 			
+			// If unsolved URL is assigned as part of cache tag
+			if(isset($data['cache-tag'],$data['cache-tag-unsolved']) && $data['cache-tag-unsolved']==1 && !empty($data['unsolved-url'])){
+				$data['cache-tag'].='-'.implode('-',$data['unsolved-url']);
+			}
+			
 			// If project title is not set by Sitemap, system defines the State project title as the value
 			if(!isset($data['project-title'])){
 				$data['project-title']=$this->getState('project-title');

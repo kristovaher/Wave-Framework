@@ -63,9 +63,8 @@ class WWW_State	{
 				'http-authentication-username'=>'',
 				'http-if-modified-since'=>false,
 				'http-authentication-password'=>'',
-				'http-content-type'=>((isset($_SERVER['CONTENT_TYPE']))?$_SERVER['CONTENT_TYPE']:''),
+				'http-content-type'=>((isset($_SERVER['CONTENT_TYPE']))?array_shift(explode(';',$_SERVER['CONTENT_TYPE'])):''),
 				'http-content-length'=>((isset($_SERVER['CONTENT_LENGTH']))?$_SERVER['CONTENT_LENGTH']:0),
-				'http-input-array'=>false,
 				'http-input'=>false,
 				'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
 				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
@@ -182,14 +181,11 @@ class WWW_State	{
 				// Testing if actual XML or JSON data was submitted at all
 				if($phpInput && $phpInput!=''){
 					
-					// For every other case, it is stored in State
-					$this->data['http-input']=$phpInput;
-					
 					// Parsing method depends on content type header
 					if($this->data['http-content-type']=='application/json'){
 					
 						// JSON string is converted to associative array
-						$this->data['http-input-array']=json_decode($phpInput,true);
+						$this->data['http-input']=json_decode($phpInput,true);
 						
 					} elseif(extension_loaded('SimpleXML') && ($this->data['http-content-type']=='application/xml' || $this->data['http-content-type']=='text/xml')){
 					
@@ -202,12 +198,31 @@ class WWW_State	{
 						
 						// Data is converted to array only if an object was created
 						if($tmp){
-							$this->data['http-input-array']=json_decode(json_encode($tmp),true);
+							$this->data['http-input']=json_decode(json_encode($tmp),true);
 						}
 						
 					}
 					
 				}
+				
+			} elseif(isset($_FILES['www-xml'])){
+			
+				// This is not supported in earlier versions of LibXML
+				if(defined('LIBXML_PARSEHUGE')){
+					$tmp=simplexml_load_file($_FILES['www-xml']['tmp_name'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE | LIBXML_PARSEHUGE);
+				} else {
+					$tmp=simplexml_load_file($_FILES['www-xml']['tmp_name'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE);
+				}
+				
+				// Data is converted to array only if an object was created
+				if($tmp){
+					$this->data['http-input']=json_decode(json_encode($tmp),true);
+				}
+			
+			} elseif(isset($_FILES['www-json'])){
+			
+				// JSON string is converted to associative array
+				$this->data['http-input']=json_decode(file_get_contents($_FILES['www-json']['tmp_name']),true);
 				
 			}
 		

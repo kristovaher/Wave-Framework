@@ -339,23 +339,27 @@ class WWW_Database {
 	// * query - Query string
 	// * variables - Values sent to PDO
 	// Returns 'prepared' query string
-	public function dbDebug($query,$variables){
+	public function dbDebug($query,$variables=array()){
 		// Attempt to simulate PDO query-building
 		$keys=array();
 		$values=array();
-		foreach($variables as $key=>$value){
-			if(is_string($key)){
-				$keys[]='/:'.$key.'/';
-			} else {
-				$keys[]='/[?]/';
+		if(!empty($variables)){
+			foreach($variables as $key=>$value){
+				if(is_string($key)){
+					$keys[]='/:'.$key.'/';
+				} else {
+					$keys[]='/[?]/';
+				}
+				if(is_numeric($value)){
+					$values[]=intval($value);
+				} else {
+					$values[]=$this->pdo->quote($value);
+				}
 			}
-			if(is_numeric($value)){
-				$values[]=intval($value);
-			} else {
-				$values[]=$this->pdo->quote($value);
-			}
+			return preg_replace($keys,$values,$query,1);
+		} else {
+			return $query;
 		}
-		return preg_replace($keys,$values,$query,1);
 	}
 	
 	// Used to get the last inserted ID from database
@@ -470,11 +474,14 @@ class WWW_Database {
 			case 'float':
 				return (float)$value;
 				break;
+			case 'numeric':
+				return trim(preg_replace('/[^0-9\-\+\ ]/i','',$value));
+				break;
 			case 'latin':
-				return preg_replace('/[^a-z]/i','',$value);
+				return preg_replace('/[^a-z0-9]/i','',$value);
 				break;
 			case 'field':
-				return preg_replace('/[^a-z\-\_]/i','',$value);
+				return preg_replace('/[^a-z0-9\-\_]/i','',$value);
 				break;
 			case 'like':
 				if($stripQuotes){

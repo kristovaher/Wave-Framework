@@ -676,6 +676,14 @@ class WWW_Factory {
 			return $this->WWW_API->state->databaseConnection->dbArray($array,$key,$unique);
 		}
 		
+		// This function attempts to 'simulate' the way PDO builds a query
+		// * query - Query string
+		// * variables - Values sent to PDO
+		// Returns 'prepared' query string
+		public function dbDebug($query,$variables=array()){
+			return $this->WWW_API->state->databaseConnection->dbDebug($query,$variables);
+		}
+		
 		// This simply allows to call WWW_Database function from the object itself, routed through database class
 		// Returns result of that call
 		final protected function dbPDO(){

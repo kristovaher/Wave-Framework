@@ -112,31 +112,6 @@ header('Content-Type: text/html;charset=utf-8');
 			} else {
 				$log[]='<span class="bold orange">WARNING</span>: PHP setting short_open_tag is turned off, default View controller requires this to work properly, if this is not possible then edit /controllers/controller.view.php';
 			}
-			
-		// ZLIB
-			if(extension_loaded('Zlib')){
-				$log[]='<span class="bold">SUCCESS</span>: Zlib is supported';
-			} else {
-				$log[]='<span class="bold orange">WARNING</span>: Zlib PHP extension is not supported, this is needed if output compression is used, but system turns it off automatically if extension is not present';
-			}
-			
-		// APC
-			if(extension_loaded('apc')){
-				$log[]='<span class="bold">SUCCESS</span>: APC is supported';
-			} else {
-				$log[]='<span class="bold orange">WARNING</span>: APC PHP extension is not supported, this is not required by Wave Framework, but can improve performance, if supported';
-			}
-			
-		// CURL AND URL OPEN
-			if(extension_loaded('curl')){
-				$log[]='<span class="bold">SUCCESS</span>: cURL is supported';
-			} else {
-				if(ini_get('allow_url_fopen')==1){
-					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported, this is not required by Wave Framework, but is useful when making API requests to other systems that include POST data';
-				} else {
-					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported and allow_url_fopen setting is also off, these are not required by Wave Framework, but without them you cannot make API requests to other networks';
-				}
-			}
 
 		// PDO
 
@@ -180,6 +155,38 @@ header('Content-Type: text/html;charset=utf-8');
 				$log[]='<span class="bold">SUCCESS</span>: PDO MSSQL is supported';
 			} else {
 				$log[]='<span class="bold orange">WARNING</span>: PDO MSSQL PHP extension is not supported, MSSQL connections could not be used, if MSSQL is not used then this warning can be ignored';
+			}
+			
+		// ZLIB
+			if(extension_loaded('Zlib')){
+				$log[]='<span class="bold">SUCCESS</span>: Zlib is supported';
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: Zlib PHP extension is not supported, this is needed if output compression is used, but system turns it off automatically if extension is not present';
+			}
+			
+		// APC
+			if(extension_loaded('apc')){
+				$log[]='<span class="bold">SUCCESS</span>: APC is supported';
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: APC PHP extension is not supported, this is not required by Wave Framework, but can improve performance, if supported';
+			}
+			
+		// XML
+			if(extension_loaded('SimpleXML')){
+				$log[]='<span class="bold">SUCCESS</span>: SimpleXML is supported';
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: SimpleXML PHP extension is not supported, this is not required by Wave Framework, but it is needed if you wish to send direct XML procedure to API';
+			}
+			
+		// CURL AND URL OPEN
+			if(extension_loaded('curl')){
+				$log[]='<span class="bold">SUCCESS</span>: cURL is supported';
+			} else {
+				if(ini_get('allow_url_fopen')==1){
+					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported, this is not required by Wave Framework, but is useful when making API requests to other systems that include POST data';
+				} else {
+					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported and allow_url_fopen setting is also off, these are not required by Wave Framework, but without them you cannot make API requests to other networks';
+				}
 			}
 			
 		// FILEINFO

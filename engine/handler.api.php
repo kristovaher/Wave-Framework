@@ -64,9 +64,9 @@ License: GNU Lesser General Public License Version 3
 	// All the data sent by user agent is added here and merged into one array
 	if(isset($_POST) && !empty($_POST)){ 
 		$inputData=$_POST; 
-	} elseif(is_array($state->data['http-input'])){
+	} elseif(is_array($state->data['http-input-array'])){
 		// http-input is POST data that is sent as a stream (as XML or JSON)
-		$inputData=$state->data['http-input'];
+		$inputData=$state->data['http-input-array'];
 	}
 	if(isset($_GET) && !empty($_GET)){ 
 		$inputData+=$_GET; 

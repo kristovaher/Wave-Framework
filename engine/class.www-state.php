@@ -63,8 +63,8 @@ class WWW_State	{
 				'http-authentication-username'=>'',
 				'http-if-modified-since'=>false,
 				'http-authentication-password'=>'',
-				'http-content-type'=>((isset($_SERVER['CONTENT_TYPE']))?array_shift(explode(';',$_SERVER['CONTENT_TYPE'])):''),
-				'http-content-length'=>((isset($_SERVER['CONTENT_LENGTH']))?$_SERVER['CONTENT_LENGTH']:0),
+				'http-content-type'=>((isset($_SERVER['CONTENT_TYPE']))?$_SERVER['CONTENT_TYPE']:false),
+				'http-content-length'=>((isset($_SERVER['CONTENT_LENGTH']))?$_SERVER['CONTENT_LENGTH']:false),
 				'http-input'=>false,
 				'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
 				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
@@ -96,8 +96,7 @@ class WWW_State	{
 			);			
 			
 		// ASSIGNING STATE FROM CONFIGURATION FILE
-			
-		
+					
 			// If array of configuration data is set during object creation, it is used
 			// This loops over all the configuration options from /config.ini file through setState() function
 			// That function has key-specific functionality that can be tied to some internal commands and PHP functions
@@ -116,8 +115,7 @@ class WWW_State	{
 			}
 			
 		// CHECKING FOR SERVER OR PHP SPECIFIC CONFIGURATION OPTIONS
-		
-		
+				
 			// If timezone is still set to false, then system attempts to set the currently set timezone
 			// Some systems throw deprecated warning if this value is not set
 			if($this->data['timezone']==false){
@@ -139,6 +137,12 @@ class WWW_State	{
 			// If first language is not defined then first node from languages array is used
 			if($this->data['language']==false){
 				$this->data['language']=$this->data['languages'][0];
+			}
+			
+			// Making sure that boundary is not part of the content type definition
+			if($this->data['http-content-type']){
+				$tmp=explode(';',$this->data['http-content-type']);
+				$this->data['http-content-type']=array_shift($tmp);
 			}
 			
 			// Compressed output is turned off if the requesting user agent does not support it

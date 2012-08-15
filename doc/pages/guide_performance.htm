@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Performance - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Performance Testing</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>Performance testing your website's or web service's functionality is a crucial part of modern sotware development. Slow web service and website leaves an impression of cheap and sloppy coding and software. This is why Wave Framework comes with a couple of useful features that allows you to see how your web service is performing. First way to test your performance is to track your HTTP requests on your website and see how quickly the result was generated, how many database requests were made and how much memory the request took. Second way of testing is to time your various function calls and see how long this or that section of your code takes time.</p>
+				
+			<h2>Tracking HTTP Requests</h2>
+			
+				<p>Wave Framework has an internal Logger for tracking HTTP requests. This setting is defined in system Configuration in /config.ini file. There are two settings in Logger configuration that affect what HTTP requests are logged by the Logger:</p>
+				
+				<ul>
+					<li><b>logger</b> - If this setting is defined and is not false, then Logger will be used to log HTTP requests that are made to Wave Framework. This Logger tracks both web page requests as well as API calls. If the value of 'logger' is set to '*', then all requests are logged. This value can also be set as a regular expression which will be matched against the HTTP request URL and the request will be logged only if the URL matches the regular expression.</li>
+					<li><b>logger-ip</b> - This limits logger to work only when HTTP request is made from a specific IP address. It is also possible to define multiple IP addresses by assigning values to this configuration setting as a comma-separated-list.</li>
+				</ul>
+				
+				<p>If the HTTP request is logged because of the above configuration options, then Wave Framework will generate a log entry about the HTTP request. This log data can be viewed with Log Reader by making a request to the developer tool directly at /tools/log-reader.php and authenticating with HTTP username and password (these settings are also defined in configuration).</p>
+				
+				<p>The exact values that Logger stores about each request are listed in another documentation page, in 'Developer Tools' and the Log Reader section there.</p>
+				
+			<h2>Using Timer</h2>
+			
+				<p>It is possible to do microtime split testing on function calls and functionality of your controllers (even across controllers). This allows you to time any part of your code and see how much this or that part of your code takes to execute a specific function or database call.</p>
+				
+				<p>To start timing your code, at first you have to call this method that will be the starting - zero point - of your timing:</p>
+				
+<pre>
+	<code>
+	$this->splitTime('my-test');
+	</code>
+</pre>
+
+				<p>This 'my-test' means that we have started a timer alled 'my-test'. This means that we can start multiple timers at the same time. A timer is not closed until it is called again. If this timer is called again, then Wave Framework writes that 'my-test' as a key to Internal Log with the value of how long was the processing time between when the timer was started and the time when the timer keyword was called next. The same exact code will close the timer:</p>
+
+<pre>
+	<code>
+	$this->splitTime('my-test');
+	</code>
+</pre>
+
+				<p>Timer functionality relies on Internal Log to be used by the system. Read more about Internal Log in the relevant document about intenral logging.</p>
+				
+				<p>This is an example of how to time a specific function call:</p>
+
+<pre>
+	<code>
+	// Starting the timer
+	$this->splitTime('my-test');
+	// This 'waits' for one second
+	sleep(1);
+	// Closing the timer
+	$this->splitTime('my-test');
+	</code>
+</pre>
+
+				<p>And this is the resulting log entry, if internal logging is supported:</p>
+
+<pre>
+	<code>
+	[splitTime for [my-test]] => Seconds since last call: 1.001805
+	</code>
+</pre>
+
+				<p>It is possible to use the same timer key multiple times. If this timer is called again, then it will write to log the time it has passed since the last moment the timer was called (which allows to track certain functionality in multiple locations while using the same timer keyword.</p>
+			
+	</body>
+</html>

@@ -5,15 +5,13 @@ Wave Framework
 State class
 
 State is always required by Wave Framework. It is used by API and some handlers. State is used 
-to keep track of system state and its changes, such as relevant PHP settings. It allows changing 
-changing these settings, and thus affecting API or PHP configuration. State is assigned in API 
-and is accessible in MVC objects as well. Multiple different states can be used by the same 
-request, but usually just one is used per request. State is only kept for the duration of the 
-request processing and is not stored beyond its use in the request.
-
-* /config.ini file settings are loaded into State and can overwrite some State values
-* Some state values affect PHP or framework internal settings
-* State also stores database connection information, which is used by MVC objects through Factory
+to keep track of system state, configuration and its changes, such as relevant PHP settings. 
+It allows changing these settings, and thus affecting API or PHP configuration. State also 
+includes functionality for State Messenger, sessions, cookies, translations and sitemap data. 
+State is assigned in API and is accessible in MVC objects through Factory wrapper methods. 
+Multiple different states can be used by the same request, but usually just one is used per 
+request. State is only kept for the duration of the request processing and is not stored 
+beyond its use in the request.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -21,78 +19,133 @@ License: GNU Lesser General Public License Version 3
 
 class WWW_State	{
 
-	// State data is stored in this public array
+	// This should hold WWW_Database class and connection data, if used.
 	public $data=array();
 	
 	// Database connection is stored in this variable, if set
 	public $databaseConnection=false;
 	
-	// This stores connection to request messenger
-	private $messenger=false;
-	private $messengerData=array();
-	
-	// Flag that stores if sessions have been started or not
+	// This is a flag that is used for testing whether sessions have been started or not. 
+	// It is used for dynamic session loading.
 	public $sessionStarted=false;
 	
-	// When state file is initiated, it populates data with default values from system and PHP settings
-	// * config - If set, State file has additional data loaded from provided configuration array
+	// This holds the 'keyword' or 'passkey' of currently used State messenger.
+	private $messenger=false;
+	
+	// This holds state messenger data as an array.
+	private $messengerData=array();
+	
+	// Construction of State object initializes the defaults for $data variable. A lot of the 
+	// data is either loaded from /config.ini file or initialized based on server environment 
+	// variables. Fingerprint string is also created during construction as well as input data 
+	// loaded from XML or JSON strings, if sent with POST directly.
 	final public function __construct($config=array()){
 	
 		// PRE-DEFINED STATE VALUES
+		
+			// Required constants
+			if(!defined('__IP__')){
+				define('__IP__',$_SERVER['REMOTE_ADDR']);
+			}
+			if(!defined('__ROOT__')){
+				define('__ROOT__',__DIR__.DIRECTORY_SEPARATOR);
+			}
 	
 			// A lot of default State variables are loaded from PHP settings, others are simply pre-defined
+			// Every setting from core configuration file is also listed here
 			$this->data=array(
-				'apc'=>1,
-				'project-title'=>'Wave Framework',
-				'api-public-profile'=>'public',
-				'api-profile'=>'public',
-				'api-token-timeout'=>3600,
-				'api-timestamp-timeout'=>30,
-				'base-url'=>false,
-				'resource-cache-timeout'=>31536000,
-				'home-view'=>'home',
+				'404-image-placeholder'=>true,
 				'404-view'=>'404',
-				'timezone'=>false,
-				'output-compression'=>'deflate',
-				'http-host'=>$_SERVER['HTTP_HOST'],
+				'apc'=>1,
+				'api-logging'=>false,
+				'api-profile'=>'public',
+				'api-public-profile'=>'public',
+				'base-url'=>false,
+				'blacklist-limiter'=>false,
+				'client-ip'=>__IP__,
+				'client-user-agent'=>((isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:''),
+				'data-root'=>false,
+				'database-errors'=>true,
+				'database-host'=>'localhost',
+				'database-name'=>'',
+				'database-password'=>'',
+				'database-persistent'=>false,
+				'database-type'=>'mysql',
+				'database-username'=>'',
+				'dynamic-color-whitelist'=>'',
+				'dynamic-filter-whitelist'=>'',
+				'dynamic-image-filters'=>true,
+				'dynamic-image-loading'=>true,
+				'dynamic-max-size'=>1000,
+				'dynamic-position-whitelist'=>'',
+				'dynamic-quality-whitelist'=>'',
+				'dynamic-resource-loading'=>true,
+				'dynamic-size-whitelist'=>'',
+				'enforce-first-language-url'=>true,
+				'enforce-url-end-slash'=>true,
+				'file-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
+				'fingerprint'=>'',
+				'forbidden-extensions'=>array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini'),
+				'home-view'=>'home',
 				'http-accept'=>((isset($_SERVER['HTTP_ACCEPT']))?explode(',',$_SERVER['HTTP_ACCEPT']):''),
-				'http-accept-encoding'=>((isset($_SERVER['HTTP_ACCEPT_ENCODING']))?explode(',',$_SERVER['HTTP_ACCEPT_ENCODING']):array()),
 				'http-accept-charset'=>((isset($_SERVER['HTTP_ACCEPT_CHARSET']))?explode(',',$_SERVER['HTTP_ACCEPT_CHARSET']):array()),
+				'http-accept-encoding'=>((isset($_SERVER['HTTP_ACCEPT_ENCODING']))?explode(',',$_SERVER['HTTP_ACCEPT_ENCODING']):array()),
 				'http-accept-language'=>((isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))?explode(',',$_SERVER['HTTP_ACCEPT_LANGUAGE']):array()),
 				'http-authentication'=>false,
-				'http-authentication-username'=>'',
-				'http-if-modified-since'=>false,
+				'http-authentication-ip'=>'*',
+				'http-authentication-limiter'=>false,
 				'http-authentication-password'=>'',
-				'http-content-type'=>((isset($_SERVER['CONTENT_TYPE']))?$_SERVER['CONTENT_TYPE']:false),
+				'http-authentication-username'=>'',
+				'http-do-not-track'=>((isset($_SERVER['HTTP_DNT']) && $_SERVER['HTTP_DNT']==1)?true:false),
 				'http-content-length'=>((isset($_SERVER['CONTENT_LENGTH']))?$_SERVER['CONTENT_LENGTH']:false),
+				'http-content-type'=>((isset($_SERVER['CONTENT_TYPE']))?$_SERVER['CONTENT_TYPE']:false),
+				'http-host'=>$_SERVER['HTTP_HOST'],
+				'http-if-modified-since'=>false,
 				'http-input'=>false,
+				'http-request-method'=>$_SERVER['REQUEST_METHOD'],
+				'https-limiter'=>false,
 				'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
-				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
-				'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
-				'enforce-url-end-slash'=>true,
-				'enforce-first-language-url'=>true,
-				'languages'=>array('en'),
+				'image-extensions'=>array('jpeg','jpg','png'),
+				'image-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
+				'index-url-cache-timeout'=>0,
+				'index-view-cache-timeout'=>0,
+				'internal-logging'=>false,
+				'keys-root'=>false,
 				'language'=>false,
-				'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
-				'client-user-agent'=>((isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:''),
-				'client-ip'=>__IP__,
-				'server-ip'=>$_SERVER['SERVER_ADDR'],
-				'trusted-proxies'=>array(),
+				'languages'=>array('en'),
+				'limiter'=>false,
+				'load-limiter'=>false,
+				'output-compression'=>'deflate',
+				'project-title'=>'',
 				'request-id'=>((isset($_SERVER['UNIQUE_ID']))?$_SERVER['UNIQUE_ID']:''),
-				'request-uri'=>$_SERVER['REQUEST_URI'],
+				'request-limiter'=>false,
 				'request-time'=>$_SERVER['REQUEST_TIME'],
+				'request-uri'=>$_SERVER['REQUEST_URI'],
+				'resource-cache-timeout'=>31536000,
+				'resource-extensions'=>array('css','js','txt','csv','xml','html','htm','rss','vcard'),
+				'resource-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
+				'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
+				'robots-cache-timeout'=>14400,
+				'server-ip'=>$_SERVER['SERVER_ADDR'],
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'session-permissions-key'=>'www-permissions',
 				'session-user-key'=>'www-user',
+				'sitemap'=>array(),
+				'sitemap-cache-timeout'=>14400,
+				'sitemap-raw'=>array(),
+				'static-root'=>false,
+				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
+				'timezone'=>false,
+				'tmp-root'=>false,
+				'translations'=>array(),
+				'true-request'=>false,
+				'trusted-proxies'=>array(),
 				'user-data'=>false,
 				'user-permissions'=>false,
-				'translations'=>array(),
-				'sitemap-raw'=>array(),
-				'sitemap'=>array(),
+				'user-root'=>false,
 				'view'=>array(),
-				'true-request'=>false,
-				'internal-logging'=>false,
-				'fingerprint'=>''
+				'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
+				'whitelist-limiter'=>false
 			);			
 			
 		// ASSIGNING STATE FROM CONFIGURATION FILE
@@ -112,6 +165,31 @@ class WWW_State	{
 			// Finding base URL
 			if(!$this->data['base-url']){
 				$this->data['base-url']=(($this->data['https-mode'])?'https://':'http://').$this->data['http-host'].$this->data['web-root'];
+			}
+			
+			// Defining default user root folder
+			if(!$this->data['user-root']){
+				$this->data['user-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'userdata'.DIRECTORY_SEPARATOR;
+			}
+			
+			// Defining default user root folder
+			if(!$this->data['data-root']){
+				$this->data['data-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR;
+			}
+			
+			// Defining default static folder
+			if(!$this->data['static-root']){
+				$this->data['static-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'static'.DIRECTORY_SEPARATOR;
+			}
+			
+			// Defining temporary files root folder
+			if(!$this->data['tmp-root']){
+				$this->data['tmp-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR;
+			}
+			
+			// Defining certificates and keys folder
+			if(!$this->data['keys-root']){
+				$this->data['keys-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'keys-'.DIRECTORY_SEPARATOR;
 			}
 			
 		// CHECKING FOR SERVER OR PHP SPECIFIC CONFIGURATION OPTIONS
@@ -209,13 +287,27 @@ class WWW_State	{
 					
 				}
 				
-			} elseif(isset($_FILES['www-xml'])){
+			} elseif(isset($_FILES['www-xml']) || isset($_REQUEST['www-xml'])){
 			
-				// This is not supported in earlier versions of LibXML
-				if(defined('LIBXML_PARSEHUGE')){
-					$tmp=simplexml_load_file($_FILES['www-xml']['tmp_name'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE | LIBXML_PARSEHUGE);
+				// If this is a file upload or not
+				if(isset($_FILES['www-xml'])){
+			
+					// This is not supported in earlier versions of LibXML
+					if(defined('LIBXML_PARSEHUGE')){
+						$tmp=simplexml_load_file($_FILES['www-xml']['tmp_name'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE | LIBXML_PARSEHUGE);
+					} else {
+						$tmp=simplexml_load_file($_FILES['www-xml']['tmp_name'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE);
+					}
+					
 				} else {
-					$tmp=simplexml_load_file($_FILES['www-xml']['tmp_name'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE);
+			
+					// This is not supported in earlier versions of LibXML
+					if(defined('LIBXML_PARSEHUGE')){
+						$tmp=simplexml_load_string($_REQUEST['www-xml'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE | LIBXML_PARSEHUGE);
+					} else {
+						$tmp=simplexml_load_string($_REQUEST['www-xml'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE);
+					}
+					
 				}
 				
 				// Data is converted to array only if an object was created
@@ -223,17 +315,23 @@ class WWW_State	{
 					$this->data['http-input']=json_decode(json_encode($tmp),true);
 				}
 			
-			} elseif(isset($_FILES['www-json'])){
+			} elseif(isset($_FILES['www-json']) || isset($_REQUEST['www-json'])){
 			
-				// JSON string is converted to associative array
-				$this->data['http-input']=json_decode(file_get_contents($_FILES['www-json']['tmp_name']),true);
+				if(isset($_FILES['www-json'])){
+					// JSON string is converted to associative array
+					$this->data['http-input']=json_decode(file_get_contents($_FILES['www-json']['tmp_name']),true);
+				} else {
+					// JSON string is converted to associative array
+					$this->data['http-input']=json_decode($_REQUEST['www-json'],true);
+				}
+			
 				
 			}
 		
 	}
 	
-	// This is called when state is not used anymore
-	// It is used to store request messenger data in filesystem
+	// When State class is not used anymore, then state messenger data - if set - is written 
+	// to filesystem based on the State messenger key.
 	final public function __destruct(){
 		// Only applies if request messenger actually holds data
 		if($this->messenger && !empty($this->messengerData)){
@@ -253,10 +351,13 @@ class WWW_State	{
 	
 	// STATE MANIPULATION
 	
-		// Returns data from State data array
+		// This is the basic call to return a State variable from the object. When call is made 
+		// without any parameters, then the entire State data variable is returned. When 
+		// $variable is set, then this method returns key of that $variable from $data array. 
+		// If the returned array is an array as well, then setting $subvariable can set the 
+		// sub-key of that array and return that instead.
 		// * variable - data array key to be returned
 		// * subvariable - if returned element is an array itself, this returns the value of that key
-		// Returns variable if found, false if failed
 		final public function getState($variable=false,$subvariable=false){
 		
 			// Unless variable and subvariable are set, the script returns entire State data array
@@ -281,11 +382,12 @@ class WWW_State	{
 			
 		}
 		
-		// Used for setting state data
-		// This will take into account internal mechanics, such as PHP settings
+		// This method is used to set a $data variable value in State object. $variable can 
+		// also be an array of keys and values, in which case multiple variables are set at 
+		// once. This method uses stateChanged() for variables that carry additional 
+		// functionality, such as setting timezone.
 		// * variable - Data key to be set
 		// * value - Value of the new data
-		// Returns true, since it just sets a new variable
 		final public function setState($variable,$value=true){
 		
 			// If variable is an array with values it assumes that array keys are variables and values are to be set for those variables
@@ -303,10 +405,13 @@ class WWW_State	{
 			
 		}
 		
-		// This function is used to set certain system flags, if certain values are set for State
+		// This is a private method used internally whenever configuration is changed. It has 
+		// checks for cases when a variable is changed that carries additional functionality 
+		// such as when changing the timezone or output compression. For example, if output 
+		// compression is set, but not supported by user agent that is making the request, 
+		// then output supression is turned off.
 		// * variable - Variable name that is changed
 		// * value - New value of the variable
-		// Returns always true since it just checks for certain variable conditions
 		final private function stateChanged($variable,$value=true){
 		
 			// Value is set instantly
@@ -333,10 +438,11 @@ class WWW_State	{
 		
 	// SITEMAP AND TRANSLATIONS
 
-		// This function returns all the translations for a specific language
+		// This method returns an array of currently active translations, or for a language set 
+		// with $language variable. If $keyword is also set, then it returns a specific translation 
+		// with that keyword from $language translations.
 		// * language - Language keyword, if this is not set then returns current language translations
 		// * keyword - If only single keyword needs to be returned
-		// Returns an array of translations and their keywords
 		final public function getTranslations($language=false,$keyword=false){
 			// If language is not set, then assuming current language
 			if(!$language){
@@ -383,10 +489,12 @@ class WWW_State	{
 			}
 		}
 		
-		// This function returns sitemap data for a specific language
+		// This method returns an array of currently active sitemap, or a sitemap for a language 
+		// set with $language variable. If $keyword is also set, then it returns a specific 
+		// sitemap node with that keyword from $language sitemap file. This method returns the 
+		// original, non-modified sitemap that has not been parsed for use with URL controller.
 		// * language - Language keyword, if this is not set then returns current language sitemap
 		// * keyword - If only a single URL node needs to be returned
-		// Returns sitemap array of set language
 		final public function getSitemapRaw($language=false,$keyword=false){
 		
 			// If language is not set, then assuming current language
@@ -435,10 +543,11 @@ class WWW_State	{
 			
 		}
 		
-		// This function returns sitemap data for a specific language
+		// This returns sitemap array that is modified for use with View controller and other 
+		// parts of the system. It returns sitemap for current language or a language set with 
+		// $language variable and can return a specific sitemap node based on $keyword.
 		// * language - Language keyword, if this is not set then returns current language sitemap
 		// * keyword - If only a single URL node needs to be returned
-		// Returns sitemap array of set language
 		final public function getSitemap($language=false,$keyword=false){
 			// If language is not set, then assuming current language
 			if(!$language){
@@ -497,24 +606,27 @@ class WWW_State	{
 		
 	// REQUEST MESSENGER
 	
-		// This method sets the request messenger key
+		// This method initializes State messenger by giving it an address and assigning the file 
+		// that State messenger will be stored under. If the file already exists and $overwrite is 
+		// not turned on, then it automatically loads contents of that file from filesystem.
 		// * address - Key that messenger data will be saved under
-		// Always returns true
-		final public function stateMessenger($address){
+		// * overwrite - If this is set then existing state messenger file will be overwritten
+		final public function stateMessenger($address,$overwrite=false){
 			// File is stored in file system as hashed
 			$this->messenger=md5($address);
 			$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
 			// If this state messenger address already stores data, then it is loaded
-			if(file_exists($dataAddress)){
+			if(!$overwrite && file_exists($dataAddress)){
 				$this->messengerData=unserialize(file_get_contents($dataAddress));
 			}
 			return true;
 		}
 		
-		// This sets messenger data
+		// This writes data to State messenger. $data is the key and $value is the value of the 
+		// key. $data can also be an array of keys and values, in which case multiple values are 
+		// set at the same time.
 		// * data - Key or data array
 		// * value - Value, if data is a key
-		// Returns true or false
 		final public function setMessengerData($data,$value=false){
 			// If messenger address is set
 			if($this->messenger){
@@ -534,9 +646,9 @@ class WWW_State	{
 			}
 		}
 		
-		// This function removes data from state messenger
+		// This method removes key from State messenger based on value of $key. If $key is not 
+		// set, then the entire State messenger data is cleared.
 		// * key - Key that will be removed, if set to false then removes the entire data
-		// Returns true if data was set and is now removed
 		final public function unsetMessengerData($key=false){
 			// If messenger address is set
 			if($this->messenger && $key){
@@ -553,10 +665,12 @@ class WWW_State	{
 			}
 		}
 		
-		// This function returns messenger data either from filesystem or from current session
+		// This method returns data from State messenger. It returns the entire State messenger 
+		// data as an array based on $address keyword that is used as the fingerprint for data. 
+		// If $remove is set, then State messenger data is removed from filesystem or State 
+		// object after being called.
 		// * address - Messenger address
 		// * remove - True or false flag whether to delete the request data after returning it
-		// Returns request messenger data
 		final public function getMessengerData($address=false,$remove=true){
 			// If messenger address is set
 			if($address){
@@ -578,7 +692,13 @@ class WWW_State	{
 				}
 			} else {
 				// if there is a messenger active
-				if($this->messenger){
+				if($this->messenger && $remove){
+					// Resetting state messenger data from the object
+					$tmp=$this->messengerData;
+					$this->messengerData=array();
+					// Data returned
+					return $tmp;
+				} elseif($this->messenger){
 					// Data returned
 					return $this->messengerData;
 				} else {
@@ -589,7 +709,8 @@ class WWW_State	{
 		
 	// SESSION USER AND PERMISSIONS
 	
-		// This sets user data to current session
+		// This method sets user data array in session. This is a simple helper function used 
+		// for holding user-specific data for a web service. $data is an array of user data.
 		// * data - Data array set to user
 		final public function setUser($data){
 			// Setting the session
@@ -599,9 +720,9 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This returns either entire current user session or a single key from it
+		// This either returns the entire user data array or just a specific $key of user data 
+		// from the session.
 		// * key - Element returned from user data, if not set then returns the entire user data
-		// Returns either the whole data as array or just a single element or false, if not found
 		final public function getUser($key=false){
 			// Testing if permissions state has been populated or not
 			if(!$this->data['user-data']){
@@ -626,8 +747,7 @@ class WWW_State	{
 
 		}
 		
-		// This method unsets existing user
-		// Always returns true
+		// This unsets user data and removes the session of user data.
 		final public function unsetUser(){
 			// Unsetting the session
 			$this->unsetSession($this->data['session-user-key']);
@@ -635,55 +755,10 @@ class WWW_State	{
 			$this->data['user-data']=false;
 			return true;
 		}
-	
-		// This function checks for session permissions
-		// * check - String that is checked against permissions array
-		// Returns either true or false, depending whether permissions are set or not
-		final public function checkPermissions($check){
-			// Testing if permissions state has been populated or not
-			if(!$this->data['user-permissions']){
-				$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
-				// If this session key did not exist, then returning false
-				if(!$this->data['user-permissions']){
-					return false;
-				}
-			}
-			// If all permissions are set, then permissions will not be separately validated and true is assumed
-			if(!in_array('*',$this->data['user-permissions'])){
-				if(is_array($check)){
-					foreach($check as $c){
-						// Returning true or false depending on whether this key exists or not
-						if(!in_array($c,$this->data['user-permissions'])){
-							return false;
-						}
-						return true;
-					}
-				} else {
-					// Returning true or false depending on whether this key exists or not
-					if(in_array($check,$this->data['user-permissions'])){
-						return true;
-					} else {
-						return false;
-					}
-				}
-			} else {
-				return true;
-			}
-		}
 		
-		// This function returns all current session permissions
-		// Returns an array of permissions
-		final public function getPermissions(){
-			// Testing if permissions state has been populated or not
-			if(!$this->data['user-permissions']){
-				$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
-			}
-			return $this->data['user-permissions'];
-		}
-		
-		// This function sets current session permissions
+		// This method sets an array of $permissions or a comma-separated string of permissions 
+		// for the current user permissions session.
 		// * permissions - An array or a string of permissions
-		// Always returns true
 		final public function setPermissions($permissions){
 			if(!is_array($permissions)){
 				$permissions=explode(',',$permissions);
@@ -695,8 +770,49 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method unsets existing permissions
-		// Always returns true
+		// This method returns an array of currently set user permissions from the session.
+		final public function getPermissions(){
+			// Testing if permissions state has been populated or not
+			if(!$this->data['user-permissions']){
+				$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
+			}
+			return $this->data['user-permissions'];
+		}
+	
+		// This checks for an existence of permissions in the user permissions session array.
+		// $permissions is either a comma-separated string of permissions to be checked, or an 
+		// array. This method returns false when one of those permission keys is not set in the
+		// permissions session. Method returns true, if $permissions exist in the permissions 
+		// session array.
+		// * permissions - Comma-separated string or an array that is checked against permissions array
+		final public function checkPermissions($permissions){
+			// Testing if permissions state has been populated or not
+			if(!$this->data['user-permissions']){
+				$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
+				// If this session key did not exist, then returning false
+				if(!$this->data['user-permissions']){
+					return false;
+				}
+			}
+			// If all permissions are set, then permissions will not be separately validated and true is assumed
+			if(!in_array('*',$this->data['user-permissions'])){
+				if(!is_array($permissions)){
+					$permissions=explode(',',$permissions);
+				}
+				foreach($permission as $p){
+					// Returning true or false depending on whether this key exists or not
+					if(!in_array($p,$this->data['user-permissions'])){
+						return false;
+					}
+					return true;
+				}
+			} else {
+				return true;
+			}
+		}
+		
+		// This unsets permissions data from session similarly to how unsetUser() method unsets 
+		// user data from session.
 		final public function unsetPermissions(){
 			// Unsetting the session
 			$this->unsetSession($this->data['session-permissions-key']);
@@ -707,11 +823,13 @@ class WWW_State	{
 		
 	// SESSION AND COOKIES
 	
-		// This starts session in current namespace
+		// This method starts sessions. This is called automatically if sessions are accessed 
+		// but sessions have not yet been started. $secure flag is for session cookie to be 
+		// secure and $httpOnly will mean that cookie is for HTTP only and cannot be accessed 
+		// with scripts.
 		// * secure - If secure cookie is used
 		// * httponly - If cookie is HTTP only
-		// Returns true
-		final public function startSession($secure=false,$httpOnly=false){
+		final public function startSession($secure=false,$httpOnly=true){
 			// Making sure that sessions have not already been started
 			if(!session_id()){
 				// Defining session name
@@ -726,7 +844,7 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This function regenerates ongoing session
+		// This method regenerates ongoing session with a new ID.
 		final public function regenerateSession(){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
@@ -737,7 +855,7 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This function regenerates ongoing session
+		// This method destroys ongoing session and removes session cookie.
 		final public function destroySession(){
 			// Making sure that sessions have been started
 			if($this->sessionStarted){
@@ -753,10 +871,10 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This sets session variable in current session namespace
+		// This method sets a session variable $key with a value $value. If $key is an array of 
+		// keys and values, then multiple session variables are set at once.
 		// * key - Key of the variable, can be an array
 		// * value - Value to be set
-		// Returns true
 		final public function setSession($key=false,$value=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
@@ -778,9 +896,10 @@ class WWW_State	{
 			return true;
 		}
 		
-		// Gets a value based on a key from current namespace
+		// This method returns $key value from session data. If $key is an array of keys, then 
+		// it can return multiple variables from session at once. If $key is not set, then entire 
+		// session array is returned.
 		// * key - Key of the value to be returned
-		// Returns the value if it exists
 		final public function getSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
@@ -817,9 +936,10 @@ class WWW_State	{
 			}
 		}
 		
-		// Unsets session variable
+		// This method unsets $key value from current session. If $key is an array of keys, then 
+		// multiple variables can be unset at once. If $key is not set at all, then this simply 
+		// destroys the entire session.
 		// * key - Key of the value to be unset, can be an array
-		// Returns true
 		final public function unsetSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
@@ -861,15 +981,19 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This sets session variable
+		// This method sets a cookie with $key and a $value. $configuration is an array of 
+		// cookie parameters that can be set.
 		// * key - Key of the variable, can be an array
 		// * value - Value to be set, can also be an array
 		// * configuration - Cookie configuration options
-		// Returns true
 		final public function setCookie($key,$value,$configuration=array()){
 			// Checking for configuration options
 			if(!isset($configuration['expire'])){
-				$configuration['expire']=2147483647;
+				if(isset($configuration['timeout'])){
+					$configuration['expire']=$this->data['request-time']+$configuration['timeout'];
+				} else {
+					$configuration['expire']=2147483647;
+				}
 			}
 			if(!isset($configuration['path'])){
 				$configuration['path']=$this->data['web-root'];
@@ -881,19 +1005,27 @@ class WWW_State	{
 				$configuration['secure']=false;
 			}
 			if(!isset($configuration['httponly'])){
-				$configuration['httponly']=false;
+				$configuration['httponly']=true;
 			}
 			// Can set multiple values
 			if(is_array($key)){
+				// Value can act as a configuration
+				if(is_array($value)){
+					$configuration=$value;
+				}
 				foreach($key as $k=>$v){
 					// Value can be an array, in which case the values set will be an array
 					if(is_array($v)){
 						foreach($v as $index=>$val){
 							setcookie($k.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+							// Cookie values can be accessed immediately after they are set
+							$_COOKIE[$k][$index]=$val;
 						}
 					} else {
 						// Setting the cookie
 						setcookie($k,$v,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+						// Cookie values can be accessed immediately after they are set
+						$_COOKIE[$k]=$v;
 					}
 				}
 			} else {
@@ -901,17 +1033,21 @@ class WWW_State	{
 				if(is_array($value)){
 					foreach($value as $index=>$val){
 						setcookie($key.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+						// Cookie values can be accessed immediately after they are set
+						$_COOKIE[$key][$index]=$val;
 					}
 				} else {
 					// Setting the cookie
 					setcookie($key,$value,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+					// Cookie values can be accessed immediately after they are set
+					$_COOKIE[$key]=$value;
 				}
 			}
 		}
 		
-		// Gets a value based on a key from current cookies
+		// This method returns a cookie value with the set $key. $key can also be an array of 
+		// keys, in which case multiple cookie values are returned in an array.
 		// * key - Key of the value to be returned, can be an array
-		// Returns the value if it exists
 		final public function getCookie($key){
 			// Multiple keys can be returned
 			if(is_array($key)){
@@ -935,36 +1071,23 @@ class WWW_State	{
 			}
 		}
 		
-		// Unsets session variable
+		// This method unsets a cookie with the set key of $key. If $key is an array, then 
+		// it can remove multiple cookies at once.
 		// * key - Key of the value to be unset
 		// * config - Additional configuration options about the cookie, such as path
-		// Returns true
-		final public function unsetCookie($key,$config=array()){
-			// Checking for configuration options
-			if(!isset($configuration['path'])){
-				$configuration['path']=$this->data['web-root'];
-			}
-			if(!isset($configuration['domain'])){
-				$configuration['domain']=$this->data['http-host'];
-			}
-			if(!isset($configuration['secure'])){
-				$configuration['secure']=false;
-			}
-			if(!isset($configuration['httponly'])){
-				$configuration['httponly']=false;
-			}
+		final public function unsetCookie($key){
 			// Can set multiple values
 			if(is_array($key)){
 				foreach($key as $value){
 					if(isset($_COOKIE[$value])){
 						// Removes cookie by setting its duration to 0
-						setcookie($value,'',($this->data['request-time']-3600),$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+						setcookie($value,'',($this->data['request-time']-3600));
 					}
 				}
 			} else {
 				if(isset($_COOKIE[$key])){
 					// Removes cookie by setting its duration to 0
-					setcookie($key,'',($this->data['request-time']-3600),$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+					setcookie($key,'',($this->data['request-time']-3600));
 				} else {
 					return false;
 				}
@@ -974,10 +1097,11 @@ class WWW_State	{
 	
 	// TERMINAL
 	
-		// This function looks for available terminal/command line option and attempts to execute it
+		// This method is wrapper function for making terminal calls. It attempts to detect 
+		// what terminal is available on the system, if any, and then execute the call and 
+		// return the results of the call.
 		// * command - Command to be executed
-		// Returns command result, if available
-		final protected function terminal($command){
+		final public function terminal($command){
 		
 			// Status variable
 			$status=1;
@@ -1004,7 +1128,7 @@ class WWW_State	{
 			}
 
 			// Returning result
-			return array('output'=>$output,'status'=>$return_var);
+			return array('output'=>$output,'status'=>$status);
 			
 		}
 	

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Database Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Database Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-database.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Simple database class that acts as a wrapper to PDO. It is not required to use WWW_Database with Wave Framework at all, but should it be required, it is available. This class uses PDO database class to simplify some of the database commands. It includes functions for returning data from database as a single row or multiple rows as associative arrays as well as get information about last inserted ID and number of rows affected by last query.</p>
+			
+				<p>Currently the default database format supported by WWW_Database class is MySQL, but PostgreSQL, MSSQL, SQLite and Oracle are also supported. WWW_Database uses PDO database class and simplifies some of its functionality.</p>
+				
+				<p>The rest of this document details the use of Database class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
+				
+			<h2>Using Database class</h2>
+			
+				<p>To use Database class, you have to load the class definition and create a new database object. You can assign database credentials during object creation or later on separately with object properties. For example, this is the easiest way to connect to a MySQL database:</p>
+				
+<pre>
+	<code>
+		require('/engine/class.www-database.php');
+		// This is a common database connection
+		$db=new WWW_Database('mysql','localhost','my_database_name','my_username','my_password',true,true);
+		// This also connects to database, but supresses database errors entirely
+		$db=new WWW_Database('mysql','localhost','my_database_name','my_username','my_password',false);
+		// This connects to database with a persistent connection
+		// This means that same database connection can be 'shared' across requests and is not recommended in most cases
+		$db=new WWW_Database('mysql','localhost','my_database_name','my_username','my_password',true,true);
+		// This actually connects to database
+		$db-&gt;dbConnect();
+	</code>
+</pre>
+
+				<p>Note that it is not actually necessary to separately connect to database. Database class will attempt to connect to database by itself when query is made but database connection is not detected.</p>
+				
+				<p>Database class has three separate methods for making database requests: dbSingle(), dbMultiple and dbCommand(). They are all wrappers for PDO prepared statements but function a little differently based on what type of query is used.</p>
+				
+				<p>dbSingle() is used for any regular query where you expect a single row to be returned. It takes two variables, a query string and an array of variables for the prepared statement. For example, this query attempts to find a user with the ID of 7:</p>
+				
+<pre>
+	<code>
+	// Uses PDO prepared statement to make a secure database request
+	$user=$db-&gt;dbSingle('SELECT * FROM users WHERE id=?',array(7));
+	// You can also make the 'old school' request as long as you are sure the variable is secure
+	$user=$db-&gt;dbSingle('SELECT * FROM users WHERE id=7');
+	</code>
+</pre>
+
+				<p>The above example now has a $user that includes entire information from database row, if it was found. $user would be an array where all keys are the column names from the database. If user was not found, then the value would be false.</p>
+				
+				<p>In order to get multiple users from database, you have to use dbMultiple() method. It works similarly to dbSingle(), except it returns an array of arrays, where each element is an array of a row that is returned. For example, to get all users whose first name is 'John' and last name is 'Willis', you could do:</p>
+				
+<pre>
+	<code>
+	$users=db-&gt;dbMultiple('SELECT * FROM users WHERE first_name=? AND last_name=?',array('John','Willis'));
+	</code>
+</pre>
+
+				<p>As before, if the $users value is false then no matching rows were found.</p>
+				
+				<p>Database class also has a helper function which you can use to filter the array returned from dbMultiple() and return all the values of a specific row. For example, this would take the result from the last $users and return all first_name values from that result in a new array:</p>
+				
+<pre>
+	<code>
+	$users=db-&gt;dbMultiple('SELECT * FROM users WHERE first_name=? AND last_name=?',array('John','Willis'));
+	// This returns an array with values of first_name
+	$firstNames=$db-&gt;dbArray($users,'first_name');
+	// This does the same as above, except all the returned values are unique
+	$firstNames=$db-&gt;dbArray($users,'first_name',true);
+	</code>
+</pre>
+				
+				<p>When you do not need to return actual rows from database, then you can simply use dbCommand() method which either returns true or false, or the amount of rows affected by the query. This is most useful for INSERT, UPDATE and DELETE requests, like this:</p>
+				
+<pre>
+	<code>
+	$result=$db-&gt;dbCommand('DELETE FROM users WHERE last_name=?',array('Willis'));
+	</code>
+</pre>
+
+				<p>The above example then returns the number of rows that were deleted.</p>
+				
+				<p>Sometimes the PDO prepared statements may not work as expected however. One of those cases is when you are using a LIKE statement. In LIKE statements, % and _ characters are wildcards and they can break the query. This means that you should add an additional escaping in such a case and use dbQuote() method, like this:</p>
+				
+<pre>
+	<code>
+	$users=db-&gt;dbMultiple('SELECT * FROM users WHERE first_name LIKE ?,array($db-&gt;dbQuote('John','like')));
+	</code>
+</pre>
+
+				<p>This dbQuote() method has multiple options available, examples are below:</p>
+				
+<pre>
+	<code>
+	// This makes the variable database-safe
+	$var=$db-&gt;dbQuote($var,'escape');
+	// This makes the variable database-safe, but also removes the quotes placed around the variable
+	$var=$db-&gt;dbQuote($var,'escape',true);
+	// This converts the variable to an integer through typecasting
+	$var=$db-&gt;dbQuote($var,'integer');
+	// This converts the variable to a float through typecasting
+	$var=$db-&gt;dbQuote($var,'float');
+	// This converts the variable to an acceprable numeric value that also can include spaces, plus, minus and brackets characters
+	$var=$db-&gt;dbQuote($var,'numeric');
+	// This removes all non-latin and non-numeric characters from the variable
+	$var=$db-&gt;dbQuote($var,'latin');
+	// This removes all characters from the variable that are not suitable for a database table or column name
+	$var=$db-&gt;dbQuote($var,'field');
+	</code>
+</pre>
+
+				<p>It is also possible to use transactions with Database class. Transactions allow to make multiple database requests and then cancel them should something go wrong later on in the script. A simple example is as follows:</p>
+				
+<pre>
+	<code>
+	// Start transaction
+	$db-&gt;dbTransaction();
+	// Delete a user from database that has ID of 1
+	$db-&gt;dbCommand('DELETE FROM users WHERE id=?',array(1));
+	// If something went wrong..
+	if($somethingWentWrong){
+		// Roll back all queries that were sent after last transaction was started
+		$db-&gt;dbRollback();
+	} else {
+		// Commit the changes to database, making the queries sent since transaction started permanent
+		$db-&gt;dbCommit();
+	}
+	</code>
+</pre>
+
+				<p>It is also possible to get the last inserted ID (the last primary key created), if needed. For example:</p>
+				
+<pre>
+	<code>
+	// Insert row to database
+	$result=$db-&gt;dbCommand('INSERT INTO users SET username=?',array('JohnDoe'));
+	// Get the new rows ID
+	if($result){
+		$lastId=$db-&gt;dbLastId();
+	}
+	</code>
+</pre>
+
+				<p>Database class automatically disconnects once it is not used anymore, but you can always disconnect it at any point with the following:</p>
+				
+<pre>
+	<code>
+	// Disconnects the database
+	$db-&gt;dbDisconnect();
+	// Does the same as above, but also resets the query counter in the request
+	$db-&gt;dbDisconnect(true);
+	</code>
+</pre>
+	
+			<h2>Database Class Parameters</h2>
+			
+				<h3>public $pdo=false</h3>
+				
+					<p>PDO object is stored in this variable, since Database class acts as a wrapper for PDO.</p>
+					
+				<h3>public $type='mysql'</h3>
+				
+					<p>This is currently used database type. It can be 'mysql', 'sqlite', 'postgresql', 'oracle' or 'mssql'.</p>
+					
+				<h3>public $username=''</h3>
+				
+					<p>This is the username that is used to connect to database.</p>
+					
+				<h3>public $password=''</h3>
+				
+					<p>This is the password that is used to connect to database.</p>
+					
+				<h3>public $host='localhost'</h3>
+				
+					<p>This is the host address of the database. In case of SQLite, this should be the location of SQLite database file.</p>
+					
+				<h3>public $database=''</h3>
+				
+					<p>This is the database name that will be connected to.</p>
+					
+				<h3>public $persistent=false</h3>
+				
+					<p>This is the flag that determines if database connection should be considered persistent or not. Persistent connections are shared across requests, but are generally not recommended to be used.</p>
+					
+				<h3>public $showErrors=false</h3>
+				
+					<p>If this value is set to true, then Database class will trigger a PHP error if it encounters a database error.</p>
+					
+				<h3>public $queryCounter=0</h3>
+				
+					<p>This is used for logging or otherwise performance tracking. This variable is a simple counter about the amount of requests made during this database connection.</p>
+			
+			<h2>Database Class Methods</h2>
+			
+				<h3>public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=true,$persistent=false)</h3>
+				
+					<p>This constructor method returns new Database object as well as includes options to quickly assign database credentials in the same request. $type can be 'mysql', 'sqlite', 'postgresql', 'oracle' or 'mssql'. $host is either 'localhost' or address of the database host on web, or the location of SQLite file. $database is the database name and $username and $password are access credentials. $showErrors is a flag that triggers PHP error, in case database query fails. $persistent is a flag that tells system to use existing database connection, if one is available (this is not recommended in most cases).</h3>
+					
+				<h3>public function __destruct()</h3>
+				
+					<p>When object is not used anymore, it automatically calls the method that closes existing database connection.</p>
+					
+				<h3>public function dbConnect()</h3>
+				
+					<p>This creates database connection based on database type. If database connection fails, then it throws a PHP error regardless if $showErrors is turned on or not.</p>
+					
+				<h3>public function dbDisconnect($resetQueryCounter=false)</h3>
+				
+					<p>This dmethod isconnects current database connection and resets query counter, if $resetQueryCounter is set to true. Returns false if no connection was present.</p>
+					
+				<h3>public function dbMultiple($queryString,$variables=array())</h3>
+				
+					<p>This sends query information to PDO. $queryString is the query string and $variables is an array of variables sent with the request. Question marks (?) in $queryString will be replaced by values from $variables array for PDO prepared statements. This method returns an array where each key is one returned row from the database, or it returns false, if the query failed. This method is mostly meant for SELECT queries that return multiple rows.</p>
+					
+				<h3>public function dbSingle($queryString,$variables=array())</h3>
+				
+					<p>This sends query information to PDO. $queryString is the query string and $variables is an array of variables sent with the request. Question marks (?) in $queryString will be replaced by values from $variables array for PDO prepared statements. This method returns the first row of the matching result, or it returns false, if the query failed. This method is mostly meant for SELECT queries that return a single row.</p>
+					
+				<h3>public function dbCommand($queryString,$variables=array())</h3>
+				
+					<p>This sends query information to PDO. $queryString is the query string and $variables is an array of variables sent with the request. Question marks (?) in $queryString will be replaced by values from $variables array for PDO prepared statements. This method only returns the number of rows affected or true or false, depending whether the query was successful or not. This method is mostly meant for INSERT, UPDATE and DELETE type of queries.</p>
+					
+				<h3>public function dbArray($array,$key,$unique=false)</h3>
+				
+					<p>This is a database helper method, that simply creates an array of database result array (like the one returned by dbMultiple). It takes the database result array and collects all $key values from that array into a new, separate array. If $unique is set, then it only returns unique keys.</p>
+					
+				<h3>public function dbDebug($query,$variables=array())</h3>
+				
+					<p>This method attempts to simulate the query that PDO builds when it makes a request to database. $query should be the query string and $variables should be the array of variables, like the ones sent to dbSingle(), dbMultiple() and dbCommand() requests. It returns a prepared query string.</p3>
+					
+				<h3>public function dbLastId()</h3>
+				
+					<p>This method attempts to return the last ID (a primary key) that was inserted to the database. If one was not found, then the method returns false.</p>
+					
+				<h3>public function dbTransaction()</h3>
+				
+					<p>This method begins a database transaction, if the database type supports transactions. If this process fails, then method returns false, otherwise it returns true.</p>
+					
+				<h3>public function dbCommit()</h3>
+				
+					<p>This commits all the queries sent to database after transactions were started. If commit fails, then it returns false, otherwise this method returns true.</p>
+					
+				<h3>public function dbRollback()</h3>
+				
+					<p>This method cancels all the queries that have been sent since the transaction was started with dbTransaction(). If rollback is successful, then method returns true, otherwise returns false.</p>
+					
+				<h3>public function dbQuote($value,$type='escape',$stripQuotes=false)</h3>
+				
+					<p>This is a database helper function that can be used to escape specific variables if that variable is not sent with as part of variables array and is written in the query string instead. $value is the variable value that will be escaped or modified. $type is the type of escaping and modifying that takes place.</p>
+					
+					<p>This can be 'escape' (which just applies regular PDO quote to the variable), 'integer' which converts the value to an integer through typecasting, 'float' which converts the value to a float through typecasting, 'numeric' which converts the value to a numeric value that also allows spaces and plus and minus symbols and brackets (such as for phone numbers), 'latin' which converts the value to just have latin characters and numbers, 'field' which converts the value to be a database-appropriate table field and 'like' which escapes the value to be suitable when used inside a LIKE match.</p>
+					
+					<p>If $stripQuotes is set, then the value will also strip any quotes, if they happen to be added to the value.</p>
+					
+				<h3>private function dbErrorCheck($query,$queryString=false,$variables=array())</h3>
+				
+					<p>This is a private method that is called after every query that is sent to database. This checks whether database error was encountered and if $showErrors was turned on, then also throws a PHP warning about it. It also accepts $query, which is the PDO resource for the query to be checked and $queryString with $variables for debugging purposes, as it attempts to rebuild the query sent to PDO using dbDebug() method.</p>
+
+	</body>
+</html>

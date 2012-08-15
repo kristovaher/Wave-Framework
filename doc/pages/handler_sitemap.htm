@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Sitemap Handler - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Sitemap Handler</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/handler.sitemap.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Sitemap Handler is used to return sitemap.xml files, if a request is made to such a file. This handler either returns the existing /sitemap.xml file, or generates a new one based on sitemap files in /resources/ folder and the languages defined in configuration.</p>
+			
+			<h2>Workflow</h2>
+			
+				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				
+				<p>Sets the content type to XML, which is the common content type of sitemap.xml files.</p>
+				
+				<p>Returns the content of existing /sitemap.xml file, if such is present. Otherwise generates a new sitemap.xml content that is returned to user agent instead. Sitemap content will be generated from configuration - where languages are loaded - and then sitemap files from /resources/[language].sitemap.ini files. Sitemap will include all non-hidden and public page URL's. This generated sitemap.xml file is also cached.</p>
+				
+				<p>Handler also includes an optional database connection, which can be used if it is necessary at some point to load sitemap.xml from database instead.</p>
+			
+				<p>Sitemap Handler returns content with appropriate HTTP response headers, including cache. It is possible to request the file without cache by requesting the file as 'nocache&amp;sitemap.xml'.</p>
+				
+				<p>Sitemap Handler also makes an entry in the log file about the request, if Logger is used.</p>
+			
+	</body>
+</html>

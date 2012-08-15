@@ -2,7 +2,7 @@
 
 /*
 Wave Framework
-MVC View class
+Home View
 
 This view is loaded when WWW_controller_view finds root or home page as the view file. Name 
 of the 'home' view is defined as a default in WWW_State class. This home view example also 
@@ -15,7 +15,7 @@ License: This file can be copied, changed and re-published under another license
 // WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_view_home extends WWW_Factory {
 
-	// WWW_controller_url calls this function as output for page content
+	// View Controller calls this function as output for page content
 	public function render($input){
 		
 		// Translations are stored in input variables and can be used within the view

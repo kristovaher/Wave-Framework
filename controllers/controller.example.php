@@ -2,7 +2,7 @@
 
 /*
 Wave Framework
-MVC Controller class
+Example Controller
 
 Minimal example controller for demonstration purposes
 

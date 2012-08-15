@@ -2,17 +2,13 @@
 
 /* 
 Wave Framework
-Index gateway data handler
+Data Handler
 
-Index gateway data handler is in functionality similar to api handler, except it uses API calls that 
-cannot be controlled with direct request. It calls WWW_controller_url to solve a URL request and it 
-calls WWW_controller_view to display data to the user agent relevant to the request. This handler is 
-loaded when no other handlers can be used to solve the user agent request.
-
-* Used for web pages
-* Requires /resources/{language-code}.sitemap.php
-* Requires /resources/{language-code}.translations.php
-* Loads State and establishes database connection (if used)
+Data Handler is loaded in situations when other handlers were not used, which is most commonly for 
+regular web page requests. Data Handler takes all the input from GET, POST, FILES; SESSION and 
+COOKIE variables, loads Wave Framework API and sends all the input to the API. It first uses URL 
+Controller to find out what page the user agent is looking for and then a View Controller to 
+generate that requested page.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -20,7 +16,7 @@ License: GNU Lesser General Public License Version 3
 
 // INITIALIZATION
 
-	// Stopping all requests that did not come from Index gateway
+	// Stopping all requests that did not come from Index Gateway
 	if(!isset($resourceAddress)){
 		header('HTTP/1.1 403 Forbidden');
 		die();
@@ -75,26 +71,26 @@ License: GNU Lesser General Public License Version 3
 		$inputData=array();
 
 		// All the data sent by user agent is added here and merged into one array
-		if(isset($_POST) && !empty($_POST)){ 
+		if(!empty($_POST)){ 
 			$inputData=$_POST; 
 		} elseif(is_array($state->data['http-input'])){
 			// http-input is POST data that is sent as a stream (as XML or JSON)
 			$inputData=$state->data['http-input'];
 		}
-		if(isset($_GET) && !empty($_GET)){ 
+		if(!empty($_GET)){ 
 			$inputData+=$_GET; 
 		}
-		if(isset($_FILES) && !empty($_FILES)){ 
+		if(!empty($_FILES)){ 
 			$inputData['www-files']=$_FILES;
 		}
-		if(isset($_COOKIE) && !empty($_COOKIE)){ 
+		if(!empty($_COOKIE)){ 
 			$inputData['www-cookie']=$_COOKIE;
 			// Testing if namespace cookie has been set, if it has then checking for session variables
 			if(isset($_COOKIE[$state->data['session-namespace']])){
 				// Starting sessions
 				$state->startSession();
 				// Checking for session variables
-				if(isset($_SESSION[$state->data['session-namespace']]) && !empty($_SESSION[$state->data['session-namespace']])){ 
+				if(!empty($_SESSION[$state->data['session-namespace']])){ 
 					$inputData['www-session']=$_SESSION[$state->data['session-namespace']];
 				}
 			}
@@ -108,7 +104,7 @@ License: GNU Lesser General Public License Version 3
 		}
 		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command(array('www-command'=>$view['controller'].'-load','www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-tags'=>((isset($view['cache-tag']))?$view['cache-tag']:''),'www-cache-timeout'=>$config['index-view-cache-timeout'])+$inputData,false,false,true);
+		$api->command(array('www-command'=>$view['controller'].'-'.$view['controller-method'],'www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-tags'=>((isset($view['cache-tag']))?$view['cache-tag']:''),'www-cache-timeout'=>$config['index-view-cache-timeout'])+$inputData,false,false,true);
 
 	}
 	

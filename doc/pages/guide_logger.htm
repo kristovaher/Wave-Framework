@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Internal Logger - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Using Internal Logger</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>In order to make it easier to debug software as it is being written, Wave Framework comes with an internal logger that can be used to log anything - from messages to arrays - in the system log. Internal logging is about a little more than just logging data however, as it is possible to filter what internal log entries are actually logged and what entries are not. And it is then possible to read the entire log with Log Reader.</p>
+				
+			<h2>Configuring Internal Logger</h2>
+			
+				<p>Internal Logger can be used by the developer to log specific values within Models, Views and Controllers. But Internal Logger is also used by default by the API itself, as API will automatically - if Logger is turned on in configuration - add log entries about the input and output data of every single API call. API will use log keywords of 'input-data' and 'output-data' for API log entries.</p>
+			
+				<p>For internal logging to work, you have to first enable and configure 'internal-logging' setting in configuration, which is stored in /config.ini file. This setting is a comma-separated list of keywords that are being logged by internal logger.</p>
+
+				<p>This configuration can work in multiple ways:</p>
+				
+				<ul>
+					<li>If '*' is one of the values in the comma-separated list, then all log entires are logged, except log entires with a key that are set to be ignored.</li>
+					<li>If '!' is set before a keyword in the comma-separated list, then log entries with that keyword will not be logged. By default it has '!input-data' and '!output-data' set, which means that by default the Internal Logger will supress all the automatic input and output data log entries sent by API when API calls are made.</li>
+					<li>If '*' is not set, then Internal Logger will log only the entires set in the 'internal-logging' configuration setting. If you add 'example' to that list and add a log entry with keyword 'example', then this is logged while another internal logging entry 'example2' will not be stored.</li>
+				</ul>
+				
+				<p>The idea behind the ability to filter specific log entries is to make it possible to leave log hooks within Models, Views and Controllers and then test various functionality if problems occur or debugging becomes necessary. Filtering makes it possible to turn off certain type of log entries with just a configuration setting, without requiring the developer to go through the code and comment out log entries manually.</li>
+				
+			<h2>Adding an Entry to Internal Log</h2>
+			
+				<p>Adding new entry to internal log is done through internalLogEntry() method that takes two parameters: keyword that log entry will be stored under and the contents of the log itself. The key is useful for storing log entries since it makes it easier later on - when scanning through the internal log - to find the entry that you are looking for if you have multiple entries stored in the log.</p>
+				
+				<p>This is an example of a simple log entry:</p>
+				
+<pre>
+	<code>
+	$this->internalLogEntry('my-log-entry','Let us test if log entries work');
+	</code>
+</pre>
+
+				<p>Note that internal logging has to be enabled in configuration for this log entry to be stored in the internal log. In this case, the 'internal-logging' comma-separated configuration list must include either '*' or 'my-log-entry'.</p>
+			
+			<h2>Reading Internal Log</h2>
+			
+				<p>Internal logs are read by one of the developer tools, the Log Reader. You need to make a HTTP request to script situated in '/tools/log-reader.php' and then select 'Internal Log as the mode in the bottom of the page, or simply go to '/tools/log.reader.php?internal' directly. This page requires HTTP authentication for access, username and password for this access are defined in Configuration file.</p>
+				
+				<p>Log Reader also allows you to clear the log. It is a good idea to clear the log file every now and then so it would not become too large and unmaintainable.</p>
+			
+	</body>
+</html>

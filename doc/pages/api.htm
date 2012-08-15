@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>API Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>API Class</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>API class is one of the core classes of Wave Framework. Every command and function in Wave Framework is executed through API object. API class implements State class - which stores configuration - and executes any and all functionality that is built within Wave Framework. It is not recommended to modify this class, in fact this class is defined as final. Methods of this class take user input, load MVC objects and execute their methods and return data in the appropriate format.</p>
+				
+				<p>API class executes methods of both public API calls and private authenticated API profiles.</p>
+				
+				<p>API takes any type of input data as an array, but considers input data that has 'www-' prefix (called the 'wave prefix') as Wave Framework specific and this can carry additional functionality. More details about Wave Framework API related calls is detailed in API feature guide.</p>
+				
+			<h2>Using API class</h2>
+			
+				<p>API class is an internal Wave Framework class and should not be used outside the context of Wave Framework. API and Data Handlers use the API in the following way, for example:</p>
+				
+<pre>
+	<code>
+	// It is recommended to also define a state
+	require('/engine/class.www-state.php');
+	$state=new WWW_State();
+	
+	// Including and loading an API object
+	require('/engine/class.www-api.php');
+	$api=new WWW_API($state);
+	</code>
+</pre>
+
+				<p>Then to execute an API call, you simply have to call the command() method with input data, like this:</p>
+				
+<pre>
+	<code>
+	// An example input array
+	$input=array('www-command'=&gt;'example-get');
+	
+	// Executing the command
+	$result=$api-&gt;command($input);
+			
+	// Printing out the result
+	print_r($result);
+	</code>
+</pre>
+
+				<p>You can take a look at the API Handler code to see how additional data is configured about API class.</p>
+
+			<h2>API Class Parameters</h2>
+
+				<h3>private $commandBuffer=array()</h3>
+				
+					<p>This variable is used to store results of API call. It acts as a buffer for API, which will be checked when another API call is made with the exact same input data.</p>
+					
+				<h3>private $apiProfiles=array()</h3>
+				
+					<p>This holds data about API profiles from /resources/api.profiles.ini, content of which will be checked by API whenever API call is made that is not public.</p>
+					
+				<h3>private $apiObservers=array()</h3>
+				
+					<p>This variable holds data about API observers from /resources/api.observers.ini file. If an API call is made, then this variable content will be checked to execute additional API calls, if defined.</p>
+					
+				<h3>public $apiLoggerData=array()</h3>
+				
+					<p>This is an array that stores data that will be logged by Logger object, if Logger is used in the system. Content length and other data is stored for logging purposes in this array.</p>
+					
+				<h3>private $splitTimes=array()</h3>
+				
+					<p>This variable stores performance related timestamps, if splitTime() method is called by the API.</p>
+					
+				<h3>public $state=false</h3>
+				
+					<p>This variable stores the initialized State object that carries a lot of configuration and environment data and functionality.</p>
+					
+				<h3>public $apc=false</h3>
+				
+					<p>This variable defines whether APC is available in the server environment. If this variable is true, then some caching methods will utilize APC instead of filesystem.</p>
+					
+				<h3>public $callIndex=0</h3>
+				
+					<p>This is a counter that stores the depth of API calls. Since API calls can execute other API calls, this variable is used to determine some caching and buffer related data when specific API call is references by API class.</p>
+					
+				<h3>public $cacheIndex</h3>
+				
+					<p>This is an index of cache files that have been referenced within the system. This is used so that certain calls do not have to be repeated, if the same cache is referred multiple times within a single request.</p>
+					
+				<h3>public $noCache=array()</h3>
+				
+					<p>This variable holds data about API execution call-index values and whether this specific API call can be cached or not. This is for internal maintenance when dealing with which API call to cache and which not.</p>
+					
+				<h3>private $internalLogging=false</h3>
+				
+					<p>This holds configuration value from State and turns on internal logging, if configuration has internal logging enabled. If this remains false, then internal log entries will not be stored.</p>
+					
+				<h3>private $internalLog=array()</h3>
+				
+					<p>This is an array that stores all the internal log entries that will be written to filesystem once API class has finished dealing with the request.</p>
+					
+			<h2>API Class Methods</h2>
+			
+				<h3>final public function __construct($state=false,$apiProfiles=false)</h3>
+				
+					<p>API object construction accepts State object in $state and array data of API profiles as $apiProfiles. If State is not defined, then API class attempts to automatically create a new State object, thus API class is highly dependent on State class being present. API object construction also loads Factory class, if it is not defined and tests if server supports APC or not. If API profiles are not submitted to API during construction, then API will attempt to load API profiles from the *.ini file. Same applies to observers.</p>
+					
+				<h3>final public function __destruct()</h3>
+					
+					<p>Once API object is not used anymore, the object attempts to write internal log to filesystem if internal log is used and has any log data to store.</p>
+					
+				<h3>final public function command($apiInputData=array(),$useBuffer=false,$apiValidation=true,$useLogger=false)</h3>
+					
+					<p>This is one of the two core methods of API class. It accepts input data from $apiInputData which is an array of keys and values. Some keys are API dependent flags with the wave prefix of 'www-'. $useBuffer setting defines if buffer can be used, which means that if the same exact input has already been sent within the same HTTP request, then it returns data from buffer rather than going through the process again. $apiValidation is a flag that sets whether API profiles are validated or not, this setting is turned off for internal API calls that have already been validated. $useLogger is a flag that tells API that Logger class is used by the system. This method validates the API call, loads MVC objects and executes their methods and sends the result to output() function.</p>
+					
+					<p>This is the step by step list of what command() method does:</p>
+					
+					<ul>
+						<li>Assigns default values to current API state (API internal configuration) that is stored as $apiState array.</li>
+						<li>Turns off output when HTTP HEAD request is made, regardless of www-output setting.</li>
+						<li>API requires 'www-command' input value, otherwise it does not know what controller and method to call.</li>
+						<li>Checks if 'www-command' has an input observer attached to it from API Observers INI file. Input observers are called before API call is executed.</li>
+						<li>Returns the result if buffer is used and the same command with the same input has already been called within the same HTTP request.</li>
+						<li>Initializes language information, if 'www-language' was sent.</li>
+						<li>Validates API call authorization if 'www-profile' is used and it exists in API Profiles INI file. It makes sure that the profile is not disabled and that IP is within allowed list. It also makes sure that the API profile is actually allowed to make that API call, as API allowed commands are listed in profiles file as well. Token and secret key are both validated.</li>
+						<li>If crypted input was sent with an API profile, then this is decrypted, if possible and merged with input data.</li>
+						<li>API can also create a new API profile session and returns access token as well as the timeout of that token.</li>
+						<li>API checks if cache is used with the request and returns data from cache, if it exists.</li>
+						<li>API calls controller based on 'www-command' variable and executes the method based on that same variable with all of the input as a single variable.</li>
+						<li>Result is also stored as cache, if caching is allowed with that API call.</li>
+						<li>Cache, if used, is also tagged.</li>
+						<li>Output API observer is checked, if one is used. Output observers are called after API call is finished.</li>
+						<li>Stores the result in buffer, if buffer is used.</li>
+						<li>Sends the API result to output() method.</li>
+					</ul>
+					
+				<h3>final private function output($apiResult,$apiState,$useLogger=true)</h3>
+					
+					<p>This is one of the two core methods of API class. Method is private and is only called within the class. This method is used to parse the data returned from API and returned to the user agent or system based on requested format. $apiResult is an array that has been returned from command() method, $apiState and $useLogger are also defined when the method is called. It returns the data as a PHP array, XML string, INI string or any other format and with or without HTTP response headers.</p>
+					
+					<p>This is the step by step list of what output() method does:</p>
+					
+					<ul>
+						<li>Sends returned data to internal logging, if such logging is used.</li>
+						<li>Sends data to on-demand callbacks, if such callbacks are enabled.</li>
+						<li>Throws an error, if return data type is PHP and the response is an error.</li>
+						<li>Adds authorization and validation-related data to result array, if such validation data was requested.</li>
+						<li>Data array is converted to JSON, binary, XML, CSV, RSS, serialized, HTTP query string or INI format.</li>
+						<li>Minifies string-based output, if requested.</li>
+						<li>Encrypts the entire output, if encryption was requested.</li>
+						<li>Pushes the output as a result to user agent, if output is requested. This adds headers for cache as well as file format.</li>
+						<li>Output is also compressed, if requested.</li>
+						<li>Final data is either returned as a variable or pushed to output buffer, if output was requested.</li>
+					</ul>
+					
+				<h3>final private function apiCallbacks($data,$useLogger,$returnType)</h3>
+					
+					<p>It is possible to execute certain callbacks with the API based on what data is returned from API. It is possible to set headers with this method that will be sent to returned output buffer. It is also possible to set and unset cookies and sessions. It is also possible to redirect the user agent with a callback. $data is the return data from the API and $logger and $returnType are defined from output() method that makes the call to apiCallbacks(). This method is private and cannot be used outside the class.</p>
+					
+					<p>This is the step by step list of what apiCallbacks() method does:</p>
+					
+					<ul>
+						<li>If 'www-set-header' is set, then data of this value (as a string or an array) is set as a header to the output buffer.</li>
+						<li>Two variables, 'www-set-cookie' and 'www-unset-cookie', allow you to set and unset cookies and values to these cookies.</li>
+						<li>Two variables, 'www-set-session' and 'www-unset-session', allow you to set and unset sessions and session variables.</li>
+						<li>It is also possible to redirect the user agent by defining 'www-temporary-redirect' or 'www-permanent-redirect'. User agent will be redirected to the value of that variable.</li>
+					</ul>
+					
+				<h3>final private function toXML($apiResult,$type=false)</h3>
+					
+					<p>This is a method that converts an array to an XML string. It can convert to both common XML as well as to RSS format. $apiResult is the data sent to the request. If $type is set to 'rss' then RSS formatting is used, otherwise a regular XML is returned. This is an internal method used by output() call.</p>
+					
+				<h3>final private function toXMLnode($data)</h3>
+					
+					<p>This is a helper method for toXML() method and is used to build an XML node. This method is private and is not used elsewhere.</p>
+					
+				<h3>final private function toCSV($apiResult)</h3>
+					
+					<p>This method converts an array to CSV format, based on the structure of the array. It uses tabs as a column separator and separates values by commas, if sub-arrays are used. $apiResult is the data sent by output() method.</p>
+					
+				<h3>final private function toBinary($apiResult)</h3>
+					
+					<p>This looks at the input data from $apiResult and tries to determine if the result was a success or not. It considers response code namespace 5XX as a successful call and considers everything else a failure.</p>
+					
+				<h3>final private function toINI($apiResult)</h3>
+					
+					<p>This attempts to convert the data array of $apiResult to INI format. It handles also subarrays and other possible conditions in the array.</p>
+					
+				<h3>final public function encryptRijndael256($data,$key,$secretKey=false)</h3>
+					
+					<p>This method uses API class internal encryption function to encrypt $data string with a key and a secret key (if set). If only $key is set, then ECB mode is used for Rijndael encryption.</p>
+					
+				<h3>final public function decryptRijndael256($data,$key,$secretKey=false)</h3>
+					
+					<p>This will decrypt Rijndael encoded data string, set with $data. $key and $secretKey should be the same that they were when the data was encrypted.</p>
+					
+				<h3>final public function unsetTaggedCache($tags)</h3>
+					
+					<p>This method unsets all cache that has been stored with a specific tag keyword. $tags variable can both be a string or an array of keywords. Every cache related to those keywords will be removed.</p>
+					
+				<h3>final public function clearBuffer()</h3>
+					
+					<p>This method is used to clear current API command buffer. This is an optimization method and should be used only of a lot of API calls are made that might fill the memory allocated to PHP. What this method does is that it tells API object to empty the internal variable that stores the results of all API calls that have already been sent to API.</p>
+					
+				<h3>final public function getExistingCache($key)</h3>
+					
+					<p>This method returns currently existing cache for currently executed API call, if it exists. This allows you to always load cache from system in case a new response cannot be generated. It returns cache with the key $key.</p>
+					
+				<h3>final public function getExistingCacheTime($key)</h3>
+					
+					<p>If cache exists for currently executed API call, then this method returns the UNIX timestamp of the time when that cache was written. It returns cache timestamp with the key $key.</p>
+					
+				<h3>final public function setCache($keyAddress,$value,$custom=false,$tags=false)</h3>
+					
+					<p>This method can be used to store cache for whatever needs by storing $key and giving it a value of $value. Cache tagging can also be used with custom tag by sending a keyword with $tags or an array of keywords.</p>
+					
+				<h3>final public function getCache($keyAddress,$custom=false)</h3>
+					
+					<p>This method fetches data from cache based on cache keyword $key, if cache exists. This should be the same keyword that was used in setCache() method, when storing cache.</p>
+					
+				<h3>final public function cacheTime($keyAddress,$custom=false)</h3>
+					
+					<p>This function returns the timestamp of when the cache of keyword $key, was created, if such a cache exists.</p>
+					
+				<h3>final public function unsetCache($keyAddress,$custom=false)</h3>
+					
+					<p>This method removes cache that was stored with the keyword $key, if such a cache exists.</p>
+					
+				<h3>final public function internalLogEntry($key,$data=false)</h3>
+					
+					<p>This method attempts to write an entry to internal log. Log entry is stored with a $key and entry itself should be the $data. $key is needed to easily find the log entry later on.</p>
+					
+				<h3>final public function splitTime($key='api')</h3>
+					
+					<p>This method is a timer that can be used to grade performance within the system. When this method is called with some $key first, it will start the timer and write an entry to log about it. If the same $key is called again, then a log entry is created with the amount of microseconds that have passed since the last time this method was called with this $key.</p>
+					
+				<h3>private function ksortArray($data)</h3>
+					
+					<p>This helper method is used to sort an array (and sub-arrays) based on keys. It essentially applies ksort() method recursively to an array.</p>
+					
+	</body>
+</html>

@@ -12,13 +12,12 @@ This ReadMe file, that you are reading right now, is specifically about the Wave
 ABOUT
 -----
 
-Wave is a PHP micro-framework that is built loosely on model-view-control architecture and factory method design pattern. It is made for web services, websites and info-systems and is built around a native API architecture, caching and smart image and resource management. Wave is a compact framework that does not include optional libraries, has a very small footprint and is developed keeping lightweight speed and optimizations in mind.
-
-Wave comes by default with a view controller and a gateway intended for website functionality with clean URLs that also incorporates a front-end JavaScript controller.
-
-Documentation about how to set up a system and use the API, as well as tutorials are available at https://sourceforge.net/p/www-php/wiki/Home/
+Wave is a PHP micro-framework that is built loosely following model-view-control architecture and factory method design pattern. It is made for web services, websites and info-systems and is built to support a native API architecture, caching, user control and smart resource management. Wave is a compact framework that does not include bloated libraries and features and is developed keeping lightweight speed and optimizations in mind. While not necessary for using Wave Framework, it comes by default with a URL and View controllers intended for building websites by solving URL requests and loading views.
 
 Mercurial and Git repositories is available for developers who are interested in following the development.
+
+Official website and documentation:
+http://www.waveframework.com
 
 Social networks for latest news: 
 Google+ - http://plus.google.com/106969835456865671988 
@@ -60,29 +59,29 @@ INSTALLATION
  1. Unpack the Wave Framework downloaded archive.
  2. Configuration file in root directory /config.ini of the archive should be configured according to your needs. Read more about configuration from Wiki.
  3. Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writeable by PHP, for example with command chmod 0777 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 777) or with any other FTP software. This is not required on Windows server.
- 4. There is a tool script for checking if your system is compatible for Wave Framework or not. After you have uploaded scripts to server, run the script /tools/compatibility.php. If this script shows any warning messages, then Wave Framework might not work properly.
- 5. Wave Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 6a and 6b, depending on your server.
- 6a. This only applies to Apache server: In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again.
- 6b. This only applies to Nginx server: For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.
- 7. Test if server is set up properly by making a request to /tools/compatibility.php script.
- 8. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
+ 4. Wave Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 6a and 6b, depending on your server.
+ 5a. This only applies to Apache server: In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again.
+ 5b. This only applies to Nginx server: For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.
+ 6. Test if server is set up properly by making a request to /tools/compatibility.php script.
+ 7. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
+ 8. Important! Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged.
  
 HELP AND DOCUMENTATION
 ----------------------
 
-Official documentation and tutorials are available at https://sourceforge.net/p/www-php/wiki/Home/
+Official documentation about how to set up a system and use the API, as well as tutorials are available under /doc/ directory. To read documentation, open /doc/start.htm file with a web browser.
 
-Support and tickets should be posted at https://sourceforge.net/p/www-php/tickets/
+If you wish to participate in Wave Framework development and submit patches, fixes and new features, then it is recommended to do so through GitHub.
 
-I am also willing to answer questions regarding Wave Framework when contacted through e-mail.
+I am also willing to answer questions regarding Wave Framework when contacted through info@waveframework.com e-mail address.
 
 REPOSITORIES
 ------------
 
+GitHub - https://github.com/kristovaher/Wave-Framework
 SourceForge - https://sourceforge.net/projects/www-php/
 Google Code - http://code.google.com/p/www-framework/
 BitBucket - https://bitbucket.org/kristovaher/wave-framework
-GitHub - https://github.com/kristovaher/Wave-Framework
 
 AUTHOR
 ------

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>State Messenger - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Using State Messenger</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>State Messenger is a channel which can be used to send one-time messages through between different HTTP requests. This works like a specialized custom caching, where a variable or set of variables is stored in cache and when accessed, the cache is deleted. Basic idea about State Messenger is to send one-time temporary messages between two different HTTP requests.</p>
+				
+				<p>State Messenger is useful for form validations, for example:</p>
+				
+				<ul>
+					<li>There is a form that accepts data from the user. This form is stored in one of Wave Framework view files.</li>
+					<li>This form makes an API request to Wave Framework. That is, when this form submits data, it submits data to Wave Framework itself and not another view. With this submit, the form also gives a unique keyword with the request that will be used as State Messenger temporary message keyword or address.</li>
+					<li>Wave Framework API gets the form submission and checks the variables that were submit. If there is a problem within those variables, then it can write a temporary message to State Messenger and redirect the user back to the previous form.</li>
+					<li>When view generates a form again, it can check if there is a State Messenger available with the key that was used to submit the form. If it is, then it can take the data from State Messenger and show an error message or whatever other information was returned.</li>
+					<li>This data, once accessed, is automatically destroyed by Wave Framework after being accessed, though it is also possible to keep it from being destroyed.</li>
+				</ul>
+				
+				<p>This workflow shows that State Messenger is technically most useful as a communication channel between views. Since the most correct way to build form submissions is not to submit the data to another view, but an API call instead, then there needs to be a way to send messages between views if additional information or errors need to be shown in those views that did not have to be shown before.</p>
+				
+				<p>State Messenger is more useful in cases where form submissions are done without AJAX, thus in situations where the website works entirely without JavaScript. When you do form submissions in JavaScript and AJAX, then state messenger has less value, since the view is not regenerated entirely to show an error or other information.</p>
+				
+			<h2>Using State Messenger</h2>
+			
+				<p>Before it is possible to use a State Messenger, you have to define the address for State Messenger. This means that you first declare the address that the State Messenger messages will be stored under. This same address will be used later on to retreive data from State Messenger.</p>
+				
+				<p>This is how you can declare a new state messenger:</p>
+				
+<pre>
+	<code>
+	$this->stateMessenger('my-shared-data');
+	</code>
+</pre>
+
+				<p>Please note that if State Messenger already exists, then it is loaded instead. This means that it is possible to pile up content for a State Messenger if needed.</p>
+				
+				<p>In order to add data to State Messenger, you can send a key and a value for that key to the State Messenger. You can also send a single array of keys and values. Here are the examples:</p>
+				
+<pre>
+	<code>
+	// Sending a key 'name' with a value to State Messenger
+	$this->stateMessengerData('name','Thomas Moore');
+	// array can also be sent that has multiple keys and values
+	$this->stateMessengerData(array('name'=>'Thomas Moore','nickname'=>'Tommy'));
+	</code>
+</pre>
+
+
+				<p>You can return data from either currently used State Messenger or from a State Messenger that has been created in previous requests. If data is used that is stored in file system, then State will automatically delete the state data after it has been returned. This is because State Messenger is mainly intended for one-time temporary message sharing, but it is also possible to keep the Messenger data after the request.</p>
+
+				<p>The following examples return data from state messenger:</p>
+	
+<pre>
+	<code>
+	// This returns data with address 'my-shared-data' and removes it from filesystem (default behavior)
+	$messengerData=$this->getStateMessengerData('my-shared-data');
+	// This returns data with address 'my-shared-data' and keeps it after use
+	$messengerData=$this->getStateMessengerData('my-shared-data',false);
+	// This returns state messenger data from current message container (current request session)
+	$messengerData=$this->getStateMessengerData();
+	</code>
+</pre>
+
+				<p>Please note that State Messenger works similarly to caching, any Controller of any HTTP request can request data from State Messenger. This messenger is not bound to IP address or a specific user session.</p>
+			
+	</body>
+</html>

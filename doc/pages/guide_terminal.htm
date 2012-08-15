@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Terminal - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Making Terminal Calls</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>PHP has multiple methods for making terminal requests, depending on the server. To simplify this process, Wave Framework has a wrapper function that tries to find the most suitable function to use when making terminal calls. This terminal method is a wrapper to system(), passthru(), exec() and shell_exec() functions.</p>
+				
+			<h2>Making Terminal Calls</h2>
+			
+				<p>To make a terminal call in an object that is extended from WWW_Factory class, you have to call terminal() method with a variable that is the command to be sent to terminal, like this:</p>
+				
+<pre>
+	<code>
+	// Making terminal call
+	$result=$this->terminal('ls');
+	// Printing out the result
+	echo $result;
+	</code>
+</pre>
+
+				<p>Please note that on a lot of servers - especially on shared hosting servers - the terminal calls are disabled entirely.</p>
+			
+	</body>
+</html>

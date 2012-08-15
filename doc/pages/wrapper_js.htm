@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JavaScript API Wrapper Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>JavaScript API Wrapper Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-wrapper.js</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Main purpose of an API Wrapper is to make it easier to make API requests over HTTP to a system built on Wave Framework. API Wrapper class does everything for the developer without requiring the developer to learn the ins and outs of technical details about how to build an API request. Wave Framework comes with two separate API authentication methods, one more secure than the other, both which are handled by this Wrapper class. JavaScript API Wrapper does not support sending data in encrypted form or decrypting encrypted data from a response.</p>
+				
+				<p>API Wrapper does a lot of thing for the developer and takes the web browser options into account, but there are still a couple of things that should be considered when using the Wrapper. It requires JSON support on the web browser for various functionality, such as for hash validations.</p>
+				
+				<p>API Wrapper makes requests by default using XMLHttpRequest(), but not asynchronously. Asynchronous requests are also possible. Requests gather data from one of two places: Either directly as input or using an existing form on the page, latter of which allows for file uploads. JavaScript API Wrapper submits files using hidden iFrames.</p>
+				
+				<p>This API Wrapper has been tested and must work with all modern web browsers. Wrapper should work without problems on latest versions of Google Chrome, Mozilla Firefox, Apple Safari, Opera and Internet Explorer.</p>
+				
+				<p>API Wrapper can use all three methods of connecting to and authenticating with a server.:</p>
+				
+				<ul>
+					<li>The most basic sessions and cookie based system - that works similarly to how a web browser works. This means that authentication is done entirely through API and without using Wave Framework API profiles. In this case, the API will use the same authentication method that a user would use when logging into the system.</li>
+					<li>Second method is that it supports a very common authentication that is similar to RESTful API's, where you first create a session token with an API profile name and a secret API key, get a token and then make requests with that token. Thse API profiles can be restricted to making only certain API requests.</li>
+					<li>Thirdly it supports an API validation that works similarly to many payment systems and banks, where the entire input data is hashed with a secret key to create a token and then that token is used to hash the input and make requests. In this system the secret key is never sent over HTTP when API connection is initialized and only the session token is returned from the server one time over HTTP - subsequent connections use that token to hash the input.</li>
+				</ul>
+				
+				<p>JavaScript API Wrapper is slightly more limited than PHP API Wrapper. Main difference is that it is not possible to encrypt and decrypt data with JavaScript API Wrapper.</p>
+				
+				<p>API Wrapper offers as much functionality as you would get over making API requests manually yourself, so it is recommended - in most cases - to make the API requests through the Wrapper. Though the API is simple enough that you can also make the requests without the Wrapper, but this is covered in API Documentation section.</p>
+				
+			<h2>Using JavaScript API Wrapper Class</h2>
+			
+				<p>It is recommended to go through all of the API Documentation sections before using the API Wrapper. This document here covers details only specific to API Wrapper and not the details about other API keywords themselves.</p>
+			
+				<p>JavaScript API Wrapper is stored as a file in /engine/class.www-wrapper.js, but it is not dependent on anything else in the filesystem and can be used independently. API Wrapper works in all modern browsers.</p>
+				
+				<p>To use the API wrapper, you need to include the script. This is usually done by placing it in the head of the document (note that the 'src' value should point to the actual location where you have placed the script). Like this:</p>
+			
+<pre>
+	<code>
+	&lt;html&gt;
+		&lt;head&gt;
+			...other headers...
+			&lt;script type=&quot;text/javascript&quot; src=&quot;class.www-wrapper.js&quot;&gt;&lt;/script&gt;
+		&lt;/head&gt;
+		&lt;body&gt;
+			...my page...
+		&lt;/body&gt;
+	&lt;/html&gt;
+	</code>
+</pre>
+
+				<p>When Wrapper object is created it requires just a single parameter: the HTTP address of the API. To create a Wrapper object you can do the following:</p>
+				
+<pre>
+	<code>
+	var WWW=new WWW_Wrapper('http://www.waher.net/wdev/json.api');
+	</code>
+</pre>
+
+				<p>Note that you can face cross-domain AJAX issues if you define an API URL on a different server than where the web system is running. You can use PHP API Wrapper to easily make API requests to a different server, if you cannot get cross-domain requests working.</p>
+				
+				<p>JavaScript API wrapper is functionally similar to PHP wrapper, but it does not support data encryption and decryption (this should be handled by PHP due to security). It also handles file uploads a little differently compared to PHP.</p>
+				
+				<p>API Wrapper takes the same type of data as API itself does, every API related parameter or setting is defined by array key with 'wave' prefixes of 'www-'. A method setInput() is used to send data to API Wrapper. It is possible to send an array, or a key/value pair to this method.</p>
+				
+				<p>All native API parameters that you can use are detailed at API Documentation Input and Output section. To get the overview of API-specific keywords about API validation, then you should consult with that document.</p>
+				
+				<p>There are also some API Wrapper specific parameters that you can send. These variables are never actually sent to API (they won't arrive in Wave Framework API controllers) and they are only used by Wrapper:</p>
+				
+				<ul>
+					<li><b>www-api</b> - API Address, you can send this if you need to change the address of the API that was originally defined. If you wish to return unserialized data from API, then you need to define the API filename in the address as 'json.api'.</li>
+					<li><b>www-hash-validation</b> - This setting means that API hash validation is used to validate API calls. This depends on the Wave Framework API Profile configuration. Hash validation is turned on by default in API Wrapper, since it is the most secure method for making API requests. To use another validation method that is less secure, this validation has to be turned off on the server that runs the API.</li>
+					<li><b>www-asynchronous</b> - This sets whether the request will be made asyncrhonously or not. By default the requests are not made asynchronously to enable better handling of events.</li>
+					<li><b>www-success-callback</b> - This is a method name that will get the result from API if the API call is considered a success by the API Wrapper.</li>
+					<li><b>www-failure-callback</b> - This is a method name that will get the result from API if the API call is considered a failure by the API Wrapper.</li>
+					<li><b>www-error-callback</b> - This is a method name that will get the result from API if the API call encountered an error when API Wrapper made the request.</li>
+					<li><b>www-get-limit</b> - This sets the request URL maximum length, it is set to 2048 by default.</li>
+					<li><b>www-reset-log</b> - This means that the API will reset the log after each API call is made.</li>
+					<li><b>www-timestamp-duration</b> - This tells API Wrapper the maximum difference in seconds it accepts the timestamp from the response.</li>
+				</ul>
+				
+				<p>Please refer to Input and Output API Documentation to see the core Wave Framework API flags.</p>
+				
+				<p>For example, a simple command would be done this way:</p>
+			
+<pre>
+	<code>
+	WWW.setInput({
+		'www-command':'example-get'
+	});
+	// This is returned only for non-asynchronous requests, otherwise you have to use callbacks
+	var result=WWW.sendRequest();
+	</code>
+</pre>
+
+				<p>It is also possible to make a request with the sendRequest shorthand, like this:</p>
+				
+<pre>
+	<code>
+	var result=WWW.sendRequest({
+		'www-command':'example-get'
+	});
+	</code>
+</pre>
+
+				<p>To make a request that will execute a callback method, you can do the following:</p>
+				
+<pre>
+	<code>
+	function myTest(data){
+		alert(data['name']);
+	}
+	WWW.setInput({
+		'www-command':'example-get',
+		'www-success-callback':'myTest'
+	});
+	WWW.sendRequest();
+	</code>
+</pre>
+
+				<p>It is also possible to read the log of API Wrapper and see exactly what it did to make that request happen. You can print out the log like this:</p>
+				
+<pre>
+	<code>
+	alert(WWW.returnLog("\n"));
+	</code>
+</pre>
+
+				<p>API of WWW Framework has a lot of private profile validation options which you can read more about in other parts of API documentation, but for example, to create an API token and you already have the profile name and profile secret key, then you can do the following:</p>
+				
+<pre>
+	<code>
+	WWW.setInput({
+		'www-profile':'custom-profile',
+		'www-secret-key':'my-secret-key',
+		'www-success-callback':'assignToken',
+		'www-command':'www-create-session'
+	});
+	var result=WWW.sendRequest();
+	if(result){
+		var token=result['www-token'];
+	}
+	</code>
+</pre>
+				
+				<p>And you can make requests when you have the token, like this:</p>
+				
+<pre>
+	<code>
+	WWW.setInput({
+		'www-profile':'custom-profile',
+		'www-secret-key':'my-secret-key',
+		'www-token':token,
+		'www-command':'example-get'
+	});
+	var result=WWW.sendRequest();
+	</code>
+</pre>
+				
+				<p>It is important to note that you don't necessarily have to define the secret key and token after you have already defined them, unless you have used $this-&gt;clearInput(true) method call. API Wrapper keeps in mind the last known secret key, API profile name and token. This would have worked too:</p>	
+				
+<pre>
+	<code>		
+	WWW.setInput({
+		'www-command':'example-get'
+	});
+	var result=WWW.sendRequest();
+	</code>
+</pre>
+				
+				<p>If returned result is 'false', then the request has failed. You should then look at the log, which details the reason for failure. Last error message is stored as $www-&gt;errorMessage and $www-responseCode. What each error code means, take a look at Response Codes documentation.</p>
+			
+			<h2>JavaScript API Wrapper Class Parameters</h2>
+			
+				<h3>var apiAddress=document.baseURI+'json.api'</h3>
+				
+					<p>This is the address and URL of the API that the Wrapper will connect to. The API address must be for Wave Framework API. This value is set either in object creation or when setting 'www-address' input variable.</p>
+					
+				<h3>var apiLanguage=document.documentElement.lang</h3>
+				
+					<p>This holds the current language of the API, it can be useful if the API commands return language-specific responses and translations from the API. This variable is set by sending 'www-language' input variable.</p>
+					
+				<h3>var apiState</h3>
+				
+					<p>This holds information about current API state, such as profile name, secret key and various API-related flags for callbacks, asyncrhonous status and more. This variable is passed around per each API call.</p>
+					
+				<h3>var errorMessage=false</h3>
+				
+					<p>This variable holds the last known error message returned from the API.</p>
+					
+				<h3>var responseCode=false</h3>
+				
+					<p>This variable holds the last known response code returned from the API.</p>
+					
+				<h3>var inputData=new Object()</h3>
+				
+					<p>Input data is a variable that stores all the plain-text input sent with the API request, it's a key-value pair of variables and their values for the API.</p>
+					
+				<h3>var log=new Array()</h3>
+				
+					<p>This is an array that gathers log information about the requests made through the API that can be used for debugging purposes should something go wrong.</p>
+					
+				<h3>var userAgent='WWWFramework/3.0.0 (JavaScript)'</h3>
+				
+					<p>This is the user-agent string of the API Wrapper. At the moment it is not possible to set custom headers with AJAX requests, so this variable is unused in the class and only defined for future purpose.</p>
+					
+				<h3>var getLimit=2048</h3>
+				
+					<p>This is the GET string maximum length. Most servers should easily be able to deal with 2048 bytes of request string length, but this value can be changed by submitting a different length with 'www-get-length' input value.</p>
+					
+				<h3>var resetLog=true</h3>
+				
+					<p>If this value is set, then API log will be reset after each API request. This value can be sent with 'www-reset-log' keyword sent to Wrapper.</p>
+				
+			<h2>JavaScript API Wrapper Class Methods</h2>
+					
+				<h3>function WWW_Wrapper(address,language)</h3>
+				
+					<p>Wrapper object creation requires an 'address', which is the address that Wrapper will make API requests to. If this is not defined, then 'address' assumes that the system it makes requests to is the same where the API is loaded from. 'language' is a language keyword from the system that API makes a connection with and is used whenever language-specific results are returned from API.</p>
+					
+				<h3>this.returnLog=function(implode)</h3>
+				
+					<p>This method returns current log of the API wrapper. If 'implode' is set, then the value of 'implode' is used as a character to implode the log with. Otherwise the log is returned as an array.</p>
+					
+				<h3>this.clearLog=function()</h3>
+				
+					<p>This method clears the API log. This method can be called manually or is called automatically if log is assigned to be reset with each new API request made by the object.</p>
+					
+				<h3>this.setInput=function(input,value)</h3>
+				
+					<p>This method is used to set an input value in the API Wrapper. 'input' is the key to set and 'value' is the value of the input key. 'input' can also be an array, in which case multiple input values will be set in the same call. This method calls private inputSetter() function that checks the input value for any internal flags that might not actually be sent as an input to the API.</p>
+					
+				<h3>var inputSetter=function(input,value)</h3>
+				
+					<p>This is a helper function that setInput() method uses to actually assign 'value' to the 'input' keyword. A lot of the keywords set carry additional functionality that may entirely be API Wrapper specific. This method also creates a log entry for any value that is changed or set.</p>
+					
+					<p>A lot of the values set by inputSetter() method are defined above in 'Using JavaScript API Wrapper Class' section.</p>
+					
+				<h3>this.setForm=function(formId)</h3>
+				
+					<p>This method sets the form ID that is used to fetch input data from. This form can be used for uploading files with JavaScript API Wrapper or making it easy to send large form-based requests to API over AJAX.</p>
+					
+				<h3>this.clearForm=function()</h3>
+				
+					<p>This method unsets the attached form from the API request.</p>
+					
+				<h3>this.clearInput=function(clearAuth)</h3>
+				
+					<p>This method resets the state of API. It is called after each API request with 'clearAuth' set to false. To entirely reset the state of API 'clearAuth' should be set to true and this will reset everything except the log file.</p>
+					
+				<h3>this.sendRequest=function(variables,formId)</h3>
+				
+					<p>This method executes the API request by building the request based on set input data and set forms and sending it to API using XmlHttpRequest() or through hidden iFrame forms. It also builds all validations as well as validates the returned response from the server and calls callback functions, if they are set. It is possible to send input variables directly with a single call by supplying the 'variable' array. Form ID can also be sent with the request directly.</p>
+					
+					<p>This method builds the request variables based on requirements of Wave Framework and includes validation and authentication for API profiles.</p>
+					
+					<p>If form ID is set, then the request is made to a hidden iFrame, otherwise the request is made with XmlHttpRequest() and either asynchronously or not. Request is made with POST if the GET length request URL is longer than 2048 characters (or another length, if different GET length is set in API Wrapper).</p>
+					
+					<p>After the request is made, this method sends the data to parseResult() method.</p>
+					
+				<h3>var parseResult=function(resultData,thisInputData,thisApiState)</h3>
+					
+					<p>JavaScript API Wrapper handles asynchronous requests and all of request callbacks, which allows to make multiple API requests at the same time or in sequence. This method validates the response data, if validation is requested and executes set callbacks with the results. 'resultData' is the response from the API call, 'thisInputData' is the original input sent to the request and 'thisApiState' is the API Wrapper state at the time of the request.</p>
+					
+					<p>It also attempts to unserialize the response from API and return it as a JavaScript object, in case it is in JSON format. Other formats are not supported by JavaScript API Wrapper.</p>
+					
+					<p>Method will also send the response to success, failure and error callback functions with the entire response, if these callbacks are defined.</p>
+					
+					<p>In case new API profile session was created, then it also assigns the API token for other API requests.</p>
+					
+				<h3>var errorHandler=function(thisInputData,thisResponseCode,thisErrorMessage,thisErrorCallback)</h3>
+				
+					<p>Error handler method is used for cases where the API response is neither success or failure, but an actual error that should not happen. It adds a log entry about the error as well as calls error callback method. 'thisInputData' is the data that was input, 'thisResponseCode' is the response code from the API, 'thisErrorMessage' is the error message of the api and 'thisErrorCallback' is the callback method that is used.</p>
+					
+				<h3>var clone=function(object)</h3>
+				
+					<p>This helper method is used to clone one JavaScript object to another 'object' is the JavaScript object to be converted.</p>
+					
+				<h3>var validationHash=function(validationData,postFix)</h3>
+				
+					<p>This method is used to build an input data validation hash string for authenticating API requests. The entire input array of 'validationData' is serialized and hashed with SHA-1 and a salt string set in 'postFix'. This is used for all API requests where input has to be validated.</p>
+					
+				<h3>var ksortArray=function(data)</h3>
+				
+					<p>This is a helper function used by validationHash() function to serialize an array recursively. It applies ksort() to main method as well as to all sub-arrays. 'data' is the array or object to be sorted.</p>
+					
+				<h3>var buildRequestData=function(data)</h3>
+				
+					<p>This is a method that is similar to PHP http_build_query() function. It builds a GET request string of input variables set in 'data'.</p>
+					
+				<h3>var subRequestData=function(key,value)</h3>
+				
+					<p>This is a helper function for buildRequestData() method, it converts between different ways data is represented in a GET request string.</p>
+					
+				<h3>var encodeValue=function(data)</h3>
+				
+					<p>This helper method converts certain characters into their suitable form that would be accepted and same as in PHP. This is a modified version of encodeURIComponent() function. 'data' is the string to be converted.</p>
+					
+				<h3>var ksort=function(object)</h3>
+				
+					<p>This is a JavaScript method that works similarly to PHP's ksort() function and applies to JavaScript objects. 'object' is the object to be sorted.</p>
+					
+				<h3>var base64_encode=function(data)</h3>
+				
+					<p>This method is JavaScript equivelant of PHP's base64 string encoding function. It is used for hash validations. 'data' is the string to be converted.</p>
+					
+				<h3>var sha1=function(msg)</h3>
+				
+					<p>This is a JavaScript equivalent of PHP's sha1() function. It calculates a hash string from 'msg' string.</p>
+			
+	</body>
+</html>

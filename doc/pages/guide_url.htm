@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>URL Controller and Sitemap - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>URL Controller and Sitemap</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/resources/[language].sitemap.ini</h3>
+				<h3>/controllers/controller.url.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework comes with a URL Controller and a sitemap system that is used to build a website on Wave Framework. This URL controller is entirely optional and can be removed from a system if you plan to implement your own URL Controller or simply use Wave Framework for API, without a website.</p>
+				
+				<p>Sitemap is an INI file that defines all the URL's for all the languages - with one sitemap file per language - and these files are used by the URL Controller to find a match in URL and apply a number of settings to the page.</p>
+				
+				<p>You can edit Sitemap file and URL Controller file according to your needs. While default URL Controller can easily work for majority of websites, you would have to do some tweaks to URL Controller if you wish to implement a user and permissions management using the set of methods and functions that already exist in Wave Framework.</p>
+				
+			<h2>Sitemap</h2>
+			
+				<p>Sitemap file is an easy-to-edit file that defines every base URL per every language on your website that is built on Wave Framework. There is one Sitemap file per language and the name of the Sitemap file must match the language keywords listed in your configuration file. If 'en' is one of your languages, then you need an en.sitemap.ini file in your /resources/ folder.</p>
+				
+				<p>Wave Framework has an example 'en' language sitemap by default in the /resources/ folder and you can edit it according to your needs.</p>
+				
+				<p>Sitemap file consists or groups where every group is a single URL. For example, this is one of the entries in sitemap file:</p>
+				
+<pre>
+	<code>
+	[home]
+	view="home"
+	meta-title="Home!"
+	cache-timeout=30
+	</code>
+</pre>
+
+				<p>This entry says that there exists a URL node of 'home'. This URL is stored in the brackets, as [home]. If you wish to add a URL that has multiple levels, then you can add it as [example/page]. This means that if you visit page http://www.example.com/example/page/ with your browser, then it will load the view information that is under [example/page] group. If it cannot find such a group, then the view will be 404.</p>
+				
+				<p>Wave Framework also supports language nodes as part of URL's. These language nodes should not be written to Sitemap file. So if you have a Finnish website URL as http://www.example.com/fi/home/ then the fi.sitemap.ini file only has to have a group for [home].</p>
+				
+				<p>Each group has a number of variables assigned under it. You don't have to define all of these variables and the only required variable is 'view', which tells what view will View Controller later on load for showing the web page.</p>
+
+				<p>All possible variables are:</p>
+				
+				<ul>
+					<li><b>view</b> - This is the View that will be loaded. This View has to exist as /views/view.[view].php file. This is the only required parameter in Sitemap.</li>
+					<li><b>meta-title</b> - This is used by View Controller to set the meta title for the page.</li>
+					<li><b>meta-description</b> - This is used by View Controller to set the meta description for the page.</li>
+					<li><b>meta-keywords</b> - This is used by View Controller to set meta keywords for the page.</li>
+					<li><b>unsolved-url</b> - If this is set to 1, then this means that this URL allows sub-URL addresses without returning a 404 page. For example, if you have page [example] that has unsolved-url value set to 1, then visiting the page http://www.example.com/example/1/ will not throw a 404 page while it would if unsolved-url would be set to 0 or if not defined. This allows you to build things like product catalogue where you can load a product with that '1' from the URL, while using the same products View and base URL for it.</li>
+					<li><b>subview</b> - Multiple URL's can actually use the same View. For example, you could make it so that you have one View for your basic web content page. You could have your 'About' page and 'Contact' page use the same view. But in order to differentiate within the view what page you are actually requesting, you would set 'subview' value as different for these two URL's. Then you can check for this value within the View and load the appropriate content.</li>
+					<li><b>robots</b> - This will be the robots directive for this page. If this is set then it overrides the default robots directive it would get from the configuration.</li>
+					<li><b>temporary-redirect</b> - If this is set to a URL, then going to that pages URL will redirect the user to the value of this setting. This uses temporary redirect with 302 response code.</li>
+					<li><b>permanent-redirect</b> - If this is set to a URL, then going to that pages URL will redirect the user to the value of this setting. This uses permanent redirect with 301 response code. This is significant for search-engine-optimizations when changing URL's but maintaining page ranking.</li>
+					<li><b>cache-timeout</b> - This is duration in UNIX timestamp (in seconds) about how long it is allowed to cache this page. For content-only pages you can increase this number to minutes, if not hours, which saves valuable processing power on the server when you get a lot of visitors at the same time. This setting overwrites the default that is set in configuration.</li>
+					<li><b>cache-tag</b> - If cache is written for this page, then this is the cache tag that is attached to this page's cache, if it is set to 1. It is then possible to remove cache should a change be detected from within MVC objects.</li>
+					<li><b>cache-tag-unsolved</b> - If this is set to 1, then unsolved URL will get its own cache tags. So if cache-tag is set to 'products' and user visits the page http://www.example.com/products/1/ then cache tag of 'products-1' is created, instead of just 'products'.</li>
+					<li><b>permissions</b> - If this value is not false, then URL controller checks for session permissions with that name. Value can be comma-separated. Note that the checking method is turned off by default in URL controller.</li>
+					<li><b>controller</b> - This is the View Controller that is loaded. If not set, then 'view' is assumed and it will load /controllers/controller.view.php file.</li>
+					<li><b>controller-method</b> - This is the View Controller method that is loaded by default. This allows you to define multiple methods in the single View Controller. Default value is 'load'.</li>
+					<li><b>view-method</b> - This is the render method that is loaded from View files in /view/ for that URL. Default is 'render'.</li>
+					<li><b>header</b> - If this is set to a string then this header will be set when user visits the page.</li>
+					<li><b>hidden</b> - If this is set to 1, then the page is considered hidden from public (and from menus, if you check for it when generating a menu). Hidden page URL's are also not shown in automatically generated sitemap.xml files.</li>
+					<li><b>priority</b> - Value from 0.0 to 1.0 and this is shown in generated sitemap.xml file.</li>
+					<li><b>change-frequency</b> - Value of 'always','hourly','daily','weekly','monthly','yearly','never' and this is shown in automatically generated sitemap.xml files.</li>
+					<li><b>last-modified</b> - Time in YYYY-MM-DD format for the last time content of this page was modified. This is shown in automatically generated sitemap.xml files.</li>
+				</ul>
+				
+				<p>General rule is to create one Sitemap file for each language that is defined in configuration and then add your basic URL's to your Sitemap file. Please note that you should also add your View files to /views/ folder, that are referenced in Sitemap, otherwise Wave Framework is unable to load the appropriate views.</p>				
+			
+			<h2>URL Controller</h2>
+			
+				<p>Wave Framework comes with a single URL Controller by default and this URL Controller is used to make all decisions about converting requested URL to match languages, sitemaps, views and more. </p>
+				
+				<p>This URL Controller does a number of things:</p>
+				
+				<ul>
+					<li>It checks for validity of URL based on system configuration file in /config.ini, for example it can enforce an end slash in the URL if such a configuration setting is used. From search-engine-optimizing perspective it is recommended for URL to always end with a slash and Wave Framework supports this through URL Controller. For example, if this setting is used, then a visitor that enters a URL of http://www.example.com/en/home will be redirected to http://www.example.com/en/home/ address.</li>
+					<li>It looks for language node in the URL. The first node (or folder) in the URL is checked for a language based on configuration. For example, if visitor enters URL of http://www.example.com/en/home/, then the first node, 'en', will be used to look for what language on the website is the user requesting. This value should be defined in /config.ini file, that has a list of languages. If /en/ is found among the languages, then Wave Framework will assign 'en' sitemap and translations file for the pages that will be rendered.</li>
+					<li>Based on configuration it is also possible to enforce the first language URL node. You can configure your website to work so that the first language URL node is not required, which means that if you have two pages for English and Finnish and you define your languages as 'en' and 'fi', but the home page for both is 'home', then user who enters http://www.example.com/en/home/ will be redirected to http://www.example.com/home/ while user who enters http://www.example.com/fi/home/ will not be redirected (since Finnish is the second language in the configuration).</li>
+					<li>URL Controller looks for a match for a view in sitemap file stored in /resources/[language].sitemap.ini, so if the user entered http://www.example.com/en/home/ as an URL, then URL Controller will look for a match in /resources/en.sitemap.ini for 'home' page. Sitemaps will be detailed further below.</li>
+					<li>URL Controller returns a '404' view by default if it is unable to find a page. It is also able to redirect a user to a 'login' page if user permissions are not found, however this functionality is commented out by default in URL Controller and is detailed further in Users and Permissions Guide.</li>
+					<li>If no URL is defined, then URL Controller assumes a 'home' view to be loaded.</li>
+					<li>Redirects, if the URL is assigned to be redirected, and view-specific headers are also handled by URL Controller.</li>
+					<li>URL Controller returns a configuration for View Controller that View Controller uses to load View and translations and sitemap information for that view.</li>
+				</ul>
+				
+				<p>URL Controller has a main method of solve() which is called by Data Handler through Index Gateway. This method gets input value of 'www-request', which is the user-agent requested URL. This solve() method is what does all the URL formatting, redirects and finds the proper view information from Sitemap. If it cannot find a view that matches the URL, then it assumes a '404' view (this view can be changed in configuration file).</p>
+				
+				<p>After solve() is run, it will call returnViewData() method which will format the data from solve() according to how View Controller expects it. It also assigns a number of defaults for the view:</p>
+				
+				<ul>
+					<li><b>controller</b> - Default controller that is called for a view is 'view', that is situated in /controllers/controller.view.php file.</li>
+					<li><b>controller-method</b> - Default method of View Controller is load().</li>
+					<li><b>view-method</b> - Default method of view - that will be loaded by View Controller - is render().</li>
+					<li><b>subview</b> - Default subview keyword is empty. Subviews are used if you wish to differentiate some pages within a single View file.</li>
+					<li><b>hidden</b> - View is not hidden by default.</li>
+				</ul>
+				
+				<p>URL Controller also has a commented-out section for user accounts and permission checks, which allows to check for user sessions and user permissions and redirect the user to log-in page if this is not present. Wave Framework comes with a framework for users and permission management, but does not come with a system where users and their permissions are created. Latter you would have to develop yourself. But URL Controller has an example of how to test existence of users and their permissions and this topic is covered further in Users and Permissions Guide.</p>
+			
+	</body>
+</html>

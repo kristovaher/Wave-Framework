@@ -4,18 +4,12 @@
 Wave Framework
 API class
 
-This is a class that is used for routing all of API commands through, it deals with validation 
-and caching, calling the proper controller and returning data with right headers and the right 
-format. API has encryption and input-output data validations, as well as some framework specific 
-callbacks. There is usually just one instance of this object in Wave Framework and it can be used 
-within MVC objects through Factory class.
-
-* Either uses existing State object or creates a new one
-* API profile data loaded from /resources/api.profiles.php file
-* Input with keys of www-* are assigned to API state and can affect API functionality
-* Data encryption and decryption is done with Rijndael 256bit in CBC or ECB mode (latter in non-public profiles)
-* Custom-formatted returned data types are JSON, binary, XML, RSS, CSV, serialized array, query string, INI or PHP
-* Custom callbacks for setting headers, cookies, sessions and redirecting user agent
+API class is one of the core classes of Wave Framework. Every command and function in Wave 
+Framework is executed through API object. API class implements State class - which stores 
+configuration - and executes any and all functionality that is built within Wave Framework. 
+It is not recommended to modify this class, in fact this class is defined as final. Methods 
+of this class take user input, load MVC objects and execute their methods and return data 
+in the appropriate format.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -23,45 +17,68 @@ License: GNU Lesser General Public License Version 3
 
 final class WWW_API {
 	
-	// This stores API command results in a buffer
+	// This variable is used to store results of API call. It acts as a buffer for API, which 
+	// will be checked when another API call is made with the exact same input data.
 	private $commandBuffer=array();
 	
-	// API profile data from /resources/api.profiles.ini file or loaded during construction
+	// This holds data about API profiles from /resources/api.profiles.ini, content of which will 
+	// be checked by API whenever API call is made that is not public.
 	private $apiProfiles=array();
 	
-	// API profile data from /resources/api.observers.ini file or loaded during construction
+	// This variable holds data about API observers from /resources/api.observers.ini file. If 
+	// an API call is made, then this variable content will be checked to execute additional 
+	// API calls, if defined.
 	private $apiObservers=array();
 	
-	// Logger state stores information about current API use
-	// This is later fished by Logger object for system-wide log
+	// This is an array that stores data that will be logged by Logger object, if Logger is used 
+	// in the system. Content length and other data is stored for logging purposes in this array.
 	public $apiLoggerData=array();
 	
-	// This stores performance microtime values
+	// This variable stores performance related timestamps, if splitTime() method is called 
+	// by the API.
 	private $splitTimes=array();
 
-	// This stores WWW_State object
+	// This variable stores the initialized State object that carries a lot of configuration 
+	// and environment data and functionality.
 	public $state=false;
 	
-	// This flag checks stores APC state
+	// This variable defines whether APC is available in the server environment. If this variable 
+	// is true, then some caching methods will utilize APC instead of filesystem.
 	public $apc=false;
 	
-	// This is a counter of how often API call has been made
+	// This is a counter that stores the depth of API calls. Since API calls can execute other 
+	// API calls, this variable is used to determine some caching and buffer related data when 
+	// specific API call is references by API class.
 	public $callIndex=0;
 	
-	// This stores locations of cache files for every API call
+	// This is an index of cache files that have been referenced within the system. This is used 
+	// so that certain calls do not have to be repeated, if the same cache is referred multiple 
+	// times within a single request.
 	public $cacheIndex=array();
 	
-	// This is an array that is used to test whether certain API calls can be cached or not
+	// This variable holds data about API execution call-index values and whether this specific 
+	// API call can be cached or not. This is for internal maintenance when dealing with which 
+	// API call to cache and which not.
 	public $noCache=array();
 	
-	// This is for internal testing
+	// This holds configuration value from State and turns on internal logging, if configuration 
+	// has internal logging enabled. If this remains false, then internal log entries will not 
+	// be stored.
 	private $internalLogging=false;
+	
+	// This is an array that stores all the internal log entries that will be written to filesystem 
+	// once API class has finished dealing with the request.
 	private $internalLog=array();
 			
-	// API requires State object for majority of functionality
+	// API object construction accepts State object in $state and array data of API profiles 
+	// as $apiProfiles. If State is not defined, then API class attempts to automatically 
+	// create a new State object, thus API class is highly dependent on State class being 
+	// present. API object construction also loads Factory class, if it is not defined and 
+	// tests if server supports APC or not. If API profiles are not submitted to API during 
+	// construction, then API will attempt to load API profiles from the *.ini file. Same 
+	// applies to observers.
 	// * state - Object of WWW_State class
-	// * apiProfiles - Array of API profile information, array should be in format such as in /resources/api.profiles.php
-	// Throws an error if profiles and profile file is inaccessible or Factory class cannot be loaded
+	// * apiProfiles - Array of API profile information
 	final public function __construct($state=false,$apiProfiles=false){
 
 		// API expects to be able to use State object
@@ -118,8 +135,6 @@ final class WWW_API {
 		// Assigning API profiles
 		$this->apiProfiles=$apiProfiles;
 		
-		// Observers
-		
 		// Observers can be loaded from overrides folder as well
 		if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.observers.ini')){
 			$sourceUrl=__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.observers.ini';
@@ -145,7 +160,8 @@ final class WWW_API {
 		
 	}
 	
-	// This writes log data to file, if internal logging is turned on 
+	// Once API object is not used anymore, the object attempts to write internal log to 
+	// filesystem if internal log is used and has any log data to store.
 	final public function __destruct(){
 		if($this->internalLogging && !empty($this->internalLog)){
 			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log',json_encode($this->internalLog)."\n",FILE_APPEND);
@@ -154,12 +170,20 @@ final class WWW_API {
 	
 	// API COMMAND
 	
-		// The main function of API
+		// This is one of the two core methods of API class. It accepts input data from 
+		// $apiInputData which is an array of keys and values. Some keys are API dependent 
+		// flags with the wave prefix of 'www-'. $useBuffer setting defines if buffer can be 
+		// used, which means that if the same exact input has already been sent within the 
+		// same HTTP request, then it returns data from buffer rather than going through the 
+		// process again. $apiValidation is a flag that sets whether API profiles are 
+		// validated or not, this setting is turned off for internal API calls that have 
+		// already been validated. $useLogger is a flag that tells API that Logger class 
+		// is used by the system. This method validates the API call, loads MVC objects and 
+		// executes their methods and sends the result to output() function.
 		// * apiInputData - array of input data
-		// * useBuffer - This turns off internal buffer that is used when the same API call is executed many times
+		// * useBuffer - Whether API calls are buffered per request
 		// * apiValidation - internally called API does not need to be hash validated, unless necessary
 		// * useLogger - Whether logger array is updated during execution
-		// Returns the result of the API call, depending on command and classes it loads
 		final public function command($apiInputData=array(),$useBuffer=false,$apiValidation=true,$useLogger=false){
 		
 			// Increasing the counter of API calls
@@ -181,9 +205,11 @@ final class WWW_API {
 					'content-type-header'=>(isset($apiInputData['www-content-type']))?$apiInputData['www-content-type']:false,
 					'custom-header'=>false,
 					'hash'=>false,
+					'hash-validation'=>true,
 					'ip-session'=>false,
 					'last-modified'=>$this->state->data['request-time'],
 					'minify-output'=>(isset($apiInputData['www-minify']))?$apiInputData['www-minify']:false,
+					'disable-callbacks'=>(isset($apiInputData['www-disable-callbacks']))?$apiInputData['www-disable-callbacks']:false,
 					'output-crypt-key'=>false,
 					'profile'=>$this->state->data['api-public-profile'],
 					'push-output'=>(isset($apiInputData['www-output']))?$apiInputData['www-output']:true,
@@ -192,22 +218,30 @@ final class WWW_API {
 					'return-type'=>(isset($apiInputData['www-return-type']))?$apiInputData['www-return-type']:'json',
 					'secret-key'=>false,
 					'token'=>false,
+					'state-key'=>false,
 					'commands'=>'*',
 					'token-file'=>false,
 					'token-directory'=>false,
 					'token-timeout'=>false
 				);
+				
+				// Turning output off if the HTTP HEAD request is made
+				if($this->state->data['http-request-method']=='HEAD'){
+					$apiState['push-output']=false;
+				}
 		
 				// If API command is not set and is not set in input array either, the system will return an error
 				if(isset($apiInputData['www-command'])){
 					$apiState['command']=strtolower($apiInputData['www-command']);
+				} elseif(isset($apiInputData['www-controller'])){
+					$apiState['command']=$apiInputData['www-controller'].'-'.strtolower($this->state->data['http-request-method']);
 				} else {
-					return $this->output(array('www-error'=>'API command not set','www-response-code'=>101),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+					return $this->output(array('www-message'=>'API command not set','www-response-code'=>101),$apiState);
 				}
 				
 				// Input observer
-				if(isset($this->apiObservers[$apiInputData['www-command']]) && isset($this->apiObservers[$apiInputData['www-command']]['input']) && $this->apiObservers[$apiInputData['www-command']]['input']!=''){
-					$this->command(array('www-return-type'=>'php','www-command'=>$this->apiObservers[$apiInputData['www-command']]['input'],'www-output'=>0,'www-return-hash'=>0,'www-content-type'=>false,'www-minify'=>false,'www-crypt-output'=>false,'www-cache-tags'=>false)+$apiInputData,((isset($this->apiObservers[$apiInputData['www-command']]['input-buffer']) && $this->apiObservers[$apiInputData['www-command']]['input-buffer']==true)?true:false),false);
+				if(isset($this->apiObservers[$apiState['command']]) && isset($this->apiObservers[$apiState['command']]['input']) && $this->apiObservers[$apiState['command']]['input']!=''){
+					$this->command(array('www-return-type'=>'php','www-command'=>$this->apiObservers[$apiState['command']]['input'],'www-output'=>0,'www-return-hash'=>0,'www-content-type'=>false,'www-minify'=>false,'www-crypt-output'=>false,'www-cache-tags'=>false)+$apiInputData,((isset($this->apiObservers[$apiState['command']]['input-buffer']) && $this->apiObservers[$apiState['command']]['input-buffer']==true)?true:false),false);
 				}
 				
 				// Sorting the input array
@@ -227,8 +261,13 @@ final class WWW_API {
 					if(in_array($apiInputData['www-language'],$this->state->data['languages'])){
 						$this->state->data['language']=$apiInputData['www-language'];
 					} else {
-						return $this->output(array('www-error'=>'This language is not defined','www-response-code'=>115),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+						return $this->output(array('www-message'=>'This language is not defined','www-response-code'=>115),$apiState);
 					}
+				}
+				
+				// This can be passed to prevent cross-site forgeries
+				if(isset($apiInputData['www-state'])){
+					$apiState['state-key']=$apiInputData['www-state'];
 				}
 				
 				// This tests if cache value sent through input is valid
@@ -255,21 +294,21 @@ final class WWW_API {
 						// Testing if API profile is disabled or not
 						if(isset($this->apiProfiles[$apiState['profile']]['disabled']) && $this->apiProfiles[$apiState['profile']]['disabled']==1){
 							// If profile is set to be disabled
-							return $this->output(array('www-error'=>'API profile is disabled','www-response-code'=>103),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+							return $this->output(array('www-message'=>'API profile is disabled','www-response-code'=>103),$apiState);
 						} 
 						
 						// Testing if IP is in valid range
-						if(isset($this->apiProfiles[$apiState['profile']]['ip']) && $this->apiProfiles[$apiState['profile']]['ip']!='*' && !in_array($this->state->data['true-client-ip'],explode(',',$this->apiProfiles[$apiState['profile']]['ip']))){
+						if(isset($this->apiProfiles[$apiState['profile']]['ip']) && $this->apiProfiles[$apiState['profile']]['ip']!='*' && !in_array($this->state->data['client-ip'],explode(',',$this->apiProfiles[$apiState['profile']]['ip']))){
 							// If profile has IP set and current IP is not allowed
-							return $this->output(array('www-error'=>'API profile not allowed from this IP','www-response-code'=>104),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+							return $this->output(array('www-message'=>'API profile not allowed from this IP','www-response-code'=>104),$apiState);
 						}
 						
 						// Profile commands are filtered only if they are set
-						if(isset($this->apiProfiles[$apiState['profile']]['commands']) && $apiState['command']!='www-create-session'){
+						if(isset($this->apiProfiles[$apiState['profile']]['commands']) && $apiState['command']!='www-create-session' && $apiState['command']!='www-destroy-session' && $apiState['command']!='www-validate-session'){
 							$apiState['commands']=explode(',',$this->apiProfiles[$apiState['profile']]['commands']);
 							if((in_array('*',$apiState['commands']) && in_array('!'.$apiState['command'],$apiState['commands'])) || (!in_array('*',$apiState['commands']) && !in_array($apiState['command'],$apiState['commands']))){
 								// If profile has IP set and current IP is not allowed
-								return $this->output(array('www-error'=>'API command is not allowed for this profile','www-response-code'=>105),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+								return $this->output(array('www-message'=>'API command is not allowed for this profile','www-response-code'=>105),$apiState);
 							}
 						}
 						
@@ -280,28 +319,39 @@ final class WWW_API {
 							if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout'])){
 								// Timestamp value has to be set and not be empty
 								if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
-									return $this->output(array('www-error'=>'Request validation timestamp is missing','www-response-code'=>106),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+									return $this->output(array('www-message'=>'API request validation timestamp is missing','www-response-code'=>106),$apiState);
 								} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
-									return $this->output(array('www-error'=>'Request timestamp is too old','www-response-code'=>107),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+									return $this->output(array('www-message'=>'API request timestamp is too old','www-response-code'=>107),$apiState);
 								}
 							}
 							
-							// Returns an error if hash validation is required but www-hash is not provided
+							// If hash validation is turned off
+							if(isset($this->apiProfiles[$apiState['profile']]['hash-validation']) && $this->apiProfiles[$apiState['profile']]['hash-validation']==0){
+								$apiState['hash-validation']=false;
+							}
+							
+							// Returns an error if secret key is not set for an API profile
 							if(isset($this->apiProfiles[$apiState['profile']]['secret-key'])){
-								// Hash value has to be set and not be empty
-								if(!isset($apiInputData['www-hash']) || $apiInputData['www-hash']==''){
-									return $this->output(array('www-error'=>'Request validation hash is missing','www-response-code'=>109),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
-								} else {
-									// Validation hash
-									$apiState['hash']=$apiInputData['www-hash'];
-									// Secret key
-									$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
+							
+								// only checked if hash-based validation is used
+								if($apiState['hash-validation']){
+									// Hash value has to be set and not be empty
+									if(!isset($apiInputData['www-hash']) || $apiInputData['www-hash']==''){
+										return $this->output(array('www-message'=>'API request validation hash is missing','www-response-code'=>109),$apiState);
+									} else {
+										// Validation hash
+										$apiState['hash']=$apiInputData['www-hash'];
+									}
 								}
+								
+								// Secret key
+								$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
+								
 							} else {
-								return $this->output(array('www-error'=>'API profile configuration incorrect: Secret key missing','www-response-code'=>108),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+								return $this->output(array('www-message'=>'API profile configuration incorrect: Secret key missing from configuration','www-response-code'=>108),$apiState);
 							}
 							
-							// Returns an error if timestamp validation is required but www-timestamp is not provided						
+							// Checks for whether token timeout is set on the API profile					
 							if(isset($this->apiProfiles[$apiState['profile']]['token-timeout']) && $this->apiProfiles[$apiState['profile']]['token-timeout']!=0){
 								// Since this is not null, token based validation is used
 								$apiState['token-timeout']=$this->apiProfiles[$apiState['profile']]['token-timeout'];
@@ -310,7 +360,7 @@ final class WWW_API {
 						}
 						
 					} else {
-						return $this->output(array('www-error'=>'Valid API profile not found','www-response-code'=>102),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+						return $this->output(array('www-message'=>'API profile not found','www-response-code'=>102),$apiState);
 					}
 
 				}
@@ -323,11 +373,11 @@ final class WWW_API {
 					// TOKEN CHECKS
 						
 						// Session filename is a simple hashed API profile name
-						$apiState['token-file']=md5($apiState['profile']).'.tmp';
-						$apiState['token-file-ip']=md5($this->state->data['true-client-ip'].$apiState['profile']).'.tmp';
+						$apiState['token-file']=md5($apiState['profile'].$this->apiProfiles[$apiState['profile']]['secret-key']).'.tmp';
+						$apiState['token-file-ip']=md5($this->state->data['client-ip'].$apiState['profile'].$this->apiProfiles[$apiState['profile']]['secret-key']).'.tmp';
 						// Session folder in filesystem
-						$apiState['token-directory']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($apiState['token-file'],0,2).DIRECTORY_SEPARATOR;
-						$apiState['token-directory-ip']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($apiState['token-file-ip'],0,2).DIRECTORY_SEPARATOR;
+						$apiState['token-directory']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR.substr($apiState['token-file'],0,2).DIRECTORY_SEPARATOR;
+						$apiState['token-directory-ip']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR.substr($apiState['token-file-ip'],0,2).DIRECTORY_SEPARATOR;
 					
 						// Checking if valid token is active
 						// It is possible that the token was created with linked IP, which is checked here
@@ -358,32 +408,47 @@ final class WWW_API {
 						} elseif($apiState['command']!='www-create-session'){
 						
 							// Token is not required for commands that create or destroy existing tokens
-							return $this->output(array('www-error'=>'API token does not exist or is timed out','www-response-code'=>110),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+							return $this->output(array('www-message'=>'API session token does not exist or is timed out','www-response-code'=>110),$apiState);
 							
 						}
 						
 					// TOKEN AND HASH VALIDATION
+					
+						// If hash validation is used
+						if($apiState['hash-validation']){
 						
-						// Validation hash is calculated from input data
-						$validationData=$apiInputData;
-						// Session input is not considered for validation hash and is unset
-						unset($validationData['www-hash'],$validationData['www-session'],$validationData['www-cookie'],$validationData['www-files']);
+							// Validation hash is calculated from input data
+							$validationData=$apiInputData;
+							// Session input is not considered for validation hash and is unset
+							unset($validationData['www-hash'],$validationData['www-session'],$validationData['www-cookie'],$validationData['www-files']);
+							
+							// If token is set then this is used for validation as long as the command is not www-create-session
+							if($apiState['token'] && $apiState['command']!='www-create-session'){
+								// Non-session creating hash validation is a little different and takes into account both token and the secret key
+								$validationHash=sha1(http_build_query($validationData).$apiState['token'].$apiState['secret-key']);
+							} else {
+								// Session creation commands have validation hashes built only with the secret key
+								$validationHash=sha1(http_build_query($validationData).$apiState['secret-key']);
+							}
+							
+							// Unsetting validation data array
+							unset($validationData);
+							
+							// If validation hashes do not match
+							if($validationHash!=$apiState['hash']){
+								return $this->output(array('www-message'=>'API profile authentication failed: input hash validation failed','www-response-code'=>111),$apiState);
+							}
 						
-						// If token is set then this is used for validation as long as the command is not www-create-session
-						if($apiState['token'] && $apiState['command']!='www-create-session'){
-							// Session creation commands have validation hashes built only with the secret key
-							$validationHash=sha1(http_build_query($validationData),$apiState['token'].$apiState['secret-key']);
-						} else {
-							// Every other command takes token into account when calculating the validation hash
-							$validationHash=sha1(http_build_query($validationData),$apiState['secret-key']);
-						}
+						} elseif($apiState['command']!='www-create-session' && (!isset($apiInputData['www-token']) || $apiState['token']!=$apiInputData['www-token'])){
 						
-						// Unsetting validation data array
-						unset($validationData);
+							// If hash validation is used, then request can be made with a token or secret key alone and if these do not match then authentication error is thrown
+							return $this->output(array('www-message'=>'API profile authentication failed: session token is missing or incorrect','www-response-code'=>111),$apiState);
 						
-						// If validation hashes do not match
-						if($validationHash!=$apiState['hash']){
-							return $this->output(array('www-error'=>'API profile input hash validation failed','www-response-code'=>111),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+						} elseif($apiState['command']=='www-create-session' && (!isset($apiInputData['www-secret-key']) || $apiInputData['www-secret-key']!=$apiState['secret-key'])){
+						
+							// If hash validation is used, then request can be made with a token or secret key alone and if these do not match then authentication error is thrown
+							return $this->output(array('www-message'=>'API profile authentication failed: secret key is missing or incorrect','www-response-code'=>111),$apiState);
+							
 						}
 						
 					// HANDLING CRYPTED INPUT
@@ -406,13 +471,13 @@ final class WWW_API {
 										// Merging crypted input with set input data
 										$apiInputData=$decryptedData+$apiInputData;
 									} else {
-										return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-response-code'=>113),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
+										return $this->output(array('www-message'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-response-code'=>113),$apiState);
 									}
 								} else {
-									return $this->output(array('www-error'=>'Problem decrypting encrypted data: Decryption failed','www-response-code'=>113),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
+									return $this->output(array('www-message'=>'Problem decrypting encrypted data: Decryption failed','www-response-code'=>113),$apiState);
 								}	
 							} else {
-								return $this->output(array('www-error'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>113),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
+								return $this->output(array('www-message'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>113),$apiState);
 							}
 						}
 						
@@ -430,7 +495,7 @@ final class WWW_API {
 							// If session token subdirectory does not exist, it is created
 							if(!is_dir($apiState['token-directory'])){
 								if(!mkdir($apiState['token-directory'],0777)){
-									return $this->output(array('www-error'=>'Server configuration error: Cannot create session token folder','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
+									return $this->output(array('www-message'=>'Server configuration error: Cannot create session token folder','www-response-code'=>100),$apiState);
 								}
 							}
 							// Token for API access is generated simply from current profile name and request time
@@ -441,16 +506,16 @@ final class WWW_API {
 								if($apiState['token-timeout']){
 									// Returning current IP together with the session
 									if($apiState['ip-session']){
-										return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>$apiState['token-timeout'],'www-ip-session'=>$this->state->data['true-client-ip']),$apiState);
+										return $this->output(array('www-message'=>'API session token created','www-token'=>$apiState['token'],'www-token-timeout'=>$apiState['token-timeout'],'www-ip-session'=>$this->state->data['client-ip'],'www-response-code'=>500),$apiState);
 									} else {
-										return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>$apiState['token-timeout']),$apiState);
+										return $this->output(array('www-message'=>'API session token created','www-token'=>$apiState['token'],'www-token-timeout'=>$apiState['token-timeout'],'www-response-code'=>500),$apiState);
 									}
 								} else {
 									// Since token timeout is not set, the token is assumed to be infinite
-									return $this->output(array('www-token'=>$apiState['token'],'www-token-timeout'=>'infinite'),$apiState);
+									return $this->output(array('www-message'=>'API session token created','www-token'=>$apiState['token'],'www-token-timeout'=>'infinite','www-response-code'=>500),$apiState);
 								}
 							} else {
-								return $this->output(array('www-error'=>'Server configuration error: Cannot create session token file','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
+								return $this->output(array('www-message'=>'Server configuration error: Cannot create session token file','www-response-code'=>100),$apiState);
 							}
 
 						} elseif($apiState['command']=='www-destroy-session'){
@@ -460,16 +525,16 @@ final class WWW_API {
 								unlink($apiState['token-directory'].$apiState['token-file']);
 							}
 							// Returning success message
-							return $this->output(array('www-success'=>'Token destroyed'),$apiState);
+							return $this->output(array('www-message'=>'API session destroyed','www-response-code'=>500),$apiState);
 						
 						} elseif($apiState['command']=='www-validate-session'){
 							// This simply returns output
-							return $this->output(array('www-success'=>'API profile validation successful'),$apiState);
+							return $this->output(array('www-message'=>'API session validation successful','www-response-code'=>500),$apiState);
 						}	
 				
 				} else if(in_array($apiState['command'],array('www-create-session','www-destroy-session','www-validate-session'))){
 					// Since public profile is used, the session-related tokens cannot be used
-					return $this->output(array('www-error'=>'API token commands cannot be used with public profile','www-response-code'=>112),array('custom-header'=>'HTTP/1.1 403 Forbidden')+$apiState);
+					return $this->output(array('www-message'=>'API session token commands cannot be used with public profile','www-response-code'=>112),$apiState);
 				}
 			
 			// CACHE HANDLING IF CACHE IS USED
@@ -488,7 +553,7 @@ final class WWW_API {
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify']);
+					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks']);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);
@@ -567,7 +632,7 @@ final class WWW_API {
 							require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
 						} else {
 							// Since an error was detected, system pushes for output immediately
-							return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),array('custom-header'=>'HTTP/1.1 501 Not Implemented')+$apiState);
+							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>114),$apiState);
 						}
 					}
 					
@@ -581,7 +646,7 @@ final class WWW_API {
 						// If command method does not exist, 501 page is returned or error triggered
 						if(!method_exists($controller,$methodName) || !is_callable(array($controller,$methodName))){
 							// Since an error was detected, system pushes for output immediately
-							return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),array('custom-header'=>'HTTP/1.1 501 Not Implemented')+$apiState);
+							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>114),$apiState);
 						}
 						// Gathering every possible echoed result from method call
 						ob_start();
@@ -590,9 +655,9 @@ final class WWW_API {
 						$apiResult=$controller->$methodName($apiInputData);
 						// If the method does not return anything in the result, then building an API result array
 						if($apiResult==null){
-							$apiResult=array('www-success'=>'OK','www-response-code'=>400);
+							$apiResult=array('www-message'=>'OK','www-response-code'=>500);
 						} elseif(!is_array($apiResult)){
-							$apiResult=array('www-success'=>'OK','www-response-code'=>400,'www-output'=>$apiResult);
+							$apiResult=array('www-message'=>'OK','www-response-code'=>500,'www-output'=>$apiResult);
 						}
 						// Catching everything that was echoed and adding to array, unless output is already populated
 						if(ob_get_length()>0){
@@ -607,51 +672,52 @@ final class WWW_API {
 						}
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-error'=>'User agent request recognized, but unable to handle','www-response-code'=>114),array('custom-header'=>'HTTP/1.1 501 Not Implemented')+$apiState);
+						return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>114),$apiState);
 					}
 					
 					// If cache timeout was set then the result is stored as a cache in the filesystem
 					if($apiState['cache-timeout']){
+					
 						// If cache has not been disallowd by any of the API calls
 						if(!isset($this->noCache[$apiState['call-index']]) || $this->noCache[$apiState['call-index']]==false){
+						
 							// If cache subdirectory does not exist, it is created
 							if(!is_dir($cacheFolder)){
 								if(!mkdir($cacheFolder,0777)){
-									return $this->output(array('www-error'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
+									return $this->output(array('www-message'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),$apiState);
 								}
 							}
 							// Cache is stored in serialized form
 							$this->setCache($cacheFolder.$cacheFile,$apiResult);
+							
+							// If cache tag is set then system stores link to cache file
+							if(isset($apiInputData['www-cache-tags'],$cacheFolder,$cacheFile) && $apiInputData['www-cache-tags']!=''){
+								$cacheTags=explode(',',$apiInputData['www-cache-tags']);
+								foreach($cacheTags as $tag){
+									if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
+										return $this->output(array('www-message'=>'Server configuration error: Cannot create cache tag index','www-response-code'=>100),$apiState);
+									}
+								}
+							}
+							
 						} else {
 							// Setting cache timeout to 0, since cache is not stored
 							$apiState['cache-timeout']=0;
 						}
+						
 					}
 					
 				}
-				
-				// If cache tag is set then system stores link to cache file
-				// if(isset($apiInputData['www-cache-tags'])){
-					// echo $apiInputData['www-cache-tags'];die();
-				// }
-				if(isset($apiInputData['www-cache-tags'],$cacheFolder,$cacheFile) && $apiInputData['www-cache-tags']!=''){
-					$cacheTags=explode(',',$apiInputData['www-cache-tags']);
-					foreach($cacheTags as $tag){
-						if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
-							return $this->output(array('www-error'=>'Server configuration error: Cannot create cache tag index','www-response-code'=>100),array('custom-header'=>'HTTP/1.1 500 Internal Server Error')+$apiState);
-						}
-					}
-				}
-			
+							
 			// SENDING RESULT TO OUTPUT
 				
 				// Output observer
-				if(isset($this->apiObservers[$apiInputData['www-command']]) && isset($this->apiObservers[$apiInputData['www-command']]['output']) && $this->apiObservers[$apiInputData['www-command']]['output']!=''){
+				if(isset($this->apiObservers[$apiState['command']]) && isset($this->apiObservers[$apiState['command']]['output']) && $this->apiObservers[$apiState['command']]['output']!=''){
 					// Output observer is called differently based on whether the returned result was an array or not
 					if(!is_array($apiResult)){
-						$this->command(array('result'=>$apiResult,'www-return-type'=>'php','www-command'=>$this->apiObservers[$apiInputData['www-command']]['output'],'www-output'=>0,'www-return-hash'=>0,'www-content-type'=>false,'www-minify'=>false,'www-crypt-output'=>false,'www-cache-tags'=>false),((isset($this->apiObservers[$apiInputData['www-command']]['output-buffer']) && $this->apiObservers[$apiInputData['www-command']]['output-buffer']==true)?true:false),false);
+						$this->command(array('result'=>$apiResult,'www-return-type'=>'php','www-command'=>$this->apiObservers[$apiState['command']]['output'],'www-output'=>0,'www-return-hash'=>0,'www-content-type'=>false,'www-minify'=>false,'www-crypt-output'=>false,'www-cache-tags'=>false),((isset($this->apiObservers[$apiState['command']]['output-buffer']) && $this->apiObservers[$apiState['command']]['output-buffer']==true)?true:false),false);
 					} else {
-						$this->command(array('www-cache-timeout'=>((isset($this->apiObservers[$apiInputData['www-command']]['output-buffer']))?$this->apiObservers[$apiInputData['www-command']]['output-buffer']:0),'www-return-type'=>'php','www-command'=>$this->apiObservers[$apiInputData['www-command']]['output'],'www-output'=>0,'www-return-hash'=>0,'www-content-type'=>false,'www-minify'=>false,'www-crypt-output'=>false,'www-cache-tags'=>false)+$apiResult,((isset($this->apiObservers[$apiInputData['www-command']]['output-buffer']) && $this->apiObservers[$apiInputData['www-command']]['output-buffer']==true)?true:false),false);
+						$this->command(array('www-cache-timeout'=>((isset($this->apiObservers[$apiState['command']]['output-buffer']))?$this->apiObservers[$apiState['command']]['output-buffer']:0),'www-return-type'=>'php','www-command'=>$this->apiObservers[$apiState['command']]['output'],'www-output'=>0,'www-return-hash'=>0,'www-content-type'=>false,'www-minify'=>false,'www-crypt-output'=>false,'www-cache-tags'=>false)+$apiResult,((isset($this->apiObservers[$apiState['command']]['output-buffer']) && $this->apiObservers[$apiState['command']]['output-buffer']==true)?true:false),false);
 					}
 				}
 			
@@ -670,11 +736,15 @@ final class WWW_API {
 	
 	// OUTPUT
 	
-		// This function returns the data, whether final data or the one returned with error messages
+		// This is one of the two core methods of API class. Method is private and is only 
+		// called within the class. This method is used to parse the data returned from API 
+		// and returned to the user agent or system based on requested format. $apiResult is 
+		// an array that has been returned from command() method, $apiState and $useLogger are 
+		// also defined when the method is called. It returns the data as a PHP array, XML 
+		// string, INI string or any other format and with or without HTTP response headers.
 		// * apiResult - Result of the API call
 		// * apiState - Various flags from command execution
 		// * useLogger - If logger is used
-		// Returns final-formatted data
 		final private function output($apiResult,$apiState,$useLogger=true){
 				
 			// If internal logging is enabled
@@ -683,46 +753,26 @@ final class WWW_API {
 			}
 			
 			// This filters the result through various PHP and header specific commands
-			if(!isset($apiResult['www-disable-callbacks']) || $apiResult['www-disable-callbacks']==false){
+			if($apiState['disable-callbacks']==false && (!isset($apiResult['www-disable-callbacks']) || $apiResult['www-disable-callbacks']==false)){
 				$this->apiCallbacks($apiResult,$useLogger,$apiState['return-type']);
 			}
-			
-			// If error is set and the returned data is in PHP format, then we simply return false
-			// This is used for benefit when API calls are made within MVC objects as you can easily check if you encountered an error or not
-			if($apiState['return-type']=='php' && isset($apiResult['www-error'])){
-				// Throwing a PHP warning, if the error is either system or API wrapper specific
-				if(isset($apiResult['www-response-code']) && $apiResult['www-response-code']<300){
-					trigger_error($apiResult['www-error'],E_USER_WARNING);
-				}
-				return false;
-			}
-			
-			// OUTPUT HASH VALIDATION
-			
-				// If timestamp is required to be returned
-				if($apiState['return-timestamp']){
-					$apiResult['www-timestamp']=time();
-				}
-			
-				// If request demanded a hash to also be returned
-				// This is only valid when the result is not an 'error' and has a secret key set
-				if($apiState['return-hash'] && $apiState['secret-key']){
 					
-					// Hash is written to returned result
-					// Session creation and destruction commands return data is hashed without token
-					if(!$apiState['token-timeout'] || $apiState['command']=='www-create-session'){
-						$apiResult['www-hash']=sha1(http_build_query($this->ksortArray($apiResult)),$apiState['secret-key']);
+			// Simple flag for error check, this is used for output encryption
+			$errorFound=false;
+			
+			// Errors are detected based on response code
+			if(isset($apiResult['www-response-code']) && $apiResult['www-response-code']<400){
+				if($apiState['return-type']=='php'){
+					// Throwing a PHP warning, if the error is either system or API Wrapper specific
+					if(isset($apiResult['www-message'])){
+						trigger_error($apiResult['www-message'],E_USER_WARNING);
 					} else {
-						$apiResult['www-hash']=sha1(http_build_query($this->ksortArray($apiResult)),$apiState['token'].$apiState['secret-key']);
+						trigger_error('Undefined error with error code #'.$apiResult['www-response-code'],E_USER_WARNING);
 					}
-					
+					return false;
 				}
-				
-				// Simple flag for error check, this is used for output encryption
-				$errorFound=false;
-				if(isset($apiResult['www-error'])){
-					$errorFound=true;
-				}
+				$errorFound=true;
+			}
 			
 			// DATA CONVERSION FROM RESULT TO REQUESTED FORMAT
 			
@@ -733,6 +783,32 @@ final class WWW_API {
 					$apiResult=$apiResult['www-data'];
 					
 				} else {
+				
+					// If state was defined
+					if($apiState['state-key']){
+						$apiResult['www-state']=$apiState['state-key'];
+					}
+				
+					// OUTPUT HASH VALIDATION
+				
+					// If timestamp is required to be returned
+					if($apiState['return-timestamp']){
+						$apiResult['www-timestamp']=time();
+					}
+				
+					// If request demanded a hash to also be returned
+					// This is only valid when the result is not an 'error' and has a secret key set
+					if($apiState['return-hash'] && $apiState['secret-key']){
+						
+						// Hash is written to returned result
+						// Session creation and destruction commands return data is hashed without token
+						if(!$apiState['token-timeout'] || $apiState['command']=='www-create-session'){
+							$apiResult['www-hash']=sha1(http_build_query($this->ksortArray($apiResult)),$apiState['secret-key']);
+						} else {
+							$apiResult['www-hash']=sha1(http_build_query($this->ksortArray($apiResult)),$apiState['token'].$apiState['secret-key']);
+						}
+						
+					}
 		
 					// Data is custom-formatted based on request
 					switch($apiState['return-type']){
@@ -777,22 +853,6 @@ final class WWW_API {
 				
 				}
 			
-			// IF OUTPUT IS REQUESTED TO BE CRYPTED
-				if($apiState['push-output'] && $apiState['output-crypt-key'] && !$errorFound){
-					// Returned result will be with plain text instead of requested format, but only if header is not already overwritten
-					if(!$apiState['content-type-header']){
-						$apiState['content-type-header']='Content-Type: text/plain;charset=utf-8';
-					}
-					// If token timeout is set, then profile must be defined
-					if($apiState['secret-key']){
-						// If secret key is set, then output will be crypted with CBC mode
-						$apiResult=$this->encryptRijndael256($apiResult,$apiState['output-crypt-key'],$apiState['secret-key']);
-					} else {
-						// If secret key is not set (for public profiles), then output will be crypted with ECB mode
-						$apiResult=$this->encryptRijndael256($apiResult,$apiState['output-crypt-key']);
-					}
-				}
-			
 			// MINIFICATION
 		
 				// If minification is requested from API
@@ -827,6 +887,23 @@ final class WWW_API {
 							break;
 					}
 					
+				}
+			
+			// OUTPUT ENCRYPTION
+			
+				if($apiState['push-output'] && $apiState['output-crypt-key'] && !$errorFound){
+					// Returned result will be with plain text instead of requested format, but only if header is not already overwritten
+					if(!$apiState['content-type-header']){
+						$apiState['content-type-header']='Content-Type: text/plain;charset=utf-8';
+					}
+					// If token timeout is set, then profile must be defined
+					if($apiState['secret-key']){
+						// If secret key is set, then output will be crypted with CBC mode
+						$apiResult=$this->encryptRijndael256($apiResult,$apiState['output-crypt-key'],$apiState['secret-key']);
+					} else {
+						// If secret key is not set (for public profiles), then output will be crypted with ECB mode
+						$apiResult=$this->encryptRijndael256($apiResult,$apiState['output-crypt-key']);
+					}
 				}
 			
 			// FINAL OUTPUT OF RESULT
@@ -963,39 +1040,44 @@ final class WWW_API {
 		
 	// RESULT CALLBACKS
 	
-		// This function checks the data for various keys and values that might affect headers
+		// It is possible to execute certain callbacks with the API based on what data is 
+		// returned from API. It is possible to set headers with this method that will be
+		// sent to returned output buffer. It is also possible to set and unset cookies and 
+		// sessions. It is also possible to redirect the user agent with a callback. $data 
+		// is the return data from the API and $logger and $returnType are defined from 
+		// output() method that makes the call to apiCallbacks(). This method is private 
+		// and cannot be used outside the class.
 		// * data - Data array
 		// * useLogger - If logger is used
-		// Always returns true after filtering
 		final private function apiCallbacks($data,$useLogger,$returnType){
 		
 			// HEADERS
-			
-				// These are only in effect if PHP is returned
-				if($returnType=='php'){
 		
-					// This sets a specific header
-					if(isset($data['www-set-header'])){
-						// It is possible to set multiple headers simultaneously
-						if(is_array($data['www-set-header'])){
-							foreach($data['www-set-header'] as $header){
-								header($header);
-							}
-						} else {
-							header($data['www-set-header']);
+				// This sets a specific header
+				if(isset($data['www-set-header'])){
+					// It is possible to set multiple headers simultaneously
+					if(is_array($data['www-set-header'])){
+						foreach($data['www-set-header'] as $header){
+							header($header);
 						}
+					} else {
+						header($data['www-set-header']);
 					}
-					
 				}
 				
 			// COOKIES AND SESSIONS
 			
 				// This adds cookie from an array of settings
 				if(isset($data['www-set-cookie']) && is_array($data['www-set-cookie'])){
-					foreach($data['www-set-cookie'] as $cookie){
-						// Cookies require name and value to be set
-						if(isset($cookie['name'],$cookie['value'])){
-							$this->state->setCookie($cookie['name'],$cookie['value']);
+					// This is when a single cookie is created
+					if(isset($data['www-set-cookie']['name'],$data['www-set-cookie']['value'])){
+						$this->state->setCookie($data['www-set-cookie']['name'],$data['www-set-cookie']['value'],$data['www-set-cookie']);
+					} else {
+						foreach($data['www-set-cookie'] as $cookie){
+							// Cookies require name and value to be set
+							if(isset($cookie['name'],$cookie['value'])){
+								$this->state->setCookie($cookie['name'],$cookie['value'],$cookie);
+							}
 						}
 					}
 				}
@@ -1014,10 +1096,15 @@ final class WWW_API {
 
 				// This adds a session
 				if(isset($data['www-set-session'])){
-					// Session value must be an array
-					foreach($data['www-set-session'] as $session){
-						if(isset($session['name'],$session['value'])){
-							$this->state->setSession($session['name'],$session['value']);
+					// This is when a single cookie is created
+					if(isset($data['www-set-session']['name'],$data['www-set-session']['value'])){
+						$this->state->setSession($data['www-set-session']['name'],$data['www-set-session']['value']);
+					} else {
+						// Session value must be an array
+						foreach($data['www-set-session'] as $session){
+							if(isset($session['name'],$session['value'])){
+								$this->state->setSession($session['name'],$session['value']);
+							}
 						}
 					}
 				}
@@ -1035,29 +1122,24 @@ final class WWW_API {
 				}
 			
 			// REDIRECTS
-			
-				// These are only in effect if PHP is returned
-				if($returnType=='php'){
 				
-					// It is possible to re-direct API after submission
-					if(isset($data['www-temporary-redirect'])){
-						// Adding log entry
-						if($useLogger){
-							$this->apiLoggerData['response-code']=302;
-							$this->apiLoggerData['temporary-redirect']=$data['www-temporary-redirect'];
-						}
-						// Redirection header
-						header('Location: '.$data['www-temporary-redirect'],true,302);
-					} elseif(isset($data['www-permanent-redirect'])){
-						// Adding log entry
-						if($useLogger){
-							$this->apiLoggerData['response-code']=301;
-							$this->apiLoggerData['permanent-redirect']=$data['www-permanent-redirect'];
-						}
-						// Redirection header
-						header('Location: '.$data['www-permanent-redirect'],true,301);
+				// It is possible to re-direct API after submission
+				if(isset($data['www-temporary-redirect'])){
+					// Adding log entry
+					if($useLogger){
+						$this->apiLoggerData['response-code']=302;
+						$this->apiLoggerData['temporary-redirect']=$data['www-temporary-redirect'];
 					}
-					
+					// Redirection header
+					header('Location: '.$data['www-temporary-redirect'],true,302);
+				} elseif(isset($data['www-permanent-redirect'])){
+					// Adding log entry
+					if($useLogger){
+						$this->apiLoggerData['response-code']=301;
+						$this->apiLoggerData['permanent-redirect']=$data['www-permanent-redirect'];
+					}
+					// Redirection header
+					header('Location: '.$data['www-permanent-redirect'],true,301);
 				}
 		
 			// Processing complete
@@ -1067,9 +1149,11 @@ final class WWW_API {
 		
 	// RESULT CONVERSIONS
 	
-		// Formats the API result array to XML string
+		// This is a method that converts an array to an XML string. It can convert to both 
+		// common XML as well as to RSS format. $apiResult is the data sent to the request. 
+		// If $type is set to 'rss' then RSS formatting is used, otherwise a regular XML is 
+		// returned. This is an internal method used by output() call.
 		// * apiResult - data returned from API call
-		// Returns text XML string
 		final private function toXML($apiResult,$type=false){
 			
 			// Different XML header is used based on whether it is an RSS or not
@@ -1089,9 +1173,9 @@ final class WWW_API {
 				
 		}
 		
-		// This creates single XML node and is used by toXML() method
+		// This is a helper method for toXML() method and is used to build an XML node. This 
+		// method is private and is not used elsewhere.
 		// * data - Data entity from array
-		// Returns formatted data
 		final private function toXMLnode($data){
 			// By default the result is empty
 			$return='';
@@ -1125,9 +1209,10 @@ final class WWW_API {
 			return $return;
 		}
 		
-		// Formats the API result array to CSV string
+		// This method converts an array to CSV format, based on the structure of the array. 
+		// It uses tabs as a column separator and separates values by commas, if sub-arrays 
+		// are used. $apiResult is the data sent by output() method.
 		// * apiResult - data returned from API call
-		// Returns text CSV string
 		final private function toCSV($apiResult){
 			
 			// Resulting rows are stored in this value
@@ -1176,21 +1261,22 @@ final class WWW_API {
 			
 		}
 		
-		// Checks if the string or array is not empty, in which case it returns 1, otherwise it returns 0
+		// This looks at the input data from $apiResult and tries to determine if the result 
+		// was a success or not. It considers response code namespace 5XX as a successful 
+		// call and considers everything else a failure.
 		// * apiResult - data returned from API call
-		// Returns either a 1 or a 0
 		final private function toBinary($apiResult){
 			// Based on the returned array, system 'assumes' whether the action was a success or not
-			if(isset($apiResult['www-success']) || (!isset($apiResult['www-success']) && !isset($apiResult['www-error']) && !empty($apiResult))){
+			if((isset($apiResult['www-response-code']) && $apiResult['www-response-code']>=500) || (!isset($apiResult['www-response-code']) && !empty($apiResult))){
 				return 1;
 			} else {
 				return 0;
 			}
 		}
 		
-		// Converts the result array to a useful INI file
+		// This attempts to convert the data array of $apiResult to INI format. It handles 
+		// also subarrays and other possible conditions in the array.
 		// * apiResult - data returned from API call
-		// Returns text string formatted as INI file
 		final private function toINI($apiResult){
 			
 			// Rows of INI file are stored in this variable
@@ -1247,11 +1333,12 @@ final class WWW_API {
 		
 	// ENCRYPTION AND DECRYPTION
 	
-		// Function encrypts data based on Rijndael 256bit encryption
+		// This method uses API class internal encryption function to encrypt $data string with 
+		// a key and a secret key (if set). If only $key is set, then ECB mode is used for 
+		// Rijndael encryption.
 		// * data - data to be encrypted
 		// * key - key used for encryption
-		// * secretKey - used for calculating initialization vector (IV), if this is not set then ECB mode is used
-		// Returns encrypted data
+		// * secretKey - used for calculating initialization vector (IV)
 		final public function encryptRijndael256($data,$key,$secretKey=false){
 			if($secretKey){
 				return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($key),$data,MCRYPT_MODE_CBC,md5($secretKey)));
@@ -1260,11 +1347,11 @@ final class WWW_API {
 			}
 		}
 		
-		// Function decrypts data based on Rijndael 256bit encryption
+		// This will decrypt Rijndael encoded data string, set with $data. $key and $secretKey 
+		// should be the same that they were when the data was encrypted.
 		// * data - data to be decrypted
 		// * key - key used for decryption
-		// * secretKey - used for calculating initialization vector (IV), if this is not set then ECB mode is used
-		// Returns decrypted data
+		// * secretKey - used for calculating initialization vector (IV)
 		final public function decryptRijndael256($data,$key,$secretKey=false){
 			if($secretKey){
 				return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($key),base64_decode($data),MCRYPT_MODE_CBC,md5($secretKey)));
@@ -1276,12 +1363,15 @@ final class WWW_API {
 		
 	// CACHE AND BUFFER
 	
-		// This method allows to remove tagged cache files from filesystem
-		// * tags - comma separated list of tag(s) that the cache was stored under
-		// Always returns true
+		// This method unsets all cache that has been stored with a specific tag keyword. 
+		// $tags variable can both be a string or an array of keywords. Every cache related 
+		// to those keywords will be removed.
+		// * tags - an array or comma separated list of tags that the cache was stored under
 		final public function unsetTaggedCache($tags){
 			// Multiple tags can be removed at the same time
-			$tags=explode(',',$tags);
+			if(!is_array($tags)){
+				$tags=explode(',',$tags);
+			}
 			foreach($tags as $tag){
 				// If this tag has actually been used, it has a file in the filesystem
 				if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp')){
@@ -1298,17 +1388,21 @@ final class WWW_API {
 			return true;
 		}
 		
-		// This function clears current API buffer
-		// Always returns true
+		// This method is used to clear current API command buffer. This is an optimization 
+		// method and should be used only of a lot of API calls are made that might fill the 
+		// memory allocated to PHP. What this method does is that it tells API object to empty 
+		// the internal variable that stores the results of all API calls that have already been 
+		// sent to API.
 		final public function clearBuffer(){
 			$this->buffer=array();
 			return true;
 		}
 		
-		// This function checks for previous cache
+		// This method returns currently existing cache for currently executed API call, if it 
+		// exists. This allows you to always load cache from system in case a new response cannot 
+		// be generated. It returns cache with the key $key.
 		// * key - Current API index
-		// Returns previous cache array
-		final public function getOldCache($key){
+		final public function getExistingCache($key){
 			if(isset($this->cacheIndex[$key])){
 				return $this->getCache($this->cacheIndex[$key]);
 			} else {
@@ -1316,10 +1410,11 @@ final class WWW_API {
 			}
 		}
 		
-		// This function checks for previous cache
+		// If cache exists for currently executed API call, then this method returns the UNIX 
+		// timestamp of the time when that cache was written. It returns cache timestamp with 
+		// the key $key.
 		// * key - Current API index
-		// Returns previous cache array
-		final public function getOldCacheTime($key){
+		final public function getExistingCacheTime($key){
 			if(isset($this->cacheIndex[$key])){
 				return $this->cacheTime($this->cacheIndex[$key]);
 			} else {
@@ -1327,35 +1422,49 @@ final class WWW_API {
 			}
 		}
 		
-		// This function writes a value to cache with a specific address
+		// This method can be used to store cache for whatever needs by storing $key and 
+		// giving it a value of $value. Cache tagging can also be used with custom tag by 
+		// sending a keyword with $tags or an array of keywords.
 		// * keyUrl - Key or address where cache should be stored
 		// * value - Value to be stored
-		// Returns true if success, throws an error if failed
-		final public function setCache($keyAddress,$value,$custom=false){
+		// * custom - Whether the stored cache is called within MVC classes
+		final public function setCache($keyAddress,$value,$custom=false,$tags=false){
 			// User cache does not have an address
 			if($custom){
+				// User cache location
 				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+				// If tag is attached to cache
+				if($tags){
+					if(!is_array($tags)){
+						$cacheTags=explode(',',$tags);
+					}
+					foreach($cacheTags as $tag){
+						if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$keyAddress."\n",FILE_APPEND)){
+							trigger_error('Cannot store cache tag at '.$keyAddress,E_USER_ERROR);
+						}
+					}
+				}
 			}
 			// Testing for APC presence
 			if($this->apc){
 				// Storing the value in APC storage
 				if(!apc_store($keyAddress,$value)){
-					trigger_error('Cannot store INI file cache in APC at '.$keyAddress,E_USER_ERROR);
+					trigger_error('Cannot store file cache in APC at '.$keyAddress,E_USER_ERROR);
 				}
 				// APC requires additional field to store the timestamp of cache
 				apc_store($keyAddress.'-time',time());
 			} else {
 				// Attempting to write cache in filesystem
 				if(!file_put_contents($keyAddress,serialize($value))){
-					trigger_error('Cannot store INI file cache at '.$keyAddress,E_USER_ERROR);
+					trigger_error('Cannot store file cache at '.$keyAddress,E_USER_ERROR);
 				}
 			}
 			return true;
 		}
 		
-		// Fetches data from cache
+		// This method fetches data from cache based on cache keyword $key, if cache exists. 
+		// This should be the same keyword that was used in setCache() method, when storing cache.
 		// * keyAddress - Address to store cache at
-		// Returns the value, if found
 		final public function getCache($keyAddress,$custom=false){
 			// User cache does not have an address
 			if($custom){
@@ -1374,9 +1483,9 @@ final class WWW_API {
 			}
 		}
 		
-		// This function returns the timestamp when the cache was created
+		// This function returns the timestamp of when the cache of keyword $key, was created, 
+		// if such a cache exists.
 		// * keyAddress - Address to store cache at
-		// Returns timestamp of cache, if found and false, if failed
 		final public function cacheTime($keyAddress,$custom=false){
 			// User cache does not have an address
 			if($custom){
@@ -1399,9 +1508,8 @@ final class WWW_API {
 			}
 		}
 		
-		// This function removes cache
+		// This method removes cache that was stored with the keyword $key, if such a cache exists.
 		// * keyAddress - Address where cache is stored
-		// Returns true, if success, false if failed
 		final public function unsetCache($keyAddress,$custom=false){
 			// User cache does not have an address
 			if($custom){
@@ -1429,10 +1537,11 @@ final class WWW_API {
 	
 	// INTERNAL LOGGING
 	
-		// This function is used to add data to internal log, if it is turned on
+		// This method attempts to write an entry to internal log. Log entry is stored with 
+		// a $key and entry itself should be the $data. $key is needed to easily find the 
+		// log entry later on.
 		// * key - Descriptive key that the log entry will be stored under
 		// * data - Data contained in the entry
-		// Returns true, if logging is used
 		final public function internalLogEntry($key,$data=false){
 			// Only applies if internal logging is turned on
 			if($this->internalLogging && ((in_array('*',$this->internalLogging) && !in_array('!'.$key,$this->internalLogging)) || in_array($key,$this->internalLogging))){
@@ -1450,9 +1559,12 @@ final class WWW_API {
 		
 	// PERFORMANCE LOGGING
 	
-		// This method writes to internal log the duration from the start object was constructed or from the last time this function was called
-		// * key - Identifier for splitTime group, API is always initialized at the start of API construct
-		// Returns current microtime
+		// This method is a timer that can be used to grade performance within the system. 
+		// When this method is called with some $key first, it will start the timer and write 
+		// an entry to log about it. If the same $key is called again, then a log entry is 
+		// created with the amount of microseconds that have passed since the last time this 
+		// method was called with this $key.
+		// * key - Identifier for splitTime group
 		final public function splitTime($key='api'){
 			// Checking if split time exists
 			if(isset($this->splitTimes[$key])){
@@ -1468,9 +1580,9 @@ final class WWW_API {
 		
 	// DATA HANDLING
 	
-		// This function applies key-based sorting recursively to an array of arrays
+		// This helper method is used to sort an array (and sub-arrays) based on keys. It 
+		// essentially applies ksort() method recursively to an array.
 		// * array - Array to be sorted
-		// Returns sorted array
 		private function ksortArray($data){
 			// Method is based on the current data type
 			if(is_array($data)){

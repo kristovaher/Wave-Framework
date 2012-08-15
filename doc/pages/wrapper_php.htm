@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>PHP API Wrapper Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>PHP API Wrapper Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-wrapper.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Main purpose of an API Wrapper is to make it easier to make API requests over HTTP to a system built on Wave Framework. API Wrapper class does everything for the developer without requiring the developer to learn the ins and outs of technical details about how to build an API request. Wave Framework comes with two separate API authentication methods, one more secure than the other, as well as data encryption and decryption methods, all of which are handled by this Wrapper class.</p>
+				
+				<p>API Wrapper does a lot of thing for the developer and takes the server environment into account, but there are still a couple of things that should be taken into account when using the Wrapper. It requires JSON support on the server for various functionality, such as hash validations, data encryption and more. It also requires the ability on the server to make HTTP requests in case cURL is not supported.</p>
+				
+				<p>API Wrapper makes requests by default over cURL. If cURL is not supported, then it attempts to make a GET request with file_get_contents(). When file_get_contents() is used, then some functionality of API wrapper is not supported, such as file uploads.</p>
+				
+				<p>API Wrapper can use all three methods of connecting to and authenticating with a server.:</p>
+				
+				<ul>
+					<li>The most basic sessions and cookie based system - that works similarly to how a web browser works. This means that authentication is done entirely through API and without using Wave Framework API profiles. In this case, the API will use the same authentication method that a user would use when logging into the system.</li>
+					<li>Second method is that it supports a very common authentication that is similar to RESTful API's, where you first create a session token with an API profile name and a secret API key, get a token and then make requests with that token. Thse API profiles can be restricted to making only certain API requests.</li>
+					<li>Thirdly it supports an API validation that works similarly to many payment systems and banks, where the entire input data is hashed with a secret key to create a token and then that token is used to hash the input and make requests. In this system the secret key is never sent over HTTP when API connection is initialized and only the session token is returned from the server one time over HTTP - subsequent connections use that token to hash the input.</li>
+					<li><i>There is also a planned authentication system for PHP API Wrapper that uses OpenSSL certificates for making requests and validating requests, but this system is not supported yet.</i></li>
+				</ul>
+				
+				<p>API Wrapper offers as much functionality as you would get over making API requests manually yourself, so it is recommended - in most cases - to make the API requests through the Wrapper. Though the API is simple enough that you can also make the requests without the Wrapper, but this is covered in API Documentation section.</p>
+				
+			<h2>Using PHP API Wrapper Class</h2>
+			
+				<p>It is recommended to go through all of the API Documentation sections before using the API Wrapper. This document here covers details only specific to API Wrapper and not the details about other API keywords themselves.</p>
+			
+				<p>PHP API Wrapper is stored as a file in /engine/class.www-wrapper.php, but it is not dependent on anything else in the filesystem and can be used independently. API Wrapper requires PHP 5.3.3 or newer due to using serialization of JSON encoding functions that detect numeric input.</p>
+				
+				<p>When Wrapper object is created it requires just a single parameter: the HTTP address of the API. To create a Wrapper object you can do the following:</p>
+				
+<pre>
+	<code>
+	require('class.www-wrapper.php');
+	$www=new WWW_Wrapper('http://www.example.com/json.api');
+	</code>
+</pre>
+				
+				<p>This command will throw an error if cURL is not enabled and allow_url_fopen setting is not turned on because wrapper uses file_get_contents() as a fallback if cURL is not available. It will also throw an error if JSON encoding is not possible.</p>
+				
+				<p>API Wrapper takes the same type of data as API itself does, every API related parameter or setting is defined by array key with 'wave' prefixes of 'www-'. A method setInput() is used to send data to API Wrapper. It is possible to send an array, or a key/value pair to this method.</p>
+				
+				<p>All native API parameters that you can use are detailed at API Documentation Input and Output section. To get the overview of API-specific keywords about API validation, then you should consult with that document.</p>
+				
+				<p>There are also some API Wrapper specific parameters that you can send. These variables are never actually sent to API (they won't arrive in Wave Framework API controllers) and they are only used by Wrapper:</p>
+				
+				<ul>
+					<li><b>www-api</b> - API Address, you can send this if you need to change the address of the API that was originally defined. If you wish to return unserialized data from API, then you need to define the API filename in the address as 'json.api'.</li>
+					<li><b>www-hash-validation</b> - This setting means that API hash validation is used to validate API calls. This depends on the Wave Framework API Profile configuration. Hash validation is turned on by default in API Wrapper, since it is the most secure method for making API requests. To use another validation method that is less secure, this validation has to be turned off on the server that runs the API.</li>
+					<li><b>www-request-timeout</b> - This is the timeout of how long Wrapper API will wait for response from API before timing out.</li>
+					<li><b>www-success-callback</b> - This is a method name that will get the result from API if the API call is considered a success by the API Wrapper.</li>
+					<li><b>www-failure-callback</b> - This is a method name that will get the result from API if the API call is considered a failure by the API Wrapper.</li>
+					<li><b>www-error-callback</b> - This is a method name that will get the result from API if the API call encountered an error when API Wrapper made the request.</li>
+					<li><b>www-last-modified</b> - This is a last-modified timestamp of the time the request was made last time. This allows Wave Framework to return 304 Not Modified response code and not go through the entire execution again.</li>
+					<li><b>www-get-limit</b> - This sets the request URL maximum length, it is set to 2048 by default.</li>
+					<li><b>www-reset-log</b> - This means that the API will reset the log after each API call is made.</li>
+					<li><b>www-timestamp-duration</b> - This tells API Wrapper the maximum difference in seconds it accepts the timestamp from the response.</li>
+				</ul>
+				
+				<p>Please refer to Input and Output API Documentation to see the core Wave Framework API flags.</p>
+				
+				<p>For example, a simple command would be done this way:</p>
+				
+<pre>
+	<code>
+	$www-&gt;setInput('www-command','example-get');
+	$result=$www-&gt;sendRequest();
+	// Simply prints out the resulting array
+	print_r($result); 
+	</code>
+</pre>
+
+				<p>It is also possible to make a request with the sendRequest shorthand, like this:</p>
+						
+<pre>
+	<code>
+	$result=$www-&gt;sendRequest(array('www-command'=&gt;'example-get'));
+	// Simply prints out the resulting array
+	print_r($result); 
+	</code>
+</pre>
+
+				<p>It is also possible to read the log of API Wrapper and see exactly what it did to make that request happen. You can print out the log like this:</p>
+				
+<pre>
+	<code>
+	// This echoes out the log and separates log entries with a linebreak
+	echo $www-&gt;returnLog('&lt;br/&gt;');
+	</code>
+</pre>
+
+				<p>API of WWW Framework has a lot of private profile validation options which you can read more about in other parts of API documentation, but for example, to create an API token and you already have the profile name and profile secret key, then you can do the following:</p>
+
+<pre>
+	<code>	
+	$www-&gt;setInput(array(
+		'www-profile'=&gt;'custom-profile',
+		'www-secret-key'=&gt;'my-secret-key',
+		'www-command'=&gt;'www-create-session'
+	));
+	$result=$www-&gt;sendRequest();
+	if($result){
+		$token=$result['www-token'];
+	}
+	</code>
+</pre>
+				
+				<p>And you can make requests when you have the token, like this:</p>
+			
+<pre>
+	<code>		
+	$www-&gt;setInput(array(
+		'www-profile'=&gt;'custom-profile',
+		'www-secret-key'=&gt;'my-secret-key',
+		'www-token'=&gt;$token,
+		'www-command'=&gt;'example-get'
+	));
+	$result=$www-&gt;sendRequest();
+	// Simply prints out the resulting array
+	print_r($result); 
+	</code>
+</pre>
+				
+				<p>It is important to note that you don't necessarily have to define the secret key and token after you have already defined them, unless you have used $t-&gt;s-&gt;clearInput(true) method call. API Wrapper keeps in mind the last known secret key, API profile name and token. This would have worked too:</p>
+				
+<pre>
+	<code>		
+	$www-&gt;setInput(array(
+		'www-command'=&gt;'example-get'
+	));
+	$result=$www-&gt;sendRequest();
+	// Simply prints out the resulting array
+	print_r($result); 
+	</code>
+</pre>
+				
+				<p>If returned result is 'false', then the request has failed. You should then look at the log, which details the reason for failure. Last error message is stored as $www-&gt;errorMessage and $www-responseCode. What each error code means, take a look at Response Codes documentation.</p>
+				
+			<h2>PHP API Wrapper Class Parameters</h2>
+			
+				<h3>private $apiAddress</h3>
+				
+					<p>This is the address and URL of the API that the Wrapper will connect to. The API address must be for Wave Framework API. This value is set either in object creation or when setting 'www-address' input variable.</p>
+			
+				<h3>private $apiLanguage=false</h3>
+				
+					<p>This holds the current language of the API, it can be useful if the API commands return language-specific responses and translations from the API. This variable is set by sending 'www-language' input variable.</p>
+			
+				<h3>private $apiState=array()</h3>
+				
+					<p>This holds information about current API state, such as profile name, secret key and various API-related flags for callbacks, timeouts and more. This variable is passed around per each API call.</p>
+			
+				<h3>public $errorMessage=false</h3>
+				
+					<p>This variable holds the last known error message returned from the API.</p>
+			
+				<h3>public $responseCode=false</h3>
+				
+					<p>This variable holds the last known response code returned from the API.</p>
+			
+				<h3>private $inputData=array()</h3>
+				
+					<p>Input data is a variable that stores all the plain-text input sent with the API request, it's a key-value pair of variables and their values for the API.</p>
+			
+				<h3>private $cryptedData=array()</h3>
+				
+					<p>Crypted input is an array of keys and values that holds data that will be encrypted prior to be sent to API. This will be encrypted with the session token of the API in serialized form.</p>
+			
+				<h3>private $inputFiles=array()</h3>
+				
+					<p>This array stores keys and values for files that will be sent to API. Key is the 'input file name' and value is the location of the file in filesystem.</p>
+			
+				<h3>private $curlEnabled=false</h3>
+				
+					<p>This flag holds state about support for cURL. cURL will be used to make requests unless it is not enabled on the server.</p>
+			
+				<h3>private $log=array()</h3>
+				
+					<p>This is an array that gathers log information about the requests made through the API that can be used for debugging purposes should something go wrong.</p>
+			
+				<h3>private $criticalError=false</h3>
+				
+					<p>This is a flag that halts the entire functionality of the Wrapper object, if it is set. Once this happens you should check the log to see what went wrong.</p>
+			
+				<h3>private $cookieContainer=false</h3>
+				
+					<p>This variable holds the address for the file that is used as a cookie container in the file system. This allows Wrapper to use cookies when making API requests.</p>
+			
+				<h3>private $userAgent='WaveFramework/3.0.0 (PHP)'</h3>
+				
+					<p>This is the user-agent string of the API Wrapper and it is sent by the Wrapper when making cURL requests. It is useful later on to determine where the requests come from. Note that when cURL is not supported and file_get_contents() makes the request, then user agent is not sent with the request.</p>
+					
+				<h3>private $getLimit=2048</h3>
+				
+					<p>This is the GET string maximum length. Most servers should easily be able to deal with 2048 bytes of request string length, but this value can be changed by submitting a different length with 'www-get-length' input value.</p>
+					
+				<h3>private $resetLog=true</h3>
+				
+					<p>If this value is set, then API log will be reset after each API request. This value can be sent with 'www-reset-log' keyword sent to Wrapper.</p>
+				
+			<h2>PHP API Wrapper Class Methods</h2>
+			
+				<h3>public function __construct($apiAddress=false,$language=false)</h3>
+					
+					<p>Wrapper object creation requires an $apiAddress, which is the address that Wrapper will make API requests to. If this is not defined, then $apiAddress assumes that the system it makes requests to is the system that is making the request. $language is a language keyword from the system that API makes a connection with and is used whenever language-specific results are returned from API.</p>
+					
+					<p>This method will throw an internal critical error in two conditions: If cURL and outside URL requests are both not enabled and when JSON functions are not supported on the server.</p>
+			
+				<h3>public function returnLog($implode=false)</h3>
+					
+					<p>This method returns current log of the API wrapper. If $implode is set, then the value of $implode is used as a character to implode the log with. Otherwise the log is returned as an array.</p>
+			
+				<h3>public function clearLog()</h3>
+					
+					<p>This method clears the API log. This method can be called manually or is called automatically if log is assigned to be reset with each new API request made by the object.</p>
+			
+				<h3>public function setCookieContainer($location=false)</h3>
+					
+					<p>This method allows to set cookie container for cURL calls. If this is set to false, then cookies are not used at all. $location is the file that is used for cookie container, it is automatically created if the file does not exist.</p>
+			
+				<h3>public function clearCookieContainer($location=false)</h3>
+					
+					<p>This method will clear and delete all cookies stored in cookie container defined in $location or in general. Warning, this method technically removes the contents of any writable file if set in $location. If $location is not set, then it attempts to use the previously defined cookie container.</p>
+			
+				<h3>public function setInput($input,$value=false)</h3>
+					
+					<p>This method is used to set an input value in the API Wrapper. $input is the key to set and $value is the value of the input key. $input can also be an array, in which case multiple input values will be set in the same call. This method calls private inputSetter() function that checks the input value for any internal flags that might not actually be sent as an input to the API.</p>
+			
+				<h3>private function inputSetter($input,$value)</h3>
+					
+					<p>This is a helper function that setInput() method uses to actually assign $value to the $input keyword. A lot of the keywords set carry additional functionality that may entirely be API Wrapper specific. This method also creates a log entry for any value that is changed or set.</p>
+					
+					<p>A lot of the values set by inputSetter() method are defined above in 'Using PHP API Wrapper Class' section.</p>
+			
+				<h3>public function setCryptedInput($input,$value=false)</h3>
+					
+					<p>This method sets a crypted input data that will be encrypted with secret key or a token prior to making the HTTP request. This allows to transmit secure data across servers. Note that crypted input should not be used when hash validation is not used for making a request, since the token or secret key would also be sent with the request. $input is the keyword and $value is the value. $input can also be an array of keys and values.</p>
+			
+				<h3>public function setFile($file,$location=false)</h3>
+					
+					<p>This method sets files that will be uploaded with the API request. $file is the name of the file and $location is the address of the file in filesystem. Multiple files can be attached at once by sending $file as an array of filenames and locations. This method also checks if the file actually exists.</p>
+			
+				<h3>public function clearInput($clearAuth=false)</h3>
+					
+					<p>This method resets the state of API. It is called after each API request with $clearAuth set to false. To entirely reset the state of API $clearAuth should be set to true and this will reset everything except the log file.</p>
+			
+				<h3>public function sendRequest($variables=false,$fileVariables,$cryptedVariables=false)</h3>
+					
+					<p>This method executes the API request by building the request based on set input data and sending it to API using cURL or file_get_contents() methods. It also builds all validations as well as validates the returned response from the server and calls callback functions, if they are set. It is possible to send input variables directly with a single call by supplying $variables, $fileVariables and $cryptedVariables arrays.</p>
+					
+					<p>This method builds the request variables based on requirements of Wave Framework and includes validation and authentication for API profiles.</p>
+					
+					<p>If file upload is not used and variable GET string length total is less than 2048 (or another value, if different GET length is used) then Wrapper makes a GET request. In every other case a POST request is made to the API.</p>
+					
+					<p>PHP API Wrapper also attempts to overcome a security problem when sending POST request with values that start with @ symbol, it attempts to convert those variables to be part of GET string instead, but there is still a chance that a POST request is made that is very long and starts with a @ symbol, in which case the request will fail.</p>
+					
+					<p>Request is made with cURL, unless it is not available. Fallback method is file_get_contents() which only works for GET requests.</p>
+					
+					<p>This method also deals with the response from the API. This includes validating the response sent from the API and decrypting the data that is sent, if encrypted data is included in the response.</p>
+					
+					<p>It also attempts to unserialize the response from API and return it as PHP variable, in case it is a JSON or other supported format.</p>
+					
+					<p>Method will also send the response to success, failure and error callback functions with the entire response, if these callbacks are defined.</p>
+					
+					<p>In case new API profile session was created, then it also assigns the API token for other API requests.</p>
+			
+				<h3>private function validationHash($validationData,$postFix)</h3>
+					
+					<p>This method is used to build an input data validation hash string for authenticating API requests. The entire input array of $validationData is serialized and hashed with SHA-1 and a salt string set in $postFix. This is used for all API requests where input has to be validated.</p>
+			
+				<h3>private function ksortArray($data)</h3>
+					
+					<p>This is a helper function used by validationHash() function to serialize an array recursively. It applies ksort() to main method as well as to all sub-arrays. $data is the array to be sorted.</p>
+			
+				<h3>private function errorHandler($inputData,$responseCode,$errorMessage,$errorCallback)</h3>
+					
+					<p>Error handler method is used for cases where the API response is neither success or failure, but an actual error that should not happen. It adds a log entry about the error as well as calls error callback method. $inputData is the data that was input, $responseCode is the response code from the API, $errorMessage is the error message of the api and $errorCallback is the callback method that is used.</p>
+			
+	</body>
+</html>

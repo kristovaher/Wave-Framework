@@ -2,7 +2,7 @@
 
 /*
 Wave Framework
-MVC Model class
+Example Model
 
 Minimal example model for demonstration purposes.
 
@@ -22,7 +22,7 @@ class WWW_model_example extends WWW_Factory {
 		// Do something here
 		return true;
 	}
-	
+
 	// This is intended to load data from database
 	// * id - Identifier of the object loaded
 	public function load($id){
@@ -31,7 +31,7 @@ class WWW_model_example extends WWW_Factory {
 		$this->name='Lorem Ipsum #'.rand(1,1000); // This is used for simply testing cache
 		return true;
 	}
-	
+
 	// This returns all of the data of currently open object
 	public function get(){
 		// Data is returned as an array

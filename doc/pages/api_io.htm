@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>API Input and Output - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>API Input and Output</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>This document gives an overview of all of the settings and configuration that can be sent to Wave Framework API and how each of those settings affects the way the API works. It will also cover all of the possible variables that Wave Framework API may return as a response. This document here is a reference guide to Wave Framework API communication.</p>
+				
+				<p>This document covers all of the input and output variables of core Wave Framework API. There are additional variables that are API Wrapper specific, which you can read more about in PHP API Wrapper and JavaScript API Wrapper documentation.</p>
+				
+			<h2>API Input - Flags and Configuration</h2>
+			
+				<p>Wave Framework expects API-specific configuration settings in a simple format. Every configuration flag or setting is prefixed with 'www-', which is called the Wave prefix since it resembles waves. When sending input data to Wave Framework API, then all of the data is sent as one input array. When HTTP request is made, then all of the POST and GET and other variables are merged into one input array the same way.</p>
+				
+				<p>These are all the input flags and settings that can be sent to API as well as what each of these input flags does:</p>
+				
+				<h3>www-command</h3>
+				
+					<p>This is a required setting for most API call made. This variable defines what Controller and what method is called by the API. Usually the value consists of two keywords, separated by '-' character. For example, if 'www-command' is set to 'example-get', then 'example' controller is called with method 'get'. This controller would be loaded from /controllers/controller.example.php, for example.</p>
+					
+					<p>If this value is set to 'www-create-session' then this calls a special functionality of API that creates a new session token for an API profile. This is covered more in detail in API Security documentation.</p>
+					
+					<p>If this value is set to 'www-destroy-session' then this will delete the existing session token.</p>
+					
+					<p>If this value is set to 'www-validate-session' then this will check if the session token is still valid.</p>
+					
+				<h3>www-controller</h3>
+				
+					<p>It is also possible to define this value instead of 'www-command'. This value only requires the name of the controller that API will call. For example, if this is set to 'example', then /controllers/controller.example.php is called.</p>
+					
+					<p>To find what method the controller will return, API will look at the HTTP request method. So if GET request is made, then it attempts to call a method get() with the input data.</p>
+					
+					<p>This allows to build controllers that conform to RESTful API approach where the HTTP request method defines what type of action is performed.</p>
+				
+				<h3>www-return-type</h3>
+				
+					<p>This tells API what type of data you expect the API to return. Wave Framework API deals internally with arrays, so data is submitted as an array and is returned as an array from controllers. But the API can also convert that array into multiple data formats that can be used by other systems.</p>
+					
+					<p>These are the formats supported as the content type:</p>
+					
+					<ul>
+						<li><b>php</b> - This returns data as a PHP variable. This is useful only for internal API calls and is a default for internal API calls. When this is set as a 'www-return-type', then 'www-output' is automatically turned off as this variable cannot be printed out in most cases.</li>
+						<li><b>json</b> - This is the default value of 'www-return-type' when using the API through API wrappers. Internally the default value is 'php'. This makes the API return the data array as serialized in a JSON string.</li>
+						<li><b>binary</b> - This makes the API return either 1 or 0, based on the response from Controller. If the Controller returns a response code that API considers a success, then 1 will be returned. Binary return type is useful when you just wish to check if a command was successful or not.</li>
+						<li><b>xml</b> - This returns data in XML format.</li>
+						<li><b>rss</b> - This returns data in RSS format. This is similar to XML format, except it comes with RSS headers and core XML frame. It does not validate the array to be compatible with RSS however, this should be done by the developer.</li>
+						<li><b>csv</b> - Data can also be returned in CSV format. It is possible to convert a single value, single array or array of arrays into CSV format.</li>
+						<li><b>serializedarray</b> - This uses PHP's serialize() function on the response. This can be used to request data from API in cases where JSON is not useful or supported.</li>
+						<li><b>querystring</b> - This returns data the way data is formatted in a GET request string or in (some) POST data. This is similar to serializedarray and is useful in cases where JSON is not supported.</li>
+						<li><b>ini</b> - It is also possible to return data as an INI file. This also supports converting a single value, an array and array of arrays.</li>
+						<li><b><i>[other]</i></b> - Other return types are set. These return types are returned by default with 'text/plain' content type headers and can be checked for in the controllers.</li>
+					</ul>
+					
+				<h3>www-minify</h3>
+				
+					<p>If this is set to 1, then this tells API to attempt to minify the result using Minifier. This type of minifying only works if 'www-return-type' is set to 'xml', 'html', 'js', 'css' or 'rss'. Otherwise the result is kept without minification.</p>
+					
+				<h3>www-output</h3>
+				
+					<p>If set to 1, then this tells API to return the result by pushing the contents to the output buffer. This means that the result will also be returned together with appropriate headers, based on 'www-return-type' or 'www-content-type' (if set). This is, for example, how View data is returned, as Views are all written and then pushed to output buffer.</p>
+					
+				<h3>www-return-hash</h3>
+				
+					<p>If this is set to 1, then it asks API to calculate a validation hash with API profile secret key or session token and return it as a 'www-hash' value to the requesting user agent. This validation hash can be used by the user agent to check whether the response data has been tampered with or not. You can read more about this in API Security documentation.</p>
+					
+				<h3>www-return-timestamp</h3>
+				
+					<p>If this is set to 1, then it tells the API to return 'www-timestamp' value that has the timestamp of when the response was generated. This can be checked by the user agent to validate when the response was made. If validation hash is used, then this value cannot be tampered with without the validation hash becoming incorrect.</p>
+				
+				<h3>www-content-type</h3>
+				
+					<p>This is an overwrite. If this is sent to API, then it tells API that no matter what the 'www-return-type' value, the value of 'www-content-type' will be submitted as the content type of the returned result.</p>
+					
+					<p>This is required for certain custom-case uses. For example, browsers tend to pre-format data within browser windows when they are not in HTML format. But if you submit data to a hidden iFrame and expect to return JSON, then the content type has to be set to 'text/html' instead, in order to make sure the contents are not automatically converted by the browser.</p>
+					
+				<h3>www-crypt-output</h3>
+				
+					<p>This tells the API to encrypt the output from the API, if set to 1. This will entirely encrypt and serialize the whole output that is returned from API as a response. This uses Rijndael 256 bit encryption with either secret key or session token and the user agent that requests crypted output will have to decrypt the data prior to getting access to the variables within.</p>
+					
+				<h3>www-cache-tags</h3>
+				
+					<p>This is either a single string or a comma-separated string of tags that will be used, in case the response will also be cached by the API. These tags can be useful later on when a Controller needs to delete some cache from the system.</p>
+					
+					<p>For example, if you generate product information page and allow it to be cached for a long time and send 'www-cache-tags' value as 'products', then you can delete all cache that has that tag from within Controllers whenever you know that your product data has been changed. This allows for very fine-tuned cache architecture.</p>
+					
+				<h3>www-language</h3>
+				
+					<p>Wave Framework comes with a translations layer that can be used even when a website is built upon Wave Framework. Sometimes you need to have your API return results in a specific language. If this value is sent to API, then API will use translations of that language when Controller and/or view generates a response to that API request. This language keyword has to be defined in configuration and it needs translations in /resources/[language].translations.ini file.</p>
+					
+				<h3>www-state</h3>
+				
+					<p>This variable has nothing to do with State class of Wave Framework or the state object that API uses at the time of request. This is a security keyword, if this value is sent to API, then API also returns that same value in response. This can be used to validate if a response is for the same request that was made, or not. You can read more about this variable in API Security documentation.</p>
+					
+				<h3>www-files</h3>
+				
+					<p>This is an array of uploaded files, this is by default populated by $_FILES array and should not be sent by API request directly.</p>
+					
+				<h3>www-cache-timeout</h3>
+				
+					<p>This tells the API the amount of seconds that the user agent is accepting as the maximum age of cache. This means that if you send the value as 600 and API finds cache for that same API call with the same input within the last 600 seconds - or ten minutes - then it will return a result from cache instead of generating it again.</p>
+					
+					<p>This allows for a lot of flexibility as it is an on-demand cache-control that can be used to speed up requests or the same Controller in some parts of the system based on their importance.</p>
+					
+				<h3>www-profile</h3>
+				
+					<p>This is the API profile name that should also be defined in /resources/api.profiles.ini file. This tells API what API profile (and thus what profile settings) the API will use when validating the API request.</p>
+					
+					<p>Note that internal API requests - such as those made from Controllers internally - never need API validations as in order to execute a Controller method, the parent call already has to be validated.</p>
+					
+					<p>This value is, by default, that of public API profile that is defined in configuration.</p>
+					
+				<h3>www-timestamp</h3>
+				
+					<p>If the API profile requires a timestamp validation, then this UNIX timestamp value has to be sent to API when making a request. API will then validate whether the timestamp was in the accepted age before executing the API call. There is more information on this variable in API Security documentation.</p>
+					
+				<h3>www-hash</h3>
+				
+					<p>This value is required by API if non-public API profile is used that requires hash-based input data validation. API will calculate it's own hash based on provided input data and secret key or session token and if the value of 'www-hash' does not match, then it returns an error. There is more information about this variable in API Security documentation.</p>
+					
+				<h3>www-ip-session</h3>
+					
+					<p>If this value is set, then the session token will be tied to the specific IP address where the request is made from. This is useful when it comes to protecting your session token. There is more information on this variable in API Security documentation.</p>
+					
+				<h3>www-cookie</h3>
+				
+					<p>This variable should hold the data from $_COOKIE variable, if $_COOKIE is not empty. It should not be sent to API directly as it would be overwritten.</p>
+					
+				<h3>www-session</h3>
+				
+					<p>This variable holds data from session variable, but not the whole $_SESSION array. Wave Framework namespaces its session data and only the namespaced session data is stored in this 'www-session' array. This variable is automatically defined for API and should not be sent through input variables.</p>
+					
+				<h3>www-crypt-input</h3>
+				
+					<p>This variable should hold encrypted data as a string that is sent to API. This data string should be encrypted as a serialized array and in Rijndael 256bit encryption, using secret key or session token as encryption keys. There is more information on this variable in API Security documentation.</p>
+					
+				<h3>www-json</h3>
+				
+					<p>It is also possible to send an entire JSON string to API that carries all of the input variables. API will first unserialize this string and then uses it as an input array.</p>
+					
+				<h3>www-xml</h3>
+				
+					<p>It is also possible to send an entire XML string to API that carries all of the input variables. API will first unserialize this string and then uses it as an input array.</p>
+					
+				<h3>www-disable-callbacks</h3>
+				
+					<p>If this is set to 1, then any callbacks that have been set in the system will not be used. This allows to disable things such as redirects and other similar functionality, when it would otherwise be set through the Controller.</p>
+				
+			<h2>API Output - Flags and Values</h2>
+			
+				<p>API will return whatever data controller returns and in a format that was defined in input of 'www-return-type'. But there are some Wave Framework specific values that can be returned together with the response and these values can be checked for things like errors and response codes.</p> 
+				
+				<p>Note that these values may not be present in the response, it entirely depends if the developer uses them. The only exception is when an error occurs.</p>
+				
+				<p>These are the values that may be found in the response from API:</p>
+				
+				<h3>www-message</h3>
+				
+					<p>This is a verbose message returned from API about whether the API command was successful or not. This is not translated and is language-independent.</p>
+				
+				<h3>www-response-code</h3>
+				
+					<p>This is response code from API. This value could be in 1XX namespace (for system and configuration and formatting errors), 2XX namespace (used by API Wrappers), 3XX namespace (used for custom developer defined error messages), 4XX namespace (used for negative and failed messages where error did not occur but the intended action did not happen either) and 5XX namespace (which is used for a successful response). There is more information on this in the Response Codes documentation.</p>
+				
+				<h3>www-token</h3>
+				
+					<p>This is returned if 'www-command' was set to 'www-create-session' and session token creation was a success. This carries the key that should be used for session token.</p>
+				
+				<h3>www-token-timeout</h3>
+				
+					<p>If session token was created, then this tells the user agent how long the session token is valid without timeout. Note that whenever a new request is made and the token has not timed out, then this timer is reset. This value is 'infinite' if token timeout is not set in the API profile.</p>
+				
+				<h3>www-ip-session</h3>
+				
+					<p>If the token creation was demanded to be IP-dependent, then this value returns the IP that is allowed to make the requests with this token.</p>
+				
+				<h3>www-disable-callbacks</h3>
+				
+					<p>This is similar to input flag, except this is sent from the Controller as a response and it will do the same thing: disable additional API callbacks, such as redirects or cookie-setting.</p>
+				
+				<h3>www-data</h3>
+				
+					<p>If Controller sends this variable, then all other return variables will be overwritten and this is used as the sole response variable instead. This is actually used by API when gathering response from output buffer instead of returned array.</p>
+				
+				<h3>www-timestamp</h3>
+				
+					<p>This is the timestamp of the moment the response was created. This can be used to validate response age by the user agent.</p>
+				
+				<h3>www-hash</h3>
+				
+					<p>This is a response validation hash that is generated from the response array and secret key or token. There is more about this variable in API Security documentation.</p>
+				
+				<h3>www-set-header</h3>
+				
+					<p>This string or strings from this array will be set as headers in response from API call.</p>
+				
+				<h3>www-set-cookie</h3>
+				
+					<p>This array will be used to set cookies in the response. It requires 'name' and 'value' keys in the array or sub-array (since multiple cookies can also be set).</p>
+				
+				<h3>www-unset-cookie</h3>
+				
+					<p>This unsets a single cookie or an array of cookies based on cookie name in the array of this value.</p>
+				
+				<h3>www-set-session</h3>
+				
+					<p>This array will be used to set session variables in the response. It requires 'name' and 'value' keys in the array or sub-array (since multiple session variables can also be set).</p>
+				
+				<h3>www-unset-session</h3>
+				
+					<p>This unsets a single session variable or an array of session variables based on cookie name in the array of this value.</p>
+				
+				<h3>www-temporary-redirect</h3>
+				
+					<p>If this is set, then user agent is told to redirect to the value of this variable. This is for a 302 Temporary Redirect header.</p>
+				
+				<h3>www-permanent-redirect</h3>
+				
+					<p>If this is set, then user agent is told to redirect to the value of this variable. This is for a 301 Permanent Redirect header.</p>
+			
+	</body>
+</html>

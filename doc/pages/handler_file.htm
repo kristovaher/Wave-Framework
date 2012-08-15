@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>File Handler - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>File Handler</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/handler.file.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>File Handler is used for returning a file from web server. It is loaded by Index Controller when a request is made to a file that has an extension that has not already been served by another Handler (such as Resource and Image handlers). File Handler is usually considered for returning documents, videos and audio from the web server. It also allows to return a file within a byte range, like in the case of file streams.</p>
+			
+			<h2>Workflow</h2>
+			
+				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				
+				<p>File Handler analyzes the request string and determines what type of file is being requested. It also checks if byte range is requested from the response rather than the whole file.</p>
+				
+				<p>File Handler tells the user agent to use cache, if the system detects that the user agent already has the file that is the latest.</p>
+				
+				<p>File Handler analyzes the file contents on the server to determine what type of file is requested. If this is not possible, then it determines the file type based on file extension and uses that as a header that will return the content to the user agent.</p>
+				
+				<p>File Handler applies all appropriate headers to the returned file, from cache control to last modified timestamps and robots tags, latter of which is based on configuration.</p>
+				
+				<p>Handler returns either the whole content or byte range of the content, if such was requested, to the user agent, if the file was found.</p>
+				
+				<p>File Handler also makes an entry in the log file about the request, if Logger is used.</p>
+			
+	</body>
+</html>

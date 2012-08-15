@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Autoload - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Autoload</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/resources/autoload.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Autoload script is not necessary on most web projects as long as functionality is built with classes and objects created from those classes that are used by Controllers, Models and Views within Wave Framework. But sometimes it is necessary to load a specific library or libraries or change some PHP configuration setting globally. Autoload script can be used as an option for this.</p>
+				
+			<h2>Using Autoload Script</h2>
+				
+				<p>It is not recommended to edit Index Gateway file at /index.php or handler files in /engine/ subfolder for that purpose. Editing those files should be the last resort. These files however load a script that is situated in /resources/autoload.php file. As a result, everything that is defined in that Autoload script will be included with every HTTP request that is made to Wave Framework.</p>
+				
+				<p>For example, if you wish to include a method in your system that is accessible everywhere for checking whether your server environment is 64bit or 32bit, then you can add this to your autoload script:</p>
+				
+<pre>
+	<code>
+	function is64bit(){
+		$int = "9223372036854775807";
+		$int = intval($int);
+		if($int==9223372036854775807){
+			return true;
+		} else if($int==2147483647){
+			return false;
+		}
+	}
+	</code>
+</pre>
+
+				<p>If this is defined in Autoload script, then this function is now available for all MVC objects in the system and can be integrated as part of the web service or website.</p>
+				
+				<p>By default the Autoload script is entirely empty and nothing is loaded automatically by Wave Framework.</p>
+			
+	</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Image Handler - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Image Handler</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/handler.image.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Image Handler is used by Index Gateway to return all image files to the user agent HTTP requests. Handler adds proper cache headers as well as supports on-demand image-editing, where it is possible to load an image file with specific resize algorithms and even image filtering. It also checks for files from overrides folder, which can be returned instead of the actual file.</p>
+			
+			<h2>Workflow</h2>
+			
+				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+			
+				<p>Image Handler checks for the presence of the requested file and if the same file exists in overrides folder. If the file exists in overrides folder, then that file is used as source instead.</p>
+				
+				<p>If the image file does not exist, then Image Handler can return a 404 image placeholder rather than just a 404 Not Found header. This is supported if it is set in configuration.</p>
+				
+				<p>Cache is one year by default, this duration can be changed in configuration file. It is also possible to return the file without cache by supplying the 'nocache' request parameter. If this is set then the image files are regenerated with every request.</p>
+				
+				<p>Handler returns a 304 Not Modified header if it detects that the user agent already has the latest version of that image file.</p>
+				
+				<p>Image Handler takes specific parameters, that are separated by &amp; symbol, in the file name. These parameters are used for on-demand image loading, such as for returning an image in a specific resolution or with a specific filtering. This on-demand image editing can be disabled in configuration.</p>
+				
+				<p>On-demand image editing parameters and their range is also checked against configuration parameters and limits, which can limit the options that can be set for image loading. This helps to protect the system against some malicious attacks.</p>
+				
+				<p>Image editing is done through Imager class and the result is also cached, so the same image does not have to be generated multiple times.</p>
+				
+				<p>Image Handler returns proper cache, last-modified, expiring headers and more. It also adds robots directive headers based on configuration.</p>
+				
+				<p>Image content, in its original or edited form, is pushed to user agent with the proper headers.</p>
+				
+				<p>Image Handler also makes an entry in the log file about the request, if Logger is used.</p>
+			
+	</body>
+</html>

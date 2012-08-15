@@ -24,7 +24,16 @@ html,body {
 	font-family: Verdana; 
 	font-size: 14px; 
 	font-weight: normal; 
-	line-height: 18px; 
+	line-height: 20px; 
+	margin:0px;
+	padding:10px;
+	text-align:justify;
+}
+
+body { 
+	width:800px;
+	margin-left:auto;
+	margin-right:auto;
 }
 
 h1,h2,h3,h4,h5 {
@@ -35,7 +44,19 @@ h1,h2,h3,h4,h5 {
 	margin:5px 2px;
 }
 
-.red {
+h1 { padding-bottom:10px; }
+
+a { 
+	color:#386e98;
+	font-weight:bold;
+	text-decoration:none;
+}
+
+a:hover {
+	color:#4d8cbd;
+}
+
+.red, .red:hover {
 	color:#c00000;
 }
 
@@ -45,7 +66,7 @@ h1,h2,h3,h4,h5 {
 
 p { 
 	margin:2px;
-	padding:2px; 
+	padding:2px 6px; 
 }
 
 .bold { 

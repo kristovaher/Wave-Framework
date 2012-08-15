@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>API Handler - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>API Handler</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/handler.api.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>API Handler is loaded whenever a HTTP request is made to *.api extension. API Handler takes all the input from GET, POST, FILES; SESSION and COOKIE variables, loads Wave Framework API and sends all the input to the API and then returns the result to the user agent. By default the API Handler returns data in JSON format. It also loads Database class for additional functionality.</p>
+			
+			<h2>Workflow</h2>
+			
+				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				
+				<p>API Handler loads State class and creates a new State object with the current configuration array. Configuration is required by the API.</p>
+				
+				<p>If database settings are set in configuration, then it also loads Database class and creates a new database object which is stored in State.</p>
+				
+				<p>API Handler also loads autoload script from either /overrides/resources/autoload.php or from /resources/autoload.php, this file can include function definitions or other PHP-related functionality. It is only recommended to store additional functionality in Autoload script if absolutely necessary, such as for functions that are used by every API call.</p>
+				
+				<p>API Handler loads API class and creates a new API object with the current State.</p>
+				
+				<p>All input data from POST, GET, FILES, COOKIE and SESSION are merged into a single input array, which works similarly to $_REQUEST. File and cookie input is stored with additional array keys of 'www-files' and 'www-cookie'. Session is stored similarly in 'www-session', but only if Wave Framework session namespace is defined as one of the cookies.</p>
+				
+				<p>If 'www-profile' is set in the input, then API call is made using that profile and API will validate API profile by using the API profiles in /resources/api.profiles.ini file.</p>
+				
+				<p>API Handler sends a request to API. Wave Framework API object will validate the request, call all the required controllers, models and views and return data to user agent, if requested.</p>
+				
+				<p>API Handler also makes an entry in the log file about the request, if Logger is used.</p>
+			
+	</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Imager Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Imager Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-imager.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Imager is a class that acts as a wrapper to PHP GD library and has a number of methods to resize images with different resize algorithms as well as apply filtering to images and deal with image conversions between different formats. It can load an image resource from server or a URL and either store the edited image in a filesystem or push it to output buffer.</p>
+			
+				<p>This class is used to handle basic image editing, mostly for file resizes and cropping. This is used by default by Index Gateway when a PNG or JPEG file is requested with specific parameters, but can also be used for other image editing in the system since it can be loaded independently and there is a wrapper method for Imager also in Factory class.</p>
+				
+				<p>Imager and on-demand image editing have multiple settings in the Wave Framework configuration file that can protect Imager methods to be used over HTTP requests.</p>
+				
+			<h2>Using Imager class</h2>
+			
+				<p>To use Imager class, it is recommended to load Imager class and then load an image by supplying an URL to this file. For example, to load an image to Imager, you can do as follows:</p>
+				
+<pre>
+	<code>
+	require('/engine/class.www-imager.php');
+	$picture=new WWW_Imager();
+	$picture-&gt;input('picture.jpg');
+	</code>
+</pre>
+
+				<p>To resize and crop that source image to 320x240 pixels, you can call resizeFitCrop() method:</p>
+				
+<pre>
+	<code>
+	$picture-&gt;resizeFitCrop(320,240,'center','center');
+	</code>
+</pre>
+
+				<p>The third and fourth parameter in that method assign where the image will be placed on the canvas prior to cropping.</p>
+				
+				<p>In order to save the file, you have to call output() method:</p>
+				
+<pre>
+	<code>
+	$picture-&gt;output('new-picture.jpg');
+	</code>
+</pre>
+
+				<p>Imager class also includes a 'wrapper' of sorts, that can take a file, do multiple actions to it and then save the file again in target location all with a single function call. The parameters string is similar to what the parameter string would be when calling the picture file through Image Handler. For example, this takes source file and saves target file after applying resizing and and black-and-white filtering to the image:</p>
+				
+<pre>
+	<code>
+	$picture-&gt;commands('source.jpg','320x240&amp;filter(grayscale)','target.jpg');
+	</code>
+</pre>	
+
+			<h2>Imager class Parameters</h2>
+			
+				<h3>public $resource=false</h3>
+				
+					<p>This variable holds the image resource that Imager class handles during its operation.</p>
+			
+				<h3>public $width=0</h3>
+				
+					<p>This variable holds currently known image width in pixels.</p>
+			
+				<h3>public $height=0</h3>
+				
+					<p>This variable holds currently known image height in pixels.</p>
+					
+				<h3>public $type=false</h3>
+				
+					<p>This holds the currently known image type (JPEG, PNG or GIF).</p>
+				
+			<h2>Imager Class Methods</h2>
+			
+				<h3>public function input($location,$extension=false)</h3>
+				
+					<p>This method is used to load an image resource for the Imager class. $location should be a file location in the system a web URL. This method automatically detects the type of image as well as image resolution, which is stored in $width and $height variables. Method returns true if image was loaded successfully.</p>
+					
+				<h3>public function output($location=false,$quality=90,$format=false)</h3>
+				
+					<p>This method stores the image in filesystem in $location folder and filename. If $location is not set, then image is returned to output buffer. $quality is used for the compression quality (from 0-100) and $format is used to define what file format the picture is returned. $format can be 'jpg', 'png' or 'gif'.</p>
+					
+				<h3>public function commands($source,$command,$target)</h3>
+				
+					<p>This method is a shorthand method to apply series of $commands, similar to Wave Framework on-demand image loading parameters, to an image in $source folder and stored in $target folder. If $target is not set, then image is returned to output buffer.</p>
+					
+				<h3>public function resizeFitCrop($width,$height,$left='center',$top='center')</h3>
+				
+					<p>This is a resize-algorithm method that resizes the current image resource to $width and $height. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'.</p>
+					
+				<h3>public function resizeCrop($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0)</h3>
+				
+					<p>This is a resize-algorithm method that resizes the current image resource to $width and $height without resizing the actual image. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values for background color in case background is required (not used for PNG images).</p>
+					
+				<h3>public function resizeFit($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0)</h3>
+				
+					<p>This is a resize-algorithm method that resizes the current image simply by resizing the image to $width and $height and leaves the remaining space for background color. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values for background color in case background is required (not used for PNG images).</p>
+					
+				<h3>public function resizeFitNoBackground($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0)</h3>
+				
+					<p>This is a resize-algorithm method that resizes the current image simply by resizing the image to $width and $height and removing the dimensions that would otherwise be left for a background. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values for background color in case background is required (not used for PNG images).</p>
+					
+				<h3>public function resizeWidth($width)</h3>
+				
+					<p>This method simply resizes the image to fixed width set with $width variable. New image height depends on the result of the resize.</p>
+					
+				<h3>public function resizeHeight($height)</h3>
+				
+					<p>This method simply resizes the image to fixed height set with $height variable. New image width depends on the result of the resize.</p>
+					
+				<h3>public function applyFilter($type,$alpha=100,$settings)</h3>
+				
+					<p>This method is a wrapper for imagefilter() and imageconvolution() methods. $type can be 'negative', 'grayscale', 'brightness', 'contrast', 'colorize', 'alphacolorize', 'edge', 'emboss', 'blur', 'soften', 'sketch', 'smooth', 'pixelate' and 'convulate'. $alpha is the percentage that this filter effect will be applied to the original image as a layer. $settings is an array of variables that are expected to be sent with imagefilter() and imageconvulation() methods.</p>
+			
+	</body>
+</html>

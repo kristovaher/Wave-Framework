@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Dynamic Loading of Images - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Dynamic Loading of Images</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework allows loading of image files, both JPEG and PNG files, with various additional on-demand options. The way this works is that all HTTP requests are redirected to Wave Framework Index Gateway which then loads image handler for serving these image files. By default the file extensions, that are served by image handler, are: *.jpg, *.jpeg, *.png.</p>
+				
+				<p>In order for dynamic loading of images to work properly, URL rewriting must be supported by the server, otherwise Wave Framework image handler will never get the request. If in doubt, you can check the /tools/compatibility.php script to see if URL rewriting is supported or not.</p>
+				
+			<h2>Making Requests to Image Files</h2>
+			
+				<p>Wave Framework image handler will attempt to return image file with proper cache headers based on configuration settings in /config.ini file. Wave Framework builds internal cache and makes sure that the requested image is returned to the requesting user agent as efficiently as possible.</p>
+			
+				<p>Common method for client to request a image file such as a JPEG file is like this:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/images/picture.jpg
+	</code>
+</pre>
+
+				<p>One of the more innovative features of Wave Framework is that it allows to make requests to images with on-demand options that allow for things like basic image editing, resizes, compression and filtering. This makes it possible to make the image resources entirely design-independent since they can be changed just by changing the link address that points to the file.</p>
+				
+				<p>These are the options that are available to be set, when requesting an image file:</p>
+				
+				<ul>
+					<li><b>XxY</b> - This resizes the file to specific dimensions, set like 320x240.</li>
+					<li><b>fitcrop</b> - This makes the image use cropping, where file is resized to fit the requested dimensions and cut away the parts of the image that don't fit inside the requested dimensions.</li>
+					<li><b>crop</b> - This makes the image use cropping to requested dimensions without resizing.</li>
+					<li><b>fitwithbackground</b> - This makes the image to be resized to requested dimensions and fill the rest of the resulting image in solid colors.</li>
+					<li><b>fitwithoutbackground</b> - This makes the image to be resized to requested dimensions and cutting out the areas not filled by image.</li>
+					<li><b>widthonly</b> - This resizes the image to width set by requested dimensions.</li>
+					<li><b>heightonly</b> - This resizes the image to height set by requested dimensions.</li>
+					<li><b>nocache</b> - This makes the system not cache the returned image. By default cache is on and lasts as long as static file cache timeout setting.</li>
+					<li><b>@X</b> - It is possible to request specific quality of compression. By default the compression is 90, but setting it to 50% is done, for example, with @50.</li>
+					<li><b>rgb(R,G,B)</b> - It is possible to set the background color for solid background, if such exists in the returned image. By default the value is black.</li>
+					<li><b>position-position</b> - It is possible to set where the image is placed within requested dimensions. By default it is 'center-center', which places the image in the center. Other possible values are 'top-left', 'center-left', 'bottom-left', 'top-center', 'center-center', 'bottom-center', 'top-right', 'center-right' and 'bottom-right'. It is also possible to send specific pixel coordinates, like 50-50.</li>
+					<li><b>filter(type,A,B,C)</b> - This allows to apply a filter to the image based on imagefilter() PHP function. First value can be 'negative', 'grayscale', 'brightness', 'contrast', 'colorize', 'edge', 'emboss', 'blur', 'soften', 'sketch', 'smooth' 'convulate' and 'pixelate'. Second, third and fourth variables are optional, based on needs of imagefilter() function. Please refer to PHP documentation for further information about the filters themselves. You can also set how much the filter will be blended with the image below by setting it like 'filter@50', which blends the filter effect by only 50%. It is also possible to apply multiple filters by simply having multiple filter parameters defined.</li>
+				</ul>
+				
+				<p>Parameters have to be prepended to the filename with & symbol separating each parameter and filename itself in the end. Below are some examples.</p>
+				
+				<p>This requests an image in 320x240 resolution instead of its original resolution:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/images/320x240&picture.jpg
+	</code>
+</pre>
+				
+				<p>Requesting image with another resize algorithm and also defining background color:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/images/320x240&fitwithbackground&rgb(255,0,0)&picture.jpg
+	</code>
+</pre>
+
+				<p>Requesting image with very high compression:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/images/320x240&fitwithbackground&rgb(255,0,0)&picture.jpg
+	</code>
+</pre>
+
+				<p>Setting image in top-left corner after resize:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/320x240&top-left&picture.jpg
+	</code>
+</pre>
+
+				<p>Applying a colorize filter on the image:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/320x240&filter(colorize,112,66,20)&picture.jpg
+	</code>
+</pre>
+
+				<p>Differently from other on-demand options, it is also possible to apply multiple filters in the same request, like this:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/320x240&filter(colorize,112,66,20)&filter(blur)&picture.jpg
+	</code>
+</pre>
+
+				<p>It is also possible to request image file without cache being used, like this:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/images/nocache&320x240&picture.jpg
+	</code>
+</pre>
+
+				<p>Image requests like this can be written to your views or general HTML and they work like any other image. Such on-demand loading means that it is never needed to regenerate image resources, especially things like user avatars or gallery pictures.</p>
+			
+	</body>
+</html>

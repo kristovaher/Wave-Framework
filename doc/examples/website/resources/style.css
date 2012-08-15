@@ -1,0 +1,90 @@
+
+/* 
+Wave Framework
+Main Stylesheet
+
+General use stylesheet that is loaded by WWW_controller_view. All styles can be defined 
+in this file and this file is generally loaded as the first CSS file in the system after 
+reset CSS.
+
+* It is possible to pre-load images based on example in this file
+
+Author and support: Kristo Vaher - kristo@waher.net
+License: This file can be copied, changed and re-published under another license without any restrictions
+*/
+
+body,html {
+	background-color: #e8decc;
+	font: 13px Verdana;
+	color: #221e18;
+}
+p { 
+	margin:6px 0px; 
+}
+a {
+	font:12px Verdana;
+	color:#000000;
+}
+#header { 
+	font: 20px Verdana;
+	color: #ffffff;
+	border-width: 2px;
+	border-radius: 8px 8px 8px 8px; 
+	background-color: #c0ac8a;
+	text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.25); 
+	margin: 10px;
+	padding: 10px;
+	width: 500px;
+	height:32px;
+	margin-left: auto;
+	margin-right: auto;
+}
+#header a {
+	display: block;
+	float: right; 
+	border-width: 2px;
+	border-radius: 8px 8px 8px 8px; 
+	background-color: #736449;
+	margin: 3px;
+	padding: 5px;
+	font: 14px Verdana;
+	color: #ffffff;
+	text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.25); 
+	text-decoration: none;
+}
+#header a.active {
+	background-color: #9d8663;
+}
+#header a:hover {
+	background-color: #847256;
+}
+#body {
+	margin: 10px;
+	padding: 10px;
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	border-radius: 8px 8px 8px 8px; 
+	background-color: #ffffff;
+}
+input,select {
+	font: 13px Verdana;
+	color: #221e18;
+	padding: 4px;
+	width:150px;
+}
+#movies td, #movies th {
+	padding:4px 8px;
+}
+#movies td, #movies th, #movies td a {
+	font: 15px Verdana;
+	color: #000000;
+}
+#movies th {
+	font-weight: bold;
+	background-color:#d6d6d6;
+}
+#movies td a {
+	font-weight: bold;
+	text-decoration: underline;
+}

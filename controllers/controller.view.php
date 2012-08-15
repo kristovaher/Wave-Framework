@@ -2,18 +2,12 @@
 
 /*
 Wave Framework
-MVC Controller class
+View Controller
 
-View class is used by index.php to load view from /views/ folder and output it to the requesting 
-user agent. View generates typical HTML header, includes various resource files and loads a view 
-that WWW_controller_url detected being the proper URL that is loaded. WWW_controller_view also 
-loads translations file from /resources/{language-code}.translations.php that can be used for 
-different languages for the same views. This class also loads Javascript and jQuery libraries 
-that include useful user interface development functionality.
-
-* This file can be edited to be suitable based on project
-* This view controller includes majority of required settings for a modern website header
-* Loads view from /views/ subfolder
+Wave Framework comes with a View Controller and a translations system that is used to build 
+a website on Wave Framework. This View Controller is entirely optional and can be removed 
+from a system if you plan to implement your own View Controller or simply use Wave Framework 
+for API, without a website.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: This file can be copied, changed and re-published under another license without any restrictions
@@ -132,7 +126,7 @@ class WWW_controller_view extends WWW_Factory {
 				<body>
 				<?php
 					// View object is rendered
-					$result=$viewObject->$view['method']($input);
+					$result=$viewObject->$view['view-method']($input);
 				?>
 				</body>
 			</html>

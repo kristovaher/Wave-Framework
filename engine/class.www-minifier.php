@@ -4,13 +4,12 @@
 Wave Framework
 Minifier class
 
-Minifier is used to minify text data without breaking functionality of that text. This is useful to be 
-applied to JavaScript, CSS Stylesheets, HTML and other text-based formats for purposes of making the 
-file size smaller, thus increasing the performance when file is transferred over HTTP. You should be 
-careful when using minifier however, since it might break functionality under some instances, so it 
-is always good to test before deploying minified resources to live systems.
-
-* This class attempts to minify CSS, JavaScript, HTML and XML
+Minifier is used to minify text data without breaking functionality of that text. This is 
+useful to be applied to JavaScript, CSS Stylesheets, HTML and XML formats for purposes of 
+making the file size smaller, thus increasing the performance when file is transferred over 
+HTTP. You should be careful when using minifier however, since it might break functionality 
+under some instances, so it is always good to test before deploying minified resources to 
+live systems.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -18,9 +17,9 @@ License: GNU Lesser General Public License Version 3
 
 class WWW_Minifier {
 	
-	// This function minifies CSS string
+	// This method removes comments, tabs, spaces, new-lines and various other spaces from 
+	// text. It assumes that text is in a CSS-like format.
 	// * data - Data string to be minified
-	// Returns minified string
 	public static function minifyCSS($data){
 	
 		// Removing comments
@@ -36,9 +35,9 @@ class WWW_Minifier {
 		
 	}
 	
-	// This function minifies JavaScript string
+	// This method removes comments, tabs, spaces, new-lines and various other spaces from 
+	// text. It assumes that text is in a JavaScript-like format.
 	// * data - Data string to be minified
-	// Returns minified string
 	public static function minifyJS($data){
 	
 		// Removing comments
@@ -52,9 +51,9 @@ class WWW_Minifier {
 		
 	}
 	
-	// This function minifies JavaScript string
+	// This method removes comments, tabs, spaces, new-lines and various other spaces from 
+	// text. It assumes that text is in a HTML-like format.
 	// * data - Data string to be minified
-	// Returns minified string
 	public static function minifyHTML($data){
 	
 		// Remove newlines and tabs
@@ -66,9 +65,9 @@ class WWW_Minifier {
 		
 	}
 	
-	// This function minifies JavaScript string
+	// This method removes comments, tabs, spaces, new-lines and various other spaces from 
+	// text. It assumes that text is in a XML-like format.
 	// * data - Data string to be minified
-	// Returns minified string
 	public static function minifyXML($data){
 	
 		// Remove newlines and tabs

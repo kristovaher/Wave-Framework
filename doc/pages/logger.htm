@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Logger Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Logger Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-logger.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>This is an optional class that is used to log requests on system by Index Gateway. WWW_Logger is used to keep track of performance of requests made to Index Gateway files, it keeps track of how long the request took, what data it included, how high was the memory use, server load, CPU usage and so on. If this logger is used, then every single request is logged as serialized arrays in filesystem in /filesystem/log/ subfolders. It is a good idea to clean that folder every now and then. There is a separate log-reader.php script for reading those log files situated in /tools/ subfolder.</p>
+			
+				<p>Logger is used by Index Gateway to keep track of requests made on the page and log the data in filesystem for later review. Whether Wave Framework uses Logger or not depends on /config.ini settings for HTTP request logging. It is possible to configure a regular expression that will be matched against request URL and only those matching URL requests will be logged by Logger through Index Gateway.</p>
+				
+				<p>Logger expects /filesystem/log/ folder to be writeable by PHP.</p>
+				
+				<p>The rest of this document details the use of Logger class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
+				
+			<h2>Using Logger Class</h2>
+			
+				<p>To use Logger class, it is recommended to load Logger class and create a Logger object as early as possible. Microtime that is defined with Logger will be used for execution time calculations.</p>
+				
+<pre>
+	<code>
+	require('/engine/class.www-logger.php');
+	$logger=new WWW_Logger('/directory/to/log/folder/',microtime());
+	</code>
+</pre>
+
+				<p>Once logger is created then you can always send data to logger. Logger always writes specific data to log that is detailed further below in the document, but it is also possible to send custom data to Logger prior to Logger writing the log in filesystem. Custom data is sent to logger like this:</p>
+				
+<pre>
+	<code>
+	// Sending a single new log data key and value
+	$logger-&gt;setCustomLogData('my-key','my-custom-data');
+	// Sending multiple log data keys and values at the same time
+	$logger-&gt;setCustomLogData(array('my-key'=&gt;'my-custom-data','my-second-key'=&gt;'more-custom-data'));
+	</code>
+</pre>
+				
+				<p>The way Logger works is that it writes one actual entry per request with all the data that has been sent to it. So it is not a log of 'messages' as much as log of data and state at the end of the request. It carries a lot of hardcoded data about input variables and request times by default, together with custom data sent to logger.</p>
+				
+				<p>To write log file in filesystem, you can call the followig method:</p>
+				
+<pre>
+	<code>
+	$logger-&gt;writeLog();
+	</code>
+</pre>
+
+				<p>This attempts to create a log with a filename in the format of 'Y-m-d-H' and in a subfolder 'Y-m-d' in log folder directory. Log data is stored as serialized array and if multiple entries are stored in the same log file, then they are separated by a new line.</p>
+			
+			<h2>Logger Class Parameters</h2>
+			
+				<h3>private $requestMicrotime=false</h3>
+				
+					<p>This stores microtime of the request at the moment Logger object was created. This microtime is used by Logger to calculate execution time of the script. If this value is not defined at the moment Logger object is created, then it is defined automatically.</p>
+				
+				<h3>private $logDir='./'</h3>
+				
+					<p>This is the main address of the folder where log files will be stored. This folder should be writable by PHP. Logger creates subfolders under this folder and stores log files in those subfolders.</p>
+				
+				<h3>public $logData=array('response-code'=&gt;200)</h3>
+				
+					<p>This array variable stores custom data sent to logger. Keys of this array will be stored as keys in the log entry.</p>
+			
+			<h2>Logger Class Methods</h2>
+			
+				<h3>public function __construct($logDir='./',$microTime=false)</h3>
+				
+					<p>Construction method of Logger expects just one variable: $logDir, which is the folder where log files will be stored. Second variable, $microTime, is used to calculate the execution time of the script. This microtime should be the microtime from the very start of the script, if it is not defined then Logger defines it by itself.</p>
+					
+					<p>A constant __IP__ is also defined with remote address of the client making the request, if it has already not been defined. It is recommended to assign a true and secure IP address to __IP__ in case the request comes from behind a proxy.</p>
+				
+					<p>This method also throws an error if the log directory does not exist.</p>
+					
+				<h3>public function setCustomLogData($key,$value=true)</h3>
+				
+					<p>This method is used to add data to objects $logData array. Key will be the same key defined in the log entry array and value will be the value of this key. It is also possible to send multiple keys and values in the same method, if $key is an array of keys and values, instead of a string.</p>
+					
+				<h3>public function writeLog()</h3>
+				
+					<p>This is the main method of Logger. This method attempts to gather a lot of data about the HTTP request and calculate things such as execution time, memory usage and more. It also creates a logger entry array and combines it with custom log array of $logData. It also creates subfolder in the log folder directory, if it doesn't exist, and writes serialized log entry array in that folder.</p>
+				
+				
+			
+	</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Frequently Asked Questions - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Frequently Asked Questions</h1>
+		
+			<h3>I uploaded the files, but when testing the page on my server, it throws an error or it does not display the Wave logo and the 'hello' message, what can I do?</h3>
+			
+				<p>This problem can occur for multiple reasons. First thing you can do is check if your server is compatible with Wave Framework. To do that you should attempt to run the Compatibility script in '/tools/compatibility.php'. This script asks for a HTTP username and password that are set in your Configuration in '/config.ini' file.</p>
+				
+				<p>If the Compatibility script works and shows no errors, then it is likely that the problem was in file upload. Some FTP upload programs and servers have a problem with certain new-lines in source code and will write the files incorrectly to the server. To fix this issue, then you should upload files in binary mode. In FileZilla, this mode is in 'Transfer -> Transfer Mode -> Binary'.</p>
+
+			<h3>What should I do before deploying the project live?</h3>
+			
+				<p>Wave Framework includes a number of functionality that is useful only for development and is not useful when the project is deployed live. In order to make sure that your project is as secure as possible when deployed live, you should do the following:</p>
+				
+				<ul>
+					<li>Remove '/tools/' folder from the server or restrict access to it entirely. Tools should be only used for debugging and by a developer or server administrator.</li>
+					<li>Remove '/doc/' folder entirely. Documentation could potentially reveal what version of Wave Framework your server is using and if the framework is outdated, then it is better if that information is kept secret in case unpatched security vulnerabilities or bugs exist in the older version.</li>
+					<li>Make sure that you cannot access *.ini and *.tmp files from the server, like '/config.ini' file especially. By default Wave Framework blocks the access to *.ini and *.tmp files directly, but in case you have changed the default Configuration, then this will make sure that your authentication and configuration data is safe.</li>
+					<li>Remove '/readme.txt' from the server since it might carry hints about what version of Wave Framework is being used.</li>
+				</ul>
+				
+			<h3>Can I build a content management system with Wave Framework?</h3>
+			
+				<p>Yes. While Wave Framework comes with fixed filesystem based Sitemap and Translations - as well as configuration - nothing stops you from building a system that allows you to generate these files. You could build a Content Management System where you can essentially build your website tree of URL's and then just generate a sitemap.ini file that Wave Framework understands.</p>
+				
+				<p>Same applies to translations and configuration. You can essentially generate these files yourself and do with them whatever you want and Wave Framework will be able to function without problems.</p>
+	</body>
+</html>

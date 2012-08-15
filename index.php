@@ -2,18 +2,13 @@
 
 /* 
 Wave Framework
-Index gateway
+Index Gateway
 
-Index gateway is a file where majority of requests are forwarded by Apache and /.htaccess file. 
-This file serves caches and compresses data, if supported, for both static files as well 
-as regular views. It also displays errors for files not found or files that are forbidden to 
-be accessed. Handlers for Index gateway are stored in /engine/ subfolder.
-
-* Request limiter checks
-* Loads state and loggers
-* Loads API handler and data handler
-* Loads files, resources and images through handlers
-* Loads robots.txt and sitemap.xml through handlers
+Index Gateway is an index/bootstrap file of Wave Framework that will serve almost every HTTP 
+request made to the system built on Wave Framework. It analyzes the HTTP request, loads Logger 
+and configuration as well as HTTP request Limiter, overwrites error handler of PHP and then 
+executes the command through one of the request handlers that are stored in 
+/engine/handler.[handler-type].php files.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -32,7 +27,7 @@ License: GNU Lesser General Public License Version 3
 	$tmp=explode('?',$_SERVER['REQUEST_URI']);
 	$resourceAddress=array_shift($tmp);
 
-	// Stopping all direct requests to Index gateway
+	// Stopping all direct requests to Index Gateway
 	if($resourceAddress==$_SERVER['SCRIPT_NAME']){
 		header('HTTP/1.1 403 Forbidden');
 		die();
@@ -41,6 +36,8 @@ License: GNU Lesser General Public License Version 3
 	// Currently known location of the file in filesystem
 	// Double replacement occurs since some environments give document root with the slash in the end, some don't (like Windows)
 	$resourceRequest=str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR,$_SERVER['DOCUMENT_ROOT'].$resourceAddress);
+	
+	// If requested URL does not point to a directory, then request is possibly made to a file
 	if(!is_dir($resourceRequest)){
 		// Getting directory, filename and extension information about current resource address
 		$resourceInfo=pathinfo($resourceRequest);
@@ -72,17 +69,53 @@ License: GNU Lesser General Public License Version 3
 		if(isset($config['trusted-proxies'])){
 			$config['trusted-proxies']=explode(',',$config['trusted-proxies']);
 		}
+		
 		// List of logger IP's
 		if(isset($config['logger-ip'])){
 			$config['logger-ip']=explode(',',$config['logger-ip']);
 		}
+		
 		// List of languages
 		if(isset($config['languages'])){
 			$config['languages']=explode(',',$config['languages']);
 		}
+		
 		// Internal logging flags
 		if(isset($config['internal-logging'])){
 			$config['internal-logging']=explode(',',$config['internal-logging']);
+		}
+		if(isset($config['api-logging'])){
+			$config['api-logging']=explode(',',$config['api-logging']);
+		}
+		
+		// File extensions and defaults
+		if(isset($config['image-extensions'])){
+			$config['image-extensions']=explode(',',$config['image-extensions']);
+		} else {
+			$config['image-extensions']=array('jpeg','jpg','png');
+		}
+		if(isset($config['resource-extensions'])){
+			$config['resource-extensions']=explode(',',$config['resource-extensions']);
+		} else {
+			$config['resource-extensions']=array('css','js','txt','csv','xml','html','htm','rss','vcard');
+		}
+		if(isset($config['forbidden-extensions'])){
+			$config['forbidden-extensions']=explode(',',$config['forbidden-extensions']);
+		} else {
+			$config['forbidden-extensions']=array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini');
+		}
+	
+		// Required timezone setting
+		if(!isset($config['timezone'])){
+			// Setting GMT as the default timezone
+			$config['timezone']='Europe/London';
+		}
+	
+		// Trusted proxies and IP address
+		if(isset($config['trusted-proxies'])){
+			$config['trusted-proxies']=explode(',',$config['trusted-proxies']);
+		} else {
+			$config['trusted-proxies']=array('*');
 		}
 		
 		// Cache of parsed INI file is stored for later use
@@ -97,28 +130,16 @@ License: GNU Lesser General Public License Version 3
 		$config=unserialize(file_get_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp'));
 	}
 	
-	// Required timezone setting
-	if(!isset($config['timezone'])){
-		// Setting GMT as the default timezone
-		$config['timezone']='Europe/London';
-	}
 	// Setting the timezone
 	date_default_timezone_set($config['timezone']);
-	
-	// Trusted proxies and IP address
-	if(isset($config['trusted-proxies'])){
-		$config['trusted-proxies']=explode(',',$config['trusted-proxies']);
-	} else {
-		$config['trusted-proxies']=array('*');
-	}
 	
 	// IP may be forwarded (such as when website is used through a proxy), this can check for such an occasion
 	if(isset($_SERVER['HTTP_CLIENT_IP']) && (in_array('*',$config['trusted-proxies']) || in_array($_SERVER['REMOTE_ADDR'],$config['trusted-proxies']))){
 		$tmp=explode(',',$_SERVER['HTTP_CLIENT_IP']);
-		define('__IP__',$tmp[0]);
+		define('__IP__',trim(array_pop($tmp)));
 	} elseif(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && (in_array('*',$config['trusted-proxies']) || in_array($_SERVER['REMOTE_ADDR'],$config['trusted-proxies']))){
 		$tmp=explode(',',$_SERVER['HTTP_X_FORWARDED_FOR']);
-		define('__IP__',$tmp[0]);
+		define('__IP__',trim(array_pop($tmp)));
 	} else {
 		define('__IP__',$_SERVER['REMOTE_ADDR']);
 	}
@@ -162,7 +183,7 @@ License: GNU Lesser General Public License Version 3
 		}
 		// If HTTP authentication is turned on, the system checks for credentials and returns 401 if failed
 		if(isset($config['http-authentication-limiter']) && $config['http-authentication-limiter']){
-			$limiter->limitUnauthorized($config['http-authentication-username'],$config['http-authentication-password']);
+			$limiter->limitUnauthorized($config['http-authentication-username'],$config['http-authentication-password'],((isset($config['http-authentication-ip']))?$config['http-authentication-ip']:'*'));
 		}
 		// Request limiter keeps track of how many requests per minute are allowed on IP.
 		// If limit is exceeded, then IP is blocked for an hour.
@@ -205,22 +226,22 @@ License: GNU Lesser General Public License Version 3
 			
 			// Input data to error report
 			$error=array();
-			if(isset($_GET) && !empty($_GET)){
+			if(!empty($_GET)){
 				$error['get']=$_GET;
 			}
-			if(isset($_POST) && !empty($_POST)){
+			if(!empty($_POST)){
 				$error['post']=$_POST;
 			}
-			if(isset($_FILES) && !empty($_FILES)){
+			if(!empty($_FILES)){
 				$error['files']=$_FILES;
 			}
-			if(isset($_COOKIE) && !empty($_COOKIE)){
+			if(!empty($_COOKIE)){
 				$error['cookies']=$_COOKIE;
 			}
-			if(isset($_SESSION) && !empty($_SESSION)){
+			if(!empty($_SESSION)){
 				$error['session']=$_SESSION;
 			}
-			if(isset($_SERVER) && !empty($_SERVER)){
+			if(!empty($_SERVER)){
 				$error['server']=$_SERVER;
 			}
 			// Add to error array
@@ -271,19 +292,21 @@ License: GNU Lesser General Public License Version 3
 	
 // LOADING HANDLERS
 
-	// Index gateway works differently based on what file is being requested
+	// Index Gateway works differently based on what file is being requested
 	// Handlers for all different modes are stored under /engine/ subfolder
 
 	// request has a file extension, then system will attempt to use another handler
 	if(isset($resourceExtension)){
 
 		// Handler is detected based on requested file extension
-		if(in_array($resourceExtension,array('jpeg','jpg','png'))){
-			// Image handler allows for things such as dynamic image loading
-			require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.image.php');
-		} elseif(in_array($resourceExtension,array('css','js','txt','csv','xml','html','htm','rss','vcard'))){
+		if(in_array($resourceExtension,$config['image-extensions'])){
 		
-			// Text-based resources are handled by Resource handler, except for two special cases (robots.txt and sitemap.xml)
+			// Image Handler allows for things such as dynamic image loading
+			require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.image.php');
+			
+		} elseif(in_array($resourceExtension,$config['resource-extensions'])){
+		
+			// Text-based resources are handled by Resource Handler, except for two special cases (robots.txt and sitemap.xml)
 			if($resourceFile=='sitemap.xml'){
 				// Sitemap is dynamically generated from sitemap files in /resource/ subfolder
 				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.sitemap.php');
@@ -291,11 +314,11 @@ License: GNU Lesser General Public License Version 3
 				// Robots file is dynamically generated based on 'robots' configuration in config.php file
 				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.robots.php');
 			} else {
-				// In every other case the system loads text based resources with additional options, such as compressions and minifying, with Resource handler
+				// In every other case the system loads text based resources with additional options, such as compressions and minifying, with Resource Handler
 				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.resource.php');
 			}
 			
-		} elseif(in_array($resourceExtension,array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini'))){
+		} elseif(in_array($resourceExtension,$config['forbidden-extensions'])){
 		
 			// These file extensions are not allowed, thus 403 error is returned
 			// Log category is 'file' due to it being a file with an extension
@@ -323,7 +346,9 @@ License: GNU Lesser General Public License Version 3
 			} else {
 			
 				// This allows API filename to define what type of data should be returned
-				if($apiHandler!='json' && $apiHandler!='www'){
+				if($apiHandler=='www'){
+					$_GET['www-return-type']='php';
+				} elseif($apiHandler!='json' && $apiHandler!='www'){
 					$_GET['www-return-type']=$apiHandler;
 				}
 				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api.php');
@@ -331,12 +356,12 @@ License: GNU Lesser General Public License Version 3
 			}
 			
 		} else {
-			// File handler is loaded for every other file request case
+			// File Handler is loaded for every other file request case
 			require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.file.php');
 		}
 		
 	} else {
-		// Every other request is handled by Data handler, which loads URL and View controllers for website views
+		// Every other request is handled by Data Handler, which loads URL and View controllers for website views
 		require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.data.php');
 	}
 

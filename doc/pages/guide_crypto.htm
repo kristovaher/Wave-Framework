@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Cryptography - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Cryptography Guide</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework has a strong encryption model that it can use to send data in encrypted form between different web servers. Wave Framework uses Rijndael 256bit encryption in ECB and CBC modes by default and there are wrapper methods available for this type of encryption. Of course, as a developer, you can use other encryption methods just as easily as you would with PHP in every other case.</p>
+				
+			<h2>Using Rijndael 256bit Wrapper Functions</h2>
+			
+				<p>Wave Framework wrapper functions for encryption and decryption do multiple things that make sure that the process flows without problems:</p>
+				
+				<ul>
+					<li>It uses ECB mode if secret key (technically initialization vector) is not used and uses CBC mode if it is used. CBC mode is more secure than ECB mode.</li>
+					<li>It makes sure that the key and initialization vector are always in the accepted length. To do this, the wrapper generates hashes from both that are 32 characters in length.</li>
+					<li>Wrapper also encodes the encryption in Base64, so it can be handled easier and decodes it from Base64 when doing the decryption.</li>
+					<li>Wrapper also trims the decrypted string of any characters that might make the decrypted string not match the source. This is important when validating with encryption.</li>
+				</ul>
+			
+				<p>Encryption needs two values, a string value that will be encrypted and an encryption key. If only the key is used for encryption, then the encryption will use ECB mode that is less secure than the initialization-vector enhanced CBC mode, but should be still secure for a lot of use cases. Here is an example of a very simple encryption:</p>
+				
+<pre>
+	<code>
+	// Data and configuration
+	$key='my-key';
+	$message='my-secret-message';
+	
+	// Encrypting the string
+	$encryptedString=$this->encryptRijndael256($message,$key);
+	</code>
+</pre>
+
+				<p>As a result, the $encryptedString value will be something like this:</p>
+				
+<pre>
+	<code>
+	purk/cIwlmH74n/WB3TrnMGisLjwzEbNdNqYhGaUW0c=
+	</code>
+</pre>
+
+				<p>To decrypt this series of characters, then you need to use the encrypted string and the key that was used to encrypt the string in the beginning:</p>
+				
+<pre>
+	<code>
+	$key='my-key';
+	$decryptedString=$this->decryptRijndael256($encryptedString,$key);
+	</code>
+</pre>
+
+				<p>And this would give $decryptedString the value of what was originally there in $message variable.</p>
+				
+				<p>To use a more secure method for encryption and decryption of data, then you can also provide the secret key or initialization vector. Below is the full example of encrypting a variable and decrypting it with the wrapper function, in CBC mode:</p>
+				
+<pre>
+	<code>
+	// Data and configuration
+	$key='my-key';
+	$secretKey='my-secret-key';
+	$message='my-secret-message';
+	
+	// Encrypting the string
+	$encryptedString=$this->encryptRijndael256($message,$key,$secretKey);
+	
+	...
+	
+	// Decrypting the string
+	$decryptedString=$this->decryptRijndael256($encryptedString,$key,$secretKey);
+	</code>
+</pre>
+
+				<p>Whether to encrypt data in ECB or CBC mode is entirely up to the developer. Even an encryption without the initialization vector or secret key is very difficult to decrypt, but the CBC mode should be used whenever you wish to make sure that you are using the best encryption that is available through Wave Framework.</p>
+			
+	</body>
+</html>

@@ -2,18 +2,12 @@
 
 /* 
 Wave Framework
-Index gateway API handler
+API Handler
 
-Index gateway API handler takes all the input from GET, POST, FILES, SESSION and COOKIE variables 
-and sends an API command to WWW_API. By default it returns JSON formatted data. This script also 
-loads WWW_Logger, WWW_Limiter and WWW_Database for additional functionality. Sending www-command 
-as an input variable (GET, POST and so on) will attempt to execute that command through API and 
-return appropriate JSON encoded data. Other returned data formats are also possible to be used, 
-if set by www-return-type, such as xml, text or serializedarray.
-
-* If non-public profile is used, request to this URL must include www-profile, www-timestamp and www-hash
-* Non-public profiles need to be defined at /resources/api.keys.php
-* Loads State and establishes database connection (if used)
+API Handler is loaded whenever a HTTP request is made to *.api extension. API Handler takes all 
+the input from GET, POST, FILES; SESSION and COOKIE variables, loads Wave Framework API and sends 
+all the input to the API and then returns the result to the user agent. By default the API Handler 
+returns data in JSON format. It also loads Database class for additional functionality.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -21,7 +15,7 @@ License: GNU Lesser General Public License Version 3
 
 //INITIALIZATION
 
-	// Stopping all requests that did not come from Index gateway
+	// Stopping all requests that did not come from Index Gateway
 	if(!isset($resourceAddress)){
 		header('HTTP/1.1 403 Forbidden');
 		die();
@@ -61,27 +55,35 @@ License: GNU Lesser General Public License Version 3
 	// All the data sent by the user agent is stored in this variable
 	$inputData=array();
 
-	// All the data sent by user agent is added here and merged into one array
-	if(isset($_POST) && !empty($_POST)){ 
-		$inputData=$_POST; 
-	} elseif(is_array($state->data['http-input'])){
-		// http-input is POST data that is sent as a stream (as XML or JSON)
+	// If data was sent through other means, such as a JSON or XML string
+	if(is_array($state->data['http-input']) && !empty($state->data['http-input'])){
+	
+		// http-input is data string, converted to array, that is sent as a stream (as XML or JSON)
 		$inputData=$state->data['http-input'];
+		
+	} else {
+	
+		// All the data sent by user agent is added here and merged into one array
+		if(!empty($_POST)){ 
+			$inputData+=$_POST; 
+		}
+		if(!empty($_GET)){ 
+			$inputData+=$_GET; 
+		}
+		if(!empty($_FILES)){ 
+			$inputData['www-files']=$_FILES;
+		}
+	
 	}
-	if(isset($_GET) && !empty($_GET)){ 
-		$inputData+=$_GET; 
-	}
-	if(isset($_FILES) && !empty($_FILES)){ 
-		$inputData['www-files']=$_FILES;
-	}
-	if(isset($_COOKIE) && !empty($_COOKIE)){ 
+	
+	if(!empty($_COOKIE)){ 
 		$inputData['www-cookie']=$_COOKIE;
 		// Testing if namespace cookie has been set, if it has then checking for session variables
 		if(isset($_COOKIE[$state->data['session-namespace']])){
 			// Starting sessions
 			$state->startSession();
 			// Checking for session variables
-			if(isset($_SESSION[$state->data['session-namespace']]) && !empty($_SESSION[$state->data['session-namespace']])){ 
+			if(!empty($_SESSION[$state->data['session-namespace']])){ 
 				$inputData['www-session']=$_SESSION[$state->data['session-namespace']]; 
 			}
 		}
@@ -100,6 +102,11 @@ License: GNU Lesser General Public License Version 3
 	$apiResult=$api->command($inputData,false,true,true);
 	
 // LOGGER
+	
+	// API Logging
+	if(isset($config['api-logging']) && $config['api-logging']!=false && isset($inputData['www-command']) && ((in_array('*',$config['api-logging']) && !in_array('!'.$state->data['api-profile'],$config['api-logging'])) || in_array($state->data['api-profile'],$config['api-logging']))){
+		file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log',$state->data['request-time']."\t".$state->data['api-profile']."\t".$inputData['www-command']."\n",FILE_APPEND);
+	}
 
 	// Logger notifications
 	if(isset($logger)){

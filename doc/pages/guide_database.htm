@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Database Requests - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Making Database Requests</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework also implements a wrapper class for PDO. This means that it is possible to use Wave Framework to connect to MySQL, PostgreSQL, SQLite, Oracle and MSSQL databases. Wave Framework also has multiple helper functions that can assist developer when dealing with database related filtering and other features.</p>
+				
+			<h2>Connecting to Database</h2>
+			
+				<p>There are two ways for Wave Framework to connect to database. The first is to set up Wave Framework to have a single database link that it will connect with through Wave Framework and the State itself.</p>
+				
+				<p>To set up such a database connection, then you have to add database credentials (the host address, database name, username and password), in the Configuration of Wave Framework, which is stored in '/config.ini' file. These are the settings:</p>
+				
+<pre>
+	<code>
+	database-type="mysql"
+	database-host="localhost"
+	database-name=""
+	database-username=""
+	database-password=""
+	database-errors=1
+	database-persistent=0
+	</code>
+</pre>
+
+				<p>Errors setting says that if the database connection throws an error, then that error is logged in system error log. And if persistence flag is set, then the database connection can be reused by other HTTP requests. It is not recommended to use persistent connections in most cases, as it can cause some HTTP requests to have to wait in queue as the database requests are made (since the connection is shared across all of those HTTP requests).</p>
+				
+				<p>It is not necessary to separately call for a function to connect and disconnect to such a database. Wave Framework detects automatically if a database connection is actually needed or not. This means that if you have a page on a website that doesn't load anything from database, then Wave Framework never connects to it, saving processing time and server resources. This includes caching: if data is returned from cache then there is no need to connect to database.</p>
+				
+				<p>Another method for connecting to a database is to create a new database object. This is useful for cases where you need to connect to a secondary database or some other system and retrieve some data from there. For example:</p>
+				
+<pre>
+	<code>
+	// Database type can be 'mysql', 'sqlite', 'postgresql', 'oracle' or 'mssql'
+	// Database host is the host address or file location of the database
+	// Database name is the name of the database to be selected
+	// User and password are the access credentials
+	// Show errors flag will make the database requests throw PHP errors if database errors occur
+	// Persistent flag is for shared connections
+	$otherDb=$this->dbNew($type,$host,$databaseName,$user,$password,$showErrors,$persistent);
+	</code>
+</pre>
+
+				<p>This new database object works with the exact same rules that Wave Framework's internal database connection follows. It is not necessary to connect to database as it does it by itself, same applies to closing the connection.</p>
+				
+				<p>Methods used in this new database object are also the same as the ones shown below, in other sections of this document.</p>
+				
+			<h2>Database Requests</h2>
+			
+				<p>Wave Framework Database Class has three methods for making database requests and one method for returning the last inserted ID. The three methods serve a slightly different purpose. Wave Framework is built around PDO class, so it supports prepared statements, which means that the query string and variables should be sent separately. It is recommended to learn more about PDO in PHP official documentation, if you are not familiar with prepared statements.</p>
+				
+				<p>If you wish to return a single row from database, then you should use the dbSingle() database call. For example, if you wish to return user data from users table that has an ID of 17:</p>
+				
+<pre>
+	<code>
+	$user=$this->dbSingle('SELECT * FROM users WHERE id=?',array(17));
+	if($user){
+		// User was found
+	} else {
+		// User was not found
+	}
+	</code>
+</pre>
+
+				<p>The above example will populate the $user variable with the array that was generated from the returned row from the database. Thus dbSingle() will only return the first row of the database query result. This array will be associative array where the array keys match the column names.</p>
+				
+				<p>If you wish to return all users from database, then you would use the dbMultiple() method, like this:</p>
+				
+<pre>
+	<code>
+	$users=$this->dbMultiple('SELECT * FROM users;');
+	if($users){
+		// Users were found
+	} else {
+		// Users were not found
+	}
+	</code>
+</pre>
+
+				<p>The above call would return an array that includes all of the returned rows, each array element has one returned row from the database and each of those rows is an array of its own.</p>
+				
+				<p>While dbSingle() and dbMultiple() methods are mostly useful for SELECT type of database calls, then there's another method - dbCommand() - which is useful for UPDATE, DELETE and INSERT queries. For example, this call would delete the user that had the ID of 17:</p>
+				
+<pre>
+	<code>
+	$result=$this->dbCommand('DELETE FROM users WHERE id=?',array(17));
+	if($result){
+		// User was deleted
+	} else {
+		// User was not deleted
+	}
+	</code>
+</pre>
+
+				<p>It is also possible to request the last inserted ID from the database with the following method:</p>
+				
+<pre>
+	<code>
+	$lastId=$this->dbLastId();
+	</code>
+</pre>
+
+				<p>This is useful for situations where you inserted a new object in database, but do not know what primary key was assigned to this new row.</p>
+				
+			<h2>Transactions</h2>
+			
+				<p>PDO supports transactions on database types that support transactions. Transactions are essentially ways to make multiple database requests and then roll them back, should something go wrong.</p>
+				
+				<p>General overview of a use for transactions is as follows:</p>
+				
+				<ul>
+					<li>Transactions are started, which means that every new database request is considered to be part of transactions session.</li>
+					<li>Multiple rows are added to the database.</li>
+					<li>An error is encountered and no more rows can be added to the database. Previous rows should be deleted. On a database type that does not support transactions, you would have to manually delete all of those rows.</li>
+					<li>A query is made that orders a rollback, this rollback will remove all the changes done after the moment when transactions were started.</li>
+					<li>If nothing goes wrong, then transactions are finished by a commit being called, which commits all the changes. This commit is also done automatically if data is not rolled back at any point before the request is finished.</li>
+				</ul>
+				
+				<p>Here are the methods that deal with transactions in Wave Framework:</p>
+				
+<pre>
+	<code>
+	// Transactions are started
+	$lastId=$this->dbTransaction();
+	...
+	//various database calls are made
+	...
+	// If the system considers all the calls to have gone correctly
+	If($ok){
+		// This commits all the database calls
+		$this->dbCommit();
+	} else {
+		// This rolls back all the queries made after the transactions were started
+		$this->dbRollback();
+	}
+	</code>
+</pre>
+
+				<p>The good thing about transactions is that these are not just buffered calls. Database works during transactions the same way it would otherwise, which means that if you add a new object within a transaction, you can also select it from database within the same transaction until you roll it back and it disappears again.</p>
+				
+				<p>Transactions are very useful in a modern database design that help to protect the system from database corruption that might result in broken scripts or processing that went wrong half way through and would otherwise require some manual work to restore.</p>
+			
+			<h2>Helpers and Debugging</h2>
+			
+				<p>There are a few more methods that can be used through the Database Class and wrapper in Wave Framework. These methods do not make an actual database request themselves, but can be used to deal with input or output from database or for debugging.</p>
+				
+				<h3>Input Filtering</h3>
+				
+					<p>First of these methods is used for database input filtering. Sometimes it is necessary to do additional filtering on a variable before it is sent to database. When using prepared statements the way PDO does it, then PDO already makes sure that malicious input does not break database requests, but there are cases where you might have to build the request without prepared statements or include a variable as part of your main database query.</p>
+					
+					<p>Wave Framework has a dbQuote() method for this purpose. This is an expanded version of PDO's own quote() method. Wave Framework's dbQuote takes three parameters: string value to be filtered or escaped, the type of escaping that will be done and whether automatially set quotes will be stripped or not from the variable. Latter of which can be useful for some cases, since PDO automatically adds quotes around escaped variables.</p>
+					
+					<p>These are the types that can be used with dbQuote():</p>
+					
+					<ul>
+						<li><b>escape</b> - This casts the PDO's own quote() method around the variable provided in the method. By default this will also add quotes around the variable, but they can be removed if quotes are assigned to be stripped.</li>
+						<li><b>integer</b> - This converts the variable to an integer through typecasting.</li>
+						<li><b>float</b> - This converts the variable to a float through typecasting.</li>
+						<li><b>numeric</b> - This uses regular expression to strip all characters from a string that are not used for any type of numbers. It does allow spaces as well as these characters in addition to numbers: +-.,()</li>
+						<li><b>latin</b> - This uses regular expression to strip all characters that are not numbers or latin characters from the string.</li>
+						<li><b>field</b> - This converts the string to a database-friendly column name string. It removes all characters that are not latin letters, numbers or - or _ symbols.</li>
+						<li><b>like</b> - This will apply both PDO's quote() method as well as escape LIKE conditions wildcards: % and _ characters.</li>
+					</ul>
+					
+					<p>For example, this shows how to use a dbQuote() method in a SELECT and LIKE database query:</p>
+						
+<pre>
+	<code>
+	$match='Buster';
+	$users=$this->dbSingle('SELECT * FROM users WHERE name LIKE "'.$this->dbQuote($match,'like',true).'";');
+	</code>
+</pre>
+
+					<p>Quotes are stripped in the above example as the string itself already has quotes around the variable.</p>
+				
+				<h3>Array Result Helper</h3>
+
+					<p>Wave Framework also has a helper method that can be used to filter an array, like the one returned from dbMultiple() database call, and return results from only one column. For example, let's say you fetched the data of all your users from a database, and now want to just have an array that holds usernames.</p>
+					
+					<p>There is a dbArray() method that is useful for cases like this. For example:</p>
+					
+		
+<pre>
+	<code>
+	// Getting all users
+	$users=$this->dbMultiple('SELECT * FROM users;');
+	// Getting the data from all 'username' values from the result array
+	$usernames=$this->dbArray($users,'username');
+	// It is also possible to make sure that the returned array has only unique entries
+	$usernames=$this->dbArray($users,'username',true);
+	</code>
+</pre>
+
+					<p>This method is useful for multiple instances where you need to quickly fetch column data from a larger array.</p>
+					
+				<h3>Query Debugging</h3>
+				
+					<p>Sometimes the database request fails and it is difficult to know why when just looking at the database error. For this purpose you can simulate what the request query looked like. For example, this method attempts to simulate a query built with a prepared statement:</p>
+					
+<pre>
+	<code>
+	// Original query
+	$query='SELECT * FROM users WHERE id=?';
+	// Input data
+	$input=array(17);
+	// Printing out simulated string
+	echo $this->dbDebug($query,$input);
+	</code>
+</pre>
+
+					<p>Rather than just echo it out, it is actually recommended to insert that simulated query to your Internal Log. You can read more about Internal Logger in its own documentation page.</p>
+					
+				<h3>Returning PDO Object</h3>
+				
+					<p>Sometimes it is necessary to use the PDO object itself separately from the Wave Framework and Factory class based MVC Objects. For this purpose you can always return the database object itself with the following call:</p>
+					
+<pre>
+	<code>
+	$db=$this->dbPDO();
+	</code>
+</pre>
+
+					<p>This returns an object similarly to dbNew() method, only difference is that the dbPDO() returns an object that is already set up - its configuration being based on Wave Framework Configuration.</p>
+
+	</body>
+</html>

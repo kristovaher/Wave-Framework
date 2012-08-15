@@ -8,52 +8,14 @@ This script checks if installation is ready for Wave Framework. It checks for PH
 Apache mod_rewrite RewriteEngine or Nginx URL rewriting is turned on and whether filesystem can be 
 written to.
 
-* PHP Version
-* Short Open Tag
-* XML extension
-* Zlib extension
-* APC extension
-* cURL extension or allow_url_fopen
-* PDO and PDO drivers
-* Fileinfo extension
-* Mcrypt extension
-* Zip extension
-* FTP extension
-* GD library extension
-* Apache, URL rewrites and .htaccess presence
-* Nginx and URL rewrites
-* Filesystem folder writability
+* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
 */
 
-// Main configuration file is included
-$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
-
-// Required timezone setting
-if(!isset($config['timezone'])){
-	// Setting GMT as the default timezone
-	$config['timezone']='Europe/London';
-}
-// Setting the timezone
-date_default_timezone_set($config['timezone']);
-
-// Error reporting is turned off in this script
-error_reporting(0);
-
-// Requiring some maintenance functions
-require('.'.DIRECTORY_SEPARATOR.'functions.php');
-
-// Default version numbers
-$softwareVersions=array();
-// Getting current version numbers
-$versionsRaw=explode("\n",str_replace("\r",'',file_get_contents('..'.DIRECTORY_SEPARATOR.'.version')));
-foreach($versionsRaw as $ver){
-	// Versions are separated by colon in the version file
-	$thisVersion=explode(':',$ver);
-	$softwareVersions[$thisVersion[0]]=$thisVersion[1];
-}
+// This initializes tools and authentication
+require('.'.DIRECTORY_SEPARATOR.'tools_autoload.php');
 
 // Log is printed out in plain text format
 header('Content-Type: text/html;charset=utf-8');
@@ -68,6 +30,10 @@ header('Content-Type: text/html;charset=utf-8');
 		<link type="text/css" href="style.css" rel="stylesheet" media="all"/>
 		<link rel="icon" href="../favicon.ico" type="image/x-icon"/>
 		<link rel="icon" href="../favicon.ico" type="image/vnd.microsoft.icon"/>
+		<meta content="noindex,nocache,nofollow,noarchive,noimageindex,nosnippet" name="robots"/>
+		<meta http-equiv="cache-control" content="no-cache"/>
+		<meta http-equiv="pragma" content="no-cache"/>
+		<meta http-equiv="expires" content="0"/>
 	</head>
 	<body>
 		<?php
@@ -193,7 +159,7 @@ header('Content-Type: text/html;charset=utf-8');
 			if(extension_loaded('fileinfo')){
 				$log[]='<span class="bold">SUCCESS</span>: Fileinfo is supported';
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: Fileinfo PHP extension is not supported, this is used by File handler, if this is not available then system detects all downloadable files as application/octet-stream';
+				$log[]='<span class="bold orange">WARNING</span>: Fileinfo PHP extension is not supported, this is used by File Handler, if this is not available then system detects all downloadable files as application/octet-stream';
 			}
 			
 		// MCRYPT
@@ -234,17 +200,17 @@ header('Content-Type: text/html;charset=utf-8');
 						if(isset($_GET['rewrite_enabled'])){
 							$log[]='<span class="bold">SUCCESS</span>: Apache mod_rewrite extension is supported';
 						} else {
-							$log[]='<span class="bold orange">WARNING</span>: Apache mod_rewrite extension is not supported, Index gateway and mod_rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+							$log[]='<span class="bold orange">WARNING</span>: Apache mod_rewrite extension is not supported, Index Gateway and mod_rewrite functionality will not work, this warning can be ignored if Index Gateway is not used';
 						}
 					} else {
-						$log[]='<span class="bold orange">WARNING</span>: Cannot test if mod_rewrite and RewriteEngine are enabled, .htaccess file is missing from /tools/ folder, this warning can be ignored if Index gateway is not used';
+						$log[]='<span class="bold orange">WARNING</span>: Cannot test if mod_rewrite and RewriteEngine are enabled, .htaccess file is missing from /tools/ folder, this warning can be ignored if Index Gateway is not used';
 					}
 					
 				// HTACCESS
 					if(file_exists('..'.DIRECTORY_SEPARATOR.'.htaccess')){
 						$log[]='<span class="bold">SUCCESS</span>: .htaccess file is present';
 					} else {
-						$log[]='<span class="bold orange">WARNING</span>: .htaccess file is missing from root folder, Index gateway and rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+						$log[]='<span class="bold orange">WARNING</span>: .htaccess file is missing from root folder, Index Gateway and rewrite functionality will not work, this warning can be ignored if Index Gateway is not used';
 					}
 					
 			} else if(strpos($_SERVER['SERVER_SOFTWARE'],'nginx')!==false){
@@ -255,11 +221,11 @@ header('Content-Type: text/html;charset=utf-8');
 				if(isset($_GET['rewrite_enabled'])){
 					$log[]='<span class="bold">SUCCESS</span>: Nginx HttpRewriteModule is supported';
 				} else {
-					$log[]='<span class="bold orange">WARNING</span>: Nginx HttpRewriteModule is not supported, Index gateway and rewrite functionality will not work, this warning can be ignored if Index gateway is not used';
+					$log[]='<span class="bold orange">WARNING</span>: Nginx HttpRewriteModule is not supported, Index Gateway and rewrite functionality will not work, this warning can be ignored if Index Gateway is not used';
 				}
 				
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: Your server is not Apache or Nginx, Index gateway will not work, this warning can be ignored if Index gateway is not used';
+				$log[]='<span class="bold orange">WARNING</span>: Your server is not Apache or Nginx, Index Gateway will not work, this warning can be ignored if Index Gateway is not used';
 			}
 			
 			
@@ -355,7 +321,7 @@ header('Content-Type: text/html;charset=utf-8');
 				$log[]='<span class="bold">SUCCESS</span>: /filesystem/limiter/ is writable';
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'limiter'.DIRECTORY_SEPARATOR.'test.tmp');
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: /filesystem/limiter/ is not writable, this warning can be ignored if Limiter is not used by Index gateway';
+				$log[]='<span class="bold orange">WARNING</span>: /filesystem/limiter/ is not writable, this warning can be ignored if Limiter is not used by Index Gateway';
 			}
 			
 			// FILESYSTEM LOG
@@ -364,7 +330,7 @@ header('Content-Type: text/html;charset=utf-8');
 				$log[]='<span class="bold">SUCCESS</span>: /filesystem/logs/ is writable';
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'test.tmp');
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: /filesystem/logs/ is not writable, this warning can be ignored if performance logging is not used by Index gateway';
+				$log[]='<span class="bold orange">WARNING</span>: /filesystem/logs/ is not writable, this warning can be ignored if performance logging is not used by Index Gateway';
 			}
 			
 			// FILESYSTEM ERRORS

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Developer Tools - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>About Developer Tools</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework comes with a suite of administrative tools that are useful for debugging, maintenance, compatibility testing and more. These scripts are all stored in /tools/ subfolder and every script is protected with a username and password. Username and password of most of those tools are stored in main /config.ini file and are used regardless whether http-authentication is turned on or off in configuration. Despite being protected by username and password, it is highly recommended to remove developer tools subfolder entirely before deploying project live.</p>
+				
+			<h2>Adminer</h2>
+			
+				<p><b>Location: /tools/adminer.php</b></p>
+				
+				<p>Adminer is an open-source database administration tool that runs from a single script. This is useful for production servers that do not have PHPMyAdmin or other similar environments installed and it doesn't require a set-up or anything of the sort. Adminer is not protected by http-authentication-username and http-authentication-password and instead asks for database host, username and password. It is highly recommended to remove this script before deploying the project live.</p>
+				
+			<h2>PHP Information</h2>
+			
+				<p><b>Location: /tools/php-info.php</b></p>
+				
+				<p>This script is essentially a password-protected wrapper for phpinfo() function and it displays information about extensions, PHP settings, server variables and setup in general. It is highly recommended to remove this script before deploying the project live.</p>
+				
+			<h2>API Information</h2>
+			
+				<p><b>Location: /tools/api-info.php</b></p>
+			
+				<p>This script lists all controllers and their methods, as well as all API profiles that can use these methods. This is meant for an overview of API commands for documentation purposes or otherwise. It shows all API commands based on what their 'www-command' value should be as well as displays comments that have been written in the header of these methods. It is possible to also show API commands per API profile.</p>
+				
+			<h2>Log Reader</h2>
+			
+				<p><b>Location: /tools/log-reader.php</b></p>
+				
+				<p>Log reader shows a lot of detailed information about each HTTP request, including input data sent with the request, performance information about how long the request took and how much memory it used.</p>
+
+				<p>By default the log reader accesses log file of the current hour, but if you define a GET variable 'log' with the request, then it can access older logs as well, if they exist. For example, this request would return logs from 11th hour on January 15, 2012:</p>
+				
+				<p>http://www.example.com/tools/log-reader.php?log=2012-01-15-11</p>
+				
+				<p>These are the details that are included in most log entries:</p>
+				
+				<ul>
+					<li><b>request-id</b> - Unique request identifier set by the server</li>
+					<li><b>request</b> - This stores the URI that client requested</li>
+					<li><b>microtime</b> - Timestamp of the request in milliseconds</li>
+					<li><b>time</b> - UNIX timestamp of the request time</li>
+					<li><b>datetime</b> - Stores request datetime in format 'Y-m-d H:i:s'</li>
+					<li><b>ip</b> - Stores IP of the client that made the request</li>
+					<li><b>forwarded-client-ip/remote-addr</b> - Additional IP values when proxy is used</li>
+					<li><b>user-agent</b> - This stores user agent string of the client</li>
+					<li><b>referrer</b> - Referrer URL that made the request</li>
+					<li><b>get</b> - GET variables submitted by client</li>
+					<li><b>post</b> - POST variables submitted by client</li>
+					<li><b>files</b> - FILES variables submitted by client</li>
+					<li><b>session</b> - SESSION variables submitted by client</li>
+					<li><b>cookie</b> - COOKIE variables submitted by client</li>
+					<li><b>execution-time</b> - This stores how long the request took in seconds</li>
+					<li><b>memory-peak-usage</b> - This stores the peak usage of memory during the request</li>
+					<li><b>cpu-user-usage/cpu-system-usage</b> - CPU usage diagnostics</li>
+					<li><b>system-load</b> - This stores system load number (that is one minute old)</li>
+					<li><b>api-profile</b> - This is the 'system identifier' that made the request</li>
+					<li><b>response-code</b> - HTTP esponse code for the request</li>
+					<li><b>error</b> - If PHP encountered an error, this stores the error message</li>
+					<li><b>category</b> - This is for categorizing various calls, used mainly by Index Gateway to separate requests of different type</li>
+					<li><b>cache-used</b> - Flag that defines whether cache has been used with this request</li>
+					<li><b>database-query-count</b> - If set, this stores how many queries were sent to database</li>
+					<li><b>content-length</b> - This is approximate length of data returned to client</li>
+				</ul>
+				
+				<p>Log Reader also has a mode that reads the Internal Log of Wave Framework. Internal Log is custom log that the developer can write to from Controllers and other parts of the system. To read the Internal Log, you have to change the request to '/tools/log-reader.php?internal' or select the Internal Log mode from the Log Reader page.</p>
+				
+				<p>Log Reader is also used to display log of API calls made over HTTP. API Log is a custom log that is populated if 'api-logging' is allowed from Configuration. Compared to Internal Log and HTTP request Log, API log is not a serialized array and simply carries three files in /filesystem/log/api.log file: Timestamp when the request was made, API Profile that made the request and the 'www-command' that was sent. This log can be used to easily calculate statistics and traffic for API profiles.</p>
+				
+			<h2>Filesystem Cleaner</h2>
+			
+				<p><b>Location: /tools/cleaner.php</b></p>
+				
+				<p>Cleaner is used to delete various temporary files - that have been generated by Wave Framework - from the filesystem - and it returns log of all files that have been removed. Script requires a specific mode to work properly and all the modes are available when the script is run without a mode set. It can clean the entire /filesystem/ folder and subfolders, only temporary files from /filesystem/ folder and subfolders or specific folders from /filesystem/.</p>
+				
+				<p>It is also possible to send a cut-off timestamp, by assigning a 'cutoff' GET variable to the request. This Unix timestamp will be compared against every file in those assigned folders and if the file is newer or has been modified since that timestamp, then the file is not deleted.</p>
+				
+			<h2>Backup</h2>
+			
+				<p><b>Location: /tools/backup.php</b></p>
+				
+				<p>This script simply creates a backup of all of your files in the project folder and places them in /filesystem/backups/ subfolder. Backup can be run in two modes that have to be defined when making a request to the script (these modes can also be selected from the script, if mode is not defined). These modes are defined with GET variables and are 'all' and 'system'. First mode creates backup of everything and second mode only creates backup of all files, except those that are in /filesystem/ directory.</p>
+				
+				<p>Backup creates a Zip archive with a date-specific filename of {Y-m-d-H-i-s}.zip.tmp and to open this archive you have to download it over FTP and rename it to .zip extension, since HTTP requests to *.tmp files are blocked by default.</p>
+				
+			<h2>Debugger</h2>
+			
+				<p><b>Location: /tools/debugger.php</b></p>
+				
+				<p>This is a script that collects error messages that have been written to filesystem. It also provides method to easily delete the error log about a specific error message, once it is considered 'fixed'. This script should be checked every now and then to test and make sure that there are no outstanding problems in the system.</p>
+				
+				<p>Wave Framework logs all PHP error messages. When Wave Framework encounters a fatal error, then it displays an error message specifying such to the user. Wave Framework supresses warnings and lesser error messages, but still logs them so that they are visible with this Debugger script. It is a good development practice to make sure all error messages and warnings are fixed so none of the errors are thrown when web service or website is used.</p>
+				
+				<p>Whenever you encounter an error message, this script should be the first place to check for a solution. It also prints out the entire trace of the error message that - while very detailed and often complicated - can often be the best way to find out why the error message happened in the first place.</p>
+				
+				<p>Wave Framework groups error messages together so that similar error messages are reported as single error message, which makes it easier when going through multiple bugs or error messages.</p>
+				
+				<p>When accessing this script, it automatically attempts to find an error log that has not been deleted yet.</p>
+				
+			<h2>Compatibility Test</h2>
+			
+				<p><b>Location: /tools/compatibility.php</b></p>
+				
+				<p>This script is used to test your current server setup and PHP settings to see how compatible it is with WWW Framework.</p>
+				
+				<p>Compatibility script tests all the following:</p>
+				
+				<ul>
+					<li>PHP Version</li>
+					<li>Short Open Tag</li>
+					<li>XML extension</li>
+					<li>Zlib extension</li>
+					<li>APC extension</li>
+					<li>cURL extension or allow_url_fopen</li>
+					<li>PDO and PDO drivers</li>
+					<li>Fileinfo extension</li>
+					<li>Mcrypt extension</li>
+					<li>Zip extension</li>
+					<li>FTP extension</li>
+					<li>SimpleXML extension</li>
+					<li>APC extension</li>
+					<li>GD library extension</li>
+					<li>Apache, URL rewrites and .htaccess presence</li>
+					<li>Nginx and URL rewrites</li>
+					<li>Filesystem folder writability</li>
+				</ul>
+			
+			<h2>Updater</h2>
+			
+				<p>Updater script is used to update Wave Framework or software that is built on Wave Framework. Updater has a minimal user interface and update is processed over FTP. Updater script asks either a URL of the update archive file or a file upload with the archive (*.zip format), then the root directory (in case the FTP credentials have a different root directory), FTP username as well as FTP password.</p>
+				
+				<p>Updater requires FTP access to file system to work properly, since it requires permissions to add or overwrite files and folders that may not be possible with regular PHP permissions on some web servers.</p>
+				
+				<p>Once Updater script has FTP credentials and the archive file, it does the following:</p>
+				
+				<ul>
+					<li>Unpacks the update archive to date specific subfolder /filesystem/tmp/update-{Y-m-d-H-i-s}/</li>
+					<li>Creates system backup of current installation to /filesystem/backups/{Y-m-d-H-i-s}.zip.tmp</li>
+					<li>Moves files from update folder to root folder of the system, overwriting where necessary</li>
+					<li>If file 'www-updater.php' was included in archive root, then updater makes HTTP request to that file.</li>
+				</ul>
+				
+				<p>This www-updater.php file, if included in the script, can include additional version-specific guidlines. Updater script makes a HTTP request to this file and includes old version number for both system and Wave Framework itself as GET parameters 'www-version' and 'system-version'.</p>
+				
+				<p>For the Updater to work correctly, the files included in the archive must follow the 'root' folder structure of Wave Framework installation and also include .version file. This version file is checked to make sure that update version numbers (for all listed entries in .version file) are at least equal or larger than the number in the archive for both Wave Framework and system. Version numbers should be listed as PHP standard version format, like X.X.X.</p>
+			
+	</body>
+</html>

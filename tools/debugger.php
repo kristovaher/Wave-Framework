@@ -8,47 +8,14 @@ This is a script that collects error messages that have been written to filesyst
 to easily delete the error log about a specific error message, once it is considered 'fixed'. This script 
 should be checked every now and then to test and make sure that there are no outstanding problems in the system.
 
-* Reads files from /filesystem/errors folder
+* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
 */
 
-// Main configuration file is included
-$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
-
-// Error reporting is turned off in this script
-error_reporting(0);
-
-// Authentication is always required, all developer tools ignore the http-authentication flag in configuration file
-if(!isset($config['http-authentication-username']) || !isset($config['http-authentication-password']) || !isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER']!=$config['http-authentication-username'] || !isset($_SERVER['PHP_AUTH_PW']) || $_SERVER['PHP_AUTH_PW']!=$config['http-authentication-password']){
-	header('WWW-Authenticate: Basic realm="'.$_SERVER['HTTP_HOST'].'"');
-	header('HTTP/1.1 401 Unauthorized');
-	echo '<h1>HTTP/1.1 401 Unauthorized</h1>';
-	echo '<h2>Username and password need to be provided by the user agent</h2>';
-	die();
-}
-
-// Required timezone setting
-if(!isset($config['timezone'])){
-	// Setting GMT as the default timezone
-	$config['timezone']='Europe/London';
-}
-// Setting the timezone
-date_default_timezone_set($config['timezone']);
-
-// Requiring some maintenance functions
-require('.'.DIRECTORY_SEPARATOR.'functions.php');
-
-// Default version numbers
-$softwareVersions=array();
-// Getting current version numbers
-$versionsRaw=explode("\n",str_replace("\r",'',file_get_contents('..'.DIRECTORY_SEPARATOR.'.version')));
-foreach($versionsRaw as $ver){
-	// Versions are separated by colon in the version file
-	$thisVersion=explode(':',$ver);
-	$softwareVersions[$thisVersion[0]]=$thisVersion[1];
-}
+// This initializes tools and authentication
+require('.'.DIRECTORY_SEPARATOR.'tools_autoload.php');
 
 // Log is printed out in plain text format
 header('Content-Type: text/html;charset=utf-8');
@@ -92,6 +59,10 @@ if(empty($_GET)){
 		<link type="text/css" href="style.css" rel="stylesheet" media="all"/>
 		<link rel="icon" href="../favicon.ico" type="image/x-icon"/>
 		<link rel="icon" href="../favicon.ico" type="image/vnd.microsoft.icon"/>
+		<meta content="noindex,nocache,nofollow,noarchive,noimageindex,nosnippet" name="robots"/>
+		<meta http-equiv="cache-control" content="no-cache"/>
+		<meta http-equiv="pragma" content="no-cache"/>
+		<meta http-equiv="expires" content="0"/>
 	</head>
 	<body>
 		<?php

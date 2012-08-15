@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>API Security - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>API Security</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/resources/api.profiles.ini</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework comes with an extensive set of tools for securing your API. Wave Framework has one public API profile as well as configuration options for private API profiles with secret keys, session tokens, timestamp and input hash validations. It also supports encryption of data that is sent as well as received as a response.</p>
+				
+				<hp>Wave Framework API can be used either over HTTP, from within Wave Framework Controllers and MVC Objects, or directly in PHP. This document here details the use of Wave Framework API over PHP and outside the scope of HTTP requests and MVC Objects of Wave Framework. As a result, it shows all the details of how Wave Framework API expects API calls when dealing with secure requests.</p>
+				
+				<p>When it comes to API validation, these are the most common methods how a developer might wish to build their API profiles and authentications:</p>
+				
+				<ul>
+					<li>You can ignore API Profiles of Wave Frameworks entirely and build your validation on the same system that you would build your user accounts and permissions systems on. This means that since your users already need to log in with username and password, you can utilize the exact same setup for your API - by essentially having API users with a username and password. Since user sessions mean cookies and PHP sessions, then your system would have to be able to handle and maintain cookies and sessions itself.</li>
+					<li>The most secure method for API Profile validation in Wave Framework is the hash based validation. This means that there exists an API Profile, defined in /resources/api.profiles.ini file that has 'hash-validation' set to 1 as well as 'secret-key' defined. This profile name and secret key are what are used to generate an API session token. Secret key and session tokens are never sent over HTTP and they are both used to generate an input data validation hashes that have to be checked on both sides.</li>
+					<li>The less secure API authentication method is similar to how majority of web service API's are built these days. You create a session token using API profile name and secret key and then submit this session token with every API request after that. This is a less secure method, but is faster and easier to build and maintain.</li>
+				</ul>
+				
+				<p>Details and information shown in this document is utilized thoroughly within Wave Framework itself. Index Gateway uses API Handler, that calls methods similarly to this document here and you can take a look at API Handler at /engine/handler.api.php to see it actually in use. Some of the things, such as hash validations, are also done in another core file of the framework: PHP API Wrapper in /engine/class.www-wrapper.php deals with some of the same validations as shown in this document, though Wrapper makes requests over HTTP and not directly as shown here.</p>
+				
+				<p>The examples here, especially in relation to what API flags to send and what values to send, apply to all ways how API can be communicated with, regardless of whether the request is made on the same server or over HTTP. If you are reading this document and want to make HTTP requests that are validated the same way, then the examples shown here can easily be converted to HTTP requests since the variables and rules are exactly the same.</p>
+				
+				<p>It is also recommended to perhaps make yourself somewhat familiar with the documentation about the API Class and State Class of Wave Framework. Both of which are detailed in other documentation pages.</p>
+
+			<h2>API Profiles</h2>
+			
+				<p>API Profiles of Wave Framework are stored in /resources/api.profiles.ini file. This file stores an array of API profile names and their secret keys and other configuration options. When API is called with an API profile that is from this list and is not set as public in framework Configuration, then this API profile has to be authenticated with either a secret key or a session token. Every API profile is a group in this file, it's name written in brackets, followed by various settings for the API profile.</p>
+				
+				<p>One API profile in the API Profiles file is considered public and is set by 'api-public-profile' configuration setting in /config.ini file. If this is not set in configuration, then 'public' is the assumed name for a public API profile.</p>
+				
+				<p>These settings are valid for both public and non-public API profiles:</p>
+				
+				<ul>
+					<li><b>disabled</b> - If this is set to 1, then this API profile can remain defined in API Profiles file, but it cannot be used to make API requests.</li>
+					<li><b>ip</b> - This is the IP or comma-separated list of IP addresses that are allowed to make requests using this API profile. If this value is set to '*', which is also the default, then all IP's are allowed to make requessts.</li>
+					<li><b>commands</b> - This is comma separated list of 'www-command' values that are allowed by this API profile. If this is set to '*', then all API commands are allowed.</li>
+				</ul>
+				
+				<p>These settings are used for non-public and authenticated API profiles only:</p>
+				
+				<ul>
+					<li><b>secret-key</b> - This is the secret key (or password) of the API profile. This is used for creating new session tokens as well as for encryption and decryption of data. This should be a 32 characters in length for adequate security.</li>
+					<li><b>token-timeout</b> - This setting tells API how long, in seconds, can an API token remain unused before being considered timed out. By default this value is 'infinite' and API session tokens do not expire.</li>
+					<li><b>timestamp-timeout</b> - This tells API that if www-timestamp is provided with the HTTP request, then how big a difference is accepted by the API profile in seconds for the request to still be considered valid. If request 'www-timestamp' value is different more than the value of this setting, compared to server timestamp, then the request is considered as failed.</li>
+					<li><b>hash-validation</b> - This setting is set to 1 by default. If this is set to 1, then hash-based validation is used, which means that a 'www-hash' value has to be generated from input data together with secret key or session token and sent with the request. Server will compare this value to its own calculated value and if it finds a difference, then the request is considered as failed.</li>
+				</ul>
+				
+				<p>You can define as many API profiles as you need in this file, or you can also generate this file yourself from database or through other methods.</p>
+				
+			<h2>Basic Request from PHP</h2>
+			
+				<p>Before we go and show examples of API authentications and validations, below is a minimalistic example of how to make an API request to Wave Framework API within PHP. This example is used to build upon the other examples shown in this document:</p>
+				
+<pre>
+	<code>
+	// It is suggested to define __ROOT__ constant that is a root folder of your website
+	// This is used by API and State to include some files (unless you have included these files by yourself)
+	define('__ROOT__',__DIR__.DIRECTORY_SEPARATOR);
+	
+	// State class is used by API and Factory created objects to keep track of request state
+	require('engine/class.www-state.php');
+	$state=new WWW_State();
+	
+	// API is the core class of Wave Framework API
+	require('engine/class.www-api.php');
+	$api=new WWW_API($state);
+	
+	// This is the input data that will be sent to API
+	$inputData=array(
+		'www-command'=&gt;'example-get'
+	);
+	
+	// This is where the input data is actually sent to API
+	$apiResult=$api-&gt;command($inputData);
+	</code>
+</pre>
+
+				<p>If this script is now run, then it should return the following result in the web browser:</p>
+				
+<pre>
+	<code>
+	{"id":1,"name":"Lorem Ipsum #56"}
+	</code>
+</pre>
+
+				<p>This means that in the default Wave Framework setup, the API command went successfully and it returned the expected result. We can also change the API request so that it returns a file in PHP format:</p>
+				
+<pre>
+	<code>
+	...
+	$inputData=array(
+		'www-command'=&gt;'example-get',
+		'www-return-type'=&gt;'php'
+	);
+	$apiResult=$api-&gt;command($inputData);
+	print_r($apiResult);
+	</code>
+</pre>
+
+				<p>And the above modification would return us an array from API that we can use in other parts of our code. This would be the output of the above code:</p>
+				
+<pre>
+	<code>
+	Array ( [id] =&gt; 1 [name] =&gt; Lorem Ipsum #234 )
+	</code>
+</pre>
+			
+			<h2>API Command Method Parameters</h2>
+			
+				<p>WWW_API->command() method accepts three other parameters after the input array. The first parameter sent to command() method is the input array, but the other three - in sequence - are:</p>
+				
+				<ul>
+					<li><b>$useBuffer</b> - If this is set to true, then API is allowed to use buffer, which means that if multiple of the same API calls with the same input are made within a single HTTP request, then these results are returned from buffer rather than generated and executed fully each time. This setting is false by default.</li>
+					<li><b>$apiValidation</b> - It is also possible to suppress API validation entirely if the request is made in localhost by setting this value as false. In most cases, PHP code itself should already be validated so in some circumstances it may be needed to use an API call that would otherwise require a validation, but cannot be validated or if validation is considered too slow. If this is turned off, then API will not use any kind of validation, regardless of validation settings sent to it. This setting is true by default.</li>
+					<li><b>$useLogger</b> - This tells API that it can use a Logger (based on WWW_Logger class). If this is set to true and Logger is used by State, then API will also attempt to write into Wave Framework system log. This is false by default.</li>
+				</ul>
+
+			<h2>Useful PHP Functions</h2>
+			
+				<p>These functions are useful when dealing with Wave Framework hash validations. These functions show how Wave Framework itself validates its input and you need to do the same when you are using hash-based validations with Wave Framework API.</p>
+				
+				<p>This method is used to generate a 'www-hash' value for API request from an array:</p>
+				
+<pre>
+	<code>
+	// $validationData is the data array
+	// $salt is the salt, usually either secret key or session token
+	function validationHash($validationData,$salt){
+		$validationData=ksortArray($validationData);
+		return sha1(http_build_query($validationData).$salt);
+	}
+	</code>
+</pre>
+
+				<p>The above method uses 'ksortArray()' method which does not exist in PHP. This method is used to apply ksort() key-based sorting to an array, but recursively (so it would work on array of arrays). This is needed, since sometimes the input may consist of nested arrays. Function is below:</p>
+				
+<pre>
+	<code>
+	function ksortArray($data){
+		if(is_array($data)){
+			ksort($data);
+			$keys=array_keys($data);
+			$keySize=sizeOf($keys);
+			for($i=0;$i&lt;$keySize;$i++){
+				$data[$keys[$i]]=ksortArray($data[$keys[$i]]);
+			}
+		}
+		return $data;
+	}
+	</code>
+</pre>
+				
+			<h2>Hash Based Validation</h2>
+			
+				<p>Hash based validation is the most secure method for making API requests to a system built with Wave Framework. This system is similar to that of many payment systems, as the secret key is never sent in direct communication across HTTP between the client making the request and the server.</p>
+				
+				<p>Hash based validation works essentially like this:</p>
+				
+				<ul>
+					<li>Server A wants to use Wave Framework API on server B. An API Profile has been made for that purpose for server A, together with a secret key, both of which are supplied to server A either though website or e-mail or other channels.</li>
+					<li>Server A makes a 'www-create-session' (as a value for 'www-command') call to server B, together with the 'www-profile' name that was created for server A. Another variable, 'www-hash', is also sent with the request. Value of 'www-hash' is a serialized input that is salted with secret key of the API profile and is hashed with SHA-1.</li>
+					<li>Server B validates the hash and if everything seems alright, it returns 'www-token' to server A that Server A can use to generate hashes with in subsequent requests.</li>
+					<li>Server A makes other API requests with other 'www-command' values and other input data. 'www-hash' for those values is generated by using the previously returned 'www-token' as the hash salt for SHA-1.</li>
+					<li>If server B validates the input and compares the 'www-hash' values, then server B allows the API call to go through.</li>
+					<li><i>It is also possible to request server B to return a 'www-hash' of their own as part of the response. If 'www-return-hash' is sent with the value 1, then server B will also build a validation hash as a response and server A can validate this response the same way server A did.</i></li>
+				</ul>
+				
+				<p>Main purpose of hash based validation is to prevent middle-man tampering of the input and response data. Since a hash validation string is generated from all the data and the token or secret key is only known to the two servers, then the middle man - who might listen in and edit the data that is transmitted prior to it arriving in the destination - cannot edit the data without the two servers learning about it. If the hash validation fails, then API will not accept the API call since it considers it insecure.</p>
+				
+				<p>Quite often the hash validation fails also because it might be generated incorrectly. If SHA-1 hash validation - that will be shown in examples below - is not possible on your server, then you can also use a less secure method for validating API calls that is detailed in the next section.</p>
+				
+				<h3>Generating a Session Token</h3>
+				
+					<p>Following the previous example from section 'Basic Request from PHP', we need to edit some of the variables that we send to the server in order to generate an API session token for our use. We need to provide a couple of things to the input data array: www-profile name and www-hash (which has to be generated from our input array).</p>
+					
+					<p>If you are running this on default Wave Framework setup, then the API Profiles will include an example private API profile called 'custom-profile' that has a secret key with the value of 'my-secret-key'.</p>
+					
+					<p>Secret key is never provided as part of the input array when making a hash based validation request, but we do need to provide the API profile, so let's modify the input array accordingly. I will also change the return type to XML and the 'www-command' value to 'www-create-token', since we are trying to generate a token. The return type is changed because I do not wish the API to throw errors in localhost, which it would do when the return type is 'php'. This would be the new input data array:</p>
+					
+<pre>
+	<code>
+	...
+	$inputData=array(
+		'www-command'=&gt;'www-create-session',
+		'www-return-type'=&gt;'xml',
+		'www-profile'=&gt;'custom-profile'
+	);
+	...
+	</code>
+</pre>
+
+					<p>If we make an API request now, then this request will fail and it will return the following:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;www-message&gt;API request validation timestamp is missing&lt;/www-message&gt;
+		&lt;www-response-code&gt;106&lt;/www-response-code&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+					<p>This error means that we did not generate 'www-hash' and submit it with the API call as an input data. To create a proper validation hash, we need to serialize the entire input data array and generate a SHA-1 hash of it by salting it with our secret key.</p>
+					
+					<p>There are two functions that were given above, in section 'Useful PHP Functions', that can be used for generating this validation hash that Wave Framework accepts. The basic idea of Wave Framework input validation is that the entire input array will be recursively sorted based on key values and then serialized with http_build_query() function. Secret key (when creating a session token) is appended to this serialized array and the whole array is then hashed with SHA-1.</p>
+					
+					</p>Here is the previous example expanded to include the 'www-hash', using our API profile secret key:</p>
+				
+<pre>
+	<code>
+	...
+	$inputData=array(
+		'www-command'=&gt;'www-create-session',
+		'www-return-type'=&gt;'xml',
+		'www-profile'=&gt;'custom-profile'
+	);
+	
+	// Generating the hash for input array
+	$inputData['www-hash']=validationHash($inputData,'my-secret-key');
+	...
+	</code>
+</pre>
+
+					<p>Now when we make the API request, then we get the following result:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;www-message&gt;API session token created&lt;/www-message&gt;
+		&lt;www-token&gt;eec6cc1c9dca4a37598e6bce3b188661&lt;/www-token&gt;
+		&lt;www-token-timeout&gt;600&lt;/www-token-timeout&gt;
+		&lt;www-response-code&gt;500&lt;/www-response-code&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+					<p>The response here gives us our session token (as 'www-token') and also tells us in seconds how long is the timeout, when using that session token. This timeout means that if that session token has not been used for the amount of seconds that is defined in 'www-token-timeout', then the session token becomes invalid and a new one has to be generated.</p>
+				
+				<h3>Making a Request With the Token</h3>
+				
+					<p>Now that we have the token, we can change the input data to make a request to 'example-get' API call and use the newly generated token together with our secret key. When generating 'www-hash' with a token, the order of variables that are sent to SHA-1 is always serialized string, then the session token and then the secret key:</p>
+				
+<pre>
+	<code>
+	...
+	$inputData=array(
+		'www-command'=&gt;'example-get',
+		'www-return-type'=&gt;'xml',
+		'www-profile'=&gt;'custom-profile'
+	);
+	
+	// Generating the hash for input array
+	$inputData['www-hash']=validationHash($inputData,'eec6cc1c9dca4a37598e6bce3b188661'.'my-secret-key');
+	...
+	</code>
+</pre>
+
+					<p>This will give us the following successful result:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;id&gt;1&lt;/id&gt;
+		&lt;name&gt;Lorem Ipsum #515&lt;/name&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+					<p>Secret key is always needed as part of the hash validation because if the secret key changes, then all session tokens must become invalid as well. When creating a new session token, then the validation hash is generated from serialized input array and the secret key appended to it. Once we have the session token, then we add that to the string in between the serialized data and the secret key.</p>
+				
+				<h3>Session Validation and Destruction</h3>
+				
+					<p>There are two methods that can be used to validate or destroy a session token. These methods are useful to determine if a currently known session token is still active, or to delete a session token in case user logs out.</p>
+					
+					<p>These are the values to be sent as 'www-command':</p>
+					
+					<ul>
+						<li><b>www-validate-session</b> - This command validates whether current API profile has a session active or not and returns a 500 API response code if the command was successful.</li>
+						<li><b>www-destroy-session</b> - This command destroys currently active session for that API profile and returns a 500 API response code if the command was successful.</li>
+					</ul>
+				
+			<h2>Secret Key and Token Based Validation</h2>
+			
+				<p>This is an alternative authentication method for Wave Framework API. This authentication method is similar to how many web services have their authentication. It is less secure than hash based validation because the session token - as well as secret key in the commands that generate session token - is submitted over HTTP and could be stolen with a middle-man attack.</p>
+				
+				<p>Despite that, security of this type of authentication is similar to security of regular user visiting a website over HTTP. This type of authentication can be made more secure if HTTPS is used.</p>
+				
+				<p>Secret key and token based validation works essentially like this:</p>
+				
+				<ul>
+					<li>Server A wants to use Wave Framework API on server B. An API Profile has been made for that purpose for server A, together with a secret key, both of which are supplied to server A either through website or e-mail or other channels.</li>
+					<li>Server A makes a 'www-create-session' (as a value for 'www-command') call to server B, together with the 'www-profile' name that was created for server A and the 'www-secret-key' value that is set to secret key of that API profile.</li>
+					<li>Server B validates the secret key and if everything seems alright, it returns 'www-token' to server A that Server A can then use to send as part of subsequent requests.</li>
+					<li>Server A makes other API requests with other 'www-command' values and other input data and provides the session token as 'www-token' as part of the request input data.</li>
+					<li>If server B finds the 'www-token' value to be correct, then the API call is validated and executed, with the response returned to server A.</li>
+				</ul>
+				
+				<p>In order to make API Profile not use the default hash based validation, 'hash-validation' flag has to be turned off for the API profile in /resources/api.profiles.ini file. For example, this would be a good API profile for testing this type of validation:</p>
+				
+<pre>
+	<code>
+	[custom-profile]
+	disabled=0
+	token-timeout=600
+	secret-key="my-secret-key"
+	commands="example-get"
+	hash-validation=0
+	</code>
+</pre>
+				
+				<h3>Generating a Session Token</h3>
+				
+					<p>Following the previous example from section 'Basic Request from PHP', we need to edit some of the variables that we send to the server in order to generate an API session token for our use. We need to provide a couple of things to the input data array: 'www-profile' name and 'www-secret-key'.</p>
+					
+					<p>If you are running this on default Wave Framework setup, then the API Profiles will include an example private API profile called 'custom-profile' that has a secret key with the value of 'my-secret-key'.</p>
+					
+					<p>So let's modify the input array accordingly and include the secret key as part of the input data. I will also change the return type to XML and the 'www-command' value to 'www-create-token', since we are trying to generate a token. The return type is changed because I do not wish the API to throw errors in localhost, which it would do when the return type is 'php'. This would be the new input data array:</p>
+					
+<pre>
+	<code>
+	...
+	$inputData=array(
+		'www-command'=&gt;'www-create-session',
+		'www-return-type'=&gt;'xml',
+		'www-profile'=&gt;'custom-profile',
+		'www-secret-key'=&gt;'my-secret-key'
+	);
+	...
+	</code>
+</pre>
+
+					<p>This will return the following XML string:</p>
+					
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;www-message&gt;API session token created&lt;/www-message&gt;
+		&lt;www-token&gt;d1fa885539b0327d15af44e7d2df048b&lt;/www-token&gt;
+		&lt;www-token-timeout&gt;600&lt;/www-token-timeout&gt;
+		&lt;www-response-code&gt;500&lt;/www-response-code&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+					<p>This XML includes the 'www-token' value that we need to send with the subsequent requests for the API profile call to be validated.</p>
+				
+				<h3>Making a Request With the Token</h3>
+				
+					<p>Now that we have the token, we can change the input data to make a request to 'example-get' API call and use our newly generated token as part of the request. The secret key should not be sent in next request as it minimizes the risk of secret key becoming compromised. Let's make the input data accordingly and send the data to API:</p>
+					
+<pre>
+	<code>
+	...
+	$inputData=array(
+		'www-command'=&gt;'example-get',
+		'www-return-type'=&gt;'xml',
+		'www-profile'=&gt;'custom-profile',
+		'www-token'=&gt;'d1fa885539b0327d15af44e7d2df048b'
+	);
+	...
+	</code>
+</pre>
+
+					<p>This will give us the following successful result:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;id&gt;1&lt;/id&gt;
+		&lt;name&gt;Lorem Ipsum #515&lt;/name&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+					<p>Please note that when the secret key changes, then the session tokens become invalid as well and need to be regenerated with the new secret key.</p>
+				
+				<h3>Session Validation and Destruction</h3>
+				
+					<p>There are two methods that can be used to validate or destroy a session token. These methods are useful to determine if a currently known session token is still active, or to delete a session token in case user logs out.</p>
+					
+					<p>These are the values to be sent as 'www-command':</p>
+					
+					<ul>
+						<li><b>www-validate-session</b> - This command validates whether current API profile has a session active or not and returns a 500 API response code if the command was successful.</li>
+						<li><b>www-destroy-session</b> - This command destroys currently active session for that API profile and returns a 500 API response code if the command was successful.</li>
+					</ul>
+				
+			<h2>State and Timestamp Validation Helpers</h2>
+			
+				<p>It is possible to enhance the security of API profiles a little more by providing one of the additional API request validation parameters as part of the request. These variables help to protect the API from middle man requests, repeat attacks and tampering.</p>
+				
+				<h3>www-timestamp</h3>
+				
+					<p>This variable is required to be sent as part of the API request input data, if the API profile has 'timestamp-timeout' setting used and not 0. This value should be the UNIX timestamp at the time of making a request. Wave Framework API will check if this timestamp is within valid range (based on API Profile 'timestamp-timeout' setting) and if it is, then API call is made, otherwise it will return an error.</p>
+					
+					<p>This type of timestamp check can protect against replay attacks where the same API call is sent to the server repeatedly, possibly revealing sensitive information.</p>
+				
+				<h3>www-return-timestamp</h3>
+				
+					<p>If this is set to 1 in the request, then this requests that the Wave Framework API also returns a UNIX timestamp at the time of API call. This can then be checked by the request-making client to validate that the response came within acceptable timeframe.</p>
+				
+				<h3>www-return-hash</h3>
+				
+					<p>If this is set, then this requests that Wave Framework API also generates a 'www-hash' of the response. This means that the client that made the request can then check if the response was not tampered with and changed. The algorithm for calculating the hash is exactly the same for Wave Framework API as it is for the client.</p>
+					
+					<p>This helps protect the client from middle man attacks where the response might be tampered with before it is returned to the client. If the response data is changed, then hash will not be correct anymore and the response is failed.</p>
+				
+				<h3>www-state</h3>
+				
+					<p>This is just a keyword - a random keyword or a rule-based keyword - that is sent to the server as part of the request. Server will return that exact same keyword as part of the response. This can be used to make sure that the response is for the same request that was made and that it was not tampered with.</p>
+					
+					<p>This can also protect the system from replay attacks if the state value follows some specific rule that is only known to the two servers, like a set of characters from a hash table.</p>
+				
+			<h2>Crypted Input and Output</h2>
+			
+				<p>Wave Framework also includes a very modern encryption and decryption model. This allows you to encrypt some input data and send it encrypted to Wave Framework API and have it decrypt that data and use it internally as part of the input data, based on the API profile secret key and session token.</p>
+				
+				<p>It is also possible to tell Wave Framework API to return data encrypted, so that the entire response would be encrypted and cannot be accessed before being decrypted by the client.</p>
+				
+				<p>Wave Framework API uses Rijndael 256bit encryption as the encryption layer and suppports both ECB and CBC modes. CBC mode is used once the session token is already created and it is a lot more secure than the ECB mode.</p>
+				
+				<p>Encryption and decryption is only possible with non-public API profiles. This is because it relies on secret keys and session tokens for the encryption, similarly to hash based validations.</p>
+				
+				<p>This is the general workflow of encryption and decryption:</p>
+				
+				<ul>
+					<li>Data that is encrypted is serialized with JSON (using json_encode() function in PHP).</li>
+					<li>The resulting serialized string is then encrypted with current token of the API profile using Rijndael 256bit encryption in CBC mode. CBC mode requires a vector, for which Wave Framework uses your profile secret key.</li>
+					<li>Generated encrypted string will be sent to the server as 'www-crypt-input', together with other variables. Please note that you should not encrypt Wave Framework specific variables, like www-command. It is recommended to always make a POST request when sending large amount of encrypted data.</li>
+					<li>Wave Framework API will attempt to decrypt the sent data and if successful, then uses that data as an addition to input array by merging it with input array.</li>
+					<li>If request included 'www-crypt-output' and that is a stromg (long string preferred), then Wave Framework will serialize and encrypt the entire output and return encrypted string to the client that made the request.</li>
+					<li>Client will have to decrypt that string and then unserialize it before use. Decryption is done with the same token and secret key that data was originally encrypted with.</li>
+					<li>It is possible to ask the server to encrypt response even though you did not send encrypted data to the server. So you never technically have to encrypt requests, but can always require the server to encrypt responses when you are dealing with sensitive information.</li>
+				</ul>
+				
+				<p>Rijndael 256bit encryption, the way PHP implements it with ECB and CBC modes, is not supported by web browsers and it is difficult to use encrypted data and decryptions with a web browser and through JavaScript.</p>
+				
+				<h3>Sending Encrypted Input</h3>
+				
+					<p>It is recommended to use encryption and decryption only with hash based validations, as hash based validations do not supply secret key ever over HTTP and the session token is only sent over HTTP once - when it is returned to the client.</p>
+					
+					<p>Examples in this document continue on from the section 'Hash Based Validation'. Let's imagine that we now want to send a secret message to the server and that the content of this secret message is 'there is always money in the banana stand'. This means that we would now have two input arrays:</p>
+					
+<pre>
+	<code>
+	...
+	$inputData=array(
+		'www-command'=&gt;'example-get',
+		'www-return-type'=&gt;'xml',
+		'www-profile'=&gt;'custom-profile'
+	);
+	// Secret data array
+	$secretData=array(
+		'secret-message'=&gt;'there is always money in the banana stand'
+	);
+	...
+	</code>
+</pre>
+
+					<p>We have to convert this secret data array to be sent as part of input data key 'www-crypt-input'. This encryption is done with key and initialization vector and through Rijndael 256bit encryption. This is how to serialize and encrypt the array:</p>
+					
+<pre>
+	<code>
+	...
+	// $myApiToken would be the 'www-token' value returned from API
+	// $mySecretKey would be the secret key of the API profile
+	$inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($myApiToken),json_encode($secretData),MCRYPT_MODE_CBC,md5($mySecretKey)));
+	...
+	</code>
+</pre>
+
+					<p>If we now send this data to the server, then the server will see the 'www-crypt-input' value and attempts to decrypt it based on API secret key and session token. If decryption is successful, then 'secret-message' would be usable just like any other input variable sent to API.</p>
+				
+				<h3>Decrypting Encrypted Response</h3>
+				
+					<p>If 'www-crypt-output' is set and is a string (longer the better) as part of the API request, then this tells Wave Framework API to also encrypt the entire output. Differently from sending encrypted input, when output encryption is requested then the entire response is serialized and returned as encrypted string. Wave Framework will also not use the token to encrypt the response, it instead uses secret key and the value of 'www-crypt-input'. This is because the session token is more likely to change over time than secret key.</p>
+					
+					<p>In order to keep 'www-crypt-output' value a secret, then it could be sent as part of 'www-crypt-input' encrypted data.</p>
+					
+					<p>We can request encrypted response by changing the input data array as follows:</p>
+					
+<pre>
+	<code>
+	...
+	$inputData=array(
+		'www-command'=&gt;'example-get',
+		'www-return-type'=&gt;'xml',
+		'www-crypt-output'=&gt;'my-cypher',
+		'www-profile'=&gt;'custom-profile'
+	);
+	...
+	</code>
+</pre>
+
+					<p>This would give me a response like:</p>
+					
+<pre>
+	<code>
+	hmrfKzOjE0lYS10E7KSQXs+pC8K9yEALjGD2Cp/zyHr5+P1fziyyfcV+1SmqHQcy
+	zXeptaX3wY6i0py+opQtXQHGXi9oWwTTuCc8sDJyYJDS+/2pf3373yPsRoQIa7+Y
+	</code>
+</pre>
+
+					<p>In order to decrypt this, I need to use my secret key and existing session token again. Decryption can be done similarly to encryption:</p>
+
+<pre>
+	<code>
+	...
+	// $response would be the encrypted response string from API
+	// $myCypher would be the value of 'www-crypt-output' that was sent with the request
+	// $mySecretKey would be the secret key of the API profile
+	$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($myCypher),base64_decode($response),MCRYPT_MODE_CBC,md5($mySecretKey));
+	...
+	</code>
+</pre>
+
+					<p>This will give me the data from API as was sent there. Note that if 'www-output' is set to 0, then data is never encrypted as a response, since it moves on localhost. Data encryption is done only on data that is sent with response that is pushed to output buffer.</p>
+			
+	</body>
+</html>

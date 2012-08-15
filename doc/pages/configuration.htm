@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Configuration - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Configuration</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/config.ini</h3>
+				
+			<h2>Introduction</h2>
+
+				<p>Configuration options from /config.ini file. These configuration options are used by Wave Framework system as well as by developer tools in /tools/ folder.</p>
+			
+			<h2>HTTP Authentication</h2>
+		
+				<p><b>http-authentication<br/>
+				http-authentication-username<br/>
+				http-authentication-password<br/>
+				http-authentication-ip</b></p>
+				
+				<p>If http-authentication is set to 1, then HTTP authentication is required before any requests go through. It is also possible to limit the entire access to only a single IP or multiple IP addresses by assigning http-authentication-ip a comma separated list of IP addresses. These settings are also used by developer tools in /tools/ subfolder.</p>
+				
+			<h2>Debugging and logging</h2>
+			
+				<p><b>database-type<br/>
+				database-host<br/>
+				database-name<br/>
+				database-username<br/>
+				database-password<br/>
+				database-errors<br/>
+				database-persistent</b></p>
+			
+				<p>Wave Framework can connect to multiple database types, database-type values can be 'mysql', 'postgresql', 'sqlite', 'mssql' and 'oracle'. If database values are not set, then system won't attempt to connect to database. Persistant connections are allowed by using database-persistent flag, in which case same connection handle will be shared across requests from different user agents, but note that this flag is not recommended and can cause additional performance issues. It is also possible to set if database errors are written in developer tools debugging log with database-errors flag. It is not recommended to turn this setting off before deploying live.</p>
+				
+			<h2>Database</h2>
+			
+				<p><b>logger<br/>
+				logger-ip</b></p>
+				
+				<p>This turns on Index Gateway performance logging, which stores all information possible about every HTTP request. If this is set to '*' then all HTTP requests are logged, if it is set to 0, then no requests are logged. Value can also be a regular expression, in which case only requests that match the regular expression will be logged (you can use this to log only requests on a specific file, for example). Logging can also be tied to only specific IP address or addresses, if you set logger-ip to have an IP address or comma separated list of addresses.</p>
+				
+			<h2>Server</h2>
+			
+				<p><b>trusted-proxies</b></p>
+				
+				<p>This setting stores comma-separated list of trusted proxy IP addresses. This setting is required when your web service or website uses a proxy, then this IP address allows for IP redirects assigned in request headers to act as user agent IP. This is a security setting and is meant to protect against bypassing IP address checks through request headers. If you use a proxy, assign the proxy IP address here. Default value is '*', which means that all proxies are allowed.</p>
+				
+				<p><b>http-host</b></p>
+				
+				<p>This is the HTTP host address of web service or website, for example 'www.example.com'. This is detected automatically by the system, but in case the same website is accessible from two different URL's, then assigning primary one here is recommended.</p>
+				
+				<p><b>system-root</b></p>
+				
+				<p>This is the directory of your website or web service on the server. Wave Framework is able to detect this directory automatically, but in case this detection causes problems, it is recommended to manually assign it here.</p>
+				
+				<p><b>user-root<br/>
+				static-root</b></p>
+				
+				<p>By default this folder is /filesystem/userdata/ and it is used for storing various user-specific files. This is detected automatically based on system-root configuration setting. Static root folder is the base root folder for static files and is situated in /filesystem/static/, similarly to 'user-root', except files uploaded there are never served by Wave Framework.</p>
+				
+				<p><b>database-root</b></p>
+				
+				<p>By default this folder is /filesystem/data/ and it is used for storing various filesystem-centric database files, such as for SQLite. If undefined, then this is automatically based on system-root configuration setting and it is not recommended to change this unless necessary.</p>
+				
+				<p><b>timezone</b></p>
+				
+				<p>This is the named timezone of servers location, this is required by PHP to have a base for time calculations. Unix timestamp is used internally by Wave Framework, so changing this value will not break the system, however it could affect things like log times and functionality of the system that uses Wave Framework. This configuration is set to 'Europe/London' by default.</p>
+				
+				<p><b>tmp-root</b></p>
+				
+				<p>This is the base root folder for temporary files. Files that are stored here should be considered temporary and used for various custom functionality in the system.</p>
+				
+				<p><b>keys-root</b></p>
+				
+				<p>This is the folder that is used to store various security certificates and OpenSSL keys, such as ones used by various API's or e-payment systems.</p>
+				
+			<h2>Handler Extensions</h2>
+
+				<p><b>image-extensions</b></p>
+				
+				<p>This is a comma-separated list of image file extensions that are routed through Image Handler. If image file extension is not listed here, then this will be served through File Handler instead - which is used to serve any file that has an extension, but no handler. If you add new extensions here, then it is recommended to also update Image Handler code at /engine/handler.image.php to support that new file extension. Default extensions are jpeg, jpg, png.</p>
+
+				<p><b>resource-extensions</b></p>
+				
+				<p>This is a comma-separated list of static resource file extensions that are routed through Resource Handler. If static resource file extension is not listed here, then this will be served through File Handler instead - which is used to serve any file that has an extension, but no handler. Resource Handler can serve these files as combined on-demand. If you add new extensions here, then it is recommended to also update Image Handler code at /engine/handler.image.php to support that new file extension. Default extensions are css, js, txt, csv, xml, html, htm, rss, vcard.</p>
+
+				<p><b>forbidden-extensions</b></p>
+				
+				<p>This is a comma-separated list of file extensions that cannot be requested over HTTP. Caution! Please note that some of these extensions, like 'ini', 'htaccess', 'version' should never be removed from here, since they can otherwise pose a security risk - it would be possible to see configuration file contents over HTTP request. Default extensions are tmp, log, ht, htaccess, pem, crt, db, sql, version, conf, ini.</p>
+			
+			<h2>Content</h2>
+			
+				<p><b>project-title<br/>
+				author<br/>
+				copyright</b></p>
+				
+				<p>These values are added to website meta information by the View Controller, if they are defined. Website title will include value of project-title, and author and copyright values are written into meta tags in HTML header. These values are all empty by default.</p>
+				
+				<p><b>languages</b></p>
+				
+				<p>First setting, 'languages', is a comma-separated list of language keywords used in the system. These keywords are used for both translations files, sitemap files as well as language detection, when detecting the language form a URL. It is needed that the keywords listed here are also available as files of /resources/{keyword}.translations.ini and /resources/{keyword}.sitemap.ini. Language detection with the keywords works the same way, like http://www.example.com/{keyword}/. It is possible to customize this behavior more with other settings in configuration. Default language is defined by 'language' setting. Default language is the first language in the list. This is set to 'en' by default.</p>
+				
+				<p><b>home-view<br/>
+				404-view</b></p>
+				
+				<p>These settings are used when using Wave Framework to build a website and not just a web service. Home view defines what view from /view/ folder is loaded by View Controller. 404 view defines what view from /view/ folder is loaded when no other view is found. These views must exist in /view/ folder in format of view.{name}.php files. Default home view is always 'home' and 404 view is '404', if left undefined.</p>
+				
+				<p><b>web-root</b></p>
+				
+				<p>While most websites are accessible from the domain name and root folder (like http://www.example.com/), then some websites are set up in subfolders (like http://www.example.com/web/). While Wave Framework is able to detect this automatically, should this automatic detection fail, it is recommended to write the web root node here. For 'http://www.example.com/web/' address it would be '/web/'. This value is used when referencing links or loading content in a website.</p>
+				
+				<p><b>enforce-url-end-slash</b></p>
+				
+				<p>It is considered a good practice to have a slash in the end of URL's. If this setting is enabled, then Wave Framework will redirect all URL's that do not end with a slash to ones that do. For example http://www.example.com/mypage would become http://www.example.com/mypage/ and this setting is turned on by default by being set to 1.</p>
+				
+				<p><b>enforce-first-language-url</b></p>
+				
+				<p>Wave Framework deals with multilingual websites by having the first URL node as the language detector. If this setting here is turned on, then first language (the first one in 'languages' configuration setting) requires that first URL node to also be defined as the language. Wave Framework would, in that case, redirect http://www.example.com/contact/ address to http://www.example.com/en/contact/ if the first language is 'en'. This is turned on by default, but is recommended to be turned off when web system only has one language.</p>
+				
+				<p><b>robots<br/>
+				image-robots<br/>
+				resource-robots<br/>
+				file-robots</b></p>
+				
+				<p>Robots flags are used by search engines and web crawlers when gathering information about web pages that they visit. These flags are 'guides' to robots that tell robots to either index the content of pages or not. In Wave Framework, 'robots' is considered the fallback setting, but you can set different defaults for images, static resources, served files and so on. It is also possible to assign different robots setting to each URL through sitemap files in /resources/ folder. These values are set to 'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet' by default, which disallows indexing.</p>
+				
+			<h2>Optimizations and Cache</h2>
+				
+				<p><b>output-compression</b></p>
+				
+				<p>Modern web browsers support output compression which reduces the amount of data sent from server to web browsers and can improve the loading speed of websites. This value can be set to 'deflate', 'gzip' or false. This setting tells Wave Framework to consider this or that type of output compression as default, or not use output compression at all (if web server does it by itself). Also note that this setting is ignored if user agent does not tell web server that they support gzip or deflate compression. This value is set to 'deflate' by default.</p>
+				
+				<p><b>index-url-cache-timeout</b></p>
+				
+				<p>Wave Framework can cache every API request. This setting tells Wave Framework to cache URL solving from Sitemap for X amount of seconds. Since /resources/{language-code}.sitemap.ini file does not change frequently on most projects, then this value can be increased to minutes, even hours. For development reasons and special cases however, this value is set to 0 by default and URL solving is not cached.</p>
+				
+				<p><b>index-view-cache-timeout</b></p>
+				
+				<p>This setting assigns the default cache duration of a website page. This value can be customized per view and URL in /resources/{language-code}.sitemap.ini and this value here only acts as a default. If your website is informative and mostly consists of content web pages, then this default value can be increased to minutes, if not hours. Default value is 0 and by default pages are not cached.</p>
+				
+				<p><b>resource-cache-timeout<br/>
+				robots-cache-timeout<br/>
+				sitemap-cache-timeout</b></p>
+				
+				<p>These settings give default cache durations for static resources, robots.txt and sitemap.xml files. This value affects max lifetime headers as well as internal cache duration (though this is always checked against source file modification date). Resource cache timeout default is 31536000, which is one year in seconds. Robots and Sitemap files have default cache of 14400 seconds, which is four hours.</p>
+				
+				<p><b>apc</b></p>
+				
+				<p>APC extension is not officially part of PHP, but if web server supports APC, then this can speed up caching and performance. If this setting is set to 1 and APC is supported on the server, then Wave Framework will use APC for caching rather than filesystem in some cases. This setting is set to 1 by default.</p>
+				
+			<h2>Dynamic Resources</h2>
+				
+				<p><b>404-image-placeholder</b></p>
+				
+				<p>If this is set to 1, then Wave Framework uses /resources/placeholder.jpg as image resource whenever it cannot actually find the image resource that it attempts to load. This allows web system to gracefully fall back when original image cannot be found anymore, since it will not display the broken image icon in browsers as a result. File not found 404 header is still returned however, so web crawlers will not index this image.</p>
+				
+				<p><b>dynamic-image-loading</b></p>
+				
+				<p>Dynamic image loading is a global flag that sets whether user agent can request images from the system with on-demand flags, such as on-demand resolution or image effects. For example, if you enter an URL like http://www.example.com/resources/images/60x60&amp;logo.png, then system returns an image that is 60 pixels in both dimensions. This setting is set to 1 by default, enabling this functionality.</p>
+				
+				<p><b>dynamic-max-size</b></p>
+				
+				<p>This is a security setting against potential Denial of Service attacks. This setting is the maximum height or width that system can dynamically serve. This is set to 1000 by default, which disables on-demand resolutions that are bigger than 1000 pixels in width or height.</p>
+				
+				<p><b>dynamic-size-whitelist</b></p>
+				
+				<p>This is a security setting against potential Denial of Service attacks. This is a space-separated list of image resolutions that are allowed to be loaded on-demand. For example, if this is set to '60x60 320x240' then only images of 60x60 and 320x240 resolutions would be allowed to be loaded on-demand. This setting is not defined by default, which allows all image resolutions to be loaded on-demand.</p>
+				
+				<p><b>dynamic-color-whitelist</b></p>
+				
+				<p>This is a security setting against potential Denial of Service attacks. This is a space-separated list of background color values in RGB that are allowed to be loaded on-demand. For example, if this is set to '120,60,14 255,255,255' then only these two RGB colors would be allowed. This setting is not defined by default, which allows for all background colors to be loaded on-demand.</p>
+				
+				<p><b>dynamic-quality-whitelist</b></p>
+				
+				<p>This is a security setting against potential Denial of Service attacks. This is a space-separated list of quality settings that are allowed to be loaded on-demand. For example, if this is set to '@50 @30', then only images with @50 and @30 quality settings are allowed to be loaded on-demand. This setting is not defined by default and all quality levels are allowed.</p>
+				
+				<p><b>dynamic-position-whitelist</b></p>
+				
+				<p>This is a security setting against potential Denial of Service attacks. This is a space-separated list of image positions that are allowed to be loaded on-demand. For example, if this is set to 'top-left 30-50', then only image positions of top-left and 30-50 (pixels) are allowed. This setting is not defined by default and all positions are allowed.</p>
+				
+				<p><b>dynamic-image-filters</b></p>
+				
+				<p>This is a security setting against potential Denial of Service attacks. Wave Framework allows for advanced on-demand image filtering. If this setting is turned off, then on-demand image filtering is not allowed at all and such images cannot be requested. By default this value is 1, which enables on-demand filters.</p>
+				
+				<p><b>dynamic-filter-whitelist</b></p>
+				
+				<p>This is a security setting against potential Denial of Service attacks. If dynamic image filters are enabled, then this is a space-separated list of allowed filter settings. If this is set to 'grayscale@100 colorize@40,120,120,120' then only grayscale filter with parameter 100 and colorize filter with 40, 120, 120 and 120 parameters are allowed. These values must be written the same way they are written to filter() brackets during on-demand image request.</p>
+				
+				<p><b>dynamic-resource-loading</b></p>
+				
+				<p>This is a security setting against potential Denial of Service attacks. This setting, if set to 1, allows to load scripts and CSS files in unified form from /resources/ folder. Multiple scripts can be loaded by separating their filenames with &amp; symbol and 'minify' flag can also be used to load the resource in minified form. This setting is 1 by default.</p>
+				
+			<h2>API Settings</h2>
+				
+				<p><b>api-public-profile</b></p>
+				
+				<p>This sets the default profile name of a public profile - when profile name itself is not set in the request. This profile must have profile settings set in /resources/api.profiles.ini file.</p>
+				
+				<p><b>internal-logging</b></p>
+				
+				<p>It's possible to log specific messages in internal log by sending such a command from MVC objects of Wave Framework. This setting here acts as a filter to those messages. Every message is stored with a 'key' and in here you can set which keys are logged and which keys are ignored. Setting it to '*' will mean that everything will be logged. If a key has exclamation mark before it, then that key will be ignored. Wave Framework has two default internal log messages 'input-data' and 'output-data' which are ignored by default, but sometimes it is recommended to turn them on for debugging purposes. This internal log can be read from developer tools as /tools/log-reader.php?internal URL. This setting is not used by default and thus internal logging is disabled.</p>
+				
+				<p><b>api-logging</b></p>
+				
+				<p>It is possible to keep a simplified log of API requests that are sent to API Handler. This setting is a comma-separated list of API profiles that will be tracked or will not be tracked. This allows for keeping track of how actively this or that API Profile is used in the system and gives a good overview of what commands have been used the most and how frequently. Setting it to '*' will mean that every API Profile will be logged, except profiles listed with '!' in front of their name. The default setting, if used, will track all API profiles except the public profile.</p>
+				
+				<p><b>session-user-key<br/>session-permissions-key</b></p>
+				
+				<p>Wave Framework has a basic user and permissions handling through sessions, which can be accessed through MVC objects. This sets the keys under which user data and permissions are stored. These values are set to 'www-user' and 'www-permissions' by default.</p>
+				
+			<h2>Request Limiter</h2>
+				
+				<p><b>limiter</b></p>
+				
+				<p>This turns on HTTP request limiter if set to 1. This setting is a global flag, if this is not set to 1, then all other flags of this group are ignored. This is set to 0 by default.</p>
+				
+				<p><b>http-authentication-limiter</b></p>
+				
+				<p>If this is set to 1, then every HTTP request requires HTTP authentication based on http-* configuration settings. Otherwise all requests are blocked. This is useful to protect website or web service from being accessed during development. This is not used by default.</p>
+				
+				<p><b>https-limiter</b></p>
+				
+				<p>This setting enforces HTTPS connections, when accessing this web service. If this is turned on, then all non-HTTPS requests will be redirected to HTTPS. This is not used by default and both HTTP and HTTPS requests (if supported) are allowed.</p>
+				
+				<p><b>whitelist-limiter</b></p>
+				
+				<p>This setting is a comma-separated list of IP addresses which are allowed to access this website or web service. Requests from any other IP are blocked and not allowed. This is not used by default.</p>
+				
+				<p><b>blacklist-limiter</b></p>
+				
+				<p>If whitelist limiter is not used, then this setting can be a comma-separated list of IP addresses that are not allowed to access this website or web service. This is not used by default.</p>
+				
+				<p><b>request-limiter</b></p>
+				
+				<p>This setting allows to limit the amount of requests per minute that are allowed. This is used to protect the system against Denial of Service attacks. This setting is the maximum amount of requests allowed per IP address. If this limit is exceeded, then that IP is blocked for one hour from accessing the service again. This is not used by default.</p>
+				
+				<p><b>load-limiter</b></p>
+				
+				<p>This setting sets the server load value that when met, will make Wave Framework temporarily block HTTP requests. If server load is too high, then subsequent requests can make problems worse, so this setting allows you to make such requests as short and quick as possible, which helps reduce the load on the server. This setting is undefined by default and this limiter is not used.</p>
+
+	</body>
+</html>

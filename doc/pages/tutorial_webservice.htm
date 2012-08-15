@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Web Service Tutorial - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>How to Build a Simple Web Service With Wave Framework</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave is a PHP micro-framework that is built loosely following model-view-control architecture and factory method design pattern. It is made for web services, websites and info-systems and is built to support a native API (Application Programming Interface) architecture, caching and smart resource management. Wave is a compact framework that does not include bloated libraries and features and is developed keeping lightweight speed and optimizations in mind.</p>
+			
+				<p>This tutorial takes a look at how to build a web service. A web service is not a website - websites can include a web service but very often they do not. Modern websites and infosystems that wish to take advantage of multi-platform options and user-interface-independence benefit from building their systems on frameworks like Wave. Wave Framework can be used to build a web service which can then be utilized in multiple platforms, from simple websites to mobile operating systems like Android and iOS. API allows data to be returned from the built system in whatever way needed for the client. User interface can run independently and fetch data from the system or send data to it whenever needed.</p>
+				
+				<p>Though API-based architecture allows to keep user interface entirely separate from functionality of the system, Wave Framework does come with a View and URL controllers to build websites too. If you are interested in building websites then I suggest you complete this tutorial and then move on to next one: "Building a website with Wave Framework".</p>
+				
+				<p>Complete files of this tutorial are available in '/doc/examples/webservice/' subfolder in the downloaded archive. If you wish to test the example without writing the tutorial code yourself, then you should copy these files to root folder of your Wave Framework. Note that this will overwrite your default '/resources/api.profiles.ini' file and you may wish to make a backup of that file before doing so. This file contains information on API Profiles and allowed API commands.</p>
+		
+			<h2>Planning</h2>
+			
+				<p>It is always a good idea to first to come up with what you need for your web service to do. For the purpose of this tutorial I wish to create a web service that stores information about my movie collection. I need my system to be able to add new movies, delete movies, see information about movies and fetch a list of my movies. I want to build this because I intend to later on use this web service as a back-end for my website as well as a mobile application.</p>
+				
+				<p>In this tutorial we shall essentially build a web service API to fit those needs.</p>
+				
+				<p>All of those commands will be executed using native API that is part of Wave Framework and is loaded through Index Gateway as an API Handler. Index Gateway routes all API-specific HTTP requests to API Handler and executes the calls that I will write below in detail.</p>
+				
+			<h2>Setup and Configuration</h2>
+			
+				<p><i>Please note that Wave Framework is recommended to be run on PHP 5.3+ and on Apache or Nginx web server.</i></p>
+				
+				<p>You should first download the latest version of Wave Framework, unpack the archive and then upload the files from the archive to your website. For the sake of this tutorial, let's say that I have uploaded the files to my website root folder, accessible through browser with http://www.example.com/ address.</p>
+				
+				<p>You should also make filesystem folder (/filesystem/) and all of its subfolders writeable by PHP, for example with command chmod 0777 or giving permissions using FileZilla (Right click on folder -&gt; File Permissions -&gt; Numeric value -&gt; 777) or with any other FTP software.</p>
+				
+				<p>There is a compatibility script in /tools/compatibility.php that you should run (in our case, from http://www.example.com/tools/compatibility.php), that tells you if your current server setup might cause problems for Wave Framework. If compatibility script finds any serious problems, then Wave Framework might not work properly on your web server.</p>
+				
+				<p>Once uploaded, go to the website with your browser. If no errors are shown and it simply says 'Hello Wave' with a nice shiny logo of Wave Framework, then installation has been successful.</p>
+				
+			<h2>Brief Introduction to MVC Pattern</h2>
+			
+				<p>Model-View-Controller architectural pattern, or simply MVC pattern, is a way of separating different parts of your software from one another based on their functionality. This pattern originates from Desktop software development and has been loosely translated over to web. MVC has been implemented in web in very many ways, which is why there are a lot of tutorials online about MVC that all implement it very differently. Wave Framework technically implements HMVC pattern (Hierarchical MVC) and to make sure that we are on the same page here, I will briefly go over how Wave Framework integrates this pattern.</p>
+				
+				<p>In MVC pattern we have three parts: models, views and controllers. Hierarchical MVC means that any component of MVC can call another MVC component, but this is an aspect that this tutorial will not look into for now.</p>
+				
+				<p><b>Models</b> are basically data objects - usually a representation of a row from database - with specific validation and logic. Variables of a model object should be (mostly) the same as they are in a database. Methods (functions) of a Model object are basically commands that save that data object in database, delete data object in database or return a number of data objects of that type from database. Main job of a model object is to basically be the layer between database and the rest of your system. If you add new data columns to your database (in this case movies database), then you would need to expand your Model object accordingly to take those new columns into account. Models are useful since you can always replace a logic of a model without affecting the rest of the system, as long as the methods and expected input and output remain the same.</p>
+				
+				<p><b>Controllers</b> are objects that translate 'commands' from the client (or user), do something in the system based on that command as well as input and then return new information back to the client. These commands can be anything: they can delete some file from the system, ping some URL or create a new Model object and return data from database. From the standpoint of Wave Framework, every action that user does is sent to a Controller with the data that user has entered. When building a website with Wave Framework, then the first Controller that is loaded is URL Controller that takes the URL user entered and finds out what page to show to the user. But in the scope of this tutorial, a Controller deals basically with our our API commands of adding a new movie or returning a list of movies to the user. Controllers have a strong relation to API in Wave Framework, as controller name and methods are essentially the API calls.</p>
+				
+				<p><b>Views</b> are an optional part of a web service. In fact, in this tutorial, we do not create any views at all. Traditionally a view is simply the HTML logic of a website and includes HTML logic. Back-end that returns views to user agent, such as web browser, can include just HTML or also a UI layer of JavaScript. In Wave Framework the scope of view is left open and it is possible to build different views on top of Wave Framework, from mobile to desktop. Second tutorial, How to Build a Simple Website With Wave Framework, deals with views and it is recommended to take a look at that if you are interested to expand the API further and implement it in a website.</p>
+				
+			<h2>A Little About Factory Pattern</h2>
+			
+				<p>Factory pattern is an efficient object-oriented architectural pattern that basically works in the principle that 'only load things that you need'. Wave Framework uses factory pattern as a core aspect of its functionality for Model, View and Controller objects.</p>
+				
+				<p>While Wave Framework does implement an autoloader script that you can use to add functions and classes to Wave Framework that will be available for every request, this is not something that Factory pattern covers. The idea of Factory pattern is that per each request PHP would only load classes that are actually used within the execution of that request. Thus all the objects are loaded from Factory methods that load and return the new object dynamically.</p>
+				
+				<p>This means that if I build a system where I store my movies and also store my music and then view a page where I list my movies, then no models or controllers of music will be loaded at all. This allows the system to be as efficient as possible and use as few resources as possible to get the job done without slowing the system down simply because it has a lot of classes defined.</p>
+				
+				<p>When writing MVC classes, then Wave Framework implements Factory method by loading new objects dynamically when calling getModel(), getView() and getController() methods within MVC classes. This will be covered within the tutorial, so you can see how to load a model when building controllers.</p>
+				
+			<h2>Building a Model</h2>
+			
+				<p>Model is basically an object that carries information about specific data entity that exists in your system. In this tutorial that data entity should hold information about a movie object - its parameters and methods that manipulate its parameters and read it from or store it in the database. In this tutorial we won't be using databases to keep things simple, so our model will simply write movie data to filesystem as a serialized array.</p>
+				
+				<p>Go to /models/ folder and create a new file called 'model.movie.php' and open it in your preferred text editor.</p>
+				
+				<p>This file will be your model for your movies and you have basically created a new model file. Wave Framework model files should include a class definition and all of those classes are extended from WWW_Factory class that add additional functionality to each of your objects. This behavior is not obligatory however and you can build model files that are not extended from Factory class at all, but for the sake of current tutorial, it is extended from WWW_Factory class.</p>
+				
+				<p>Class name should be written with the logic WWW_model_{class-name}. As a result you should create a class definition in that file as follows:</p>
+				
+<pre>
+	<code>
+	&lt;?php
+		class WWW_model_movie extends WWW_Factory {
+			echo 'test';
+		}
+	?&gt;
+	</code>
+</pre>
+
+				<p>Next I am going to define all the data that I want to hold about a movie as variables for that class. As a result I am going to add variables about for the title and year of release to the class. I am also adding a variable for ID so I can identify movies from one another later on (such as when I want to delete a movie). ID defined as 0 by default, but I intend to save it as a non-zero value later on. Place these lines within your class definition:</p>
+				
+<pre>
+	<code>
+	...
+	public $id=0;
+	public $title;
+	public $year;
+	...
+	</code>
+</pre>
+
+				<p>Next I will create two new methods for the class that I can use to set data for a movie (for title and year). I could also create a single method for this purpose and submit an array, but for tutorial purposes it is better to keep these separate as this makes the functionality and methods of the model more clear. Place these functions within your class definition:</p>		
+				
+<pre>
+	<code>
+	...
+	public function setTitle($title){
+		$this-&gt;title=$title;
+	}
+	public function setYear($year){
+		$this-&gt;year=$year;
+	}
+	...
+	</code>
+</pre>
+
+				<p>Next I will create a function that allows me to store data in database. I will not be using an actual database for this example, instead data will be written to filesystem under /filesystem/data/ folder as a serialized array string, with a filename of movies.db. One of the calls used here is getState('data-root'), which returns a folder of /filesystem/data/ where filesystem specific files and folders can be stored safely. This function below implements this call to store the data as a file:</p>
+				
+<pre>
+	<code>
+	...
+	// This saves the current movie in database
+	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
+	public function saveMovie(){
+		// Making sure that title and year are both set
+		if($this-&gt;title!='' && $this-&gt;year!=''){
+			// Database location
+			$dbLoc=$this-&gt;getState('data-root').'movies.db';
+			// If database file already exists, we simply load the database and unserialize its data to add a new movie to it
+			if(file_exists($dbLoc)){
+				$curDb=unserialize(file_get_contents($dbLoc));
+				// ID's are indexes in the stored array, so we seek the highest index in that array
+				$nextId=max(array_keys($curDb))+1;
+			} else {
+				// Since database did not exist, an array is created for new database
+				$curDb=array();
+				$nextId=1;
+			}
+			// Creating data node of current movie
+			$movie=array();
+			$movie['title']=$this-&gt;title;
+			$movie['year']=$this-&gt;year;
+			// Adding the new node into database array
+			$curDb[$nextId]=$movie;
+			// We overwrite the old database with the updated database with a new movie
+			if(file_put_contents($dbLoc,serialize($curDb))){
+				return $nextId;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	...
+	</code>
+</pre>
+
+				<p>Another function is needed that will be used to remove a movie from the same database. It will either remove the movie with a current ID or a movie with a set ID from the method. Function is below:</p>
+				
+<pre>
+	<code>
+	// This deletes movie with a specific ID from database
+	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
+	public function deleteMovie($id=0){
+		// This function, if defined with an ID, deletes specific ID, otherwise it deletes currently active ID
+		if($id!=0){
+			$deleteId=$id;
+		} else if($this-&gt;id!=0){
+			$deleteId=$this-&gt;id;
+		} else {
+			// No ID was set in here nor in the current object
+			return false;
+		}
+		// Database location
+		$dbLoc=$this-&gt;getState('data-root').'movies.db';
+		// If database does not exist then we have no movies to delete
+		if(file_exists($dbLoc)){
+			$curDb=unserialize(file_get_contents($dbLoc));
+		} else {
+			return false;
+		}
+		// If such an ID exists in database, it is simply unset
+		if(isset($curDb[$deleteId])){
+			unset($curDb[$deleteId]);
+		} else {
+			return false;
+		}
+		// We overwrite the old database with the updated database
+		if(file_put_contents($dbLoc,serialize($curDb))){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	</code>
+</pre>
+
+				<p>As we now have methods needed to store movie information in database as well as remove it, we now also need a function that is used to load information to the object from database based on ID that is given and return that data. Function that achieves this is the following:</p>
+				
+<pre>
+	<code>
+	// This loads a movie based on its ID
+	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
+	public function loadMovie($id=0){
+		if($id!=0){
+			// Database location
+			$dbLoc=$this-&gt;getState('data-root').'movies.db';
+			// Making sure that current database exists
+			if(file_exists($dbLoc)){
+				$curDb=unserialize(file_get_contents($dbLoc));
+			} else {
+				return false;
+			}
+			// If this movie exists in the database, we assign its values to 
+			// current object.
+			if(isset($curDb[$id])){
+				$this-&gt;id=$id;
+				$this-&gt;title=$curDb[$id]['title'];
+				$this-&gt;year=$curDb[$id]['year'];
+				return array(
+					'id'=&gt;$id,
+					'title'=&gt;$curDb[$id]['title'],
+					'year'=&gt;$curDb[$id]['year']
+					);
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	</code>
+</pre>
+
+				<p>Since we are creating an API for storing information about movies and displaying that information, we also need a method that returns a list of all movies from our database together with its ID's. This function is similar to previous one, except it returns all movies:</p>
+				
+<pre>
+	<code>
+	// This loads all movies from database into returned value
+	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
+	public function loadAllMovies(){
+		// Database location
+		$dbLoc=$this-&gt;getState('data-root').'movies.db';
+		// Making sure that current database exists
+		if(file_exists($dbLoc)){
+			$curDb=unserialize(file_get_contents($dbLoc));
+		} else {
+			// Since database does not exist (and thus movies don't exist) we return empty array instead of false
+			return array();
+		}
+		// We store all movie data in a separate array that will be returned
+		$allMovies=array();
+		foreach($curDb as $id=&gt;$data){
+			$movie=array();
+			$movie['id']=$id;
+			$movie['title']=$data['title'];
+			$movie['year']=$data['year'];
+			$allMovies[]=$movie;
+		}
+		return $allMovies;
+	}
+	</code>
+</pre>
+
+				<p>This covers all the model methods we need for our web service. You should upload this file to your server. Model itself is unable to do much in our system, so we need to build a controller for this, which is covered in the next section.</p>
+				
+			<h2>Building a Controller</h2>
+			
+				<p>API commands are commonly executed through a Controller. Controllers can have different duties in a system and they hold core logic of the system and its functionality. In this tutorial the Controller deals with interpreting the user input and calling the Model objects and methods we created in the previous step. Controller is the most important part of your system.</p>
+				
+				<p>Go to /controllers/ folder and create a new file called 'controller.movies.php' and open it in your preferred text editor. This file will include the class for your Controller.</p>
+				
+				<p>Wave Framework controller files should include a class definition and all of those classes are extended from WWW_Factory class that add additional functionality to each of your objects. Class name should be written with the logic WWW_controller_{class-name}.</p>
+				
+				<p>Since controller will also return data to API, I will add a variable $returnData to that class definition, which is not required and can be handled as you see fit based on your system, but since Controller is always expected to return or print out some data, this can be a good practice. Alternative is to define the returnable variables within methods themselves.</p>
+				
+				<p>As a result you should create a class definition in that file as follows:</p>
+	
+<pre>
+	<code>
+	&lt;?php
+		class WWW_controller_movies extends WWW_Factory {
+			public $returnData=array();
+		}   
+	?&gt;
+	</code>
+</pre>
+
+				<p>According to our initial plan we need to have four different API commands (essentially Controller methods) in our system. We need to add a movie to our list (1), delete a movie from our list (2), get information about a movie from our list (3) and get a list of all of our movies (4). This means that we need to create methods for each of those commands in our Controller file.</p>
+				
+				<p>The way Index Gateway - that is used to route all HTTP requests through - works so that all input data sent by the user agent (GET, POST and other variables) are all merged into a single input data array. This variable is the variable defined in our Controller methods as the $input and we can do with that data as we see fit. In our controller we expect data to be sent with similar variable names as they were in model files (such as our Model's $title is $input['title'] in Controller), but this is not necessary - it is simply a good practice.</p>
+				
+				<p>First we will create a method for adding a new movie to database. The $input variable will simply be the variable provided by API from all the input data user agent sends to API. This method dynamically creates a Model object through Factory based on class that we defined earlier by calling getModel() function with the name of our Model (in this case 'movie'). Then we can call the methods of that Model that we built earlier, such as setting the title with setTitle() or saving the movie with saveMovie().</p>
+				
+<pre>
+	<code>
+	// This function adds a movie in database
+	// * title - Title of the movie
+	// * year - Year of the movie
+	public function add($input){
+		if(!isset($input['title']) || $input['title']==''){
+			$this-&gt;returnData['error']='Title is missing';
+		} else if(!isset($input['year']) || $input['year']==''){
+			$this-&gt;returnData['error']='Year is missing';
+		} else {
+			// This loads the model object from the class we created
+			$movie=$this-&gt;getModel('movie');
+			$movie-&gt;setTitle($input['title']);
+			$movie-&gt;setYear($input['year']);
+			if($movie-&gt;saveMovie()){
+				$this-&gt;returnData['success']='Movie saved!';
+			} else {
+				$this-&gt;returnData['error']='Could not save movie!';
+			}
+		}
+		return $this-&gt;returnData;
+	}
+	</code>
+</pre>
+
+				<p>One thing about the comments: it is recommended to write controller comments that are in headers of each method as describing the input array keys that are sent to the method. This is because there is a developer tool that later fetches those comments and shows them as part of API documentation (this will be shown in later sections). This is why I detailed 'title' and 'year' in the comments, rather than $input.</p>
+				
+				<p>Next method will return data from database based on ID provided by client. Again we will create a Model object based on the Model class we built earlier and call its loadMovie() method with the input variable $input['id'], if it is defined:</p>
+				
+<pre>
+	<code>
+	// This returns data about a movie based on ID
+	// * id - ID of the movie to return information for
+	public function get($input){
+		if(!isset($input['id']) || $input['id']=='' || $input['id']==0){
+			$this-&gt;returnData['error']='ID is incorrect!';
+		} else {
+			$movie=$this-&gt;getModel('movie');
+			$movie=$movie-&gt;loadMovie($input['id']);
+			if($movie){
+				$this-&gt;returnData=$movie;
+			} else {
+				$this-&gt;returnData['error']='Cannot find movie with this ID!';
+			}
+		}
+		return $this-&gt;returnData;
+	}
+	</code>
+</pre>
+
+				<p>Another function will be used to return all the movies from the database. System creates a new Model and simply returns the result from loadAllMovies() method:</p>
+				
+<pre>
+	<code>
+	// This loads all listed movies from database
+	public function all(){
+		$movies=$this-&gt;getModel('movie');
+		$movies=$movies-&gt;loadAllMovies();
+		if($movies){
+			$this-&gt;returnData=$movies;
+		} else {
+			$this-&gt;returnData['error']='Cannot find movies!';
+		}
+		return $this-&gt;returnData;
+	}
+	</code>
+</pre>
+
+				<p>Last controller method will delete a movie from our database, again through the Model we created earlier:</p>
+				
+<pre>
+	<code>
+	// This deletes a movie from database
+	// * id - ID of the movie to delete
+	public function delete($input){
+		if(!isset($input['id']) || $input['id']=='' || $input['id']==0){
+			$this-&gt;returnData['error']='ID is incorrect!';
+		} else {
+			$movie=$this-&gt;getModel('movie');
+			$movie=$movie-&gt;deleteMovie($input['id']);
+			if($movie){
+				$this-&gt;returnData['success']='Movie deleted!';
+			} else {
+				$this-&gt;returnData['error']='Cannot find movie with this ID!';
+			}
+		}
+		return $this-&gt;returnData;
+	}
+	</code>
+</pre>
+
+				<p>This covers all the controller methods we need for our web service. You should upload this file (and the Model file, if you did not already do so) to your web server. Our API service is basically done and complete now, next up is testing and making sure everything works as expected. If your code does not work, then compare it against the example files included in the tutorial.</p>
+				
+			<h2>API Profile Permissions</h2>
+			
+				<p>API does not give access to API commands unless permissions for this are given in API profiles file. This is because every system built on Wave Framework is driven by API and thus API has to be secure by default. By default API profiles are restricted in order to defend your software from potential abuse. As a result, you should set the commands you deem 'allowed' over API connection in profile configuration.</p>
+				
+				<p>API profiles configuration is set in the file /resources/api.profiles.ini and you should open this file in a text editor.</p>
+				
+				<p>By default this file has two profiles: 'public' and 'custom-profile'. The default public profile depends on your configuration setting in /config.ini file (it is 'public' by default). Public profile is always used whenever a HTTP request is made to API without any other profile set. Public profile works much like a website would and can (but does not have to) be dependent on sessions and cookies.</p>
+				
+				<p>We will be using this public profile for this example (and you can read more about API security and profiles in other sections of this documentation) so take a look at the default profile information there:</p>
+				
+<pre>
+	<code>
+	[public]
+	disabled=0
+	ip=*
+	commands="example-get"
+	</code>
+</pre>
+
+				<p>The commands setting is a comma-separated list of commands that can be called with this API profile. By default this public profile only allows 'example-get' API command (this translates to 'example' Controller and 'get()' method). In order for public API to allow the controller commands we have made, this value has to be changed to either '*' - which allows all commands, but is never recommended for public API profiles - or a comma separated list like this: 'movies-all,movies-add,movies-delete,movies-get' - which allows only the controller methods we built here. You should edit the profile accordingly:</p>
+				
+<pre>
+	<code>
+	[public]
+	disabled=0
+	ip=*
+	commands="movies-all,movies-add,movies-delete,movies-get"
+	</code>
+</pre>
+
+				<p>Once you have edited API configuration file, upload it to server and proceed to next step.</p>
+				
+			<h2>Debugging Wave Framework</h2>
+			
+				<p>Before we continue to actually executing the API commands over HTTP, it is important to know that Wave Framework overrides default PHP error and exception handling. Main reason for this is that quite often the PHP's own errors can cause additional problems and get in the way of execution of the application. This is why Wave Framework does two things: it shows an error message when it encounters a fatal error and it silently writes all warnings and less significant error messages to a debugging log in the background.</p>
+				
+				<p>To see the error messages that have been logged, you should execute the script /tools/debugger.php that comes with Wave Framework. What this script does is that it logs error messages and groups them based on error message and type. If you run that script and it gives detailed information about the error message, then you can see where Wave Framework found PHP errors or had problems running and can then attempt to fix the problem and remove the error message from Debugger.</p>
+				
+				<p>Once an error message is removed from debugger, then Debugger will show additional error messages if any. This means that it is recommended to check this script every now and then even if your website or web service does not show any errors and especially before deploying the project live. This script makes sure the developer keeps their code clean and free from errors and if you run into any problems with your web service or website, then this script is the first place to check what happened.</p>
+				
+			<h2>Executing API Commands Over HTTP</h2>
+			
+				<p>Now that we have basically created our web service, we can test if it works properly by testing it through Wave Framework's API. Wave Framework uses Index Gateway to route through all HTTP requests and when a file with the extension *.api is requested, then it attempts to send the request to API Handler, which is stored in /engine/handler.api.php if you are interested in how what user writes into URL bar is converted into data for API. But for the time being, you do not need to know more about specifics of handlers.</p>
+
+				<p>What API Handler does is that it translates all the input data sent over HTTP (GET, POST, FILES, SESSION and COOKIES) into a merged input array and then executes a controller method based on the value of www-command that is sent to API.</p>
+				
+				<p>For this project the plan was to return data in XML format. This means that we have to make a request to our API with specific API settings. This is done by requesting a filename 'xml.api' with a browser (or some other HTTP client) and supplying additional variables based on command. In the first example we're making a request to JSON API though, so we'll be using 'json.api' filename. You should be able to access your API with the following script:</p>
+				
+				<p>http://www.example.com/json.api</p>
+				
+				<p>Since no other details were sent to the API, then API returns the following message, detailing that it was unable to properly process your request:</p>		
+				
+<pre>
+	<code>
+	{"www-error":"API command not set","www-response-code":101}
+	</code>
+</pre>
+
+				<p>This means that API works and client request went through correctly, but it requires more information before it is able to do what we actually want it to do. As a result we need to send certain GET variables with the command (this data can also be sent with POST or other variables, but this tutorial is easier to follow with GET variables due to them being included in the script URL itself). Full list of API settings are detailed in other parts of this documentation, but you can ignore that for now as I will list the parameters we actually need below.</p>
+				
+				<p>API also requires a command variable and 'www-command' is the main variable we have to submit, since this tells API what controller and what method we wish to execute. If 'www-command' has a value of 'movies-all', then it will load controller WWW_controller_movie and execute method all() from that class. There is really nothing more to it!</p>
+				
+				<p>We can also tell API what type of data need the API to return. By default it returns data in JSON format (as it did when we sent the empty request). We can tell API what format of data we need in one of two ways: we either send 'www-return-type' variable with value 'xml', 'json', 'ini' and so on, or simply change the filename of API from to 'xml.api', 'json.api' and so on.</p>
+				
+				<p>Let's try this out! Make an equivalent request with a browser to your 'xml.api' file:</p>
+				
+				<p>http://www.example.com/xml.api?www-command=movies-all</p>
+				
+				<p>Since there are no movies set, it most likely returns the following:</p>		
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;error&gt;Cannot find movies!&lt;/error&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+				
+				<p>If an XML is not returned or another error is shown, then you should make sure your web server works properly with Wave Framework. If you run into error messages or code does not work properly, then be sure to take a look at the script that is intended for developers only, the Debugger script located at /tools/debugger.php, as this script gives detailed information about parsing errors, undefined variables and other PHP-related errors. You can always download the archive simple-web-service-tutorial.zip used for this tutorial from here to make sure some typo did not break your code.</p>
+				
+				<p>If you got the same message as shown above, then your system seems to be working! So let's try adding a movie to the list by making an equivalent request. Remember that the GET (or POST and so on) variables we send to API will be all merged into a single input array. This is the array our Controller expects in our method as the input variable (there we defined it as $input as well). Let's add 'title' and 'year' GET variables to our call:</p>
+				
+				<p>http://www.example.com/xml.api?www-command=movies-add&title=Avatar&year=2010</p>
+				
+				<p>This should return the following XML:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;success&gt;Movie saved!&lt;/success&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+				<p>This is a good sign! But let's make sure that the movie was indeed saved by making the first request again where we asked the API to return all of our movies:</p>
+				
+				<p>http://www.example.com/xml.api?www-command=movies-all</p>
+				
+				<p>And we should get an XML that includes the movie 'Avatar' in the list:</p>	
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;node&gt;
+			&lt;id&gt;1&lt;/id&gt;
+			&lt;title&gt;Avatar&lt;/title&gt;
+			&lt;year&gt;2010&lt;/year&gt;
+		&lt;/node&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+				<p>Movie is indeed listed! Let's add another movie to the list and get the movie list output once more, just to play around with our web service a little:</p>
+				
+				<p>http://www.example.com/xml.api?www-command=movies-add&title=Shrek&year=2001</p>
+				
+				<p>http://www.example.com/xml.api?www-command=movies-all</p>
+				
+				<p>This returns the XML with both movies set:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;node&gt;
+			&lt;id&gt;1&lt;/id&gt;
+			&lt;title&gt;Avatar&lt;/title&gt;
+			&lt;year&gt;2010&lt;/year&gt;
+		&lt;/node&gt;
+		&lt;node&gt;
+			&lt;id&gt;2&lt;/id&gt;
+			&lt;title&gt;Shrek&lt;/title&gt;
+			&lt;year&gt;2001&lt;/year&gt;
+		&lt;/node&gt;
+	&lt;/www&gt;
+
+	</code>
+</pre>
+
+				<p>Let's also try to delete a movie from the list by using the following command. Note that if we provide an ID of a movie that does not exist, then we will also get a proper error message, since we checked for this in our Controller delete() method:</p>
+				
+				<p>http://www.example.com/xml.api?www-command=movies-delete&id=2</p>
+				
+				<p>Result of that command is:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;success&gt;Movie deleted!&lt;/success&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+				<p>And when we fetch the list of all movies again we will see that one of the movies was deleted:</p>
+				
+				<p>http://www.example.com/xml.api?www-command=movies-all</p>
+				
+				<p>That results in:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;node&gt;
+			&lt;id&gt;1&lt;/id&gt;
+			&lt;title&gt;Avatar&lt;/title&gt;
+			&lt;year&gt;2010&lt;/year&gt;
+		&lt;/node&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+				<p>You can also try different return-data-type formats, such as 'serializedarray' or 'json'. Certain formats are compatible with arrays and Wave Framework handles the conversion for you by default. Wave Framework does PHP array to text formatting for all following return data types: JSON, binary (simply returns 1 when the result was not false), XML, RSS (similar to XML, but with RSS headers), CSV, serializedarray and INI.</p>
+				
+				<p>This calls JSON as the result:</p>
+				
+				<p>http://www.example.com/json.api?www-command=movies-all</p>
+				
+				<p>And it returns the string:</p>
+	
+<pre>
+	<code>
+	[{"id":1,"title":"Avatar","year":"2010"}]
+	</code>
+</pre>
+
+			<h2>API Documentation</h2>
+			
+				<p>Wave Framework also attempts to help generating documentation for your API based on the comments that have been written in the header of methods as well as the API profiles that are listed in /resources/api.profiles.ini file. This API Documentation generation tool can be accessed by making a request to /tools/api-info.php script. This script essentially scans the controller files and generates API-appropriate www-command names for all methods that are public (private methods are never accessible over API).</p>
+				
+				<p>As long as you keep your comments accurate and to the point, this tool will make sure you always have an up-to-date documentation for your API.</p>
+					
+			<h2>Where to Next?</h2>
+			
+				<p>I recommend you take a look at the API Documentation section of this documentation, which has multiple documentation pages about all the options that Wave Framework API offers. Some documentation pages under Feature Guides section are also useful for building API's.</p>
+				
+				<p>This tutorial is used as the basis for the next tutorial about how to build a simple website for our movie list. The same models and controllers are used as the base for the website tutorial. You can continue to those tutorials from the same code you developed in here.</p>
+
+			<h2>Congratulations!</h2>
+
+				<p>You have created your first fully functional web service with Wave Framework! If you use different data formats then you can easily integrate this web service with various different user interfaces and not just websites. You can use this web service as part of AJAX calls on your website, but you can also use it as a back-end API for a mobile application that stores data over data connection.</p>
+				
+				<p>This makes your created program entirely independent from user interfaces, which is a modern software development standard that is recommended to be followed by all projects.</p>
+				
+				<p>So congratulations and I hope you will have fun experimenting and developing software with Wave Framework!</p>
+				
+				<p>Good luck!</p>
+				
+	</body>
+</html>

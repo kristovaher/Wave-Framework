@@ -2,7 +2,7 @@
 
 /*
 Wave Framework
-MVC View class
+Example View
 
 Minimal example view for demonstration purposes.
 
@@ -13,7 +13,7 @@ License: This file can be copied, changed and re-published under another license
 // WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_view_example extends WWW_Factory {
 
-	// WWW_controller_url calls this function as output for page content
+	// View Controller calls this function as output for page content
 	public function render($input){
 		
 		?>

@@ -2,18 +2,12 @@
 
 /*
 Wave Framework
-MVC Controller class
+URL Controller
 
-This class is used by index.php gateway to solve current URL request. It uses the URL string 
-of the request to calculate what view must be loaded and it uses an internal sitemap that it 
-maps itself against, stored in /resources/{language-code}.sitemap.php where language code is 
-the language that WWW_controller_url detects is being used. This class also deals with things 
-such as slashes at the end of URL's and whether first language of the sytem needs to have a 
-URL node in the request string or not. It also redirects the user agent in case URL is 
-incorrectly formatted. This class is optional and only needed if one intends to build a 
-website with beautiful URL's with Wave Framework.
-
-* Returns view based data, such as translations, sitemap and view settings, to view through data handler
+Wave Framework comes with a URL Controller and a sitemap system that is used to build a 
+website on Wave Framework. This URL controller is entirely optional and can be removed 
+from a system if you plan to implement your own URL Controller or simply use Wave 
+Framework for API, without a website.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: This file can be copied, changed and re-published under another license without any restrictions
@@ -272,7 +266,8 @@ class WWW_controller_url extends WWW_Factory {
 			
 			$data+=array(
 				'controller'=>'view',
-				'method'=>'render',
+				'controller-method'=>'load',
+				'view-method'=>'render',
 				'subview'=>'',
 				'hidden'=>0
 			);
@@ -312,25 +307,25 @@ class WWW_controller_url extends WWW_Factory {
 				$data['www-set-header'][]='X-Robots-Tag: '.$data['robots'];
 			}
 			
-		// HANDLING AND CHECKS
+		// USER PERMISSIONS CHECKS
 		
 			// This is the best place to build your authentication module for web views
 			// But the commands that it uses are not shown here, so it is commented out
 			// This is essentially the boilerplate startpoint for you to implement authentication, as the actual login redirection is turned off
 			// Attempting to get user session
-			if(isset($data['permissions'])){
+			// if(isset($data['permissions'])){
 			
 				// Permissions are exploded into an array from comma separated string in sitemap file
-				$data['permissions']=explode(',',$data['permissions']);
+				// $data['permissions']=explode(',',$data['permissions']);
 				// This method automatically removes all empty entries from the array
-				$data['permissions']=array_filter($data['permissions']);
+				// $data['permissions']=array_filter($data['permissions']);
 				
 				// This flag, if changed, will redirect user to log-in screen
-				$failed=false;
+				// $failed=false;
 				
 				// Testing if user session exists
-				$user=$this->getUser();
-				if($user){
+				// $user=$this->getUser();
+				// if($user){
 					// Double-checking user account validity from database
 					// $userData=$this->dbSingle('SELECT * FROM users WHERE id=? AND deleted=0',array($user['id']));
 					// if($userData){
@@ -345,17 +340,17 @@ class WWW_controller_url extends WWW_Factory {
 					// } else {
 						// $failed=true;
 					// }
-				} else {
-					$failed=true;
-				}
+				// } else {
+					// $failed=true;
+				// }
 				
-				if($failed){
+				// if($failed){
 					// $siteMapReference=$this->getSitemap();
 					// Success array is used since technically URL solving has been a 'success'
-					// return $this->successArray('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
-				}
+					// return $this->resultTrue('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
+				// }
 				
-			}
+			// }
 		
 		// Data about the view is returned
 		return $data;

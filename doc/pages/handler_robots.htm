@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Robots Handler - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Robots Handler</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/handler.robots.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Robots Handler is used to return robots.txt files, if a request is made to such a file. This handler either returns the existing /robots.txt file, or generates a new one that allows all-access to robots. Robot directives for search engines and other crawlers are actually stored on files and pages themselves, so it is not needed to specifically allow or deny anything through robots.txt file. Robots Handler also pinpoints to sitemap.xml file.</p>
+			
+			<h2>Workflow</h2>
+			
+				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				
+				<p>Sets the content type to plain text, which is the common content type of robots.txt files.</p>
+				
+				<p>Returns the content of existing /robots.txt file, if such is present. Otherwise generates a new robots.txt content that is returned to user agent instead. This generated robots.txt file is also cached.</p>
+				
+				<p>Handler also includes an optional database connection, which can be used if it is necessary at some point to load robots.txt from database instead.</p>
+				
+				<p>Robots Handler returns content with appropriate HTTP response headers, including cache. It is possible to request the file without cache by requesting the file as 'nocache&amp;robots.txt'.</p>
+				
+				<p>Robots Handler also makes an entry in the log file about the request, if Logger is used.</p>
+			
+	</body>
+</html>

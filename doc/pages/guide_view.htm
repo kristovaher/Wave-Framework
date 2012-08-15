@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>View Controller and Translations - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>View Controller and Translations</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/resources/[language].translations.ini</h3>
+				<h3>/controllers/controller.view.php</h3>
+				<h3>/views/view.[view].php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework comes with a View Controller and a translations system that is used to build a website on Wave Framework. This View Controller is entirely optional and can be removed from a system if you plan to implement your own View Controller or simply use Wave Framework for API, without a website.</p>
+				
+				<p>Translations are stored in an INI file that lists all the translation keywords for all languages - with one translations file per language - and these files are used by View Controller and the Views loaded by the View Controller to display appropriate translations in the views.</p>
+				
+				<p>You can edit Translations file and View Controller file according to your needs. While default View Controller can easily work for majority of websites, it is recommended to do your tweaks to View Controller HTML template and include your CSS files, JavaScript libraries and set up your basic HTML frame within that Controller.</p>
+				
+			<h2>Translations</h2>
+			
+				<p>Translations file is an easy-to-edit file that defines all translation keywords and their values. Since Wave Framework is built upon UTF-8 through and through, it is recommended to make sure your translations file is also in UTF-8 encoding, otherwise various foreign characters will show up wrong on the website.</p>
+				
+				<p>There is one Translations file per language and the name of the Translations file must match the language keywords listed in your configuration file. If 'en' is one of your languages, then you need an 'en.translations.ini' file in your /resources/ folder.
+				
+				<p>Wave Framework has an example 'en' language translations file by default in te /resources/ folder and you can edit it according to your needs.</p>
+				
+				<p>Every row in Translations file is one translation. The key is the keyword that is referred to in the Views when using translations and the value is what the value will be when the View is rendered. For example:</p>
+	
+<pre>
+	<code>
+	hello-world="Hello Wave"
+	</code>
+</pre>
+
+				<p>This example means that if 'hello-world' is referred to in a view, then it will be rendered as 'Hello Wave' as per translation. If there was another translation file with a different value to that same keyword - and that language was shown on the web page - then the other value would be shown instead.</p>
+				
+			<h2>View Controller</h2>
+			
+				<p>Wave Framework comes with a single View Controller by default and this View Controller is used to generate the HTML frame and load specific view or number of views within that frame.</p>
+				
+				<p>This View Controller does a number of things:</p>
+				
+				<ul>
+					<li>Generates meta title for the page based on system configuration, Sitemap settings and view itself.</li>
+					<li>Generates unified CSS and unified JavaScript links that utilize Wave Framework Resource Handler to load multiple resources with a single HTTP request. It is also possible to load view specific CSS and JavaScript. View Controller will load CSS and JavaScript files from /resouces/ folder if their file format is [view].style.css or [view].script.js. This allows you to include specific functionality or CSS only on some views, instead of adding weight to the main JavaScript or stylesheet file.</li>
+					<li>Generates HTML header (by default following HTML5 standard) with all the meta information that is needed, together with base URL - which simplifies referencing resources in views - as well as Favicon file and all resources.</li>
+					<li>Loads the defined View method and renders the page.</li>
+				</ul>
+				
+				<p>It is possible to define multiple View Controllers and use different View Controller methods to load views based on settings in Sitemap file. But by default Wave Framework has only a single View Controller and method.</p>
+				
+				<p>View Controller is usually modified for each new project in little ways to include all the required resources and build the HTML frame that other views will use across the system. It is a good idea to modify the default View Controller or create a new one based on that View Controller.</p>
+				
+			<h2>Views</h2>
+			
+				<p>Views are stored in /views/ folder in Wave Framework. These views are loaded by View Controller based on the URL that was requested and the view that URL Controller found is requested.</p>
+				
+				<p>By default there are three views in /views/ folder:</p>
+				
+				<ul>
+					<li><b>home</b> - This is home view that is referred to by default in Configuration. This view is loaded whenever request is made to web page that does not have a URL defined.</li>
+					<li><b>404</b> - This is the view that is referred to by default in Configuration as the view that is used whenever URL Controller is unable to find a page.</li>
+					<li><b>example</b> - This is an example page in Wave Framework that is there only for testing purposes, if you open this view then you can see various functionality as it is called in Wave Framework and can be used within views.</li>
+				</ul>
+				
+				<p>Some of the useful method calls and variables within View file that is extended from Factory class are as follows:</p>
+				
+				<ul>
+					<li><b>$input</b> - This is an input data of everything that View Controller has sent to the View.</li>
+					<li><b>$this-&gt;getSitemap()</b> - This returns reverse-sitemap array for the current language (you can also define another language by sending language keyword as a variable). This sitemap array has the key of array elements same for all languages, so you can refer to views based on the view name and not directly the URL. This allows you to add a link to 'About' page, for example, without having to include language checks within the view.</li>
+					<li><b>$this-&gt;getTranslations()</b> - This returns a key-value array of current language translations. Another language translations can be returned if you supply a variable with the language keyword to be loaded.</li>
+				</ul>
+				
+				<p>There are other useful methods too and every View has access to entire State, API and Database connections within the system, giving you an entirely free reign. It is also possible for views to load other views and create entire chain of views, which gives you flexibility to design a system in any and every way possible.</p>
+				
+				<p>It is recommended to visit the example page, http://www.example.com/example/ with the default installation (just replace the domain name with yours), and see what the examples printed in that view display. All of this data can be used to build a website.</p>
+				
+				<p>There is more information about the methods and features in other feature guide documentation pages.</p>
+			
+	</body>
+</html>

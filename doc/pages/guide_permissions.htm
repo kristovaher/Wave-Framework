@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Users and Permissions - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>About Users and Permissions</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>Users and permissions systems are always a hassle to set up. Different systems expect different things and with too many details. Wave Framework also implements a system for handling session data and checking for permissions across the system.</p>
+				
+			<h2>Users</h2>
+				
+				<p>Wave Framework holds user data in sessions. Technically you should build a database or load user data from some database with a Controller that you develop for your system. Wave Framework doesn't come with a user database and login systems from the get go.</p>
+				
+				<p>In your controller where you would authenticate the submitted username and password and fetch user data from database or filesystem, you can assign Wave Framework to store this data across HTTP requests with the following call:</p>
+				
+<pre>
+	<code>
+	// $userData is the array of user data
+	$this->setUser($userData);
+	</code>
+</pre>
+
+				<p>Then you can always check if the user session is active or not, or for example, return some data from the user session with the following examples:</p>
+				
+<pre>
+	<code>
+	// Returns current user session data array, or false if user is not set
+	$userData=$this->getUser();
+	// Returns a single value, like 'username', from current user session
+	$username=$this->getUser('username');
+	</code>
+</pre>
+
+				<p>It is also important to be able to delete active user session. This is recommended whenever the user logs out. This can be done with the following call:</p>
+				
+<pre>
+	<code>
+	$this->unsetUser();
+	</code>
+</pre>
+
+				<p>It is also possible to develop your own user session storage systems that implement other functionality or features. Wave Framework simply comes with a recommended method for doing this through the framework itself as easily as possible.</p>
+				
+			<h2>User Permissions</h2>
+			
+				<p>Permissions are technically separate from user sessions themselves. Wave Framework comes with a very simple keyword-based permissions layer. Permissions - just like user data - is stored in sessions by the framework.</p>
+				
+				<p>Every activity that you have in your system can be protected by this permissions layer. Here is a simple workflow of such an example:</p>
+				
+				<ul>
+					<li>For example, say that you have an infosystem where certain users can add new tasks, but other users cannot do this.</li>
+					<li>In your infosystem you decide to name this permission as 'add-tasks'.</li>
+					<li>You can then store this permission information with your users and assign it to sessions when the user logs in.</li>
+					<li>Whenever you generate a view or listen to an API call, you can check if this permission is currently active. This means you can both not show a button to add a task in the view, as well as actually protect the controller that adds views with the same system.</li>
+				</ul>
+			
+				<p>Here is an example how to add an array of permissions to the current session:</p>
+				
+<pre>
+	<code>
+	// The set value can be both a comma-separated-list or an array of permission keywords
+	$this->setPermissions('add-tasks','delete-tasks'); 
+	</code>
+</pre>
+
+				<p>Now, whenever you wish to check for the presence of permissions and make sure that the user has 'add-tasks' permission set to their account, you can do the following:</p>
+				
+			
+<pre>
+	<code>
+	if($this->checkPermissions('add-tasks')){
+		// Show the 'add tasks' button, for example
+	}
+	</code>
+</pre>
+
+				<p>It is also possible to check for multiple permissions at the same time. This method call would return if one of the permissions in the comma-separated list does not exist in the permissions session:</p>	
+				
+<pre>
+	<code>
+	if($this->checkPermissions('add-tasks,delete-tasks')){
+		// User has no adding and deleting rights
+	}
+	</code>
+</pre>
+
+				<p>You can also get an array of all currently set permissions as well as unset the permissions sessions. For example:</p>
+				
+<pre>
+	<code>
+	// Returns all currently active permissions
+	$permissions=$this->getPermissions();
+	// Unsets permissions sessions entirely
+	$this->unsetPermissions();
+	</code>
+</pre>
+				
+				<p>It is recommended to call the latter method whenever user logs out. Users session is not directly connected to permissions session, so it would require two different calls.</p>
+				
+			<h2>Maintaining User Session with Cookies</h2>
+			
+				<p>Wave Framework uses sessions for storing user and permission data. There is no alternative to store user data and permission data in cookies instead. But sometimes you need to build a system where the user does not log out when their cookies expire in the browser.</p>
+				
+				<p>In order to do this, you would have to store a separate cookie value for a user in your users database. And whenever the cookie is set with that value, then you could log the user in immediately. It is recommended to tie this with an IP check or other features in order to make the process more secure and protect the user from cookie theft. This makes it more secure than a usual cookie-only based login system would be.</p>
+			
+	</body>
+</html>

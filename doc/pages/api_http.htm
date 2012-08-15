@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>API Requests - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>API Requests</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework allows you to connect to the API over HTTP, in fact this is one of the core reasons why the framework is built upon API in the first place. If your entire software runs as an API, then you can tie any type of user interface to this API, from generated HTML to JavaScript to mobile.</p>
+				
+				<p>API requests to a system that is set up on Wave Framework follow the same rules that the API itself, which means that it is recommended to read through Security documentation and Input and Output documentation in order to learn more about the variables that have to be sent to Wave Framework.</p>
+				
+				<p>There are two different methods how you can make a request to Wave Framework API. One is by making requests over the web with simple URL query string, another is by submitting data with POST and other advanced HTTP methods.</p>
+				
+				<p>There are also API Wrappers for both PHP and JavaScript, which can be used to communicate with Wave Framework over HTTP, which are detailed in their own documentation pages. This document here describes how you would go about making such requests yourself, without a wrapper.</p>
+				
+				<p>Examples shown in this document focus on PHP, but these requests can be made this way from any system that allows to make HTTP requests.</p>
+				
+			<h2>GET Requests</h2>
+			
+				<p>Easiest way to communicate with Wave Framework API is to make requests over GET, which means that you can test or access an API even over URL bar of any web browser. These API requests are interpreted by Index Gateway and loaded through API Handler and you can read more about those two components in other parts of documentation.</p>
+				
+				<p>File name that API requests are made to has an *.api extension.</p>
+				
+				<p>In PHP, you have two common ways that you can make HTTP requests with: cURL and file_get_contents(). It is possible to make HTTP requests manually by building it with fsockopen(), but this is not covered in this example here.</p>
+				
+				<p>If you have set up default Wave Framework on http://www.example.com/ domain, then you can make a simple HTTP request to Wave Framework API on that URL with your web browser:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/www.api?www-command=example-get
+	</code>
+</pre>
+
+				<p>This should return something similar to the following:</p>
+				
+<pre>
+	<code>
+	{"id":1,"name":"Lorem Ipsum #670"}
+	</code>
+</pre>
+
+				<p>As you can see, the response is in JSON encoded format, which means that the data is an array that is serialized as a JSON. JSON is the most common method for serializing arrays in modern web services because it can be easily converted to a JavaScript object.</p>
+				
+				<p>It is also possible to return another content type from the web service, the following would return an XML file of the same API call:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/www.api?www-command=example-get&amp;www-return-type=xml
+	// or a shorthand alternative:
+	http://www.example.com/xml.api?www-command=example-get
+	</code>
+</pre>	
+			
+				<p>This returns data as an XML string:</p>
+				
+<pre>
+	<code>
+	&lt;www&gt;
+		&lt;id&gt;1&lt;/id&gt;
+		&lt;name&gt;Lorem Ipsum #694&lt;/name&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+				<p>To make such a request using file_get_contents and convert the result to an array in PHP, you can do as follows from a PHP script:</p>
+					
+<pre>
+	<code>
+	// This makes the HTTP request
+	// Requires that the server has allow_url_fopen setting turned on
+	$result=file_get_contents('http://www.example.com/xml.api?www-command=example-get');
+	// This converts the JSON string to an associative array
+	$array=json_decode($result,true);
+	// Prints out the name from the array
+	echo $array['name'];
+	</code>
+</pre>
+
+			<h2>Advanced POST Requests</h2>
+				
+				<p>It is also possible to make HTTP POST requests to the API. This means that multiple things are possible that would not be possible with the usual GET request:</p>
+				
+				<ul>
+					<li>You can submit more data with POST than you would be able to with a GET request.</li>
+					<li>It is possible to upload files with POST requests.</li>
+					<li>It is possible to submit a JSON or XML string, that will be interpreted as an input string by the API.</li>
+				</ul>
+				
+				<p>The easiest way in PHP to make POST requests is to use cURL module, which will be used here as an example for demonstrating these requests.</p>
+				
+				<h3>Regular POST Request</h3>
+				
+					<p>Here is an example that is the same as the one in the GET Requests examples above, except sent with POST and through cURL:</p>
+					
+<pre>
+	<code>
+	// Initializing cURL object
+	$cURL=curl_init();
+	
+	// Input data array
+	$input=array('www-command'=&gt;'example-get');
+
+	// Setting cURL options (read more in cURL documentation on php.net)
+	$options=array(
+		CURLOPT_POST=&gt;true,
+		CURLOPT_POSTFIELDS=&gt;$input,
+		CURLOPT_URL=&gt;'http://www.example.com/json.api',
+		CURLOPT_HEADER=&gt;false,
+		CURLOPT_RETURNTRANSFER=&gt;true
+	);
+
+	// Assigning configuration options to cURL object
+	curl_setopt_array($cURL,$options);
+
+	// Sending the request
+	$result=curl_exec($cURL);
+	
+	// This converts the JSON string to an associative array
+	$array=json_decode($result,true);
+	
+	// Prints out the name from the array
+	echo $array['name'];
+	</code>
+</pre>
+
+					<p>This should print out 'Lorem Ipsum #XX' on a default Wave Framework setup, if it uses the example Controller that is provided.</p>
+				
+				<h3>File Upload POST Request</h3>
+				
+					<p>cURL also allows you to upload files with the HTTP request. The way cURL handles file uploads is that the CURLOPT_POSTFIELDS array also includes the file keyword (which in HTML would be the 'name' tag) and the file location on the web server that is making the request. This file location has to be prefixed with an '@' character.</p>
+					
+					<p>For example, if I send the above request and also include a file, I would set the $input array as follows:</p>
+						
+<pre>
+	<code>
+	...
+	// Input data array
+	$input=array(
+		'www-command'=&gt;'example-get',
+		'my-file'=&gt;'@my-file.txt'
+	);
+	...
+	</code>
+</pre>
+						
+					<p>Please note that the default implementation of cURL in PHP comes with a security flaw. If you do not intend to actually upload a file and one of your POST values starts with '@' character, then the cURL request will fail. It is recommended to send such POST values as a GET string (part of the CURLOPT_URL value) instead.</p>
+				
+				<h3>Sending a JSON or XML Input String in POST</h3>
+				
+					<p>It is also possible to submit JSON or XML string to the server, which Wave Framework interprets and convers to an input array. This allows you to store 'procedures' that you send to API as a JSON or XML string without having to rebuild the input array every time you make a request.</p>
+					
+					<p>For example, let's say that you create such an XML string:</p>
+					
+<pre>
+	<code>
+	&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+	&lt;www&gt;
+		&lt;www-command&gt;example-get&lt;/www-command&gt;
+	&lt;/www&gt;
+	</code>
+</pre>
+
+					<p>It is possible to send this to Wave Framework API and Wave Framework will interpret it as an input array. For this to work, you need to modify a little the way you make a POST request in cURL:</p>
+					
+<pre>
+	<code>
+	// Initializing cURL object
+	$cURL=curl_init();
+	
+	// This $XML would be your XML string and not an array
+	$input=$XML;
+
+	// Setting cURL options (read more in cURL documentation on php.net)
+	// Custom header is added here because of the XML string
+	$options=array(
+		CURLOPT_POST=&gt;true,
+		CURLOPT_POSTFIELDS=&gt;$input,
+		CURLOPT_URL=&gt;'http://www.example.com/json.api',
+		CURLOPT_HEADER=&gt;false,
+		CURLOPT_HTTPHEADER=&gt;array('Content-Type: application/xml','Content-Length: '.strlen($XML))
+		CURLOPT_RETURNTRANSFER=&gt;true
+	);
+
+	// Assigning configuration options to cURL object
+	curl_setopt_array($cURL,$options);
+
+	// Sending the request
+	$result=curl_exec($cURL);
+	
+	// This converts the JSON string to an associative array
+	$array=json_decode($result,true);
+	
+	// Prints out the name from the array
+	echo $array['name'];
+	</code>
+</pre>
+
+					<p>Same applies to JSON data, you would have to encode an array as JSON string and send this instead of the XML shown above. If sending JSON then you should also change the content type of the request to that of JSON, since Wave Framework uses that to detect what the user agent is trying to do.</p>
+					
+					<p>It is also possible to accomplish the same thing by sending a file or a string over POST that has a name 'www-xml' or 'www-json'. Wave Framework API will interpret these two files or strings the exact same way. You can also send 'www-xml' or 'www-json' as strings, in which case every other sent value will be overwritten by values of that string (except cookies).</p>	
+			
+	</body>
+</html>

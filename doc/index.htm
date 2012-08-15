@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Documentation - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Wave Framework Documentation</h1>
+		
+			<h2>About</h2>
+			
+				<p>Wave is a PHP micro-framework that is built loosely following model-view-control architecture and factory method design pattern. It is made for web services, websites and info-systems and is built to support a native API (Application Programming Interface) architecture, caching and smart resource management. Wave is a compact framework that does not include bloated libraries and features and is developed keeping lightweight speed and optimizations in mind.</p>
+				<p>While not necessary for using Wave Framework, it comes by default with a URL and View controllers intended for building websites by solving URL requests and loading views.</p>
+				<p>Wave Framework has repositories in <a href="http://sourceforge.net/projects/www-php/" target="_blank">SourceForge</a>, <a href="https://github.com/kristovaher/Wave-Framework" target="_blank">GitHub</a>, <a href="http://code.google.com/p/www-framework/" target="_blank">Google Code</a> and <a href="https://bitbucket.org/kristovaher/wave-framework" target="_blank">BitBucket</a>. If you wish to participate in Wave Framework development and submit patches, fixes and new features, then it is recommended to do so through GitHub.</p>
+				
+				<p>Official website of Wave Framework is available <a href="http://www.waveframework.com/" target="_BLANK">here</a>.</p>
+				
+			<h2>Overview</h2>
+			
+				<p>This section gives general overview about set-up and installation of Wave Framework as well as overview of all the files included in default Wave Framework package.</p>
+			
+				<ul>
+					<li><a href="pages/installation.htm">Installation and Setup</a> - Information about how to set up Wave Framework</li>
+					<li><a href="pages/configuration.htm">Configuration</a> - Detailed overview of all configuration options of Wave Framework</li>
+					<li><a href="pages/filesystem.htm">Filesystem Overview</a> - Detailed overview about all of the files included in Wave Framework</li>
+					<li><a href="pages/faq.htm">Frequently Asked Questions</a> - Solutions to common problems and issues when using Wave Framework</li>
+				</ul>
+				
+			<h2>Tutorials</h2>
+			
+				<p>This section has tutorials for Wave Framework. Working examples of these tutorials are in /doc/examples/ subfolders.</p>
+
+				<ul>
+					<li><a href="pages/tutorial_webservice.htm">Web Service</a> - Building a simple web service API</li>
+					<li><a href="pages/tutorial_website.htm">Website</a> - Building a simple website</li>
+					<li><a class="red" href="#pages/tutorial_ajax.htm">AJAX</a> - Making AJAX requests on a website</li>
+					<li><a class="red" href="#pages/tutorial_permissions.htm">User Sessions and Permissions</a> - Implementing user logins and permissions</li>
+				</ul>
+				
+			<h2>Feature Guides</h2>
+			
+				<p>This section covers feature guides and is meant to be a supplement to Tutorials. This covers all the features of Wave Framework and gives detailed overview of functionality when building Wave Framework MVC classes and functionality, especially when creating websites.</p>
+			
+				<ul>
+					<li><a href="pages/guide_url.htm">URL Controller and Sitemap</a> - URL routing through URL controller and sitemap</li>
+					<li><a href="pages/guide_view.htm">View Controller and Translations</a> - Details about default view controller, translations and view-loading</li>
+					<li><a href="pages/guide_mvc.htm">MVC Pattern</a> - Good practices when building models, views and controllers with Wave Framework</li>
+					<li><a href="pages/guide_api.htm">API Calls</a> - Making API calls from MVC objects</li>
+					<li><a href="pages/guide_objects.htm">Creating Objects</a> - Creating objects and dynamically loading classes</li>
+					<li><a href="pages/guide_database.htm">Database Requests</a> - Connecting to databases and making database requests</li>
+					<li><a href="pages/guide_state.htm">State and Configuration</a> - Getting and setting State data and configurations</li>
+					<li><a href="pages/guide_sessions.htm">Sessions and Cookies</a> - Session and cookie handling</li>
+					<li><a href="pages/guide_permissions.htm">Users and Permissions</a> - Users and permissions handling</li>
+					<li><a href="pages/guide_messenger.htm">State Messenger</a> - Using state messenger</li>
+					<li><a href="pages/guide_logger.htm">Internal Logger</a> - Using internal logger</li>
+					<li><a href="pages/guide_cache.htm">Cache</a> - Cache and buffer functionality</li>
+					<li><a href="pages/guide_autoload.htm">Autoload</a> - Autoload script</li>
+					<li><a href="pages/guide_crypto.htm">Cryptography</a> - Encryption and decryption options</li>
+					<li><a href="pages/guide_performance.htm">Performance</a> - Performance testing options</li>
+					<li><a href="pages/guide_terminal.htm">Terminal</a> - Terminal calls</li>
+					<li><a href="pages/guide_images.htm">Dynamic Loading of Images</a> - About the functionality to serve images as resized and edited on-demand</li>
+					<li><a href="pages/guide_resources.htm">Dynamic Loading of Resources</a> - About the functionality to serve resources as unified and minified</li>
+					<li><a href="pages/guide_static.htm">Static Files</a> - About serving files without PHP</li>
+					<li><a href="pages/guide_overrides.htm">Overrides</a> - Information about how to override images, resources and MVC objects</li>
+					<li><a href="pages/guide_tools.htm">Developer Tools</a> - Detailed functionality of various development and administrative tools</li>
+				</ul>
+
+			<h2>API Documentation</h2>
+			
+				<p>This covers all the functionality of using Wave Framework API, both internally or when connecting to the API from other systems either by making the requests yourself or using the API Wrapper classes.</p>
+			
+				<ul>
+					<li><a href="pages/api_io.htm">Input and Output</a> - Input configuration flags and returned output</li>
+					<li><a href="pages/api_security.htm">Security</a> - Security, API profiles and encryption</li>
+					<li><a href="pages/api_http.htm">Requests</a> - Making API requests over HTTP</li>
+					<li><a href="pages/api_codes.htm">Response Codes</a> - API numeric response codes</li>
+					<li><a href="pages/api_observers.htm">Observers</a> - Using command observers</li>
+					<li><a href="pages/wrapper_php.htm">PHP API Wrapper Class</a> - PHP Wrapper class to create API requests over HTTP</li>
+					<li><a href="pages/wrapper_js.htm">JavaScript API Wrapper Class</a> - JavaScript Wrapper class to create API requests over HTTP</li>
+				</ul>
+				
+			<h2>Class and Engine Documentation</h2>
+			
+				<p>This section gives overview of all classes that are used by Wave Framework as well as framework specific handlers and the engine. Note that this is technical overview of the classes and not necessarily about how to use these classes in Wave Framework. This section can be ignored if you don't intend to develop the functionality of Wave Framework itself.</p>
+			
+				<ul>
+					<li><a href="pages/rewrites.htm">URL Rewrites</a> - Apache and Nginx URL rewrites</li>
+					<li><a href="pages/gateway.htm">Index Gateway</a> - About the Index Gateway that routes all requests</li>
+					<li><a href="pages/handler_api.htm">API Handler</a> - API Handler is used for API requests over HTTP</li>
+					<li><a href="pages/handler_data.htm">Data Handler</a> - Data Handler is used for any web page requests</li>
+					<li><a href="pages/handler_file.htm">File Handler</a> - File Handler is used whenever a file is requested</li>
+					<li><a href="pages/handler_image.htm">Image Handler</a> - Image Handler is used for returning image files</li>
+					<li><a href="pages/handler_resource.htm">Resource Handler</a> - Resource Handler is used to return JavaScript and CSS stylesheet files</li>
+					<li><a href="pages/handler_robots.htm">Robots Handler</a> - Robots Handler is used whenever robots.txt file is requested</li>
+					<li><a href="pages/handler_sitemap.htm">Sitemap Handler</a> - Sitemap Handler is used whenever sitemap.xml file is requested</li>
+					<li><a href="pages/state.htm">State Class</a> - State class that is used to store system configuration and state</li>
+					<li><a href="pages/api.htm">API Class</a> - API class that is used to execute API commands</li>
+					<li><a href="pages/database.htm">Database Class</a> - Database class, how to connect to database and how to make database queries</li>
+					<li><a href="pages/factory.htm">Factory Class</a> - Factory class that is used by API to dynamically load resources.</li>
+					<li><a href="pages/limiter.htm">Limiter Class</a> - Limiter class to limit specific queries or requests from IP's as well as enforce HTTPS</li>
+					<li><a href="pages/logger.htm">Logger Class</a> - Logger class to keep track of server requests and grade performance</li>
+					<li><a href="pages/imager.htm">Imager Class</a> - Imager class that is used to do basic image manipulation</li>
+					<li><a href="pages/minifier.htm">Minifier Class</a> - Minifier class that is used to minify CSS, JS and other text formats</li>
+				</ul>
+				
+			<h2>References</h2>
+			
+				<p>This section covers reference documentation that can assist during development, but is mostly for providing additional information about Wave Framework components.</p>
+			
+				<ul>
+					<li><a href="pages/history.htm">Version History</a> - Version history of Wave Framework releases</li>
+					<li><a href="pages/components.htm">Additional Components</a> - Information about external components included in Wave Framework</li>
+				</ul>
+				
+			<h2>Your API Documentation</h2>
+			
+				<p>Wave Framework supports automatically generated API documentation that is specific to your system. API documentation is generated from your controllers methods and comments and is based on API profiles and access rights. By default, this automatically generated API documentation is available only after authentication. To see your automatically generated API documentation, you should make a request to your /tools/api-info.php script.</p>
+			
+			<h2>Author</h2>
+			
+				<p>Kristo Vaher<br/>
+				kristo@waher.net<br/>
+				<a href="http://www.waher.net/" target="_blank">www.waher.net</a><br/>
+				<a href="https://plus.google.com/102632377636999004385/" target="_blank">Google+</a></p>
+
+			<h2>License</h2>
+			
+				<p>This framework is released as open source and its components (with the exception of <a href="pagess/components.htm">external components</a>) are released under <a href="http://www.gnu.org/licenses/lgpl-3.0.txt" target="_blank">GNU Lesser General Public License Version 3</a>. The system that is built on Wave Framework may carry a different license, make sure to take a look at the file headers or ReadMe files for further information.</p>
+	
+	</body>
+</html>

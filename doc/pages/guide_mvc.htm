@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>MVC Pattern - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Guide to Using MVC Pattern</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework is loosely based on Hierarchical Model-View-Controller architecture principle that separates three logical components of software. A Model is a data representation object, usually for something like a row object from a database. A View is a component that is rendered for User Interface. And Controller is the object that receives input, validates input and executes other aspects of software within the system.</p>
+				
+				<p>MVC is hierarchical in Wave Framework, which means that every object can load other objects. It is possible for a view to load another Controller or Model or vice versa, or an entire API call itself. There is more information on this in Creating Objects documentation.</p>
+				
+				<p>Wave Framework comes with an example Model, View and Controller that are stored in '/models/', '/views/' and '/controllers/' subfolders.</p>
+				
+				<p>It is recommended for MVC Objects to be extended from WWW_Factory class, which adds additional functionality to the objects that can be used to access variety of features of Wave Framework and its API.</p>
+				
+			<h2>Models</h2>
+			
+				<p>Models are used as data-representation layer in the system. In most cases, a model would be an object representation of database row and would include methods for editing that information, saving and updating it, deleting it and so on.</p>
+				
+				<p>The main purpose of a model is to make the data object in infosystem independent from what actual method is used for storing that data. For example, if you used MySQL at first and now wish to use another database format or simply store an object in filesystem, then all you have to do is replace the model that is being used and called in your system. As long as the methods and input-output remain the same, then the system will continue working without problems.</p>
+				
+				<p>Parameters of a model are usually representations of database column names and it is recommended to make the model methods work in input and output through an array, so that the models methods return an array if you fetch data.</p>
+				
+				<p>Here is an example model:</p>
+				
+<pre>
+	<code>
+	// WWW_Factory is parent class for all MVC classes of Wave Framework
+	class WWW_model_example extends WWW_Factory {
+
+		// All the variables of this model should be stored here
+		public $id=0;
+		public $name='';
+		
+		// This is like __construct() but for Factory-created objects
+		public function __initialize(){
+			// Do something here
+			return true;
+		}
+		
+		// This is intended to load data from database
+		// * id - Identifier of the object loaded
+		public function load($id){
+			// Actual database query should be built here
+			$this->id=$id;
+			$this->name='Lorem Ipsum #'.rand(1,1000); // This is used for simply testing cache
+			return true;
+		}
+		
+		// This returns all of the data of currently open object
+		public function get(){
+			// Data is returned as an array
+			return array(
+				'id' => $this->id,
+				'name'=>$this->name
+			);
+		}
+
+		// This function is intended to save data to database
+		public function save(){
+			// Actual database query should be built here
+			return true;
+		}
+
+	}
+	</code>
+</pre>
+
+				<p>This example would have, in database, just an ID and name that would be loaded from database. In load() method you would have the functions that load from database. In get() method you would have functionality that returns an array representation of current Models data. In save() method you would write current information to database.</p>
+				
+				<p>You can name your model methods whatever you want, since your own designed system actually calls these methods. The only thing that Wave Framework forbids is the use of __construct() method in a class that is extended from WWW_Factory class. For this you can use __initialize() method that is called by Factory when object is created.</p>
+			
+				<p>Models should be stored in '/models/' subfolder, with a filename of 'model.[name].php' and class name of 'WWW_model_[name]'.</p>
+				
+			<h2>Views</h2>
+			
+				<p>Views are objects in the system that are used to display HTML or other visuals in the system. By default, Wave Framework expects that Views write to output buffer - technically they don't have to, but it simplifies the production of HTML views in the system.</p>
+				
+				<p>Wave Framework does not use a separate templating system and templating language, since PHP itself is a natural templating language in many ways. While it is not recommended to write logic in your views, you can do so. Wave Framework does not restrict your abilities when using the language.</p>
+				
+				<p>It is also possible to make API calls, load other views and more within views. This allows you to create nested views and generate any kind of web pages you can think of.</p>
+				
+				<p>Here is an example view:</p>
+
+<pre>
+	<code>
+	// WWW_Factory is parent class for all MVC classes of Wave Framework
+	class WWW_view_example extends WWW_Factory {
+
+		// WWW_controller_url calls this function as output for page content
+		public function render($input){
+		
+			// An example of getting a sitemap array
+			$sitemap=$this->getSitemap();
+			
+			// An example of getting current translations array
+			$translations=$this->getTranslations();
+		
+			echo '&lt;h1&gt;Hello World&lt;/h1&gt;';
+			
+		}
+
+	}
+	</code>
+</pre>
+				
+				<p>You can name your View methods whatever you want, but Wave Frameworks core View Controller assumes 'render()' as the method by default. A different method can be called if a different method is set in Sitemap file.</p>
+
+				<p>The only thing that Wave Framework forbids is the use of __construct() method in a class that is extended from WWW_Factory class. For this you can use __initialize() method that is called by Factory when object is created.</p>
+			
+				<p>Views should be stored in '/views/' subfolder, with a filename of 'view.[name].php' and class name of 'WWW_view_[name]'. This same view name should be defined in the Sitemap in /resources/[language].sitemap.ini file, so that the default View Controller could load a View for a requested URL.</p>
+			
+			<h2>Controllers</h2>
+			
+				<p>Controllers are the objects in Wave Framework that are the first objects called by API. Any API call - the ones done over HTTP as well as internal calls - load a controller first and foremost and execute a method in that controller.</p>
+				
+				<p>Public methods of Controllers act as API calls, where the 'www-command' value would essentially be [controller]-[method]. Private methods cannot be called through API.</p>
+				
+				<p>Controllers would be used for mainly validating input and then returning output to the client or function that called the API and thus the controller. Controllers can be used for anything: user logins, getting tweets from Twitter API, validating or converting input data and more.</p>
+				
+				<p>Here is an example controller that also loads a Model and returns a specific ID from that model as a response:</p>
+				
+<pre>
+	<code>
+	// WWW_Factory is parent class for all MVC classes of Wave Framework
+	class WWW_controller_example extends WWW_Factory {
+		
+		// Simple example call (from API it would be called as 'example-get' command)
+		// Please note that only public methods can be called through API, protected and private methods remain hidden
+		public function get(){
+			// New objects can be created through Factory easily
+			$example=$this->getModel('example');
+			// This 'loads' model with ID of 1. Note that the function call here can be anything you need, this is just used as an example
+			$example->load(1);
+			// Returning the result of controller call
+			return $example->get();
+		}
+		
+	}
+	</code>
+</pre>
+
+				<p>This example returns just an array as the response, but usually it is recommended to return a standardized Wave Framework array. There is more information about this below in Returning Standardized Array section.</p>
+				
+				<p>You can name your Controller methods whatever you want, since your own designed system actually calls these methods. The only thing that Wave Framework forbids is the use of __construct() method in a class that is extended from WWW_Factory class. For this you can use __initialize() method that is called by Factory when object is created.</p>
+			
+				<p>Controllers should be stored in '/controllers/' subfolder, with a filename of 'controller.[name].php' and class name of 'WWW_controller_[name]'.</p>
+			
+				<h3>Returning Standardized Arrays</h3>
+				
+					<p>Wave Framework Controllers are the direct connection point between the client and the API request. This means that what the controller returns is what will be returned to the client as well through the system.</p>
+			
+					<p>Wave Framework allows you to return any type of arrays as a result from the Controller method and the client that made the request can then do whatever they want with the response from the controller.</p>
+					
+					<p>But Wave Framework has a recommended standard for returning arrays. This standard tells Wave Framework and API itself a little more about what the Controller did. Wave Framework needs to know only two things to take full advantage of the returned response: Verbose message about what was done and a response code.</p>
+					
+					<p>You can read more about response codes in a documentation page about the topic, but in general, Wave Framework has five response code namespaces:</p>
+					
+					<ul>
+						<li><b>1XX</b> - System and configuration error messages</li>
+						<li><b>2XX</b> - API Wrapper error messages</li>
+						<li><b>3XX</b> - Custom error messages, these are defined by the developer in the system.</li>
+						<li><b>4XX</b> - Failed messages, there are defined by the developer in the system. </li>
+						<li><b>5XX</b> - Success messages, these are defined by the developer in the system.</li>
+					</ul>
+					
+					<p>Implementing this type of response is relatively easy. Your returned array should have two additional keys:</p>
+					
+					<ul>
+						<li><b>www-message</b> - Simple verbose text message that can be logged or read by other systems, but is (usually) not shown in User Interface.</li>
+						<li><b>www-response-code</b> - Response code in the 1XX, 2XX, 3XX, 4XX or 5XX namespace.</li>
+					</ul>
+					
+					<p>You can add these to the returned array yourself, or use one of the helper functions when returning data, for example:</p>
+					
+<pre>
+	<code>
+	// This returns an error array
+	return $this->resultError('Bad things happened');
+	// This returns an error array with additional custom data
+	return $this->resultError('Bad things happened',array('some-data'=>'some-value'));
+	// This returns an error array with a custom response code (if not defined, it would be 300)
+	return $this->resultError('Bad things happened',array('some-data'=>'some-value'),384);
+	
+	// This returns a failure array with a custom response code (if not defined, it would be 400)
+	return $this->resultFalse('Something failed',array('some-data'=>'some-value'),412);
+	
+	// This returns a success array with a custom response code (if not defined, it would be 500)
+	return $this->resultFalse('Something went OK!',array('some-data'=>'some-value'),501);
+	</code>
+</pre>
+
+					<p>It is recommended to document your 3XX, 4XX and 5XX errors somewhere in your API, such as in your API method comments, as these are not part of Wave Framework itself.</p>
+
+					<p>The difference between Failure and Error is that an Error causes the system to throw an error. This means that something was done in the Controller that should not have been done, or that something failed in unexpected ways.</p>
+					
+					<p>Failure messages are used for negative responses, for example when something did not work, but you still want to display that information in User Interface. For example, when user log-in fails, then that would be returned as a Failed response and not an Error.</p>
+					
+					<p>Success messages should be used when Controllers method call was considered a success, such as when a user has successfully logged in.</p>
+					
+					<p>Wave Framework uses the response code internally to see if the method call was considered a success or not, or if an error was encountered. This is important when returning binary data (that just returns 1 or 0 to the client), or for API Wrapper that can have callbacks set for different type of responses. This is detailed more in API documentation.</p>
+
+	</body>
+</html>

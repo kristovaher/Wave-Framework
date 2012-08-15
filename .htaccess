@@ -2,10 +2,10 @@
 # Wave Framework
 # Apache configuration
 # 
-# Apache commands are stored in this file, including the loading of RewriteEngine, which is 
-# used to filter requests to certain file extensions and direct certain files to /index.php 
-# for parsing, including loading all URL's that it cannot find that WWW_controller_url can 
-# solve.
+# Apache commands are stored in this file. This file loads the RewriteEngine, which is used 
+# redirect all HTTP requests, except those to /static/ folders and those that are PHP files 
+# itself, to Index Gateway stored in /index.php. These commands and Wave Framework itself 
+# only work when RewriteEngine is supported on the web server.
 # 
 # Author and support: Kristo Vaher - kristo@waher.net
 # License: GNU Lesser General Public License Version 3
@@ -19,6 +19,7 @@ RewriteEngine on
 
 # Files from static folder are served directly
 RewriteRule ^resources/static/ - [L]
+RewriteRule ^filesystem/static/ - [L]
 
 # Everything that is not a PHP file is redirected to index.php
 # If you do not wish to redirect all to index.php, then write different RewriteRules for this reason

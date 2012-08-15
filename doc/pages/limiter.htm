@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Limiter Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Limiter Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-limiter.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>This is an optional class that is used to limit HTTP requests based on user agent, IP, server condition and other information. This class is loaded by Index Gateway. WWW_Limiter can be used to block IP's if they make too many requests per minute, block requests if server load is detected as too high, block the request if it comes from blacklist provided by the system, allow only whitelisted IP's to access, ask for HTTP authentication or force the user agent to use HTTPS. Note that some of this functionality can be achieved by Apache configuration and modules, but it is provided here for cases where the project developer might not have control over server configuration.</p>
+			
+				<p>Whether Wave Framework uses Limiter or not depends on /config.ini HTTP request limiter settings.</p>
+				
+				<p>The rest of this document details the use of Limiter class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
+				
+			<h2>Using Limiter class</h2>
+			
+				<p>To use Limiter class, it is recommended to load Limiter class and create a Limiter object as early as possible. This makes sure that the HTTP request limiter checks happen before actual code execution. Some Limiter functionality expects to be able to write to filesystem to keep track of certain HTTP requests, it is recommended to send this address as a parameter when creating the Limiter object.</p>
+				
+<pre>
+	<code>
+	require('/engine/class.www-limiter.php');
+	$limiter=new WWW_Limiter('/directory/to/limiter/folder/');
+	</code>
+</pre>
+
+				<p>If you are also using a Logger (from WWW_Logger), then you can send Logger object to Limiter as well. This makes sure that when Limiter decides to quit the execution of the script it also writes the proper log entry. This means that the requests that were blocked by Limiter are still observeable by examining log files. To send Logger object to Limiter, you can do the following:
+				
+<pre>
+	<code>
+	$limiter-&gt;limiter=$logger;
+	</code>
+</pre>
+
+				<p>It is possible to block HTTP requests if the server seems to be under heavy load. For example, this shows how to make sure that HTTP requests go through only when server load is not above 80:</p>
+				
+<pre>
+	<code>
+	$limiter-&gt;limitServerLoad(80);
+	</code>
+</pre>
+
+				<p>It is also possible to only allow HTTP requests from specific IP addresses. This shows how Limiter blocks all HTTP requests unles they come from 196.123.12.1 or 196.200.1.1 IP addresses:</p>
+				
+<pre>
+	<code>
+	$limiter-&gt;limitWhitelisted('196.123.12.1,196.200.1.1');
+	</code>
+</pre>
+
+				<p>Just like it was with whitelisted IP's, it is possible to define IP's that are blacklisted and when request is detected from those IP's, then the request is blocked:</p>
+				
+<pre>
+	<code>
+	$limiter-&gt;limitBlacklisted('196.123.12.1,196.200.1.1');
+	</code>
+</pre>
+
+				<p>It is also possible to enforce that the client uses HTTPS connection. This does not block the HTTP request, but in case it detects a HTTP request, then it redirects it to HTTPS:</p>
+				
+<pre>
+	<code>
+	// Automatically redirects to HTTPS
+	$limiter-&gt;limitNonSecureRequests();
+	// Shows 401 Unauthorized when non-HTTPS
+	$limiter-&gt;limitNonSecureRequests(false);
+	</code>
+</pre>
+
+				<p>It is also possible to protect HTTP requests with basic HTTP authentication, which asks for a username and password. This access can also be restricted to specific IP addresses:</p>
+				
+<pre>
+	<code>
+	// Protected just by username and a password
+	$limiter-&gt;limitUnauthorized('my-username','my-password');
+	// Only allowed from two IP addresses
+	$limiter-&gt;limitUnauthorized('my-username','my-password','196.123.12.1,196.200.1.1');
+	</code>
+</pre>
+
+				<p>Limiter makes it also possible to block HTTP requests from specific IP addresses, if they are too frequent, such as the case of accidental or intentional Denial of Service attacks. For example, this shows how to make sure that only 200 requests are allowed per minute from one IP address:</p>
+				
+<pre>
+	<code>
+	// Blocks all requests for one hour, if IP makes more than 200 requests in a minute
+	$limiter-&gt;limitRequestCount(200);
+	// Blocks requests for only 30 minutes if IP makes more than 200 requests in a minute
+	$limiter-&gt;limitRequestCount(200,1800);
+	</code>
+</pre>
+
+			<h2>Limiter Class Parameters</h2>
+			
+				<h3>private $logDir='./'</h3>
+				
+					<p>This is the main address of the folder where limiter stores log files for request limiter.</p>
+					
+				<h3>public $logger=false</h3>
+				
+					<p>This holds the WWW_Logger object, if it is used. This makes it possible for Limiter to write proper log files through Logger in case requests are blocked.</p>
+				
+			<h2>Limiter Class Methods</h2>
+				
+				<h3>public function __construct($logDir='./')</h3>
+				
+					<p>Construction method of Logger expects just one variable: $logDir, which is the folder where limiter stores files for specific limiter methods. This folder should be writable by PHP.</p>
+				
+					<p>A constant __IP__ is also defined with remote address of the client making the request, if it has already not been defined. It is recommended to assign a true and secure IP address to __IP__ in case the request comes from behind a proxy.</p>
+				
+					<p>This method also throws an error if the log directory does not exist.</p>
+					
+				<h3>public function limitRequestCount($limit=400,$duration=3600)</h3>
+				
+					<p>This method will block requests from the request-making IP address for $duration amount of seconds, if the IP address makes more than $limit amount of requests per minute. It keeps track of the amount of requests by storing minimal log files in filesystem, in $logDir subfolder. Returns true if not limited, throws 403 error if limit exceeded.</p>
+					
+					<p>Returns true if not limited, throws 403 page if limit exceeded, throws error if log file cannot be created.</p>
+					
+				<h3>public function limitServerLoad($limit=80)</h3>
+				
+					<p>This method will block HTTP requests if server load is more than $limit. It throws 503 Service Unavailable message should that happen.</p>
+					
+				<h3>public function limitWhitelisted($whiteList='')</h3>
+				
+					<p>This method only allows HTTP requests from a comma-separated list of IP addresses sent with $whitelist. For every other IP address it throws a 403 Forbidden error.</p>
+					
+				<h3>public function limitBlacklisted($blackList='')</h3>
+				
+					<p>This method blocks IP addresses sent with $blackList as a comma-separated list. If HTTP request has an IP defined in that list, then Limiter throws a 403 Forbidden error.</p>
+					
+				<h3>public function limitUnauthorized($username,$password,$ip='*')</h3>
+				
+					<p>This method asks for basic HTTP authentication $username and $password and throws a 403 Forbidden error if provided credentials are incorrect or missing. It is also possible to provide a comma-separated list of IP addresses in $ip that allow this type of authentication for additional security.</p>
+					
+				<h3>public function limitNonSecureRequests($autoRedirect=true)</h3>
+				
+					<p>This method either throws a 403 Forbidden error if non-HTTPS connection is used to make a request, or redirects the request to HTTPS. If $autoRedirect is set to true, then HTTP requests are automatically redirected.</p>
+			
+	</body>
+</html>

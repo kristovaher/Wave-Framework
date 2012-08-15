@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>State and Configuration - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>About State and Configuration</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework is built around three core components: API that executes all functionality in the system, State that stores configuration and environment state and Factory-enhanced objects that you build as a developer. State and configuration are accessible by both API and MVC Objects.</p>
+				
+				<p>State is responsible for two things: it carries system configuration and it has methods that allow you to change this configuration or modify the system state in some way (such as use cookies, sessions or the State Messenger). System configuration is loaded from '/config.ini' file and some of the configuration options - when changed - trigger additional calls in the system. You can read more about this from Configuration documentation. The list of all potential variables stored in state is available in State Class documentation.</p>
+				
+			<h2>Getting and Setting State Data</h2>
+			
+				<p>System configuration and various environment variables are automatically loaded into state as variables. There are two methods that allow you to access configuration and state variables: setState() and getState(). State-setting methods should be used with caution, most of the web services or websites should not have to change anything in State directly.</p>
+				
+				<p>Here is how to get some of the more useful data from State:</p>
+				
+<pre>
+	<code>
+	// This is the root folder where Wave Framework is installed
+	$root=$this->getState('system-root');
+	// This is client user agent
+	$userAgent=$this->getState('client-user-agent');
+	// This is root of the writable folder where you can store various file uploads
+	$userData=$this->getState('user-root');
+	// This is a fingerprint of the user agent that is making the request
+	// Might not be entirely unique, but good for some occasions
+	$userData=$this->getState('fingerprint');
+	// This is assumed as the IP address of the client that is making the request
+	$ip=$this->getState('client-ip');
+	// If the user agent has requested not to be tracked
+	$dnt=$this->getState('http-do-not-track');
+	// Currently detected language
+	$language=$this->getState('language');
+	// Root folder for temporary files
+	$tmp=$this->getState('tmp-root');
+	// Modified request URI and true request URI
+	$requestUri=$this->getState('request-uri');
+	$trueRequest=$this->getState('true-request');
+	// Array of all data about the current view (when a page is requested)
+	$view=$this->getState('view');
+	// This returns the whole array from State, all the data
+	$stateData=$this->getState();
+	// It is also possible, when the state object is an array, to reference to a key in that array, like:
+	$viewName=$this->getState('view','view');
+	</code>
+</pre>
+
+				<p>This state also carries either the original or modified data that is written in Configuration file, so every keyword in configuration is also accessible through that same getState() method. Some comma-separated options in the '/config.ini' file are represented as arrays in State, however.</p>
+				
+				<p>It is also possible to change a State variable. This example shows how to change the current timezone:</p>
+				
+<pre>
+	<code>
+	// Setting a single variable
+	$this->setState('timezone'=>'Europe/Helsinki');
+	// Setting multiple state values at once
+	$this->setState(array('timezone'=>'Europe/Helsinki','output-compression'=>false));
+	</code>
+</pre>
+
+				<p>But note that some of these changes might cause the system to run into problems, like if you change the current language and the language translation files don't actually exist and so on. So caution should be there before changing such variables.</p>
+				
+			<h2>Translations and Sitemap</h2>
+				
+				<p>State also stores information about translations from '/resources/[language].translations.ini' file and from sitemap '/resources/[language].sitemap.ini' file. State also allows to return data about translations and sitemaps of not just currently active language, but also of other languages in the system.</p>
+				
+				<p>Both Sitemap and Translations are useful whenever dealing with Views and building a website. Translations allow you to build a website that uses the same views, but works with multiple languages. And Sitemaps allow you to have a tree of URL's on your web system that are linked between one another, which you can use to generate menu's and also create links independently from currently active language.</p>
+				
+				<p>This method can be used to return all translations and their keywords for the currently active language:</p>
+				
+<pre>
+	<code>
+	// This returns the currently active translations
+	$translations=$this->getTranslations();
+	// Get translations for english language (if 'en' language keyword is defined)
+	$translations=$this->getTranslations('en');
+	</code>
+</pre>
+
+				<p>The same applies to getting sitemaps:</p>
+				
+<pre>
+	<code>
+	// This returns the currently active language sitemap
+	$sitemap=$this->getSitemap();
+	// Get sitemap for english language (if 'en' language keyword is defined)
+	$sitemap=$this->getSitemap('en');
+	</code>
+</pre>
+
+				<p>Here are the examples of how a Sitemap file's group is represented later on in a Sitemap array:</p>	
+<pre>
+	<code>
+	// Source, as it is in /resources/[language].sitemap.ini file
+	[example-page]
+	view="example"
+	// In Sitemap array, when using English language
+    [example] => Array
+        (
+            [view] => example
+            [url] => /en/example-page/
+        )
+		
+	// Source, as it is in /resources/[language].sitemap.ini file
+	[other-page/some-string]
+	view="example"
+	subview="alt"
+	// In Sitemap array, when using English language
+    [example/alt] => Array
+        (
+            [view] => example
+            [subview] => alt
+            [url] => /en/other-page/some-string/
+        )
+	</code>
+</pre>
+
+				<p>What the State interpreter does with the Sitemap file is that it takes the view name and appends the 'subview' name to it after a slash. So a URL that uses 'example' view and defines 'alt' as a subview, would be referenced in Sitemap as 'example/alt'. The idea behind this is that if the same page exists for another language (that is, a page that uses the same view and has the same subview defined), then you can use the same address to direct to the page in that language.</p>
+				
+				<p>This means that if you add that 'example/alt' URL to your page, then the link would work for all of your languages, even though the URL they will redirect to will be different.</p>
+				
+				<p>Of course you can also refer to the original, raw Sitemap file (and for each language), the same way, if necessary. For example:</p>		
+<pre>
+	<code>
+	// This returns the currently active language sitemap
+	$sitemap=$this->getSitemapRaw();
+	// Get sitemap for english language (if 'en' language keyword is defined)
+	$sitemap=$this->getSitemapRaw('en');
+	</code>
+</pre>
+
+				<p>These methods - from translations to sitemaps - are both useful when building your views.</p>
+			
+	</body>
+</html>

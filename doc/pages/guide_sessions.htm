@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Sessions and Cookies - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Using Sessions and Cookies</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework includes a number of wrapper methods which can be used to set cookies and session variables, get data from cookies and sessions as well as unset cookies and sessions. Wave Framework also detects if session variables are unset and if nothing is stored in sessions anymore, then removing the entire session together with session cookie. Wave Framework also deals with session namespacing, which makes sure that the cookies set by Wave Framework are not easily edited by other systems that run on the same server.</p>
+				
+			<h2>Cookies</h2>
+			
+				<p>Cookies are an important part in most websites, as it is possible to store various temporary data with cookies that other HTTP requests can use. Cookies work like a browser-side sessions and cookies also store the key to sessions, which are technically server-side cookies.</p>
+				
+				<p>Methods that can be used by MVC Objects in Wave Framework allow you to create a single cookie or multiple cookies at the same time with a single method call. Here are the examples of both:</p>
+				
+<pre>
+	<code>
+	// Setting a single cookie
+	$this->setCookie('my-cookie-key','my-cookie-value');
+	// Setting multiple cookies with a single call
+	$this->setCookie(array('my-cookie-key'=>'my-cookie-value','my-other-key'=>'my-other-value'));
+	</code>
+</pre>
+				
+				<p>It is also possible to send configuration options with the cookie, that define how long the cookie should live, as well as if this cookie can only be accessed by HTTP or more. Here is the list of possible configuration options that should be sent as part of the configuration array:</p>
+					
+					<ul>
+						<li><b>timeout</b> - This is how many seconds, since the moment cookie is created, it will not be deleted.</li>
+						<li><b>expire</b> - This is how many seconds, since the moment cookie is created, it will not be deleted. This is different from default PHP setcookie() call that just asks the timestamp. If this value is sent, then 'timeout' value will be ignored entirely.</li>
+						<li><b>path</b> - Web root path where the cookie is valid. By default the web root of the system is used.</li>
+						<li><b>domain</b> - Domain which applies to the cookie. Default is the current system domain.</li>
+						<li><b>secure</b> - Whether cookie is set only over secure connection.</li>
+						<li><b>httponly</b> - Whether cookie can be only accessed over HTTP and not with JavaScript.</li>
+					</ul>
+				
+				<p>And here is an example of setting a cookie that expires in one minute:</p>
+				
+<pre>
+	<code>
+	// Setting a single cookie
+	$this->setCookie('my-cookie-key','my-cookie-value',array('expire'=>60));
+	</code>
+</pre>
+
+				<p>Note that if setting multiple cookies at the same time, then single configuration applies for all of the cookies. When sending the array, then the second parameter can be the configuration array.</p>
+				
+				<p>To retreive a value from a cookie or to remove a cookie, then these two methods can be called:</p>
+				
+<pre>
+	<code>
+	// This gets a value from a cookie
+	$value=$this->getCookie('my-cookie-key');
+	// This unsets a cookie
+	$value=$this->unsetCookie('my-cookie-key');
+	</code>
+</pre>
+
+				<p>Differently from default behavior in PHP, where you need to make a new HTTP request before you can access cookies, Wave Framework allows you to access cookies immediately after setting them.</p>
+				
+			<h2>Sessions</h2>
+			
+				<p>Sessions are used as the most common method for doing user sessions in modern websites. Sessions hold a cookie in users computer, value of which is used to define a session variable on the web server. This variable can store any kind of information.</p>
+				
+				<p>Setting, getting and unsetting session variables is very similar to how you would set cookies (as shown in the previous section). You do not need to separately start sessions in Wave Framework, as sessions are internally namespaced and Wave Framework will start sessions itself, when session variables are accessed.</p>
+				
+				<p>Sessions do not have a separate configuration, so setSession() method only takes two variables maximum. Here are the examples of setting a session variable, getting a value from a session variable and unsetting a session variable:</p>
+								
+<pre>
+	<code>
+	// This sets a session variable
+	$this->setSession('my-session-key');
+	// This adds multiple session variables at the same time
+	// Setting multiple cookies with a single call
+	$this->setSession(array('my-session-key'=>'my-session-value','my-other-key'=>'my-other-value'));
+	// This gets a value from a session
+	$value=$this->getSession('my-session-key');
+	// This unsets a session
+	$value=$this->unsetSession('my-session-key');
+	</code>
+</pre>
+				
+				<p>It is however possible to also start sessions manually, which allows you to set some session cookie configuration as well. The first option, for secure cookie, is 'false' by default. If this is set to true then this cookie is set only for secure HTTPS connections. Second flag, for HTTP only, means that the cookie cannot be accessed by other scripts - this is set to 'true' by default. Example here:</p>
+				
+<pre>
+	<code>
+	// Regular session-start call (usually this is called automatically)
+	$this->startSession();
+	// Starts sessions with secure connection only and allows the cookie to be accessed with scripts
+	$this->startSession(true,false);
+	</code>
+</pre>
+
+				<p>Wave Framework also has calls for regenerating session ID as well as destroying sessions. Examples of which are here:</p>
+				
+<pre>
+	<code>
+	// Regenerating session ID
+	$this->regenerateSession();
+	// Destroying sessions
+	$this->destroySession();
+	</code>
+</pre>
+
+				<p>It can be useful to destroy sessions when a user logs out, but if other parts of the system also use sessions, then it might destroy some sessions that were not meant to be destroyed. One way or another, the tools are there and can be used for whatever purpose deemed necessary.</p>
+			
+	</body>
+</html>

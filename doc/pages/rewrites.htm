@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>URL Rewrites - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>URL Rewrites</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/.htaccess</h3>
+				<h3>/nginx.conf</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework includes files for two of the supported web servers: Apache and Nginx. Directives and/or configuration from these files should be loaded with the web server.</p>
+				
+			<h2>Apache</h2>
+			
+				<p>Apache commands are stored in .htaccess file. This file loads the RewriteEngine, which is used redirect all HTTP requests, except those to /static/ folders and those that are PHP files itself, to Index Gateway stored in /index.php. These commands - and Wave Framework itself - only work when RewriteEngine is supported on the web server.</p>
+				
+				<p>On most server configurations you should not have to do anything to get the /.htaccess file working, as Apache will automatically execute commands from that file. If this does not work however, then these commands should be set to Apache as directives directly or allow Apache to just execute /.htaccess files in the project folder.</p>
+				
+			<h2>Nginx</h2>
+			
+				<p>Wave Framework also supports Nginx and recommended configuration is stored in /nginx.conf file. This file is never automatically loaded by Nginx and commands and configuration from this file should be set to Nginx server configuration. These commands redirect all HTTP requests, except those to /static/ folders and those that are PHP files itself, to Index Gateway stored in /index.php. These commands - and Wave Framework itself - only work when URL rewriting is supported.</p>
+				
+				<p>This configuration file should not replace your Nginx configuration. You should merely take the relevant parts of this configuration example and apply it to your Nginx configuration file.</p>
+			
+	</body>
+</html>

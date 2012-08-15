@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Version History - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Version History</h1>
+		
+			<h2>Roadmap</h2>
+			
+				<ul>
+					<li><b>Q4 2012</b> - Additional tutorials about AJAX and User Sessions</li>
+					<li><b>Q4 2012</b> - Testing suite for Wave Framework that can be used to test Wave Framework with mock Models and actual Controllers.</li>
+					<li><b>Q4 2012</b> - OpenSSL public and private-key based two-way API security for API profiles. OpenSSL based helper functions for creating hashes and validating hashes with a certificate key. OpenSSL based developer tool for generating cryptography public and private keys.</li>
+				</ul>
+		
+			<h2>3.x.x</h2>
+			
+				<ul>
+					<li><b>3.0.0</b> - Complete overhaul of documentation, Wave Framework now comes with an ~100 page documentation. Documentation files are also included in framework archive under /docs/ subfolder and they also include examples by default. This makes it easier to get all the required information from one place, as well as keep track of documentation changes independently from website or repository. Also includes multiple bug-fixes and code refactoring and minor new features. Entire framework has also passed through integrity testing of each of its features to detect logic flaws and other minor bugs.</li>
+				</ul>
+		
+			<h2>2.x.x</h2>
+		
+				<ul>
+					<li><b>2.6.3</b> - It's also possible to send set of commands with file upload by naming them www-xml or www-json. This is an alternative to sending the entire set of commands with input stream.</li>
+					<li><b>2.6.2</b> - Added an option to send XML or JSON string as direct input stream in POST. Added XML support check to compatibility script. dbQuote and dbDebug tweaks to offer better functionality. </li>
+					<li><b>2.6.1</b> - Tweaks to cache tagging. Ability to tag caches created through Data Handler (sitemap-specific pages).</li>
+					<li><b>2.6.0</b> - APC is now used for storing cache, if APC is enabled on the server. Additional MVC Factory methods have been added for that purpose. Custom caching methods added. Encryption/decryption wrappers have also been added to Factory inherited objects.</li>
+					<li><b>2.5.8</b> - Additional security checks for IP's and configuration for trusted proxies. Additional database related methods and better error handling. Slight tweaks to configuration loading.</li>
+					<li><b>2.5.6</b> - Now named Wave Framework! Also added option to fetch previous cache results for current API call. Bug fix that stopped proper redirects happen, if API response assigned for a redirect.</li>
+					<li><b>2.5.5</b> - It's now possible to log requests based on regular expression being matched against the request URL and ignore other requests. Also fixed a bug related to database connection query counter logging.</li>
+					<li><b>2.5.4</b> - Better defaults handling for URL Controller. Added ability to store multiple views - based on methods - in a single View class. API handles View and other echo/print specific output much better and standardizes it with the rest of the API, by returning arrays.</li>
+					<li><b>2.5.2</b> - It is now possible to use cookies with PHP API Wrappers, in case an API is designed that is authorized with cookies and sessions as opposed to more secure methods. While it is not recommended to use API in this manner, the option is there. Fixed bug when returning the last ID from database. Fixed the bug when State messenger data is unset entirely.</li>
+					<li><b>2.5.1</b> - Added initial implementation of cache tagging and API observers. API rights are now called 'permissions' instead in both profiles and sitemap configuration. Added image format conversion options. Renamed functions.php file to autoload.php, since it can carry additional functionality. Added dynamic class loader to Factory.</li>
+					<li><b>2.4.7</b> - Added better default rights example to URL controller. Fixed Internet Explorer specific bug with base tag in View controller. Added 'float' to database dbQuote method. Added 'base-url' to State.</li>
+					<li><b>2.4.6</b> - Added internal split time method for debugging execution time. If PHP is used as a content type and an error is found during API execution with response code of 1XX or 2XX, then this results in PHP warning being thrown and logged for Debugger script. Updated database query error logging.</li>
+					<li><b>2.4.5</b> - Fixed undefined error bug for non-HTML API results, fixed last modified check in File Handler.</li>
+					<li><b>2.4.4</b> - Added /resources/static/ subfolder - Files from this folder will never be served through PHP. This can be used for specific static files that might be faster when served without PHP. Unified some isset() calls. Fixed a potential bug with system root folder. Fixed some compatibility tests.</li>
+					<li><b>2.4.3</b> - Sessions are unset, if session array is found to be empty. It also removes session cookie, if that happens. Improved performance by unifying a handful unset() method calls.</li>
+					<li><b>2.4.2</b> - Fixed cache related bug with state messenger (state messenger now turns cache off, when used). Added Factory method to disable cache on-demand. Fixed typo in cookie name.</li>
+					<li><b>2.4.1</b> - Database only connects now when actually used. Additional parameters defined for returned view data. Better Range header handling. Better limiter responses and correct header for too-many-requests IP block. Fix for sporadic DEPRECATED error reporting. Tools now use proper configuration timezone.</li>
+					<li><b>2.4.0</b> - Added some defaults to be returned to view when using URL controller. Updated INI generation algorithm.</li>
+					<li><b>2.3.9</b> - Added author and copyright settings to configuration. Streamlined database class method names and made it possible to create a new instance of a database through Factory. Added an option to have a cut-off timestamp when cleaning files from filesystem.</li>
+					<li><b>2.3.8</b> - More clear licensing terms. Also fixed a bug that stopped Data Handler from being loaded on certain servers.</li>
+					<li><b>2.3.7</b> - Error reporting now also handles fatal errors and has an intelligent error back-end. Added a tool for debugging all logged errors from the back-end. Error reporting settings have been removed from configuration. Using JSON now for log messages and internal logging due to better handling of new-line symbols. Also removed quirks regarding array being passed by reference.</li>
+					<li><b>2.3.6</b> - Much improved error-handling, now catches and logs even PHP-specific error messages. Added options to have array support for many State specific functions, like getting a translation keyword or specific detail about a user session. Added internal error logging in case an error is thrown in code. Streamlined view-data in State to simply be 'view'. Updated log files to be written with *.log extension instead of *.tmp extension.</li>
+					<li><b>2.3.5</b> - Added user session management wrappers.</li>
+					<li><b>2.3.4</b> - Added option to limit logging to specific IP's only. Updated view data to be merged with unsolved URL array. Added whitelist limiter to allow access to only specific IP's.</li>
+					<li><b>2.3.3</b> - Fixed a potential loophole in cache when serving static images and resources.</li>
+					<li><b>2.3.2</b> - Optimized URL controller functionality. Fixed a bug in view controller that was introduced in previous update. Using PHP's serialization instead of JSON for internal caches and data storage due to speed benefits. Updated log reader with some power-user functionality.</li>
+					<li><b>2.3.0</b> - Refactoring of configuration, translation and API profile files to use INI files instead of PHP files. Added methods to load translations and sitemap information from API directly.</li>
+					<li><b>2.2.7</b> - Added session rights management. Added session rights key. Updated bootstrap rights check algorithm. Streamlined view controller.</li>
+					<li><b>2.2.6</b> - Refactored MVC class naming. The prefixes are now {model/view/controller}.{*}.php instead of class.{*}.php. This makes the file navigation clearer when browsing files based on filename.</li>
+					<li><b>2.2.5</b> - Added styles to developer tools.</li>
+					<li><b>2.2.4</b> - Updated API information tool to display all type of comments, not just Docblock comments. Made sure that API checks for private and protected methods, which it cannot call. Applied protected visibility to Factory class methods to eliminate the possibility of calling these methods through API. Added an option to generate documentation for only specific API profiles.</li>
+					<li><b>2.2.1</b> - Added API information tool that automatically generates full API documentation. Added configuration option for database errors. Updated URL controller redirection logic. Improved API command security by providing controller command blacklist as well as making it a requirement to define allowed API commands in API profile configuration. Added escape method for database controller and MVC Factory.</li>
+					<li><b>2.1.4</b> - Updated API to have more streamlined API default settings. Added method to factory for testing WWW-standardized controller-responses. Fixed PHP API Wrapper bug that did not send crypted data. Added developer-only index gateway error reporting.</li>
+					<li><b>2.1.3</b> - Updated internal logging configuration to have more options. Fixed bug where data handler did not get database connection object.</li>
+					<li><b>2.1.2</b> - Option added that allows to load different view controllers per sitemap URL. Internal API debugging/logging methods added. Standardized method added for returning data from controllers.</li>
+					<li><b>2.1.1</b> - State messenger added - this allows to easily share data without using databases between different clients or between different requests. This is most useful for form-submission error-handling.</li>
+					<li><b>2.1.0</b> - Better API Handler file format loading based on filename and *.api extension. Added internal development API logging and log reader support for it. Added boilerplate location for authentication systems. Fixed bug that defaulted internal API commands to return JSON instead of PHP.</li>
+					<li><b>2.0.8</b> - Updated hash validations to properly support multi-layer input data and arrays. Fixed form-submit bug on IE8.</li>
+					<li><b>2.0.7</b> - Wrapper refactoring and browser compatibility issues fixed. Better request validations.</li>
+					<li><b>2.0.6</b> - Added session and cookie namespaces. Removed session-specific configuration options from configuration file, since sessions are now loaded only if they are actually used. Fixed bug with database error reporting. Improved API Wrappers to keep API authentication details by default as well as detect token if it was sent as a response to www-create-session command.</li>
+					<li><b>2.0.4</b> - Nginx configuration adjustments and state detection for Nginx specific system paths. Compatibility script now properly detects Nginx server and settings.</li>
+					<li><b>2.0.3</b> - Slight adjustments to API and token validations. Updated wrappers with error codes.</li>
+					<li><b>2.0.2</b> - It is now possible to create API profiles that have less validation options, such as profiles without hash validations and only with IP validations. It is now also possible to create sessions that are IP-restricted. Optimized cache checks and added 304 Not Modified option to API Wrappers. SimpleXML requirement removed.</li>
+					<li><b>2.0.1</b> - JavaScript API Wrapper added. Removed ajax() and form() functions from main JavaScript files due to being obsolete.</li>
+					<li><b>2.0.0</b> - Nginx supported, please look at .nginx file for recommended options. Apache .htaccess minimized, file handling through Index Gateway. Better error handling throughout the framework. Added API Wrapper class for PHP (JavaScript to be added soon) that allows to call API over HTTP without having to worry about API security specifics. Updated API validation methods for increased security against replay attacks. Performance has also been increased, benchmark increase of 5-10%, depending on conditions. Rjindael 256bit input and output encryption option added that increases security of API calls over network.</li>
+				</ul>
+			
+			<h2>1.x.x</h2>
+			
+				<ul>
+					<li><b>1.9.11</b> -Logger now tracks every request made through Index Gateway. Logger also includes data about returned content-length for approximate bandwidth tracking.</li>
+					<li><b>1.9.10</b> - Entire resource handling now returns 304 Not-Modified headers, if system detects that the file has not been modified. Optimized single-resource requests.</li>
+					<li><b>1.9.9</b> - Project title possible to be set in configuration. All input data is now transmitted to view files properly. Some bug fixes.</li>
+					<li><b>1.9.8</b> - Compartmentalized API commands better, making one API command affect another less.</li>
+					<li><b>1.9.7</b> - Added ability to state in Sitemap the duration of view cache. Added option to make the 404 view file configurable. Added the ability to add custom API Handlers. Adjusted some API call defaults regarding PHP output and made it possible to have redirects through API. Minor bug-fixes.</li>
+					<li><b>1.9.5</b> - Fixed HTTP request limiter folder.</li>
+					<li><b>1.9.4</b> - Detailed configuration file with comments. A number of micro-optimisations.</li>
+					<li><b>1.9.3</b> - Fixed API caching folder.</li>
+					<li><b>1.9.2</b> - 404 image placeholder implemented. State path detection improved.</li>
+					<li><b>1.9.0</b> - Bug-fixes with URL controller solving some 404 pages incorrectly.</li>
+					<li><b>1.8.9</b> - Update script (/tools/updater.php) that can unpack and install an update *.zip archive. Backup script (/tools/backup.php) that creates an archive of system. jQuery 1.7.2 is added. Image pre-loader CSS example added.</li>
+					<li><b>1.8.1</b> - URL Router fixes and updated ReadMe.</li>
+					<li><b>1.8.0</b> - New sitemap.xml and robots.txt handlers, new structure for sitemap resource. </li>
+					<li><b>1.7.2</b> - Minor bugfix regarding positioning of dynamically created pictures. </li>
+					<li><b>1.7.1</b> - Image filtering options added for dynamic image loading. More accurate last modified date in response headers. Imager stops from resizing images if the size is already the same. Fixed some PNG alpha problems. </li>
+					<li><b>1.7.0</b> - Minifier class added and functionality implemented in both Resouce handler as well as for API requests. New configuration option for using minification in response. File paths and inclusions much improved. Limiter and Logger have now a more streamlined process for logging. Index Gateway now also supports IP based blacklists. Resource cache default time is one year by default. File Handlers 'nocache' functionality did not work before. New configuration options. Much better URL Map functionality which allows to set whether unsolved URL's are allowed or not Basic minifiers for HTML and XML added. Default View controller now uses unified resources. Alpha support for dynamically resized images. </li>
+					<li><b>1.5.4</b> -Logger is now also implemented to Limiter class. Vary Accept-Encoding header added for proxies. </li>
+					<li><b>1.5.3</b> - Additional PHP extension checks throughout the system. </li>
+					<li><b>1.5.2</b> - Fileinfo is now used by File Handler to determine MIME type. </li>
+					<li><b>1.5.1</b> - Added compatibility script. </li>
+					<li><b>1.5.0</b> - API gateway, as a separate file, has been removed. Index Gateway restructured to load separate handlers based on request. New handler for returning files to the client. Tidied up Apache redirects. </li>
+					<li><b>1.4.9</b> - New returned data types 'ini', 'vcard', 'css' and 'js'. New configuration option for resource cache durations. Can now use deflate as an output compression type, together with Gzip. New Cleaner developer script for cleaning WWW created caches and temporary system files. Better support for clients that send no request headers. System now maintains image files as well and this includes support to dynamically resize and crop images per request. It is now possible to dynamically unify CSS and JavaScript files. Simple minification is used for CSS and JavaScript files. JS and CSS file compressions are now cached, increasing performance a little. It is also now possible to use image overrides from resources subfolder. Limiter now affects all requests, including static file requests. Logger now is categorized and is also used for static file requests. </li>
+					<li><b>1.2.2</b> - Fixed a bug where URL controller, due to cache, lost translations files for Index Gateway. </li>
+					<li><b>1.2.1</b> - Added binary (0 or 1) as a returned data-type, meant simply for confirmations for AJAX or other function calls. </li>
+					<li><b>1.2.0</b> - IP based API validation is now possible. API can now also return result formatted in CSV string (tabs and new-lines used for separating data). URL Controller now returns home view even when first URL node is not matched in URL map, so developer can do as they wish with the URL data. </li>
+					<li><b>1.1.6</b> - View controller outputs a valid HTML5 document with updated attributes and doctype. </li>
+					<li><b>1.1.5</b> - View specific translations are supported for both JavaScript and PHP. More usable URL maps are generated for use in views. </li>
+					<li><b>1.1.3</b> - Proper UTF-8 character set support for new database drivers.</li>
+					<li><b>1.1.2</b> - Added support for PostgreSQL, MSSQL, Oracle and SQLite database drivers through PDO. Note that these are still untested and should be considered beta for now. Also included other optimizations for WWW_Database class. </li>
+					<li><b>1.1.1</b> - Certain server configurations represented document root without the slash in the end. Also re-factored parts of the code to include server specific directory separators. </li>
+					<li><b>1.1.0</b> - Added support for Windows servers and WAMP setups and removed deprecated pass-by-reference use. </li>
+					<li><b>1.0.4</b> - Some bugs were fixed, including a fatal error with Factory class returning PDO class. </li>
+					<li><b>1.0.3</b> - Refactored Database class to use PDO instead of soon-to-be-deprecated mysql_* functions. </li>
+					<li><b>1.0.1</b> - URL maps are now also stored in state. URL Map structure is also slightly changed, making it possible to reverse-search specific URL's when in a view (such as when you need to add links). URL controller loads translations into state (before it was loaded by View controller). </li>
+					<li><b>1.0.0</b> - Changed token creation and destruction method authentications to be more simple. Fixed a bug with HTTP authentication values in State object. Full documentation released, including the first tutorial. </li>
+				</ul>
+			
+			<h2>0.x.x</h2>
+			
+				<ul>
+					<li><b>0.9.9</b> - Hash validation options were missing when creating and destroying tokens. Added a configuration option to Index Gateway for API cache timeout setting. New Favicon picture and updated ReadMe. Various tweaks across the system. </li>
+					<li><b>0.9.8</b> - Restructured API output writing and removed non-essential cryptography functions that can be implemented by developer within MVC functions instead of bloating the API. </li>
+					<li><b>0.9.7</b> - Changed the way input is validated on non-public profiles and added token-based validation. Added better error handling should errors be returned while API command is run. Changed the way input data is represented in Index and API gateways.</li>
+				</ul>
+			
+	</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Dynamic Loading of Resources - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Dynamic Loading of Resources</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework allows loading of resource files, JavaScript and CSS stylesheets, with various additional on-demand options. The way this works is that all HTTP requests are redirected to Wave Framework Index Gateway which then loads resource handler for serving these resource files. By default the file extensions, that are served by resource handler, are: *.css, *.js, *.txt, *.csv, *.xml, *.html, *.htm, *.rss, *.vcard.</p>
+				
+				<p>In order for dynamic loading of resources to work properly, URL rewriting must be supported by the server, otherwise Wave Framework resource handler will never get the request. If in doubt, you can check the /tools/compatibility.php script to see if URL rewriting is supported or not.</p>
+				
+			<h2>Making Requests to Resource Files</h2>
+
+				<p>Wave Framework resource handler will attempt to compress the file as well as return proper cache headers based on configuration settings in /config.ini file. Wave Framework builds internal cache and makes sure that the requested resource is returned to the requesting user agent as efficiently as possible.</p>
+			
+				<p>Common method for client to request a resource file such as JavaScript *.js or CSS stylesheet *.css is like this:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/script.js
+	http://www.example.com/resources/home.script.js
+	</code>
+</pre>
+
+				<p>It is however possible to combine these two scripts. This makes it possible to 'unify' these two scripts into a single script, so that only one HTTP request is required by the server to return the script content. If your website has a lot of JavaScript or stylesheet files, then this can noticably speed up your website, since the browser has to do less HTTP requests. Less requests also means that your server will have to deal with less concurrent HTTP requests when serving files and can possibly serve more visitors at the same time.</p>
+				
+				<p>It is only recommended to unify resources of the same type, such as unifying two *.js files or two or more *.css files. This is done by separating the files with an & symbol, like this:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/script.js&home.script.js
+	</code>
+</pre>
+
+				<p>If you make a similar request on your own web server, then you should see that the contents of the two scripts have been unified and contents of both scripts have been returned with just a single HTTP request. The order of scripts is the order of filenames in the request string, so in our example the script.js content would be returned before home.script.js content.</p>
+				
+				<p>Wave Framework will automatically build a cache for this unified script and will serve the script next time from cache directly, minimizing the time it takes to actually build the script from sources. Wave Framework also makes sure that if one of the source files is changed, then it will rebuild the script for new requests.</p>
+				
+				<p>If you want to make sure that cache is never used, then you can send an additional flag 'nocache' with the request, like this:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/nocache&script.js&home.script.js
+	</code>
+</pre>
+
+				<p>This makes sure that no cache is stored server side and that server also notifies the user agent (the browser) not to store cache of this script. While it does slow down the request, this is useful for testing and debugging. When deploying the project live, it is recommended not to use the 'nocache' flag.</p>
+				
+				<p>It is also possible to minify the resulting script. Minifying is possible with CSS stylesheets, JavaScript and XML files. What minifying does is that it removes comments and additional whitespace from the document, making the filesize of the document much smaller. It is always recommended to test minified scripts before deploying them live however, as in under some circumstances minifying might remove parts of the script that might break it.</p>
+				
+				<p>To return minified version of the combined JavaScript, you can do a request like this:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/minify&script.js&home.script.js
+	</code>
+</pre>
+
+				<p>It is possible to also use 'minify' and 'nocache' flags together:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/minify&nocache&script.js&home.script.js
+	</code>
+</pre>
+
+			<h2>Dealing With Version Updates</h2>
+			
+				<p>Wave Framework tells user agents - browsers - in the response headers to cache the resource file for one full year. This is recommended practice in modern web development, as static-like resources should not be requested more than once from the server. But what happens if one of the scripts does indeed change?</p>
+				
+				<p>One of the options is to create a new file, which browsers will download again if they find a link to one from HTML. But this is not optimal, so Wave Framework has another option for this. It is possible to write a version number to the request and if you deploy a new version of the script and want to make sure that all visiting clients have the new version, then you just update that version number, for example:</p>
+				
+<pre>
+	<code>
+	// This would be your default request
+	http://www.example.com/resources/script.js&home.script.js
+	// When you need to make sure all clients request a new file, you simply change the link to that file
+	http://www.example.com/resources/1.1&script.js&home.script.js
+	</code>
+</pre>
+
+				<p>Despite the files returned being the same, if the user agent hasn't made a request to the second script before, it will make a new request and download that updated resource again.</p>
+			
+	</body>
+</html>

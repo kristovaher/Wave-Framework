@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Creating Objects - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Creating Objects Dynamically</h1>
+		
+			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework is built around the concept that every object of the system is loaded dynamically. This is done through Factory and every object in a system built on top of Wave Framework benefits from being extended from that Factory since the Factory gives additional functionality to each of those objects.</p>
+				
+				<p>Of course it is also possible to include Models, Views and Controllers and other objects that are not extended from Factory, so both options are there.</p>
+				
+				<p>Dynamic loading of objects is useful for one big reason: this means that your system only loads the resources and classes that it actually needs and actually uses. This lowers the amount of memory your system takes during a request as well as increases the processing speed of your requests.</p>
+				
+			<h2>Loading Objects</h2>
+			
+				<p>Wave Framework groups classes in four: Models, Views, Controllers and Objects. You can read more about the purpose of each of those classes in MVC Pattern documentation page. But in order for these objects to be loaded dynamically, there are a couple of rules that have to be followed.</p>
+				
+				<h3>Models</h3>
+				
+					<p>Dynamically loaded models need to follow these rules:</p>
+				
+					<ul>
+						<li>Models have to be stored in /models/ folder</li>
+						<li>Model filename has to be model.[name].php</li>
+						<li>Model class name has to be WWW_model_[name]</li>
+						<li>It is recommended for the model to be extended from WWW_Factory class</li>
+					</ul>
+				
+					<p>In order to load a model dynamically, you have to call getModel() method, like this:</p>
+					
+<pre>
+	<code>
+	$model=$this->getModel('example');
+	</code>
+</pre>
+
+					<p>The above code would load the class from '/models/model.example.php' and then create the object from class that is named 'WWW_model_example'. After this the model can be used in any way you would otherwise use an object, to call methods and so on and so forth.</p>
+					
+					<p>It is also possible to dynamically load a class, create an object, and call a method of that object with data all in a single method call. For example, this would do the same thing as the previous example, except it would also call a method called 'test()' with input data sent to that method:</p>
+					
+<pre>
+	<code>
+	$input='some-input-string';
+	$result=$this->getModel('example','test',$input);
+	</code>
+</pre>
+
+					<p>After this call, the above example's $result variable would contain the result from that method and not the object itself. This is useful in some cases, where you know that you only need to use an object once.</p>
+					
+				<h3>Views</h3>
+				
+					<p>Dynamically loaded views need to follow these rules:</p>
+				
+					<ul>
+						<li>Views have to be stored in /views/ folder</li>
+						<li>View filename has to be view.[name].php</li>
+						<li>View class name has to be WWW_view_[name]</li>
+						<li>It is recommended for the view to be extended from WWW_Factory class</li>
+					</ul>
+				
+					<p>In order to load the view dynamically, you have to call getView() method, like this:</p>
+					
+<pre>
+	<code>
+	$view=$this->getView('example');
+	</code>
+</pre>
+
+					<p>The above code would load the class from '/views/view.example.php' and then create the object from class that is named 'WWW_view_example'. After this the view can be used in any way you would otherwise use an object, to call methods and so on and so forth.</p>
+					
+					<p>It is also possible to dynamically load a class and execute a method in that class. This is done similarly to Models and you should refer to examples about Models as shown above to see how that is done.</p>
+					
+				<h3>Controllers</h3>
+				
+					<p>Dynamically loaded controllers need to follow these rules:</p>
+				
+					<ul>
+						<li>Controllers have to be stored in /controllers/ folder</li>
+						<li>Controller filename has to be controller.[name].php</li>
+						<li>Controller class name has to be WWW_controller_[name]</li>
+						<li>It is recommended for the controller to be extended from WWW_Factory class</li>
+					</ul>
+				
+					<p>In order to load the controller dynamically, you have to call getController() method, like this:</p>
+					
+<pre>
+	<code>
+	$controller=$this->getController('example');
+	</code>
+</pre>
+
+					<p>The above code would load the class from '/controllers/controller.example.php' and then create the object from class that is named 'WWW_controller_example'. After this the controller can be used in any way you would otherwise use an object, to call methods and so on and so forth.</p>
+					
+					<p>It is also possible to dynamically load a class and execute a method in that class. This is done similarly to Models and you should refer to examples about Models as shown above to see how that is done.</p>
+					
+				<h3>Other Objects</h3>
+				
+					<p>It is also possible to load other classes dynamically in Wave Framework. While there are some restrictions to loading these classes dynamically - for example you cannot set construction variables - sometimes it is useful when the loaded class serves occasional purpose.</p>
+					
+					<p>Dynamically loaded objects need to follow these rules:</p>
+				
+					<ul>
+						<li>Class definitions have to be stored in /resources/classes/ folder</li>
+						<li>Class filename has to be class.[name].php</li>
+						<li>Class name has to be the same as the name that is being requested</li>
+					</ul>
+					
+					<p>In order to load the object dynamically, you have to call getObject() method, like this:</p>
+					
+<pre>
+	<code>
+	$view=$this->getObject('example');
+	</code>
+</pre>
+
+					<p>The above code would load the class from '/resources/classes/class.example.php' and then create the object from class that is named 'example'. After this the object can be used in any way you would otherwise use an object, to call methods and so on and so forth.</p>
+					
+					<p>It is also possible to dynamically load a class and execute a method in that class. This is done similarly to Models and you should refer to examples about Models as shown above to see how that is done.</p>
+					
+			<h2>Construction Methods</h2>
+			
+				<p>PHP has a magic method called '__construct()' that is called whenever an object is created. This can be used to load additional functionality to an object when it is created, like create some database connections or initialize configuration.</p>
+				
+				<p>In Wave Framework, if your object is created from a class that is extended from WWW_Factory, then you cannot define a '__construct()' method for that object as it is not possible to overwrite the method from WWW_Factory. Instead you should define '__initialize()' method instead, as Factory's own construction will also make a call for that method, if it is defined.</p>
+			
+	</body>
+</html>

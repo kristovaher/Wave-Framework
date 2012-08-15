@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>State Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>State Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-state.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>State class is one of the core classes of Wave Framework. State holds a lot of information about the server, configuration as well as current request. State class can be used separately from Wave Framework, but is generally not recommended, since it is tailored for use with Wave Framework.</p>
+				
+				<p>State object is also used by Wave Framework to load configuration - from /config.ini file - to State data variable, so that it can be used and accessed by Wave Framework MVC classes. By default State class has a number of data variables loaded by default, to make sure that State can work even when no configuration file is loaded.</p>
+				
+				<p>State carries additional functionality: it includes a state messenger as well as wrappers for creating and destroying sessions and cookies, returning translations and sitemap information and more. To learn more about specific functionality of State when used through MVC objects of Wave Framework, you should look into "State and Configuration" feature guide</p>
+				
+				<p>The rest of this document details the use of Logger class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
+				
+			<h2>Using State class</h2>
+			
+				<p>While it is unlikely that State class can be of use outside Wave Framework, below is an example of how to create a new State object. State object is created with a configuration array and some of these configuration keys can affect the functionality of PHP (State will attempt to change PHP settings accordingly).</p>
+				
+<pre>
+	<code>
+	require('/engine/class.www-state.php');
+	// Configuration should be an array
+	$state=new WWW_State($config);
+	</code>
+</pre>
+
+				<p>State class is automatically used by WWW_API objects. When creating a new WWW_API object, then you can send the State class like this:</p>
+				
+<pre>
+	<code>
+	require('/engine/class.www-api.php');
+	$api=new WWW_API($state);
+	</code>
+</pre>
+				
+				<p>State defines it's own default data and then loads the $config on top of that data. Most of State data variables are directly related to data loaded from /config.ini file and it is recommended to read more about these settings from "Configuration" document.</p>
+				
+				<p>To change a state value, you can do this:</p>
+				
+<pre>
+	<code>
+	// Change a single setting
+	$state-&gt;setState('my-key','my-value');
+	// Change multiple settings at the same time with array of key and value pairs
+	$state-&gt;setState($config);
+	</code>
+</pre>
+
+				<h3>State Settings with Additional Functionality</h3>
+				
+					<p><b>timezone</b></p>
+					
+					<p>This also changes PHP's default timezone through date_default_timezone_set() function.</p>
+					
+					<p><b>output-compression</b></p>
+					
+					<p>This value can be set to 'deflate' or 'gzip'. But if the request making user agent does not notify the server that it supports gzip or deflate, then State automatically keeps this value set to false.</p>
+					
+					<p>Rest of the functionality of State class is too specific to Wave Framework API and it will be covered more in the feature guides.</p>
+					
+			<h2>State Class Parameters</h2>
+			
+				<h3>public $data=array()</h3>
+				
+					<p>This is the primary variable of State class and it carries representation of the system configuration, both loaded from /config.ini file as well as initialized from environmental server variables.</p>
+					
+					<h4>Overview of variables set in $data array:</h4>
+					
+					<ul>
+						<li><b>404-image-placeholder</b> - True or false flag for whether placeholder 404 image is used.</li>
+						<li><b>404-view</b> - View keyword that is loaded when URL controller cannot find a page.</li>
+						<li><b>apc</b> - True or false flag for whether the system attempts to use APC PHP accelerator.</li>
+						<li><b>api-logging</b> - If this is set to false, then API logging is not used. Otherwise this should be an array of logging flags.</li>
+						<li><b>api-profile</b> - Currently used API profile, this is set by the API.</li>
+						<li><b>api-public-profile</b> - API profile name that is considered public.</li>
+						<li><b>base-url</b> - Base URL that is used for HTML views and resource locations.</li>
+						<li><b>blacklist-limiter</b> - Comma-separated list of IP addresses that are blocked from making HTTP requests.</li>
+						<li><b>client-ip</b> - IP address of the client that makes the request, this is detected by the system and takes into account proxies.</li>
+						<li><b>client-user-agent</b> - Client user agent string that makes the request.</li>
+						<li><b>data-root</b> - Location of filesystem /data/ folder which is used to store filesystem database files.</li>
+						<li><b>database-errors</b> - True or false flag for whether database errors are logged.</li>
+						<li><b>database-host</b> - Database host name.</li>
+						<li><b>database-name</b> - Database name.</li>
+						<li><b>database-password</b> - Database access password</li>
+						<li><b>database-persistent</b> - True or false flag for whether database connection is persistent.</li>
+						<li><b>database-type</b> - Database type, either mysql, sqlite, mssql, oracle, postgresql.</li>
+						<li><b>database-username</b> - Database access username</li>
+						<li><b>dynamic-color-whitelist</b> - Comma separated list of background colors allowed to be used with on-demand image loading.</li>
+						<li><b>dynamic-filter-whitelist</b> - Comma separated list of filters allowed to be used with on-demand image loading.</li>
+						<li><b>dynamic-image-filters</b> - True or false flag for whether dynamic image filters are allowed.</li>
+						<li><b>dynamic-image-loading</b> - True or false flag for whether dynamic image loading is allowed at all.</li>
+						<li><b>dynamic-max-size</b> - Maximum pixel size of dynamically loaded picture width and height.</li>
+						<li><b>dynamic-position-whitelist</b> - Comma separated list of picture positions allowed to be used with on-demand image loading.</li>
+						<li><b>dynamic-quality-whitelist</b> - Comma separated list of image quality settings allowed to be used with on-demand image loading.</li>
+						<li><b>dynamic-resource-loading</b> - True or false flag for whether dynamic resource loading is supported.</li>
+						<li><b>dynamic-size-whitelist</b> - Comma separated list of image resolutions allowed to be used with on-demand image loading.</li>
+						<li><b>enforce-first-language-url</b> - True or false flag for whether language node is required as part of the request URL.</li>
+						<li><b>enforce-url-end-slash</b> - True or false flag for whether end URL slash is required as part of the request URL.</li>
+						<li><b>file-robots</b> - Robots command string for file downloads.</li>
+						<li><b>fingerprint</b> - Fingerprint string about the user agent</li>
+						<li><b>forbidden-extensions</b> - Array of file extensions that cannot be requested over HTTP.</li>
+						<li><b>home-view</b> - View keyword that is considered for 'home' or 'root' pages.</li>
+						<li><b>http-accept</b> - Array of types user agent accepts as the response.</li>
+						<li><b>http-accept-charset</b> - Array of charsets accepted by the user agent.</li>
+						<li><b>http-accept-encoding</b> - Array of character encodings accepted by the user agent.</li>
+						<li><b>http-accept-language</b> - Array of language keywords accepted by the user agent.</li>
+						<li><b>http-authentication</b> - True or false flag for whether HTTP authentication is required.</li>
+						<li><b>http-authentication-ip</b> - Comma-separated list of IP addresses that are allowed to log-in through HTTP authentication.</li>
+						<li><b>http-authentication-limiter</b> - True or false flag for whether HTTP authentication is used.</li>
+						<li><b>http-authentication-password</b> - HTTP authentication password.</li>
+						<li><b>http-authentication-username</b> - HTTP authentication username.</li>
+						<li><b>http-do-not-track</b> - True or false flag whether the user agent allows to be tracked or not.</li>
+						<li><b>http-content-length</b> - Content length of the HTTP request.</li>
+						<li><b>http-content-type</b> - Content type of the HTTP request.</li>
+						<li><b>http-host</b> - HTTP host of the server.</li>
+						<li><b>http-if-modified-since</b> - If-modified-since date if user agent sends the request with the value.</li>
+						<li><b>http-input</b> - Data stream if sent with the request, such as when sending an XML with POST.</li>
+						<li><b>http-request-method</b> - Request method used for current HTTP request. Usually GET or POST, but also HEAD.</li>
+						<li><b>https-limiter</b> - True or false flag for whether HTTPS is required for requests.</li>
+						<li><b>https-mode</b> - True or false flag for whether current request uses HTTPS or not.</li>
+						<li><b>image-extensions</b> - Array of picture extensions that are served through Image Handler.</li>
+						<li><b>image-robots</b> - Robots command string for pictures.</li>
+						<li><b>index-url-cache-timeout</b> - Cache lifetime for URL controller requests, for solving URL's.</li>
+						<li><b>index-view-cache-timeout</b> - Default cache lifetime for View controller requests.</li>
+						<li><b>internal-logging</b> - If this is set to false, then internal logging is not used. Otherwise this should be an array of logging flags.</li>
+						<li><b>keys-root</b> - Filesystem location for keys file, used for certificates.</li>
+						<li><b>language</b> - Currently detected language.</li>
+						<li><b>languages</b> - Array of language keywords used by the system.</li>
+						<li><b>limiter</b> - True or false flag for whether HTTP request limiter is used or not.</li>
+						<li><b>load-limiter</b> - True or false flag for whether server load limiter is used.</li>
+						<li><b>output-compression</b> - Currently used output compression mode.</li>
+						<li><b>project-title</b> - Project title that is used by View controller meta title.</li>
+						<li><b>request-id</b> - Unique HTTP request ID.</li>
+						<li><b>request-limiter</b> - True or false flag for whether HTTP request rate-limiter is used or not.</li>
+						<li><b>request-time</b> - Request timestamp.</li>
+						<li><b>request-uri</b> - Request URI.</li>
+						<li><b>resource-cache-timeout</b> - Lifetime of resource cache.</li>
+						<li><b>resource-extensions</b> - Array of extensions that will be loaded through Resource Handler.</li>
+						<li><b>resource-robots</b> - Robots command string for resources.</li>
+						<li><b>robots</b> - Universal robots command string.</li>
+						<li><b>robots-cache-timeout</b> - Cache lifetime of robots.txt files.</li>
+						<li><b>server-ip</b> - Server IP address.</li>
+						<li><b>session-namespace</b> - Session namespace keyword.</li>
+						<li><b>session-permissions-key</b> - Keyword that is used for storing permissions.</li>
+						<li><b>session-user-key</b> - Keyword that is used for storing user account data.</li>
+						<li><b>sitemap</b> - Array of current language sitemap data.</li>
+						<li><b>sitemap-cache-timeout</b> - Cache lifetime of sitemap.xml files.</li>
+						<li><b>sitemap-raw</b> - Raw sitemap data in an array.</li>
+						<li><b>static-root</b> - Filesystem folder for static files.</li>
+						<li><b>system-root</b> - Root folder of the system.</li>
+						<li><b>timezone</b> - Currently used timezone.</li>
+						<li><b>tmp-root</b> - Filesystem folder for temporary files.</li>
+						<li><b>translations</b> - Array of translations of current language.</li>
+						<li><b>true-request</b> - True request URI.</li>
+						<li><b>trusted-proxies</b> - Array of trusted proxy IP addresses.</li>
+						<li><b>user-data</b> - Array of user data.</li>
+						<li><b>user-permissions</b> - Array of user permissions.</li>
+						<li><b>user-root</b> - Filesystem folder of user folder.</li>
+						<li><b>view</b> - Currently used view.</li>
+						<li><b>web-root</b> - Web root URL node, in case system is not installed in root of the website.</li>
+						<li><b>whitelist-limiter</b> - Comma-separated list of IP addresses that are allowed to make HTTP requests.</li>
+					</ul>
+			
+				<h3>public $databaseConnection=false</h3>
+					
+					<p>This should hold WWW_Database class and connection data, if used.</p>
+			
+				<h3>public $sessionStarted=false</h3>
+				
+					<p>This is a flag that is used for testing whether sessions have been started or not. It is used for dynamic session loading.</p>
+			
+				<h3>private $messenger=false</h3>
+				
+					<p>This holds the 'keyword' or 'passkey' of currently used State messenger.</p>
+			
+				<h3>private $messengerData=array()</h3>
+				
+					<p>This holds state messenger data as an array.</p>
+					
+			<h2>Logger Class Methods</h2>
+			
+				<p>The methods of State class are considered 'final' mainly due to them being core and expected by Wave Framework API and Factory classes.</p>
+			
+				<h3>final public function __construct($config=array()){</h3>
+				
+					<p>Construction of State object initializes the defaults for $data variable. A lot of the data is either loaded from /config.ini file or initialized based on server environment variables. Fingerprint string is also created during construction as well as input data loaded from XML or JSON strings, if sent with POST directly.</p>
+				
+				<h3>final public function __destruct()</h3>
+				
+					<p>When State class is not used anymore, then state messenger data - if set - is written to filesystem based on the State messenger key.</p>
+				
+				<h3>final public function getState($variable=false,$subvariable=false)</h3>
+				
+					<p>This is the basic call to return a State variable from the object. When call is made without any parameters, then the entire State data variable is returned. When $variable is set, then this method returns key of that $variable from $data array. If the returned array is an array as well, then setting $subvariable can set the sub-key of that array and return that instead.</p>
+				
+				<h3>final public function setState($variable,$value=true)</h3>
+				
+					<p>This method is used to set a $data variable value in State object. $variable can also be an array of keys and values, in which case multiple variables are set at once. This method uses stateChanged() for variables that carry additional functionality, such as setting timezone.</p>
+				
+				<h3>final private function stateChanged($variable,$value=true)</h3>
+				
+					<p>This is a private method used internally whenever configuration is changed. It has checks for cases when a variable is changed that carries additional functionality such as when changing the timezone or output compression. For example, if output compression is set, but not supported by user agent that is making the request, then output supression is turned off.</p>
+				
+				<h3>final public function getTranslations($language=false,$keyword=false)</h3>
+				
+					<p>This method returns an array of currently active translations, or for a language set with $language variable. If $keyword is also set, then it returns a specific translation with that keyword from $language translations.</p>
+				
+				<h3>final public function getSitemapRaw($language=false,$keyword=false)</h3>
+				
+					<p>This method returns an array of currently active sitemap, or a sitemap for a language set with $language variable. If $keyword is also set, then it returns a specific sitemap node with that keyword from $language sitemap file. This method returns the original, non-modified sitemap that has not been parsed for use with URL controller.</p>
+				
+				<h3>final public function getSitemap($language=false,$keyword=false)</h3>
+				
+					<p>This returns sitemap array that is modified for use with View controller and other parts of the system. It returns sitemap for current language or a language set with $language variable and can return a specific sitemap node based on $keyword.</p>
+				
+				<h3>final public function stateMessenger($address,$overwrite=false)</h3>
+				
+					<p>This method initializes State messenger by giving it an address and assigning the file that State messenger will be stored under. If the file already exists and $overwrite is not turned on, then it automatically loads contents of that file from filesystem.</p>
+				
+				<h3>final public function setMessengerData($data,$value=false)</h3>
+				
+					<p>This writes data to State messenger. $data is the key and $value is the value of the key. $data can also be an array of keys and values, in which case multiple values are set at the same time.</p>
+				
+				<h3>final public function unsetMessengerData($key=false)</h3>
+				
+					<p>This method removes key from State messenger based on value of $key. If $key is not set, then the entire State messenger data is cleared.</p>
+				
+				<h3>final public function getMessengerData($address=false,$remove=true)</h3>
+				
+					<p>This method returns data from State messenger. It returns the entire State messenger data as an array based on $address keyword that is used as the fingerprint for data. If $remove is set, then State messenger data is removed from filesystem or State object after being called.</p>
+				
+				<h3>final public function setUser($data)</h3>
+				
+					<p>This method sets user data array in session. This is a simple helper function used for holding user-specific data for a web service. $data is an array of user data.</p>
+				
+				<h3>final public function getUser($key=false)</h3>
+				
+					<p>This either returns the entire user data array or just a specific $key of user data from the session.</p>
+				
+				<h3>final public function unsetUser()</h3>
+				
+					<p>This unsets user data and removes the session of user data.</p>
+				
+				<h3>final public function setPermissions($permissions)</h3>
+				
+					<p>This method sets an array of $permissions or a comma-separated string of permissions for the current user permissions session.</p>
+				
+				<h3>final public function getPermissions()</h3>
+				
+					<p>This method returns an array of currently set user permissions from the session.</p>
+				
+				<h3>final public function checkPermissions($permission)</h3>
+				
+					<p>This checks for an existence of permissions in the user permissions session array. $permissions is either a comma-separated string of permissions to be checked, or an array. This method returns false when one of those permission keys is not set in the permissions session. Method returns true, if $permissions exist in the permissions session array.</p>
+				
+				<h3>final public function unsetPermissions()</h3>
+				
+					<p>This unsets permissions data from session similarly to how unsetUser() method unsets user data from session.</p>
+				
+				<h3>final public function startSession($secure=false,$httpOnly=true)</h3>
+				
+					<p>This method starts sessions. This is called automatically if sessions are accessed but sessions have not yet been started. $secure flag is for session cookie to be secure and $httpOnly will mean that cookie is for HTTP only and cannot be accessed with scripts.</p>
+				
+				<h3>final public function regenerateSession()</h3>
+				
+					<p>This method regenerates ongoing session with a new ID.</p>
+				
+				<h3>final public function destroySession()</h3>
+				
+					<p>This method destroys ongoing session and removes session cookie.</p>
+				
+				<h3>final public function setSession($key=false,$value=false)</h3>
+				
+					<p>This method sets a session variable $key with a value $value. If $key is an array of keys and values, then multiple session variables are set at once.</p>
+				
+				<h3>final public function getSession($key=false)</h3>
+				
+					<p>This method returns $key value from session data. If $key is an array of keys, then it can return multiple variables from session at once. If $key is not set, then entire session array is returned.</p>
+				
+				<h3>final public function unsetSession($key=false)</h3>
+				
+					<p>This method unsets $key value from current session. If $key is an array of keys, then multiple variables can be unset at once. If $key is not set at all, then this simply destroys the entire session.</p>
+				
+				<h3>final public function setCookie($key,$value,$configuration=array())</h3>
+				
+					<p>This method sets a cookie with $key and a $value. $configuration is an array of cookie parameters that can be set. Parameters are as follows:</p>
+					
+					<ul>
+						<li><b>timeout</b> - This is how many seconds, since the moment cookie is created, it will not be deleted.</li>
+						<li><b>expire</b> - This is how many seconds, since the moment cookie is created, it will not be deleted. This is different from default PHP setcookie() call that just asks the timestamp. If this value is sent, then 'timeout' value will be ignored entirely.</li>
+						<li><b>path</b> - Web root path where the cookie is valid. By default the web root of the system is used.</li>
+						<li><b>domain</b> - Domain which applies to the cookie. Default is the current system domain.</li>
+						<li><b>secure</b> - Whether cookie is set only over secure connection.</li>
+						<li><b>httponly</b> - Whether cookie can be only accessed over HTTP and not with JavaScript.</li>
+					</ul>
+				
+				<h3>final public function getCookie($key)</h3>
+				
+					<p>This method returns a cookie value with the set $key. $key can also be an array of keys, in which case multiple cookie values are returned in an array.</p>
+				
+				<h3>final public function unsetCookie($key)</h3>
+				
+					<p>This method unsets a cookie with the set key of $key. If $key is an array, then it can remove multiple cookies at once.</p>
+				
+				<h3>final public function terminal($command)</h3>
+				
+					<p>This method is wrapper function for making terminal calls. It attempts to detect what terminal is available on the system, if any, and then execute the call and return the results of the call.</p>
+			
+	</body>
+</html>

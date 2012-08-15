@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Resource Handler - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Resource Handler</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/handler.resource.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Resource Handler is used to return files that are considered web resources that are not media. This includes things like JavaScript, CSS stylesheets, XML, HTML and other file formats (this is based on configuration). Resource Handler uses Wave Frameworks on-demand resource loader, which allows to combine multiple files to a single resource file or minify contents of the scripts. It also checks for files from overrides folder, which can be returned instead of the actual file.</p>
+			
+			<h2>Workflow</h2>
+			
+				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				
+				<p>Resource Handler considers the requested file extension as the content type for the returned file. It supports JavaScript, CSS stylesheets, XML, text file, CSV, HTML, RSS and vCard formats by default and serves any other type of file as a text string.</p>
+				
+				<p>Multiple files can be requested by separating these files with a &amp; symbol in the request URL, if this is enabled in configuration.</p>
+				
+				<p>Cache headers are also returned by Resource Handler based on their default duration in configuration file (default would be one year). It is possible to request a file without using cache by providing 'nocache' flag in the file, in which case Resource Handler always generates the file again.</p>
+				
+				<p>It checks if the file has an override in /overrides/resouces/ folder, if it has then that file is returned instead. Handler also returns a 304 Not Modified header if it detects that the user agent has the latest version.</p>
+				
+				<p>If 'minify' flag is defined in the file request URL, then resource is also minified with Minifier class.</p>
+				
+				<p>Resource Handler also compresses the output, which reduces the bandwidth on the web server.</p>
+				
+				<p>Resource Handler also caches each of the dynamically loaded resource in file system, which makes sure that the file isn't re-generated with every new HTTP request.</p>
+				
+				<p>Handler returns the content with all the appropriate headers, from cache to content size and robots information (based on configuration).</p>
+				
+				<p>Resource Handler also makes an entry in the log file about the request, if Logger is used.</p>
+			
+	</body>
+</html>

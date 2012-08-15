@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Static Files - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Static Files</h1>
+		
+			<h2>Introcution</h2>
+			
+				<p>Static files are all the files that are not served by Robots, Image, Sitemap or Resource Handlers. Static files are served usually through File Handler that is called by Index Gateway. If the HTTP request has a file extension that is not registered to Image Handler, Resource Handler and is not one of the forbidden file extensions (*.tmp, *.log, *.ht, *.htaccess, *.pem, *.crt, *.db, *.sql, *.version, *.conf, *.ini), then Wave Framework serves the file through file handler.</p>
+				
+				<p>File Handler attempts to return the file to user agent with proper file headers based on information File Handler is able to detect about the file. It also supports returning only specific byte range, if request header asks for specific range and supports proper cache headers.</p>
+				
+				<p>Usual request to a common file is like follows:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/file.pdf
+	</code>
+</pre>
+				
+				<p>It is possible to serve such files without cache flag set, by assigning 'nocache' to the file request. This means that the server tells user agent not to cache this file. Like this:</p>
+				
+<pre>
+	<code>
+	http://www.example.com/resources/nocache&file.pdf
+	</code>
+</pre>
+				
+			<h2>Serving Resource and Image Files Without Handlers</h2>
+			
+				<p>Sometimes it is necessary to also serve files directly to user agent without PHP and Wave Framework having anything to do with the file. This means that requests to those static files are not logged at all by Wave Framework.</p>
+				
+				<p>To make sure that a file, like JavaScript file or stylesheet or picture file, is served to user agent without Wave Framework being involved, then you should store these files in /resources/static/ or /filesystem/static/ subfolder. Every request to that subfolder will be ignored by Wave Framework entirely.</p>
+			
+	</body>
+</html>

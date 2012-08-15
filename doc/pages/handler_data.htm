@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Data Handler - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Data Handler</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/handler.data.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Data Handler is loaded in situations when other handlers were not used, which is most commonly for regular web page requests. Data Handler takes all the input from GET, POST, FILES; SESSION and COOKIE variables, loads Wave Framework API and sends all the input to the API. It first uses URL Controller to find out what page the user agent is looking for and then a View Controller to generate that requested page.</p>
+			
+			<h2>Workflow</h2>
+			
+				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				
+				<p>It sets URL and View cache timeouts to 0, if either of them are not defined in configuration.</p>
+				
+				<p>Data Handler loads State class and creates a new State object with the current configuration array. Configuration is required by the API that Data Handler uses.</p>
+				
+				<p>If database settings are set in configuration, then it also loads Database class and creates a new database object which is stored in State.</p>
+				
+				<p>Data Handler also loads autoload script from either /overrides/resources/autoload.php or from /resources/autoload.php, this file can include function definitions or other PHP-related functionality. It is only recommended to store additional functionality in Autoload script if absolutely necessary, such as for functions that are used by every page call.</p>
+				
+				<p>Data Handler loads API class and creates a new API object with the current State.</p>
+				
+				<p>First it sends the current requested URL to URL Controller with 'url-solve' command, which determines what view the user agent is requesting, what language is currently defined and so on. URL Controller also redirects the client, if the URL seems to be in incorrect format. URL Controller detects the View that should be loaded based on sitemap configuration stored in /resources/[language].sitemap.ini files.</p>
+				
+				<p>Once the view is found, all input data from POST, GET, FILES, COOKIE and SESSION are merged into a single input array, which works similarly to $_REQUEST. File and cookie input is stored with additional array keys of 'www-files' and 'www-cookie'. Session is stored similarly in 'www-session', but only if Wave Framework session namespace is defined as one of the cookies.</p>
+				
+				<p>Data Handler makes a new API call to View Controller, which is usually the file from /controllers/controller.view.php but other View Controllers (and Controller methods) can be called. View Controller will load the appropriate views and return data to user agent.</p>
+				
+				<p>Data Handler also makes an entry in the log file about the request, if Logger is used.</p>
+			
+	</body>
+</html>

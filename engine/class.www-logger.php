@@ -4,15 +4,13 @@
 Wave Framework
 Logger class
 
-This is an optional class that is used to log requests on system by Index gateway. 
-WWW_Logger is used to keep track of performance of requests made to Index gateway files, 
-it keeps track of how long the request took, what data it included, how high was the 
-memory use, server load and so on. If this logger is used, every single request is logged 
-as serialized arrays in filesystem in /filesystem/log/ subfolders. It is a good idea to 
-clean that folder every now and then. There is a separate script for reading those log 
-files situated in /tools/read-log.php.
-
-* Logger expects /filesystem/logs/ to be writeable
+This is an optional class that is used to log requests on system by Index Gateway. WWW_Logger 
+is used to keep track of performance of requests made to Index Gateway files, it keeps track 
+of how long the request took, what data it included, how high was the memory use, server load, 
+CPU usage and so on. If this logger is used, then every single request is logged as serialized 
+arrays in filesystem in /filesystem/log/ subfolders. It is a good idea to clean that folder 
+every now and then. There is a separate log-reader.php script for reading those log files 
+situated in /tools/ subfolder.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -20,21 +18,32 @@ License: GNU Lesser General Public License Version 3
 
 class WWW_Logger {
 
-	// Request execution time
+	// This stores microtime of the request at the moment Logger object was created. This 
+	// microtime is used by Logger to calculate execution time of the script. If this value 
+	// is not defined at the moment Logger object is created, then it is defined automatically.
 	private $requestMicrotime=false;
 	
-	// Directory of log files
-	private $logDir;
+	// This is the main address of the folder where log files will be stored. This folder 
+	// should be writable by PHP. Logger creates subfolders under this folder and stores log 
+	// files in those subfolders.
+	private $logDir='./';
 	
-	// This stores custom data sent to logger
+	// This array variable stores custom data sent to logger. Keys of this array will be stored 
+	// as keys in the log entry.
 	public $logData=array('response-code'=>200);
 	
-	// Default values are assigned when Logger is constructed
-	// It is good to initiate Logger as early as possible
+	// Construction method of Logger requires just one variable: $logDir, which is the folder 
+	// where log files will be stored. Second variable, $microTime, is used to calculate the 
+	// execution time of the script. This microtime should be the microtime from the very start 
+	// of the script, if it is not defined then Logger defines it by itself.
 	// * logDir - location of directory to store log files at
 	// * microTime - Starting microtime
-	// Initializes the class
-	public function __construct($logDir,$microTime=false){
+	public function __construct($logDir='./',$microTime=false){
+	
+		// Defining IP
+		if(!defined('__IP__')){
+			define('__IP__',$_SERVER['REMOTE_ADDR']);
+		}
 	
 		// We record the start time of the request
 		if(!$microTime){
@@ -48,25 +57,31 @@ class WWW_Logger {
 			$this->logDir=$logDir;
 		} else {
 			// Assigned folder is not detected as being a folder
-			trigger_error('Assigned log folder does not exist',E_USER_ERROR);
+			trigger_error('Assigned log folder does not exist or is not writable',E_USER_ERROR);
 		}
 		
 	}
 	
-	// This allows single or multiple log data keys to be sent to Logger at the same time
+	// This method is used to add data to objects $logData array. Key will be the same key defined 
+	// in the log entry array and value will be the value of this key. It is also possible to send
+	// multiple keys and values in the same method, if $key is an array of keys and values, instead 
+	// of a string.
 	// * setting - single key or array of data
-	// Always returns true
-	public function setCustomLogData($key,$value=false){
+	public function setCustomLogData($key,$value=true){
 		if(is_array($key)){
 			$this->logData=$key+$this->logData;
 		} else {
 			$this->logData[$key]=$value;
 		}
+		return true;
 	}
 	
-	// Writes log entry to file system
+	// This is the main method of Logger. This method attempts to gather a lot of data about the 
+	// HTTP request and calculate things such as execution time, memory usage and more. It also 
+	// creates a logger entry array and combines it with custom log array of $logData. It also 
+	// creates subfolder in the log folder directory, if it doesn't exist, and writes serialized 
+	// log entry array in that folder.
 	// * category - Category under which log is assigned
-	// Returns true if entry written to log, triggers an error if file cannot be written
 	public function writeLog(){
 	
 		// All log data is gathered to this variable
@@ -112,27 +127,27 @@ class WWW_Logger {
 			}
 				
 			// GET variables submitted by user agent.
-			if(isset($_GET) && !empty($_GET)){ 
+			if(!empty($_GET)){ 
 				$logData['get']=$_GET;
 			}
 			
 			// POST variables submitted by user agent
-			if(isset($_POST) && !empty($_POST)){ 
+			if(!empty($_POST)){ 
 				$logData['post']=$_POST;
 			}
 			
 			// FILES variables submitted by user agent
-			if(isset($_FILES) && !empty($_FILES)){
+			if(!empty($_FILES)){
 				$logData['files']=$_FILES;
 			}
 			
 			// SESSION variables submitted by user agent
-			if(isset($_SESSION) && !empty($_SESSION)){ 
+			if(!empty($_SESSION)){ 
 				$logData['session']=$_SESSION;
 			}
 			
 			// COOKIE variables submitted by user agent
-			if(isset($_COOKIE) && !empty($_COOKIE)){ 
+			if(!empty($_COOKIE)){ 
 				$logData['cookie']=$_COOKIE;
 			}
 			

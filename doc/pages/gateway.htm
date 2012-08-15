@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Index Gateway - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Index Gateway</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/index.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Index Gateway is an index/bootstrap file of Wave Framework that will serve almost every HTTP request made to the system built on Wave Framework. It analyzes the HTTP request, loads Logger and configuration as well as HTTP request Limiter, overwrites error handler of PHP and then executes the command through one of the request handlers that are stored in /engine/handler.[handler-type].php files.</p>
+				
+			<h2>Workflow</h2>
+			
+				<p>Index Gateway records current microtime as a variable and turns off PHP's own error reporting entirely. It also makes sure that the HTTP request is not made to /index.php file directly.</p>
+				
+				<p>Additional data is gathered from the requested URL, if it does not look like a request to a folder. This assigns variables like file extension and basename, that will be checked later.</p>
+				
+				<p>Index Gateway loads configuration from /config.ini file. Contents of this file are slightly modified by Index Gateway (such as arrays created from comma-separated lists) and this new array is stored as serialized in file system and loaded with subsequent requests. This improves loading time of configuration while making sure that config.ini file is as reader-friendly as possible.</p>
+				
+				<p>Timezone is set as Europe/London, unless another timezone is set in configuration.</p>
+				
+				<p>Index Gateway also attempts to set the IP it assumes that the request is made from. It takes into account trusted proxies configuration and other request headers, in case proxies are used to make the request.</p>
+				
+				<p>It loads Logger, which is used to log HTTP requests and performance data related to those requests for later analysis.</p>
+				
+				<p>It loads HTTP Request Limiter, which is used to limit specific HTTP requests, require HTTP authentication, check for IP white- and blacklists and more.</p>
+				
+				<p>Index Gateway also entirely overwrites error handling of PHP. Errors are stored in a separate internal log and a critical error page is shown to user of the system only if a critical error actually occurs. Lesser errors and warnings are simply logged internally and can be viewed later with the Debugger tool. The entire backtrace of the error is logged, if error is encountered.</p>
+				
+				<p>Image Handler is loaded if the requested extension is for an image file. Resource Handler is loaded if JavaScript or CSS files are requested. Sitemap and Robots Handlers are loaded if robots.txt or sitemap.xml files are requested. These extensions can be set in configuration file.</p>
+				
+				<p>Index Gateway will also throw a 403 Forbidden error, if a file is requested that has an extension that is disallowed by configuration. These files include htaccess file, *.tmp files and more.</p>
+				
+				<p>API Handler is loaded whenever an *.api extension is requested.</p>
+				
+				<p>File Handler is loaded whenever the request includes a file extension that has not already been served by Resource, Image, Sitemap, Robots and API Handlers.</p>
+				
+				<p>Every other request uses Data Handler.</p>
+				
+	</body>
+</html>

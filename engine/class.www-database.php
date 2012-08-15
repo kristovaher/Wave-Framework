@@ -4,15 +4,11 @@
 Wave Framework
 Database class
 
-Simple database class that has presently only support for MySQL. It is not required to use 
-WWW_Database with Wave Framework at all, but should it be required, it is available. This 
-class uses PDO database class to simplify some of the database commands. It includes
-functions for returning data from database as a single row or multiple rows as associative 
-arrays as well as get information about last inserted ID and number of rows affected by 
-last query.
-
-* This currently supports MySQL, but other PDO drivers can be easily supported
-* MySQL, SQLite, PostgreSQL, Oracle, MS SQL supported
+Simple database class that acts as a wrapper to PDO. It is not required to use WWW_Database 
+with Wave Framework at all, but should it be required, it is available. This class uses PDO 
+database class to simplify some of the database commands. It includes functions for returning 
+data from database as a single row or multiple rows as associative arrays as well as get 
+information about last inserted ID and number of rows affected by last query.
 
 Author and support: Kristo Vaher - kristo@waher.net
 License: GNU Lesser General Public License Version 3
@@ -20,28 +16,52 @@ License: GNU Lesser General Public License Version 3
 
 class WWW_Database {
 
-	// PDO class is used for database commands
+	// PDO object is stored in this variable, since Database class acts as a wrapper for PDO.
 	public $pdo=false;
 	
 	// Flag for checking whether database connection is active or not
-	private $connected=0;
+	private $connected=false;
 	
-	// All database authentication and connection related variables
+	// This is currently used database type. It can be 'mysql', 'sqlite', 'postgresql', 
+	// 'oracle' or 'mssql'.
 	public $type='mysql';
+	
+	// This is the username that is used to connect to database.
 	public $username='';
+	
+	// This is the password that is used to connect to database.
 	public $password='';
+	
+	// This is the host address of the database. In case of SQLite, this should be the location 
+	// of SQLite database file.
 	public $host='localhost';
+	
+	// This is the database name that will be connected to.
 	public $database='';
+	
+	// This is the flag that determines if database connection should be considered persistent 
+	// or not. Persistent connections are shared across requests, but are generally not recommended 
+	// to be used.
 	public $persistent=false;
 	
-	// Flag for whether errors are thrown or not
+	// If this value is set to true, then Database class will trigger a PHP error if it encounters 
+	// a database error.
 	public $showErrors=false;
 	
-	// We count the amount of queries in this variable
+	// This is used for logging or otherwise performance tracking. This variable is a simple counter 
+	// about the amount of requests made during this database connection.
 	public $queryCounter=0;
 
-	// These parameters are set during object construction
-	public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=false,$persistent=false){
+	// This constructor method returns new Database object as well as includes options to quickly 
+	// assign database credentials in the same request.
+	// * type - Database type, can be 'mysql', 'sqlite', 'postgresql', 'oracle' or 'mssql'
+	// * host - Database server address or SQLite database file location
+	// * database - Database name
+	// * username - Username
+	// * password - Password
+	// * showErrors - Whether database errors trigger PHP errors or not
+	// * persistent - Whether database connection is persistent or not (usually not recommended)
+	public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=true,$persistent=false){
 		// Assigning construct elements to object parameters
 		$this->type=$type;
 		$this->host=$host;
@@ -52,20 +72,15 @@ class WWW_Database {
 		$this->persistent=$persistent;
 	}
 	
-	// Database connection is closed if this object is not used anymore
+	// When object is not used anymore, it automatically calls the method that closes existing 
+	// database connection.
 	public function __destruct(){
 		$this->dbDisconnect();
 	}
 
-	// Connects to database based on set configuration
-	// * persistent - Whether database connection is persistent or not
-	// Throws errors if database connection fails
-	public function dbConnect($persistent=false){
-	
-		// Persistent or not
-		if($persistent==true){
-			$this->persistent=true;
-		}
+	// This creates database connection based on database type. If database connection fails, 
+	// then it throws a PHP error regardless if $showErrors is turned on or not.
+	public function dbConnect(){
 	
 		// Actions based on database type
 		switch($this->type){
@@ -74,7 +89,7 @@ class WWW_Database {
 				if(extension_loaded('pdo_mysql')){
 					$this->pdo=new PDO('mysql:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent,PDO::MYSQL_ATTR_INIT_COMMAND=>'SET NAMES \'UTF8\''));
 					if($this->pdo){
-						$this->connected=1;
+						$this->connected=true;
 					} else {
 						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
@@ -87,7 +102,7 @@ class WWW_Database {
 				if(extension_loaded('pdo_sqlite')){
 					$this->pdo=new PDO('sqlite:'.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
-						$this->connected=1;
+						$this->connected=true;
 					} else {
 						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
@@ -101,7 +116,7 @@ class WWW_Database {
 					$this->pdo=new PDO('pgsql:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->pdo->exec('SET NAMES \'UTF8\'');
-						$this->connected=1;
+						$this->connected=true;
 					} else {
 						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
@@ -114,7 +129,7 @@ class WWW_Database {
 				if(extension_loaded('pdo_oci')){
 					$this->pdo=new PDO('oci:dbname='.$this->database.';charset=AL32UTF8',$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
-						$this->connected=1;
+						$this->connected=true;
 					} else {
 						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
@@ -128,7 +143,7 @@ class WWW_Database {
 					$this->pdo=new PDO('dblib:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->pdo->exec('SET NAMES \'UTF8\'');
-						$this->connected=1;
+						$this->connected=true;
 					} else {
 						trigger_error('Cannot connect to database',E_USER_ERROR);
 					}
@@ -143,8 +158,8 @@ class WWW_Database {
 		}
 	}
 	
-	// Disconnects from database, if connected
-	// Returns false if no connection was present
+	// This disconnects current database connection and resets query counter, if 
+	// $resetQueryCounter is set to true. Returns false if no connection was present.
 	public function dbDisconnect($resetQueryCounter=false){
 	
 		// This is only executed if existing connection is detected
@@ -155,23 +170,26 @@ class WWW_Database {
 			}
 			// Closing the database
 			$this->pdo=null;
-			$this->connected=0;
+			$this->connected=false;
 		} else {
 			return false;
 		}
 		
 	}
 
-	// Sends query to database and returns associative array of all results
-	// Meant for SELECT queries
+	// This sends query information to PDO. $queryString is the query string and $variables 
+	// is an array of variables sent with the request. Question marks (?) in $queryString 
+	// will be replaced by values from $variables array for PDO prepared statements. This 
+	// method returns an array where each key is one returned row from the database, or it 
+	// returns false, if the query failed. This method is mostly meant for SELECT queries 
+	// that return multiple rows.
 	// * queryString - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
-	// Returns the result in an array or returns false when query failed
 	public function dbMultiple($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
 		if($this->connected!=1){
-			$this->dbConnect($this->persistent);
+			$this->dbConnect();
 		}
 		
 		// Query total is being counted for performance review
@@ -198,16 +216,18 @@ class WWW_Database {
 		
 	}
 
-	// Sends query to database and returns associative array of first returned row
-	// Meant for SELECT queries
+	// This sends query information to PDO. $queryString is the query string and $variables 
+	// is an array of variables sent with the request. Question marks (?) in $queryString 
+	// will be replaced by values from $variables array for PDO prepared statements. This 
+	// method returns the first row of the matching result, or it returns false, if the query 
+	// failed. This method is mostly meant for SELECT queries that return a single row.
 	// * queryString - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
-	// Returns the result in an array or returns false when query failed
 	public function dbSingle($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
 		if($this->connected!=1){
-			$this->dbConnect($this->persistent);
+			$this->dbConnect();
 		}
 		
 		// Query total is being counted for performance review
@@ -234,16 +254,19 @@ class WWW_Database {
 		
 	}
 
-	// Executes a specific database query 
-	// Meant for INSERT, UPDATE, DELETE queries
+	// This sends query information to PDO. $queryString is the query string and $variables 
+	// is an array of variables sent with the request. Question marks (?) in $queryString 
+	// will be replaced by values from $variables array for PDO prepared statements. This 
+	// method only returns the number of rows affected or true or false, depending whether 
+	// the query was successful or not. This method is mostly meant for INSERT, UPDATE and 
+	// DELETE type of queries.
 	// * queryString - query string, a statement to prepare with PDO
 	// * variables - array of variables to use in prepared statement
-	// Returns the amount of rows that were affected by the query
 	public function dbCommand($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
 		if($this->connected!=1){
-			$this->dbConnect($this->persistent);
+			$this->dbConnect();
 		}
 		
 		// Query total is being counted for performance review
@@ -274,41 +297,13 @@ class WWW_Database {
 		
 	}
 	
-	// Triggers a PHP error if MySQL encounters error in the query
-	// * query - query object from PDO
-	// * queryString - query string
-	// * variables - Variables sent to query
-	// Triggers an error if there was an error
-	private function dbErrorCheck($query,$queryString=false,$variables=array()){
-	
-		// This method requires database to be connected
-		if($this->connected==1){
-			if($this->showErrors==1){
-				// Checking if there is error information stored for this request
-				$errors=$query->errorInfo();
-				if($errors && !empty($errors)){
-					// PDO errorInfo carries verbose error as third in the index
-					if(!empty($variables)){
-						trigger_error('QUERY:'."\n".$this->dbDebug($queryString,$variables)."\n".'FAILED:'."\n".$errors[2],E_USER_WARNING);
-					} else {
-						trigger_error('QUERY:'."\n".$queryString."\n".'FAILED:'."\n".$errors[2],E_USER_WARNING);
-					}
-				}
-			}
-		} else {
-			trigger_error('Database not connected',E_USER_ERROR);
-		}
-		
-		// Since error was not triggered, it simply returns true
-		return true;
-		
-	}
-	
-	// This method creates a new array of specific keys from a result array
+	// This is a database helper method, that simply creates an array of database result array 
+	// (like the one returned by dbMultiple). It takes the database result array and collects 
+	// all $key values from that array into a new, separate array. If $unique is set, then it 
+	// only returns unique keys.
 	// * array - Array to filter from
 	// * key - Key to return
 	// * unique - If returned array should only have unique values
-	// Returns an array
 	public function dbArray($array,$key,$unique=true){
 		$result=array();
 		// This method only works on an array
@@ -335,10 +330,12 @@ class WWW_Database {
 		return $result;
 	}
 	
-	// This function attempts to 'simulate' the way PDO builds a query
+	// This method attempts to simulate the query that PDO builds when it makes a request to 
+	// database. $query should be the query string and $variables should be the array of 
+	// variables, like the ones sent to dbSingle(), dbMultiple() and dbCommand() requests. 
+	// It returns a prepared query string.
 	// * query - Query string
 	// * variables - Values sent to PDO
-	// Returns 'prepared' query string
 	public function dbDebug($query,$variables=array()){
 		// Attempt to simulate PDO query-building
 		$keys=array();
@@ -362,8 +359,8 @@ class WWW_Database {
 		}
 	}
 	
-	// Used to get the last inserted ID from database
-	// Returns last ID if found, returns false if last ID was not found
+	// This method attempts to return the last ID (a primary key) that was inserted to the 
+	// database. If one was not found, then the method returns false.
 	public function dbLastId(){
 	
 		// This method requires database to be connected
@@ -387,13 +384,13 @@ class WWW_Database {
 		
 	}
 	
-	// Begins transaction if transactions are supported
-	// Returns true if transaction is started
+	// This method begins a database transaction, if the database type supports transactions. 
+	// If this process fails, then method returns false, otherwise it returns true.
 	public function dbTransaction(){
 	
 		// Attempting to connect to database, if not connected
 		if($this->connected!=1){
-			$this->dbConnect($this->persistent);
+			$this->dbConnect();
 		}
 		
 		// Query total is being counted for performance review
@@ -408,8 +405,8 @@ class WWW_Database {
 			
 	}
 	
-	// Commits transaction if transactions are supported
-	// Returns true if transaction is commited
+	// This commits all the queries sent to database after transactions were started. If 
+	// commit fails, then it returns false, otherwise this method returns true.
 	public function dbCommit(){
 	
 		// This method requires database to be connected
@@ -430,8 +427,9 @@ class WWW_Database {
 		}
 	}
 	
-	// Rolls back the changes from transaction
-	// Returns true if transaction is rolled back
+	// This method cancels all the queries that have been sent since the transaction was 
+	// started with dbTransaction(). If rollback is successful, then method returns true, 
+	// otherwise returns false.
 	public function dbRollback(){
 	
 		// This method requires database to be connected
@@ -453,7 +451,18 @@ class WWW_Database {
 		
 	}
 	
-	// This function escapes a string for use in query
+	// This is a database helper function that can be used to escape specific variables if 
+	// that variable is not sent with as part of variables array and is written in the 
+	// query string instead. $value is the variable value that will be escaped or modified. 
+	// $type is the type of escaping and modifying that takes place. This can be 'escape' 
+	// (which just applies regular PDO quote to the variable), 'integer' which converts the 
+	// value to an integer through typecasting, 'float' which converts the value to a float 
+	// through typecasting, 'numeric' which converts the value to a numeric value that also 
+	// allows spaces and plus and minus symbols and brackets (such as for phone numbers), 
+	// 'latin' which converts the value to just have latin characters and numbers, 'field' 
+	// which converts the value to be a database-appropriate table field and 'like' which 
+	// escapes the value to be suitable when used inside a LIKE match. If $stripQuotes is set, 
+	// then the value will also strip any quotes, if they happen to be added to the value.
 	// * value - Input value
 	// * type - Method of quoting, either 'escape', 'integer', 'latin', 'field' or 'like'
 	// * stripQuotes - Whether the resulting quotes will be stripped from the string, if they get set
@@ -475,7 +484,7 @@ class WWW_Database {
 				return (float)$value;
 				break;
 			case 'numeric':
-				return trim(preg_replace('/[^0-9\-\+\ ]/i','',$value));
+				return trim(preg_replace('/[^0-9\-\+\ \(\)\.\,]/i','',$value));
 				break;
 			case 'latin':
 				return preg_replace('/[^a-z0-9]/i','',$value);
@@ -494,6 +503,39 @@ class WWW_Database {
 				return $value;
 				break;
 		}
+		
+	}
+	
+	// This is a private method that is called after every query that is sent to database. This 
+	// checks whether database error was encountered and if $showErrors was turned on, then also 
+	// throws a PHP warning about it. It also accepts $query, which is the PDO resource for the 
+	// query to be checked and $queryString with $variables for debugging purposes, as it attempts 
+	// to rebuild the query sent to PDO using dbDebug() method.
+	// * query - query object from PDO
+	// * queryString - query string
+	// * variables - Variables sent to query
+	private function dbErrorCheck($query,$queryString=false,$variables=array()){
+	
+		// This method requires database to be connected
+		if($this->connected==1){
+			if($this->showErrors==1){
+				// Checking if there is error information stored for this request
+				$errors=$query->errorInfo();
+				if($errors && !empty($errors)){
+					// PDO errorInfo carries verbose error as third in the index
+					if(!empty($variables)){
+						trigger_error('QUERY:'."\n".$this->dbDebug($queryString,$variables)."\n".'FAILED:'."\n".$errors[2],E_USER_WARNING);
+					} else {
+						trigger_error('QUERY:'."\n".$queryString."\n".'FAILED:'."\n".$errors[2],E_USER_WARNING);
+					}
+				}
+			}
+		} else {
+			trigger_error('Database not connected',E_USER_ERROR);
+		}
+		
+		// Since error was not triggered, it simply returns true
+		return true;
 		
 	}
 

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Overrides - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Overrides</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework includes the ability to have overrides. Overrides are files that override default functionality in some way. This is insignificant for most websites and web services, but if Wave Framework is used to develop a specific info-system that is installed on multiple web servers and it is required to change certain files around (like a logo or some functionality), then overrides make this work easily without making it impossible to later on update the core software.</p>
+				
+				<p>The way overrides work in Wave Framework is that they have to be placed in /overrides/ subfolder in the main archive and system will check whether such override files exist in those folders before serving the file. There are overrides for models, views, controllers as well as static images and resources such as JavaScript.</p>
+				
+			<h2>Overriding Classes</h2>
+			
+				<p>Wave Framework stores model classes in /models/ subfolder, views in /views/ subfolder, controllers in /controllers/ subfolder and other, generic use classes, in /resources/classes/ subfolder. It is possible to override those classes by placing files with the exact same filename under /overrides/models/, /overrides/views/, /overrides/controllers/ or /overrides/resources/classes/ subfolders.</p>
+				
+				<p>When any of those files are requested and loaded through Factory, then Wave Framework will first look in these folders to see if an override file exists. If an override exists, then this is loaded instead. This means that no matter what is done to the main files, overrides are always loaded when they are present. This makes it possible to have multiple web services with the same code on different servers, but override the view controller, for example, to behave a little differently. And when the core code is updated, then the override is not updated and stays the same, which makes it possible to easily update multiple installations of the same software.</p>
+				
+				<p>Of course this also means that sometimes the override might break functionality of a specific installation if the main code is updated, so it is always recommended to test the installations that use overrides.</p>
+				
+				<p>Overrides cannot be applied to core Wave Framework classes to make sure the engine is always on the same version.</p>
+				
+			<h2>Overriding Resources</h2>
+			
+				<p>It is also possible to override image files, script files and stylesheets. This overriding functionality is only enabled for any image file (*.jpeg, *.jpg, *.png) or resource file (*.css, *.js, *.txt, *.csv, *.xml, *.html, *.htm, *.rss, *.vcard) stored in /resources/ folder and its subfolders. To override a specific script or picture, then you should create a file with the same name and folder structure under /overrides/resources/ subfolder. If this file is found, then override file is loaded instead of the original.</p>
+				
+				<p>This makes it possible to override small details of software in case the same software is installed in multiple servers. For example, it is possible to override stylesheet or logo picture of the installation without affecting the situation where the entire software needs to be updated. If you have hundred installations of the same software and you update the entire software file architecture, then overrides make sure that specific files - that are installation specific - are not affected and software will continue working as before.</p>
+				
+				<p>It is still recommended to test and make sure that everything works as expected in installations that implement overrides to make sure that the changes in core software did not break functionality of overrides.</p>
+				
+				<p>Note that configuration file /config.ini cannot have an override, same with files in /resources/static/ subfolder (read about this more in "Static Files").</p>
+			
+	</body>
+</html>

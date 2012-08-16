@@ -322,7 +322,7 @@ License: GNU Lesser General Public License Version 3
 		
 			// These file extensions are not allowed, thus 403 error is returned
 			// Log category is 'file' due to it being a file with an extension
-			if($logger){
+			if(isset($logger)){
 				$logger->setCustomLogData(array('response-code'=>403,'category'=>'file'));
 				$logger->writeLog();
 			}

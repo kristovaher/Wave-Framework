@@ -28,7 +28,7 @@
 				
 				<ul>
 					<li>The most basic sessions and cookie based system - that works similarly to how a web browser works. This means that authentication is done entirely through API and without using Wave Framework API profiles. In this case, the API will use the same authentication method that a user would use when logging into the system.</li>
-					<li>Second method is that it supports a very common authentication that is similar to RESTful API's, where you first create a session token with an API profile name and a secret API key, get a token and then make requests with that token. Thse API profiles can be restricted to making only certain API requests.</li>
+					<li>Second method is that it supports a very common authentication that is similar to RESTful API's, where you first create a session token with an API profile name and a secret API key, get a token and then make requests with that token. These API profiles can be restricted to making only certain API requests.</li>
 					<li>Thirdly it supports an API validation that works similarly to many payment systems and banks, where the entire input data is hashed with a secret key to create a token and then that token is used to hash the input and make requests. In this system the secret key is never sent over HTTP when API connection is initialized and only the session token is returned from the server one time over HTTP - subsequent connections use that token to hash the input.</li>
 					<li><i>There is also a planned authentication system for PHP API Wrapper that uses OpenSSL certificates for making requests and validating requests, but this system is not supported yet.</i></li>
 				</ul>

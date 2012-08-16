@@ -126,7 +126,7 @@ class WWW_controller_view extends WWW_Factory {
 				<body>
 				<?php
 					// View object is rendered
-					$result=$viewObject->$view['view-method']($input);
+					$viewObject->$view['view-method']($input);
 				?>
 				</body>
 			</html>

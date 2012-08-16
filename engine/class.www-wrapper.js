@@ -258,7 +258,7 @@ function WWW_Wrapper(address,language){
 					}
 					break;
 				case 'www-timestamp-duration':
-					apiState.timestampDuration=$value;
+					apiState.timestampDuration=value;
 					log.push('API valid timestamp duration set to: '+value);
 					break;
 				case 'www-output':
@@ -343,7 +343,7 @@ function WWW_Wrapper(address,language){
 		
 			// If log is assigned to be reset with each new API request
 			if(resetLog){
-				clearLog();
+				this.clearLog();
 			}
 		
 			// In case variables have been sent with a single request
@@ -386,7 +386,7 @@ function WWW_Wrapper(address,language){
 			}
 
 			// Clearing input data
-			this.clearInput();
+			this.clearInput(false);
 
 			// Log entry
 			log.push('Starting to build request');
@@ -492,7 +492,7 @@ function WWW_Wrapper(address,language){
 					var requestData=buildRequestData(thisInputData);
 				
 					// Creating request handler
-					XMLHttp=new XMLHttpRequest();
+					var XMLHttp=new XMLHttpRequest();
 				
 					// POST request is made if the URL is longer than 2048 bytes (2KB).
 					// While servers can easily handle 8KB of data, servers are recommended to be vary if the GET request is longer than 2KB
@@ -511,7 +511,7 @@ function WWW_Wrapper(address,language){
 						log.push('Making '+method+' request to URL: '+requestURL);
 						
 						// AJAX states
-						XMLHttp.onreadystatechange=function(oEvent){
+						XMLHttp.onreadystatechange=function(){
 							if(XMLHttp.readyState===4){
 								// Result based on status
 								if(XMLHttp.status===200 || XMLHttp.status===304){
@@ -570,7 +570,7 @@ function WWW_Wrapper(address,language){
 					var apiSubmitForm=document.getElementById(thisApiState.apiSubmitFormId);
 					
 					if(apiSubmitForm==null){
-						return errorHandler(thisInputData,215,'Form not found: '.thisApiState.apiSubmitFormId,thisApiState.errorCallback);
+						return errorHandler(thisInputData,215,'Form not found: '+thisApiState.apiSubmitFormId,thisApiState.errorCallback);
 					}
 				
 					// Hidden iFrame
@@ -583,10 +583,10 @@ function WWW_Wrapper(address,language){
 					apiSubmitForm.appendChild(hiddenWindow);
 					
 					//Old parameters
-					old_formAction=apiSubmitForm.action;
-					old_formTarget=apiSubmitForm.target;
-					old_formMethod=apiSubmitForm.method;
-					old_formEnctype=apiSubmitForm.enctype;
+                    var old_formAction=apiSubmitForm.action;
+                    var old_formTarget=apiSubmitForm.target;
+                    var old_formMethod=apiSubmitForm.method;
+					var old_formEnctype=apiSubmitForm.enctype;
 					
 					// Preparing form submission
 					apiSubmitForm.method='POST';
@@ -598,7 +598,7 @@ function WWW_Wrapper(address,language){
 					// Input data
 					var counter=0;
 					var hiddenFields=new Object();
-					for(node in thisInputData){
+					for(var node in thisInputData){
 						counter++;
 						hiddenFields[counter]=document.createElement('input');
 						hiddenFields[counter].id=('www_hidden_form_data_'+counter);
@@ -636,7 +636,7 @@ function WWW_Wrapper(address,language){
 							apiSubmitForm.target='';
 						}
 						// Removing created elements
-						for(i=1;i<=counter;i++){
+						for(var i=1;i<=counter;i++){
 							if(hiddenFields[i]!=null){
 								hiddenFields[i].parentNode.removeChild(hiddenFields[i]);
 							}
@@ -779,7 +779,7 @@ function WWW_Wrapper(address,language){
 				// If callback function is set
 				if(thisApiState.successCallback && resultData['www-response-token']!=null && resultData['www-response-token']>=500){
 					// Calling user function
-					thisCallback=this.window[thisApiState.successCallback];
+					var thisCallback=this.window[thisApiState.successCallback];
 					if(typeof(thisCallback)==='function'){
 						log.push('Sending failure data to callback: '+thisApiState.successCallback+'()');
 						// Callback execution
@@ -789,7 +789,7 @@ function WWW_Wrapper(address,language){
 					}
 				} else if(thisApiState.failureCallback && resultData['www-response-token']!=null && resultData['www-response-token']<500){
 					// Calling user function
-					thisCallback=this.window[thisApiState.failureCallback];
+					var thisCallback=this.window[thisApiState.failureCallback];
 					if(typeof(thisCallback)==='function'){
 						log.push('Sending failure data to callback: '+thisApiState.failureCallback+'()');
 						// Callback execution
@@ -822,7 +822,7 @@ function WWW_Wrapper(address,language){
 			// If failure callback has been defined
 			if(thisErrorCallback){
 				// Looking for function of that name
-				thisCallback=this.window[thisErrorCallback];
+				var thisCallback=this.window[thisErrorCallback];
 				if(typeof(thisCallback)==='function'){
 					log.push('Sending failure data to callback: '+thisErrorCallback+'()');
 					// Callback execution
@@ -961,43 +961,6 @@ function WWW_Wrapper(address,language){
 			}
 			return sorted;
 		}
-		
-		// This method is JavaScript equivelant of PHP's base64 string encoding function. 
-		// It is used for hash validations. 'data' is the string to be converted.
-		// * value - value to convert
-		var base64_encode=function(data){
-			var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-			var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
-				ac = 0,
-				enc = "",
-				tmp_arr = [];
-
-			if (!data) {
-				return data;
-			}
-
-			do { // pack three octets into four hexets
-				o1 = data.charCodeAt(i++);
-				o2 = data.charCodeAt(i++);
-				o3 = data.charCodeAt(i++);
-
-				bits = o1 << 16 | o2 << 8 | o3;
-
-				h1 = bits >> 18 & 0x3f;
-				h2 = bits >> 12 & 0x3f;
-				h3 = bits >> 6 & 0x3f;
-				h4 = bits & 0x3f;
-
-				// use hexets to index into b64, and append result to encoded string
-				tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-			} while (i < data.length);
-
-			enc = tmp_arr.join('');
-			
-			var r = data.length % 3;
-			
-			return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
-		}
 	
 		// This is a JavaScript equivalent of PHP's sha1() function. It calculates a hash 
 		// string from 'msg' string.
@@ -1007,7 +970,7 @@ function WWW_Wrapper(address,language){
 			function rotate_left(n,s) {
 				var t4 = ( n<<s ) | (n>>>(32-s));
 				return t4;
-			};
+			}
 			function lsb_hex(val) {
 				var str="";
 				var i;
@@ -1019,7 +982,7 @@ function WWW_Wrapper(address,language){
 					str += vh.toString(16) + vl.toString(16);
 				}
 				return str;
-			};
+			}
 			function cvt_hex(val) {
 				var str="";
 				var i;
@@ -1029,7 +992,7 @@ function WWW_Wrapper(address,language){
 					str += v.toString(16);
 				}
 				return str;
-			};
+			}
 			function Utf8Encode(string) {
 				string = string.replace(/\r\n/g,"\n");
 				var utftext = "";
@@ -1049,7 +1012,7 @@ function WWW_Wrapper(address,language){
 					}
 				}
 				return utftext;
-			};
+			}
 			var blockstart;
 			var i, j;
 			var W = new Array(80);

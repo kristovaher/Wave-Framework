@@ -27,12 +27,12 @@
 				<p>This configuration can work in multiple ways:</p>
 				
 				<ul>
-					<li>If '*' is one of the values in the comma-separated list, then all log entires are logged, except log entires with a key that are set to be ignored.</li>
-					<li>If '!' is set before a keyword in the comma-separated list, then log entries with that keyword will not be logged. By default it has '!input-data' and '!output-data' set, which means that by default the Internal Logger will supress all the automatic input and output data log entries sent by API when API calls are made.</li>
-					<li>If '*' is not set, then Internal Logger will log only the entires set in the 'internal-logging' configuration setting. If you add 'example' to that list and add a log entry with keyword 'example', then this is logged while another internal logging entry 'example2' will not be stored.</li>
+					<li>If '*' is one of the values in the comma-separated list, then all log entries are logged, except log entries with a key that are set to be ignored.</li>
+					<li>If '!' is set before a keyword in the comma-separated list, then log entries with that keyword will not be logged. By default it has '!input-data' and '!output-data' set, which means that by default the Internal Logger will suppress all the automatic input and output data log entries sent by API when API calls are made.</li>
+					<li>If '*' is not set, then Internal Logger will log only the entries set in the 'internal-logging' configuration setting. If you add 'example' to that list and add a log entry with keyword 'example', then this is logged while another internal logging entry 'example2' will not be stored.</li>
 				</ul>
 				
-				<p>The idea behind the ability to filter specific log entries is to make it possible to leave log hooks within Models, Views and Controllers and then test various functionality if problems occur or debugging becomes necessary. Filtering makes it possible to turn off certain type of log entries with just a configuration setting, without requiring the developer to go through the code and comment out log entries manually.</li>
+				<p>The idea behind the ability to filter specific log entries is to make it possible to leave log hooks within Models, Views and Controllers and then test various functionality if problems occur or debugging becomes necessary. Filtering makes it possible to turn off certain type of log entries with just a configuration setting, without requiring the developer to go through the code and comment out log entries manually.</p>
 				
 			<h2>Adding an Entry to Internal Log</h2>
 			

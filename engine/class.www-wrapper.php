@@ -742,9 +742,6 @@ class WWW_Wrapper {
 							// This is the variable that carries POST variables that will be sent to cURL
 							$postData=$thisInputData;
 							
-							// This holds GET variables, if GET is used instead of POST
-							$getVariables=array();
-							
 							// Regular input variables can be sent over GET if they are not too long
 							if($getRequestLength<=$this->getLimit){
 							
@@ -914,7 +911,7 @@ class WWW_Wrapper {
 						}
 					} else if($thisInputData['www-return-type']=='querystring'){
 						// Return data is filtered through string parsing and url decoding to create return array
-						$resultData=parse_str(urldecode($resultData),$resultData);
+						parse_str(urldecode($resultData),$resultData);
 						if(!$resultData){
 							return $this->errorHandler($thisInputData,207,'Cannot unserialize returned data: Cannot parse query data string',$thisApiState['errorCallback']);
 						} else {

@@ -161,7 +161,7 @@
 				
 					<p>First of these methods is used for database input filtering. Sometimes it is necessary to do additional filtering on a variable before it is sent to database. When using prepared statements the way PDO does it, then PDO already makes sure that malicious input does not break database requests, but there are cases where you might have to build the request without prepared statements or include a variable as part of your main database query.</p>
 					
-					<p>Wave Framework has a dbQuote() method for this purpose. This is an expanded version of PDO's own quote() method. Wave Framework's dbQuote takes three parameters: string value to be filtered or escaped, the type of escaping that will be done and whether automatially set quotes will be stripped or not from the variable. Latter of which can be useful for some cases, since PDO automatically adds quotes around escaped variables.</p>
+					<p>Wave Framework has a dbQuote() method for this purpose. This is an expanded version of PDO's own quote() method. Wave Framework's dbQuote takes three parameters: string value to be filtered or escaped, the type of escaping that will be done and whether automatically set quotes will be stripped or not from the variable. Latter of which can be useful for some cases, since PDO automatically adds quotes around escaped variables.</p>
 					
 					<p>These are the types that can be used with dbQuote():</p>
 					

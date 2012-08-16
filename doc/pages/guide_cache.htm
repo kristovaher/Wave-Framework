@@ -22,7 +22,7 @@
 			
 				<p>While not directly related to Wave Framework caching, the API also implements API command buffering. This means that the API tracks what API requests are made and with what input within a single HTTP request. Since API requests can be nested in Wave Framework, at times the same API call can be executed multiple times with the exact same input.</p>
 				
-				<p>In order to lower the potential memory and processing power consumption with these repeated requests, API has an internal buffer that stores API call request results for every API call that is successfully made. This buffer is used only within the single HTTP request and is not transfered to subsequent requests. This helps the API to minimize the amount of processing it needs to do when the same API call is requested in multiple places (such as loading certain users account information) in multiple places in the same view within the same HTTP request.</p>
+				<p>In order to lower the potential memory and processing power consumption with these repeated requests, API has an internal buffer that stores API call request results for every API call that is successfully made. This buffer is used only within the single HTTP request and is not transferred to subsequent requests. This helps the API to minimize the amount of processing it needs to do when the same API call is requested in multiple places (such as loading certain users account information) in multiple places in the same view within the same HTTP request.</p>
 				
 				<p>At times it is necessary to clear this buffer, in case you are certain that the buffer might have changed and that other calls are made that should return a different result, but do not because of the buffer. For those cases it is possible to clear the API buffer with the following call:</p>
 				
@@ -116,7 +116,7 @@
 
 				<h3>Accessing Previous Cache</h3>
 
-					<p>There is one more set of methods that is possible from within MVC Objeects in Wave Framework that can be very useful at times. It is possible to refer to previous cache in Controllers. This means that if an API call is made and a Controller is loaded without cache being used, then this Controller can get both the timestamp and contents of cache of the previous time when the cache was there.</p>
+					<p>There is one more set of methods that is possible from within MVC Objects in Wave Framework that can be very useful at times. It is possible to refer to previous cache in Controllers. This means that if an API call is made and a Controller is loaded without cache being used, then this Controller can get both the timestamp and contents of cache of the previous time when the cache was there.</p>
 					
 					<p>While a little difficult to explain, this flow description might give a good real life example:</p>
 					
@@ -127,7 +127,7 @@
 						<li>Usually you would have to build your own checks for cases such as this, or cache this previous tweet variable in database or filesystem somewhere.</li>
 					</ul>
 					
-					<p>Wave Framework however allows you to actually refer to the contents and timestamp of your previous cache and you can do with this data whatever you want within the Controller. You can even make the Controller return the previous cache every single time, which technically means that the first generated cache would be permanent.</li>
+					<p>Wave Framework however allows you to actually refer to the contents and timestamp of your previous cache and you can do with this data whatever you want within the Controller. You can even make the Controller return the previous cache every single time, which technically means that the first generated cache would be permanent.</p>
 					
 					<p>This is how you can refer to the previous contents as well as the creation timestamp of the cache of the current API call:</p>
 					

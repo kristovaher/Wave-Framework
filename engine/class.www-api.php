@@ -251,8 +251,8 @@ final class WWW_API {
 				if($useBuffer){
 					$commandBufferAddress=md5($apiState['command'].serialize($apiInputData));
 					// If result already exists in buffer then it is simply returned
-					if(isset($this->buffer[$commandBufferAddress])){
-						return $this->buffer[$commandBufferAddress];
+					if(isset($this->commandBuffer[$commandBufferAddress])){
+						return $this->commandBuffer[$commandBufferAddress];
 					}
 				}
 				
@@ -724,9 +724,9 @@ final class WWW_API {
 				// If buffer is not disabled, response is checked from buffer
 				if($useBuffer){
 					// Storing result in buffer
-					$this->buffer[$commandBufferAddress]=$this->output($apiResult,$apiState,$useLogger);
+					$this->commandBuffer[$commandBufferAddress]=$this->output($apiResult,$apiState,$useLogger);
 					// Returning result from newly created buffer
-					return $this->buffer[$commandBufferAddress];
+					return $this->commandBuffer[$commandBufferAddress];
 				} else {
 					// System returns correctly formatted output data
 					return $this->output($apiResult,$apiState,$useLogger);
@@ -754,7 +754,7 @@ final class WWW_API {
 			
 			// This filters the result through various PHP and header specific commands
 			if($apiState['disable-callbacks']==false && (!isset($apiResult['www-disable-callbacks']) || $apiResult['www-disable-callbacks']==false)){
-				$this->apiCallbacks($apiResult,$useLogger,$apiState['return-type']);
+				$this->apiCallbacks($apiResult,$useLogger);
 			}
 					
 			// Simple flag for error check, this is used for output encryption
@@ -1049,7 +1049,7 @@ final class WWW_API {
 		// and cannot be used outside the class.
 		// * data - Data array
 		// * useLogger - If logger is used
-		final private function apiCallbacks($data,$useLogger,$returnType){
+		final private function apiCallbacks($data,$useLogger){
 		
 			// HEADERS
 		
@@ -1157,10 +1157,10 @@ final class WWW_API {
 		final private function toXML($apiResult,$type=false){
 			
 			// Different XML header is used based on whether it is an RSS or not
-			if(!$type){
-				$xml='<?xml version="1.0" encoding="utf-8"?><www>';
-			} elseif($type=='rss'){
-				$xml='<?xml version="1.0" encoding="utf-8"?><rss version="2.0">';
+			if($type=='rss'){
+                $xml='<?xml version="1.0" encoding="utf-8"?><rss version="2.0">';
+			} else {
+                $xml='<?xml version="1.0" encoding="utf-8"?><www>';
 			}
 			// This is the recursive function used
 			$xml.=$this->toXMLnode($apiResult);
@@ -1394,7 +1394,7 @@ final class WWW_API {
 		// the internal variable that stores the results of all API calls that have already been 
 		// sent to API.
 		final public function clearBuffer(){
-			$this->buffer=array();
+			$this->commandBuffer=array();
 			return true;
 		}
 		
@@ -1428,6 +1428,7 @@ final class WWW_API {
 		// * keyUrl - Key or address where cache should be stored
 		// * value - Value to be stored
 		// * custom - Whether the stored cache is called within MVC classes
+        // * tags - Tags that are attached to cache
 		final public function setCache($keyAddress,$value,$custom=false,$tags=false){
 			// User cache does not have an address
 			if($custom){
@@ -1436,10 +1437,10 @@ final class WWW_API {
 				// If tag is attached to cache
 				if($tags){
 					if(!is_array($tags)){
-						$cacheTags=explode(',',$tags);
+                        $tags=explode(',',$tags);
 					}
-					foreach($cacheTags as $tag){
-						if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$keyAddress."\n",FILE_APPEND)){
+					foreach($tags as $t){
+						if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($t).'.tmp',$keyAddress."\n",FILE_APPEND)){
 							trigger_error('Cannot store cache tag at '.$keyAddress,E_USER_ERROR);
 						}
 					}

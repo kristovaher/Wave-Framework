@@ -20,7 +20,7 @@
 			
 				<p>Wave Framework comes with an extensive set of tools for securing your API. Wave Framework has one public API profile as well as configuration options for private API profiles with secret keys, session tokens, timestamp and input hash validations. It also supports encryption of data that is sent as well as received as a response.</p>
 				
-				<hp>Wave Framework API can be used either over HTTP, from within Wave Framework Controllers and MVC Objects, or directly in PHP. This document here details the use of Wave Framework API over PHP and outside the scope of HTTP requests and MVC Objects of Wave Framework. As a result, it shows all the details of how Wave Framework API expects API calls when dealing with secure requests.</p>
+				<p>Wave Framework API can be used either over HTTP, from within Wave Framework Controllers and MVC Objects, or directly in PHP. This document here details the use of Wave Framework API over PHP and outside the scope of HTTP requests and MVC Objects of Wave Framework. As a result, it shows all the details of how Wave Framework API expects API calls when dealing with secure requests.</p>
 				
 				<p>When it comes to API validation, these are the most common methods how a developer might wish to build their API profiles and authentications:</p>
 				
@@ -218,7 +218,7 @@
 					
 					<p>There are two functions that were given above, in section 'Useful PHP Functions', that can be used for generating this validation hash that Wave Framework accepts. The basic idea of Wave Framework input validation is that the entire input array will be recursively sorted based on key values and then serialized with http_build_query() function. Secret key (when creating a session token) is appended to this serialized array and the whole array is then hashed with SHA-1.</p>
 					
-					</p>Here is the previous example expanded to include the 'www-hash', using our API profile secret key:</p>
+					<p>Here is the previous example expanded to include the 'www-hash', using our API profile secret key:</p>
 				
 <pre>
 	<code>

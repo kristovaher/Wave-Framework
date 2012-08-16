@@ -30,7 +30,7 @@
 				
 				<ul>
 					<li>The most basic sessions and cookie based system - that works similarly to how a web browser works. This means that authentication is done entirely through API and without using Wave Framework API profiles. In this case, the API will use the same authentication method that a user would use when logging into the system.</li>
-					<li>Second method is that it supports a very common authentication that is similar to RESTful API's, where you first create a session token with an API profile name and a secret API key, get a token and then make requests with that token. Thse API profiles can be restricted to making only certain API requests.</li>
+					<li>Second method is that it supports a very common authentication that is similar to RESTful API's, where you first create a session token with an API profile name and a secret API key, get a token and then make requests with that token. These API profiles can be restricted to making only certain API requests.</li>
 					<li>Thirdly it supports an API validation that works similarly to many payment systems and banks, where the entire input data is hashed with a secret key to create a token and then that token is used to hash the input and make requests. In this system the secret key is never sent over HTTP when API connection is initialized and only the session token is returned from the server one time over HTTP - subsequent connections use that token to hash the input.</li>
 				</ul>
 				
@@ -64,11 +64,12 @@
 				
 <pre>
 	<code>
-	var WWW=new WWW_Wrapper('http://www.waher.net/wdev/json.api');
+	// This creates local API connection on the same server the framework itself is set up
+	var WWW=new WWW_Wrapper('json.api');
 	</code>
 </pre>
 
-				<p>Note that you can face cross-domain AJAX issues if you define an API URL on a different server than where the web system is running. You can use PHP API Wrapper to easily make API requests to a different server, if you cannot get cross-domain requests working.</p>
+				<p>Note that you can face cross-domain AJAX issues if you define a full API URL that is set up on a different server than where the web system is running. As an alternative you can use PHP API Wrapper to easily make API requests to a different server if you cannot get cross-domain requests working.</p>
 				
 				<p>JavaScript API wrapper is functionally similar to PHP wrapper, but it does not support data encryption and decryption (this should be handled by PHP due to security). It also handles file uploads a little differently compared to PHP.</p>
 				
@@ -81,7 +82,7 @@
 				<ul>
 					<li><b>www-api</b> - API Address, you can send this if you need to change the address of the API that was originally defined. If you wish to return unserialized data from API, then you need to define the API filename in the address as 'json.api'.</li>
 					<li><b>www-hash-validation</b> - This setting means that API hash validation is used to validate API calls. This depends on the Wave Framework API Profile configuration. Hash validation is turned on by default in API Wrapper, since it is the most secure method for making API requests. To use another validation method that is less secure, this validation has to be turned off on the server that runs the API.</li>
-					<li><b>www-asynchronous</b> - This sets whether the request will be made asyncrhonously or not. By default the requests are not made asynchronously to enable better handling of events.</li>
+					<li><b>www-asynchronous</b> - This sets whether the request will be made asynchronously or not. By default the requests are not made asynchronously to enable better handling of events.</li>
 					<li><b>www-success-callback</b> - This is a method name that will get the result from API if the API call is considered a success by the API Wrapper.</li>
 					<li><b>www-failure-callback</b> - This is a method name that will get the result from API if the API call is considered a failure by the API Wrapper.</li>
 					<li><b>www-error-callback</b> - This is a method name that will get the result from API if the API call encountered an error when API Wrapper made the request.</li>
@@ -193,7 +194,7 @@
 					
 				<h3>var apiState</h3>
 				
-					<p>This holds information about current API state, such as profile name, secret key and various API-related flags for callbacks, asyncrhonous status and more. This variable is passed around per each API call.</p>
+					<p>This holds information about current API state, such as profile name, secret key and various API-related flags for callbacks, asynchronous status and more. This variable is passed around per each API call.</p>
 					
 				<h3>var errorMessage=false</h3>
 				
@@ -310,10 +311,6 @@
 				<h3>var ksort=function(object)</h3>
 				
 					<p>This is a JavaScript method that works similarly to PHP's ksort() function and applies to JavaScript objects. 'object' is the object to be sorted.</p>
-					
-				<h3>var base64_encode=function(data)</h3>
-				
-					<p>This method is JavaScript equivelant of PHP's base64 string encoding function. It is used for hash validations. 'data' is the string to be converted.</p>
 					
 				<h3>var sha1=function(msg)</h3>
 				

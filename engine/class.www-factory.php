@@ -881,7 +881,7 @@ class WWW_Factory {
 		// * type - Method of quoting, either 'escape', 'integer', 'latin', 'field' or 'like'
 		// * stripQuotes - Whether the resulting quotes will be stripped from the string, if they get set
 		final protected function dbQuote($value,$type='escape',$stripQuotes=false){
-			return $this->WWW_API->state->databaseConnection->dbQuote($value,$type);
+			return $this->WWW_API->state->databaseConnection->dbQuote($value,$type,$stripQuotes);
 		}
 		
 		// This is a database helper method, that simply creates an array of database result 

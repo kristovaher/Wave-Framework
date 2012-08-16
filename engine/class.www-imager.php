@@ -215,7 +215,6 @@ class WWW_Imager {
 				$left='center';
 				$quality=90;
 				$filters=array();
-				$filterSettings=array();
 				$format=false;
 				
 			// FINDING SETTINGS FROM SET PARAMETERS
@@ -891,20 +890,19 @@ class WWW_Imager {
 		
 		// Storing original type for reference
 		$requestedType=$type;
+
+        // Amount of settings/variables that are required
+        $settingsRequired=0;
 	
 		// Type is basically a shortcut to imagefilter() function
 		switch($type){
 			case 'negative':
 				// Reverses all colors of the image
 				$type=IMG_FILTER_NEGATE;
-				// Defines the amount of settings to use
-				$settingsRequired=0;
 				break;
 			case 'grayscale':
 				// Converts the image into grayscale
 				$type=IMG_FILTER_GRAYSCALE;
-				// Defines the amount of settings to use
-				$settingsRequired=0;
 				break;
 			case 'brightness':
 				// Changes the brightness of the image, first setting defines brightness level
@@ -933,32 +931,22 @@ class WWW_Imager {
 			case 'edge':
 				// Uses edge detection to highlight the edges in the image.
 				$type=IMG_FILTER_EDGEDETECT;
-				// Defines the amount of settings to use
-				$settingsRequired=0;
 				break;
 			case 'emboss':
 				// Embosses the image
 				$type=IMG_FILTER_EMBOSS;
-				// Defines the amount of settings to use
-				$settingsRequired=0;
 				break;
 			case 'blur':
 				// Blurs the image using the Gaussian method
 				$type=IMG_FILTER_GAUSSIAN_BLUR;
-				// Defines the amount of settings to use
-				$settingsRequired=0;
 				break;
 			case 'soften':
 				// Softens the image
 				$type=IMG_FILTER_SELECTIVE_BLUR;
-				// Defines the amount of settings to use
-				$settingsRequired=0;
 				break;
 			case 'sketch':
 				// Uses mean removal to achieve a sketch effect
 				$type=IMG_FILTER_MEAN_REMOVAL;
-				// Defines the amount of settings to use
-				$settingsRequired=0;
 				break;
 			case 'smooth':
 				// Makes the image smoother, first setting defines the level of smoothness

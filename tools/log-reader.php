@@ -170,13 +170,15 @@ if(isset($_GET['internal'])){
 						if(is_array($l)){
 							$accepted=true;
 							// Breaking out of the loop if the assigned key value is not the one that is required
-							foreach($types as $key=>$t){
-								if($key!='all' && $t!==true){
-									if(!isset($l[str_replace('['.$t.']','',$key)]) || $l[str_replace('['.$t.']','',$key)]!=$t){
-										$accepted=false;
-									}
-								}
-							}
+                            if(isset($types)){
+                                foreach($types as $key=>$t){
+                                    if($key!='all' && $t!==true){
+                                        if(!isset($l[str_replace('['.$t.']','',$key)]) || $l[str_replace('['.$t.']','',$key)]!=$t){
+                                            $accepted=false;
+                                        }
+                                    }
+                                }
+                            }
 							if($accepted){
 								echo '<div class="border block">';
 								// Printing out log data

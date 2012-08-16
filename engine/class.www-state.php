@@ -797,9 +797,9 @@ class WWW_State	{
 			// If all permissions are set, then permissions will not be separately validated and true is assumed
 			if(!in_array('*',$this->data['user-permissions'])){
 				if(!is_array($permissions)){
-					$permissions=explode(',',$permissions);
+                    $permissions=explode(',',$permissions);
 				}
-				foreach($permission as $p){
+				foreach($permissions as $p){
 					// Returning true or false depending on whether this key exists or not
 					if(!in_array($p,$this->data['user-permissions'])){
 						return false;

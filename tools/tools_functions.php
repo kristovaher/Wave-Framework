@@ -254,10 +254,7 @@ function getTrueIP($trustedProxies=false){
 	if(!$trustedProxies){
 		$trustedProxies=array('*');
 	}
-	
-	// Default value is empty
-	$ip='';
-	
+
 	// IP may be forwarded (such as when website is used through a proxy), this can check for such an occasion
 	if(isset($_SERVER['HTTP_CLIENT_IP']) && (in_array('*',$trustedProxies) || in_array($_SERVER['REMOTE_ADDR'],$trustedProxies))){
 		$tmp=explode(',',$_SERVER['HTTP_CLIENT_IP']);

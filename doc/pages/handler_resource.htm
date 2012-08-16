@@ -30,7 +30,7 @@
 				
 				<p>Cache headers are also returned by Resource Handler based on their default duration in configuration file (default would be one year). It is possible to request a file without using cache by providing 'nocache' flag in the file, in which case Resource Handler always generates the file again.</p>
 				
-				<p>It checks if the file has an override in /overrides/resouces/ folder, if it has then that file is returned instead. Handler also returns a 304 Not Modified header if it detects that the user agent has the latest version.</p>
+				<p>It checks if the file has an override in /overrides/resources/ folder, if it has then that file is returned instead. Handler also returns a 304 Not Modified header if it detects that the user agent has the latest version.</p>
 				
 				<p>If 'minify' flag is defined in the file request URL, then resource is also minified with Minifier class.</p>
 				

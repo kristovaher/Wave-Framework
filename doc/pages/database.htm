@@ -33,7 +33,7 @@
 		require('/engine/class.www-database.php');
 		// This is a common database connection
 		$db=new WWW_Database('mysql','localhost','my_database_name','my_username','my_password',true,true);
-		// This also connects to database, but supresses database errors entirely
+		// This also connects to database, but suppresses database errors entirely
 		$db=new WWW_Database('mysql','localhost','my_database_name','my_username','my_password',false);
 		// This connects to database with a persistent connection
 		// This means that same database connection can be 'shared' across requests and is not recommended in most cases
@@ -112,7 +112,7 @@
 	$var=$db-&gt;dbQuote($var,'integer');
 	// This converts the variable to a float through typecasting
 	$var=$db-&gt;dbQuote($var,'float');
-	// This converts the variable to an acceprable numeric value that also can include spaces, plus, minus and brackets characters
+	// This converts the variable to an acceptable numeric value that also can include spaces, plus, minus and brackets characters
 	$var=$db-&gt;dbQuote($var,'numeric');
 	// This removes all non-latin and non-numeric characters from the variable
 	$var=$db-&gt;dbQuote($var,'latin');
@@ -206,7 +206,7 @@
 			
 				<h3>public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=true,$persistent=false)</h3>
 				
-					<p>This constructor method returns new Database object as well as includes options to quickly assign database credentials in the same request. $type can be 'mysql', 'sqlite', 'postgresql', 'oracle' or 'mssql'. $host is either 'localhost' or address of the database host on web, or the location of SQLite file. $database is the database name and $username and $password are access credentials. $showErrors is a flag that triggers PHP error, in case database query fails. $persistent is a flag that tells system to use existing database connection, if one is available (this is not recommended in most cases).</h3>
+					<p>This constructor method returns new Database object as well as includes options to quickly assign database credentials in the same request. $type can be 'mysql', 'sqlite', 'postgresql', 'oracle' or 'mssql'. $host is either 'localhost' or address of the database host on web, or the location of SQLite file. $database is the database name and $username and $password are access credentials. $showErrors is a flag that triggers PHP error, in case database query fails. $persistent is a flag that tells system to use existing database connection, if one is available (this is not recommended in most cases).</p>
 					
 				<h3>public function __destruct()</h3>
 				
@@ -218,7 +218,7 @@
 					
 				<h3>public function dbDisconnect($resetQueryCounter=false)</h3>
 				
-					<p>This dmethod isconnects current database connection and resets query counter, if $resetQueryCounter is set to true. Returns false if no connection was present.</p>
+					<p>This method disconnects current database connection and resets the query counter, if $resetQueryCounter is set to true. Returns false if no connection was present.</p>
 					
 				<h3>public function dbMultiple($queryString,$variables=array())</h3>
 				
@@ -238,7 +238,7 @@
 					
 				<h3>public function dbDebug($query,$variables=array())</h3>
 				
-					<p>This method attempts to simulate the query that PDO builds when it makes a request to database. $query should be the query string and $variables should be the array of variables, like the ones sent to dbSingle(), dbMultiple() and dbCommand() requests. It returns a prepared query string.</p3>
+					<p>This method attempts to simulate the query that PDO builds when it makes a request to database. $query should be the query string and $variables should be the array of variables, like the ones sent to dbSingle(), dbMultiple() and dbCommand() requests. It returns a prepared query string.</p>
 					
 				<h3>public function dbLastId()</h3>
 				

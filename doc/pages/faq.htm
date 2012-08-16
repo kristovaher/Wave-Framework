@@ -11,6 +11,26 @@
 	<body>
 	
 		<h1>Frequently Asked Questions</h1>
+			
+			<h3>Why is Wave Framework called a 'micro-framework'? Do I have to do more work?</h3>
+			
+				<p>The ideaology behind Wave Framework was to keep PHP development still plain and simple. The developer should not have to learn about a large number of libraries and architecture design methods before they can implement their project on the framework. Wave Framework is a helper for the developer as the developer can still write their native and comfortable PHP code as much as they want without having to change the way they write code too much. Wave Framework has only a few very simple requirements and recommendations for the developer in terms of architecture and Wave Framework already does most of the things for the developer - from caching to compressions to dynamic loading of objects - by default.</p>
+				
+				<p>Wave Framework cannot be really compared against large scale frameworks that require a lot of configuration and planning and implement a deep filesystem logic. Wave Framework is intended primarily for projects that need to get up and running as fast as possible without compromises in the ability and potential functionality to do so. Wave Framework is used by a number of startups because of this capability.</p>
+				
+			<h3>Why is Wave Framework 'API-centric'? What does that mean?</h3>
+			
+				<p>Web development has been slow to catch up with desktop programming over the years. Majority of web applications today get the whole MVC (Model-View-Controller pattern) wrong for the following reasons: views are tightly integrated and controllers often play a too multi-functional role in the entire system and are too tightly coupled with views. And a lot of web service API's (which allow you to connect different software systems with one another) within the last ten years or so have been developed as an additional plugin or an extension, rather than core part of the main functionality.</p>
+
+				<p>Wave Framework takes a different approach and keeps API in the center of everything. This is because every web service (even a website) that is being developed can also be developed as an API first and this helps to iron out most of the MVC-from-desktop-to-web kinks. This means that the software layer can be developed independently from the User Interface and then joined at any point during the development seamlessly. You can work on just your models and controllers and develop your entire software to work through API and then implement the UI by creating hooks in the views to that API.</p>
+
+				<p>This means that your entire software should work without any User Interface at all and after your models and controllers have been built, then your entire web service should be 100% functional. For example: if you build a Twitter client, then you should have logins, tweet submits, tweet reading and so on. Your visual and UI design team could work independently at the same time, coming up with the user interface while you're working on the functionality. At some point these two parts can be joined and a UI can be implemented across the API as you start implementing the Views.</p>
+
+				<p>What this API-centric development does is that it makes you entirely independent from your user interface. It's not just loose: it really is 100% independent. You can do everything through the API and this means that you can implement any kind of user interface and environment: be it web, desktop software or a mobile client.</p>
+
+				<p>This also makes testing - the bane of web developers due to multi-layered nature of the web - far easier: you can test the API separately from the UI very easily.</p>
+
+				<p>Desktop programming has largely worked this way for many years, but web has not yet caught up. Today - when the ability to quickly create mobile views of web services and/or mobile applications is business critical - this has become more important than ever and Wave Framework keeps that in mind.</p>
 		
 			<h3>I uploaded the files, but when testing the page on my server, it throws an error or it does not display the Wave logo and the 'hello' message, what can I do?</h3>
 			
@@ -34,5 +54,27 @@
 				<p>Yes. While Wave Framework comes with fixed filesystem based Sitemap and Translations - as well as configuration - nothing stops you from building a system that allows you to generate these files. You could build a Content Management System where you can essentially build your website tree of URL's and then just generate a sitemap.ini file that Wave Framework understands.</p>
 				
 				<p>Same applies to translations and configuration. You can essentially generate these files yourself and do with them whatever you want and Wave Framework will be able to function without problems.</p>
+				
+			<h3>Why isn't Wave Framework API entirely RESTful or why does it not support SOAP?</h3>
+			
+				<p>Wave Framework has an API that can be used across HTTP very similarly to the principles of REST. But there are a couple of things that RESTful API would require that were considered not to be beneficial to the developer and seemed to be too restrictive. While you can build an API with Wave Framework that is very similar to how REST demands it, there are still some crucial differences:</p>
+				
+				<h4>RESTful API demands that the action what the client requests is set in HTTP method, like GET, POST, PUT and DELETE.</h4>
+				
+					<p>Wave Framework does not implement this requirement for two reasons. First of all, if your API requires that a specific HTTP header is set for it to work, then you make it more difficult to implement the API in clients or software where it might be too difficult to make such a custom HTTP request. For example, a developer that builds a PHP system on a server that cannot use cURL but can use file_get_contents() over HTTP, would suddenly be unable to connect to your API. As a result, the API calls in Wave Framework are simply defined by a prefixed keyword of 'www-command' and the value of this can be for any model and any action, like 'users-get' or 'users-delete' while making the request over any HTTP method.</p>
+					
+					<p>Wave Framework makes the input data independent from the request method entirely. It merges all the data down into a single array much like $_REQUEST variable in PHP. The idea of this is that you should never make an API request that defines two variables with the same keyword, this would be a bad design. Since Wave Framework makes the method of sending the variables completely open, you can make POST requests, GET requests and more without having to worry about the API returning different type of result.</p>
+					
+					<p>Wave Framework does automatically implement the HTTP method header though for clients that still wish to use it, but this is not the recommended default behavior and you can read more about it in API documentation pages.</p>
+					
+				<h4>RESTful API demands that the response content type preference is set in the request headers</h4>
+				
+					<p>This means that if you want a JSON response, then it has to be defined in the headers. If you want an XML response, then you have to define it in headers again. Similarly to the previous point, Wave Framework API use is not strictly tied to the HTTP headers, you can send the response data type preference as part of the variables sent to API directly. And there are different API handlers that can return different type of response by default.</h4>
+				
+				<h4>RESTful API implements the URL as the method of finding what object and ID you are making a request for.</h4>
+				
+					<p>Wave Framework API works through a single file that is assigned for the API and the URL's are intended for web pages themselves. Since Wave Framework can include API calls that cannot be easily mapped directly to objects or various features, it made little to no sense to restrict the developer and make them design a system that fits this URL approach.</p>
+					
+					<p>In Wave Framework, you define your model and controller in the value of 'www-command' and that's it.</p>
 	</body>
 </html>

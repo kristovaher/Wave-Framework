@@ -2,7 +2,7 @@
 WAVE FRAMEWORK
 --------------
 
-API-focused web and infosystems PHP micro-framework
+API-centric Open Source PHP Micro-framework
 
 ABOUT THIS README
 -----------------
@@ -27,30 +27,33 @@ Twitter - http://www.twitter.com/WWWFramework
 FEATURES
 --------
 
- * Modern API-focused framework for PHP versions 5.3.3 and above
- * Secure API requests with input and token and key-based authentication
+ * Modern API-centric framework for PHP versions 5.3 and above
+ * Secure API requests with hash validation, token and key-based authentication
  * Dynamically loaded Hierarchical MVC objects through Factory pattern
  * API returns XML, CSV, JSON, HTML, native PHP and other data formats
  * Compressed data output with Deflate and Gzip
  * Input and output data is fully UTF-8
  * PDO-specific database controller for general-use database connections
- * Smart Index gateway that handles all HTTP requests
- * Full taggable cache control for all types of dynamic and static requests
- * View and URL controllers that support multiple languages and clean URL's
+ * Index gateway and Handlers for all types of HTTP requests
+ * Caching system with tagging support for all types of dynamic and static requests
+ * View and URL Controllers that support multiple languages and clean URL's
+ * Users and permissions control
  * jQuery JavaScript framework supported
- * On-demand dynamic image resizer and basic image editor
- * On-demand resource compressing, unifying and minifying
+ * On-demand dynamic image resizer and editor
+ * On-demand resource compression, unifying and minifying
  * Automatic sitemap.xml and robots.txt generation
  * Automatically generated API documentation
  * API wrapper classes that make browser and server to server communication easy
- * Optional 256bit Rijndael CBC data communication encryption
+ * 256bit Rijndael encrypted data transmission
+ * API Observers for creating event-specific listeners
  * Installation-specific MVC class and resource overrides
  * Request limiter that can block HTTP requests under certain conditions
  * Request logger that can be used for detailed performance grading of HTTP requests
- * Backup, update and filesystem maintenance tools
+ * Debugging, backup, update and filesystem maintenance tools
  * Compatibility script that tests support for server setup
  * Supports Apache and Nginx servers in Linux and Windows environments
  * Supports APC extension
+ * 100+ pages of detailed documentation and tutorials
  * Licensed under GNU Lesser General Public License Version 3
  
 INSTALLATION

@@ -22,8 +22,8 @@ class WWW_view_movie extends WWW_Factory {
 			<div id="body">
 				<p><?=$translations['movie-info']?></p>
 				<?php
-				if(isset($view['unsolved-url'][0])){
-					$movie=$this->api('movies-get',array('id'=>$view['unsolved-url'][0]));
+				if(isset($view['dynamic-url'][0])){
+					$movie=$this->api('movies-get',array('id'=>$view['dynamic-url'][0]));
 					if(!isset($movie['error'])){
 						?>
 						<p><?=$translations['title']?>: <?=$movie['title']?></p>

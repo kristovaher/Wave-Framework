@@ -180,7 +180,7 @@
 
 			<p><b>/resources/{language-code}.sitemap.ini</b></p>
 
-			<p>Sitemaps are used by WWW_controller_url to solve what view should be loaded based on user agents request. WWW_controller_url detects both languages and URL and unsolved URL nodes from the request and matches them against this file, based on language code that it detects in the request. If it finds a match here then it returns that view. Note that it can also find a partial match, such as /example/test/test2/ will return the same view as /example/test/ and keep the /test2/ node as unsolved URL node, if the setting for URL has it enabled. This can be useful if you store something else in that part of URL, such as product code.</p>
+			<p>Sitemaps are used by WWW_controller_url to solve what view should be loaded based on user agents request. WWW_controller_url detects both languages and URL and unsolved URL nodes from the request and matches them against this file, based on language code that it detects in the request. If it finds a match here then it returns that view. Note that it can also include dynamic URL's for partial matching.</p>
 
 			<p><b>/resources/{language-code}.translations.ini</b></p>
 

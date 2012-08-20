@@ -114,8 +114,8 @@
 	$var=$db-&gt;dbQuote($var,'float');
 	// This converts the variable to an acceptable numeric value that also can include spaces, plus, minus and brackets characters
 	$var=$db-&gt;dbQuote($var,'numeric');
-	// This removes all non-latin and non-numeric characters from the variable
-	$var=$db-&gt;dbQuote($var,'latin');
+	// This removes all non-letter characters from the variable
+	$var=$db-&gt;dbQuote($var,'alphanumeric');
 	// This removes all characters from the variable that are not suitable for a database table or column name
 	$var=$db-&gt;dbQuote($var,'field');
 	</code>
@@ -260,7 +260,7 @@
 				
 					<p>This is a database helper function that can be used to escape specific variables if that variable is not sent with as part of variables array and is written in the query string instead. $value is the variable value that will be escaped or modified. $type is the type of escaping and modifying that takes place.</p>
 					
-					<p>This can be 'escape' (which just applies regular PDO quote to the variable), 'integer' which converts the value to an integer through typecasting, 'float' which converts the value to a float through typecasting, 'numeric' which converts the value to a numeric value that also allows spaces and plus and minus symbols and brackets (such as for phone numbers), 'latin' which converts the value to just have latin characters and numbers, 'field' which converts the value to be a database-appropriate table field and 'like' which escapes the value to be suitable when used inside a LIKE match.</p>
+					<p>This can be 'escape' (which just applies regular PDO quote to the variable), 'integer' which converts the value to an integer through typecasting, 'float' which converts the value to a float through typecasting, 'numeric' which converts the value to a numeric value that also allows spaces and plus and minus symbols and brackets (such as for phone numbers), 'alphanumeric' which converts the value to just have letters, 'field' which converts the value to be a database-appropriate table field and 'like' which escapes the value to be suitable when used inside a LIKE match.</p>
 					
 					<p>If $stripQuotes is set, then the value will also strip any quotes, if they happen to be added to the value.</p>
 					

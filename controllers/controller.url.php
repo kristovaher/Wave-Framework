@@ -152,7 +152,10 @@ class WWW_controller_url extends WWW_Factory {
 		$this->setState('language',$language);
 		
 		// All nodes of URL's that were not found as modules are stored here
-		$unsolvedUrl=array();
+		$dynamicUrl=array();
+		
+		// Number of URL nodes
+		$urlNodeCount=count($urlNodes);
 		
 		// URL Map is stored in this array
 		$siteMap=$this->getSitemapRaw($language);
@@ -161,35 +164,118 @@ class WWW_controller_url extends WWW_Factory {
 			return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
 		}
 		
+		// Exploding sitemap array variables to nodes to match against
+		foreach($siteMap as $key=>$settings){
+			$siteMap[$key]['nodes']=explode('/',$key);
+		}
+		
 		// Array that stores information from sitemap file
 		$siteMapInfo=$siteMap[$viewHome];
 		
 		// If home is not expected to be returned
 		if(!$returnHome){
 		
+			$matchKey=0;
 			// System loops through URL nodes and attempts to find a match in URL Map
-			while(!empty($urlNodes)){
-				// This string is used to find a match
-				$search=implode('/',$urlNodes);
-				// String is matched against URL Map, if match is found the value from URL Map is assigned as view
-				if(isset($siteMap[$search])){
-					// Setting current page information
-					$siteMapInfo=$siteMap[$search];
-					// Match was found from URL Map, so view is defined
-					$view=$siteMap[$search]['view'];
-					// Page has been found
-					break;
-				} else {
-					// Last element from the array is removed and inserted to unsolved nodes array
-					$bit=array_pop($urlNodes);
-					if($bit!=''){
-						$unsolvedUrl[]=$bit;
+			while(!empty($urlNodes) && !empty($siteMap)){
+				foreach($siteMap as $key=>$settings){
+					// URL length needs to match the URL declaration in Sitemap
+					if($matchKey==0 && $urlNodeCount!=count($settings['nodes'])){
+						unset($siteMap[$key]);
+					} else {
+						// If the node is not dynamic
+						if($settings['nodes'][$matchKey][0]!=':'){
+							if($urlNodes[$matchKey]!=$settings['nodes'][$matchKey]){
+								unset($siteMap[$key]);
+							}
+						} else {
+							// Matching the dynamic URL's
+							$matched=explode(':',$settings['nodes'][$matchKey],3);
+							switch($matched[1]){
+								case 'numeric':
+									if($matched[2]==''){
+										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey])){
+											unset($siteMap[$key]);
+										} else {
+											$dynamicUrl[]=$urlNodes[$matchKey];
+										}
+									} else {
+										// Finding the match parameters
+										$parameters=explode('-',$matched[2]);
+										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey]) || intval($urlNodes[$matchKey])<$parameters[0] || intval($urlNodes[$matchKey])>$parameters[1]){
+											unset($siteMap[$key]);
+										} else {
+											$dynamicUrl[]=$urlNodes[$matchKey];
+										}
+									}
+									break;
+								case 'alpha':
+									if($matched[2]==''){
+										if(!preg_match('/^[a-z\-\_]*$/i',$urlNodes[$matchKey])){
+											unset($siteMap[$key]);
+										} else {
+											$dynamicUrl[]=$urlNodes[$matchKey];
+										}
+									} else {
+										// Finding the match parameters
+										$parameters=explode('-',$matched[2]);
+										if(!preg_match('/^[a-z\-\_]*$/i',$urlNodes[$matchKey]) || strlen($urlNodes[$matchKey])<$parameters[0] || strlen($urlNodes[$matchKey])>$parameters[1]){
+											unset($siteMap[$key]);
+										} else {
+											$dynamicUrl[]=$urlNodes[$matchKey];
+										}
+									}
+									break;
+								case 'alphanumeric':
+									if($matched[2]==''){
+										if(!preg_match('/^[a-z0-9\-\_]*$/i',$urlNodes[$matchKey])){
+											unset($siteMap[$key]);
+										} else {
+											$dynamicUrl[]=$urlNodes[$matchKey];
+										}
+									} else {
+										// Finding the match parameters
+										$parameters=explode('-',$matched[2]);
+										if(!preg_match('/^[a-z0-9\-\_]*$/i',$urlNodes[$matchKey]) || strlen($urlNodes[$matchKey])<$parameters[0] || strlen($urlNodes[$matchKey])>$parameters[1]){
+											unset($siteMap[$key]);
+										} else {
+											$dynamicUrl[]=$urlNodes[$matchKey];
+										}
+									}
+									break;
+								case 'fixed':
+									if($matched[2]!=''){
+										// Finding the match parameters
+										$matches=explode(',',$matched[2]);
+										if(!in_array($urlNodes[$matchKey],$matches)){
+											unset($siteMap[$key]);
+										} else {
+											$dynamicUrl[]=$urlNodes[$matchKey];
+										}
+									} else {
+										unset($siteMap[$key]);
+									}
+									break;
+							}
+						}
 					}
 				}
+				unset($urlNodes[$matchKey]);
+				$matchKey++;
 			}
 			
+			// If all URL nodes have been matched and there's still a URL in the Sitemap array
+			if(empty($urlNodes) && !empty($siteMap)){
+				$siteMapInfo=array_pop($siteMap);
+				$view=$siteMapInfo['view'];
+			} else {
+				// Formatting and returning the expected result array
+				return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
+			}
+		
+			
 			// If the found view is home view, then we simply redirect to home view without the long url
-			if(empty($unsolvedUrl) && $view==$viewHome){
+			if(empty($dynamicUrl) && $view==$viewHome){
 			
 				// If first language is used and it is not needed to use language URL in first language
 				if($enforceLanguageUrl==false && $language==$languages[0]){
@@ -223,15 +309,9 @@ class WWW_controller_url extends WWW_Factory {
 		$siteMapInfo['web-root']=$webRoot;
 		
 		// Array of unsolved URL nodes is reversed if it is not empty
-		if(!empty($unsolvedUrl)){
+		if(!empty($dynamicUrl)){
 			// Unsolved URL's are reversed so that they can be used in the order they were defined in URL
-			$unsolvedUrl=array_reverse($unsolvedUrl);
-			// 404 is returned if unsolved URL's were not permitted
-			if(!isset($siteMapInfo['unsolved-url']) || $siteMapInfo['unsolved-url']==false){
-				// Populating sitemap info with additional details
-				$siteMapInfo['unsolved-url']=$unsolvedUrl;
-				return $this->returnViewData(array('view'=>$view404,'cache-timeout'=>0,'header'=>'HTTP/1.1 404 Not Found')+$siteMapInfo);
-			}
+			$dynamicUrl=array_reverse($dynamicUrl);
 		} else {
 			// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
 			if(isset($siteMapInfo['temporary-redirect']) && $siteMapInfo['temporary-redirect']!=''){
@@ -252,7 +332,7 @@ class WWW_controller_url extends WWW_Factory {
 		}
 		
 		// Populating sitemap info with additional details
-		$siteMapInfo['unsolved-url']=$unsolvedUrl;
+		$siteMapInfo['dynamic-url']=$dynamicUrl;
 			
 		// Formatting and returning the expected result array
 		return $this->returnViewData($siteMapInfo);
@@ -275,8 +355,8 @@ class WWW_controller_url extends WWW_Factory {
 		// DEFAULTS FOR VIEW DATA
 			
 			// If unsolved URL is assigned as part of cache tag
-			if(isset($data['cache-tag'],$data['cache-tag-unsolved']) && $data['cache-tag-unsolved']==1 && !empty($data['unsolved-url'])){
-				$data['cache-tag'].='-'.implode('-',$data['unsolved-url']);
+			if(isset($data['cache-tag'],$data['cache-tag-unsolved']) && $data['cache-tag-unsolved']==1 && !empty($data['dynamic-url'])){
+				$data['cache-tag'].='-'.implode('-',$data['dynamic-url']);
 			}
 			
 			// If project title is not set by Sitemap, system defines the State project title as the value

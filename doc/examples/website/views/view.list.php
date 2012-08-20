@@ -30,7 +30,7 @@ class WWW_view_list extends WWW_Factory {
 						echo '</tr>';
 						foreach($movies as $m){
 							echo '<tr>';
-								echo '<td><a href="'.$sitemap['movie']['url'].$m['id'].'/">'.$m['title'].'</a></td>';
+								echo '<td><a href="'.str_replace(':0:',$m['id'],$sitemap['movie']['url']).'">'.$m['title'].'</a></td>';
 								echo '<td>'.$m['year'].'</td>';
 							echo '</tr>';
 						}

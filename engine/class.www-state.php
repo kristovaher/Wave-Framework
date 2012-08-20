@@ -576,7 +576,21 @@ class WWW_State	{
 						}
 						// Home views do not need a URL node
 						if($node['view']!=$this->data['home-view']){
-							$url=$key.'/';
+							if(strpos($key,':')!==false){
+								$url='';
+								$count=0;
+								$bits=explode('/',$key);
+								foreach($bits as $b){
+									if($b[0]!=':'){
+										$url.=$b.'/';
+									} else {
+										$url.=':'.$count.':/';
+										$count++;
+									}
+								}
+							} else {
+								$url=$key.'/';
+							}
 						} else {
 							$url='';
 						}

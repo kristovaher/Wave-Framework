@@ -165,18 +165,14 @@
 					
 <pre>
 	<code>
-	[movie]
+	[movie/:numeric:]
 	view="movie"
 	meta-title="Movie information"
-	unsolved-url=1
 	</code>
 </pre>
-
-					<p>What this 'unsolved-url' setting does is that it tells Wave Framework that if it finds that the client requests a URL that only partially matches this URL in the sitemap, then it will not show a 404 Not Found page that it would usually and instead still allows to load this view.</p>
+					<p>This ':numeric:' URL keyword means that the second URL node must be numeric in order for this URL to be matched. In case it is not numeric, then a 404 page is shown to the user agent. In other words, if you would go on an URL like 'http://www.example.com/movie/23/' then Wave Framework would throw a 404 Not Found page by default. Other dynamic URL options are also available, such as :alpha: and :alphanumeric: and you can read more about them in URL Controller documentation.</p>
 					
-					<p>In other words, if you would go on an URL like 'http://www.example.com/movie/23/' then Wave Framework would throw a 404 Not Found page by default. But because 'unsolved-url' is set to true in Sitemap, then Wave Framework will still load the nearest matching URL and still load the 'movie' View.</p>
-					
-					<p>This allows us to then use that unsolved URL as a value when generating the view, such as for loading a movie with the ID of 23. This will be shown later on in the tutorial.</p>
+					<p>This allows us to then use that dynamic URL as a value when generating the view, such as for loading a movie with the ID of 23. This will be shown later on in the tutorial.</p>
 				
 				<h3>Stylesheets and JavaScript</h3>
 				
@@ -397,8 +393,7 @@
         (
             [view] => movie
             [meta-title] => Movie information
-            [unsolved-url] => 1
-            [url] => /w/en/movie/
+            [url] => /w/en/movie/:0:/
         )
 	</code>
 </pre>
@@ -407,9 +402,7 @@
 					
 					<p>In case multiple URL's use the same view, then you can refer to them based on the 'subview' value you set in Sitemap INI file. This is why the Sitemap array returns 'page/about', since there was a Sitemap URL for 'about' that used the view of 'page' and had subview of 'about' set for it.</p>
 					
-					<p>Sitemap array also includes things like Sitemap settings that were stored in Sitemap file. For example, the 'movie' Sitemap node includes a variable of 'unsolved-url' that says that this page allowed unsolved URL nodes.</p>
-					
-					<p>Sitemap array also includes new generated values, such as the 'url' variable, which are links to the page from the Sitemap. It also includes the the meta-title which you can (but don't have to) use as the title for the link.</p>
+					<p>Sitemap array also includes things like Sitemap settings that were stored in Sitemap file as well as new generated values, such as the 'url' variable, which are links to the page from the Sitemap. It also includes the the meta-title which you can (but don't have to) use as the title for the link.</p>
 					
 					<p>We will simply use the variables from the array returned by getSitemap() method call and build a header menu from out Sitemap like this:</p>
 						
@@ -615,7 +608,7 @@
 					
 					<p>After you have added the previous snippet then you should test your page by uploading the files now and seeing if you get a 'Found!' response on your List page or not. You should get a 'Found!' message on the page, since we added a movie through the API in the previous section.</p>
 					
-					<p>This 'Found!' response is obviously not what we actually want. We should generate a table in the page content instead. This table should also include links. Since we declared a 'movie' View for our movie information pages that also allowed for unsolved URL nodes, then we can easily implement links using the URL of our 'movie' View and appending to it the ID of the movie from our database.</p>
+					<p>This 'Found!' response is obviously not what we actually want. We should generate a table in the page content instead. This table should also include links. Since we declared a 'movie' View for our movie information pages that also allowed for dynamic URL nodes, then we can easily implement links using the URL of our 'movie' View and appending to it the ID of the movie from our database.</p>
 					
 					<p>Here is a simple example of a table that has the list of movies as well as the links to those movies pages. Use this to replace the previous 'Found!' line in the code:</p>
 						
@@ -629,7 +622,7 @@
 	echo '&lt;/tr&gt;';
 	foreach($movies as $m){
 		echo '&lt;tr&gt;';
-			echo '&lt;td&gt;&lt;a href=&quot;'.$sitemap['movie']['url'].$m['id'].'/&quot;&gt;'.$m['title'].'&lt;/a&gt;&lt;/td&gt;';
+			echo '&lt;td&gt;&lt;a href=&quot;'.str_replace(':0:',$m['id'],$sitemap['movie']['url']).'&quot;&gt;'.$m['title'].'&lt;/a&gt;&lt;/td&gt;';
 			echo '&lt;td&gt;'.$m['year'].'&lt;/td&gt;';
 		echo '&lt;/tr&gt;';
 	}
@@ -637,6 +630,8 @@
 	...
 	</code>
 </pre>
+
+					<p>The above snippet includes a string replacement on a $sitemap['movie']['url'] value. This is because dynamic values are listed in that string as ':0:' and so on, depending on their position in the string. We are replacing this value with the ID of the movie, since that is what the dynamic URL part is for.</p>
 						
 					<p>When you upload the files and run the page again then you should get a nice list of movies or that single movie. Links of these movies direct to Movie View that we have not yet made, but will make in the next section.</p>
 					
@@ -646,7 +641,7 @@
 					
 					<p>You should copy your 'view.home.php' file and rename it to 'view.movie.php' file in the '/views/' subfolder. Class name should also be renamed to 'WWW_view_movie'.</p>
 					
-					<p>Movie View is the only View that was declared in our Sitemap file with the permission to use unsolved URL nodes. This means that we will be able to use the last node in URL and accept it as the ID of the movie in our database.</p>
+					<p>Movie View is the only View that was declared in our Sitemap file with the permission to use dynamic URL nodes. This means that we will be able to use the last node in URL and accept it as the ID of the movie in our database.</p>
 					
 					<p>We will be loading data to our View similarly to how we loaded it for the list View: through an API call. This time we will be making a 'movies-get' request to the API that also requires a variable 'id'. This 'id' variable defines what movie ID we are requesting. The second variable sent to the api() method is an array of all variables that are used as an input to the API call. For example, to make a request to movie that has an ID of 1, then you would make the following request:</p>
 						
@@ -656,17 +651,17 @@
 	</code>
 </pre>
 
-					<p>We want to use the unsolved URL as the ID for our API call. We can fetch data from the same 'view' State data that we assigned earlier to $view variable for this purpose. This 'unsolved-url' key in that $view variable actually stores an array, since it is possible to have more than one unsolved URL at the same time.</p>
+					<p>We want to use the dynamic URL as the ID for our API call. We can fetch data from the same 'view' State data that we assigned earlier to $view variable for this purpose. This 'dynamic-url' key in that $view variable actually stores an array, since it is possible to have more than one dynamic URL at the same time.</p>
 					
-					<p>To make our system load the information about the specific movie we have listed, then we have to get the first key in that 'unsolved-url' array. You should replace the current Views page content with the following:</p>
+					<p>To make our system load the information about the specific movie we have listed, then we have to get the first key in that 'dynamic-url' array. You should replace the current Views page content with the following:</p>
 						
 <pre>
 	<code>
 	...
 	&lt;p&gt;&lt;?=$translations['movie-info']?&gt;&lt;/p&gt;
 	&lt;?php
-	if(isset($view['unsolved-url'][0])){
-		$movie=$this-&gt;api('movies-get',array('id'=&gt;$view['unsolved-url'][0]));
+	if(isset($view['dynamic-url'][0])){
+		$movie=$this-&gt;api('movies-get',array('id'=&gt;$view['dynamic-url'][0]));
 		if(!isset($movie['error'])){
 			?&gt;
 			&lt;p&gt;&lt;?=$translations['title']?&gt;: &lt;?=$movie['title']?&gt;&lt;/p&gt;
@@ -684,7 +679,7 @@
 	</code>
 </pre>
 
-					<p>If you visit your List page again and click on one of the movies, then you will see that the page now shows a simple table that includes information about the requested movie. And at the same time your request URL is clean, with the movie ID number following the View URL itself. It would also be a good idea to check if other unsolved URL's are defined and throw an error if they are, but this is not important for the scope of the current tutorial.</p>
+					<p>If you visit your List page again and click on one of the movies, then you will see that the page now shows a simple table that includes information about the requested movie. And at the same time your request URL is clean, with the movie ID number following the View URL itself. It would also be a good idea to check if other dynamic URL's are defined and throw an error if they are, but this is not important for the scope of the current tutorial.</p>
 					
 					<p>If you manually change the URL to have an ID that you know doesn't exist, then the page shows a translation for 'cannot-find-movie' keyword as well.</p>
 					

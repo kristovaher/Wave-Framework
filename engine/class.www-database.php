@@ -459,12 +459,12 @@ class WWW_Database {
 	// value to an integer through typecasting, 'float' which converts the value to a float 
 	// through typecasting, 'numeric' which converts the value to a numeric value that also 
 	// allows spaces and plus and minus symbols and brackets (such as for phone numbers), 
-	// 'latin' which converts the value to just have latin characters and numbers, 'field' 
+	// 'alphanumeric' which converts the value to just have letters and numbers, 'field' 
 	// which converts the value to be a database-appropriate table field and 'like' which 
 	// escapes the value to be suitable when used inside a LIKE match. If $stripQuotes is set, 
 	// then the value will also strip any quotes, if they happen to be added to the value.
 	// * value - Input value
-	// * type - Method of quoting, either 'escape', 'integer', 'latin', 'field' or 'like'
+	// * type - Method of quoting, either 'escape', 'integer', 'alpha', 'field' or 'like'
 	// * stripQuotes - Whether the resulting quotes will be stripped from the string, if they get set
 	public function dbQuote($value,$type='escape',$stripQuotes=false){
 	
@@ -486,7 +486,7 @@ class WWW_Database {
 			case 'numeric':
 				return trim(preg_replace('/[^0-9\-\+\ \(\)\.\,]/i','',$value));
 				break;
-			case 'latin':
+			case 'alphanumeric':
 				return preg_replace('/[^a-z0-9]/i','',$value);
 				break;
 			case 'field':

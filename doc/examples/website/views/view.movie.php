@@ -22,7 +22,6 @@ class WWW_view_movie extends WWW_Factory {
 			<div id="body">
 				<p><?=$translations['movie-info']?></p>
 				<?php
-				if(isset($view['dynamic-url'][0])){
 					$movie=$this->api('movies-get',array('id'=>$view['dynamic-url'][0]));
 					if(!isset($movie['error'])){
 						?>
@@ -30,11 +29,9 @@ class WWW_view_movie extends WWW_Factory {
 						<p><?=$translations['year']?>: <?=$movie['year']?></p>
 						<?php
 					} else {
+						$this->setHeader('HTTP/1.1 404 Not Found');
 						echo '<p>'.$translations['cannot-find-movie'].'</p>';
 					}
-				} else {
-					echo '<p>'.$translations['cannot-find-movie'].'</p>';
-				}
 				?>
 				<a href="<?=$sitemap['list']['url']?>"><?=$translations['back-to-list']?></a>
 			</div>

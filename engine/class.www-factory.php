@@ -908,6 +908,24 @@ class WWW_Factory {
 			return $this->WWW_API->state->databaseConnection->pdo;
 		}
 		
+	// HEADERS
+		
+		// This is a simple wrapper function for setting a header. $header is the header 
+		// string to be sent and $replace is a true-false flag about whether previous 
+		// similar header should be replaced or not.
+		// * header - Header string to add
+		// * replace - Whether the header should be replaced, if previously set
+		final public function setHeader($header,$replace=true){
+			return $this->WWW_API->state->setHeader($header,$replace);
+		}
+	
+		// This method is a wrapper function for simply removing a previously set header. 
+		// $string is the header that should be removed.
+		// * header - header to remove
+		final public function unsetHeader($header){
+			return $this->WWW_API->state->unsetHeader($header);
+		}
+		
 	// TERMINAL
 	
 		// This method is wrapper function for making terminal calls. It attempts to detect 

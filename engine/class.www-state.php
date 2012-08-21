@@ -1108,6 +1108,24 @@ class WWW_State	{
 			}
 			return true;
 		}
+		
+	// HEADERS
+	
+		// This is a simple wrapper function for setting a header. $header is the header 
+		// string to be sent and $replace is a true-false flag about whether previous 
+		// similar header should be replaced or not.
+		// * header - Header string to add
+		// * replace - Whether the header should be replaced, if previously set
+		final public function setHeader($header,$replace=true){
+			return header($header,$replace);
+		}
+	
+		// This method is a wrapper function for simply removing a previously set header. 
+		// $string is the header that should be removed.
+		// * header - header to remove
+		final public function unsetHeader($header){
+			return header_remove($header);
+		}
 	
 	// TERMINAL
 	

@@ -2,7 +2,7 @@
 WAVE FRAMEWORK
 --------------
 
-API-centric Open Source PHP Micro-framework
+Open Source API-centric PHP Micro-framework
 
 ABOUT THIS README
 -----------------

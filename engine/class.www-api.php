@@ -1584,7 +1584,7 @@ final class WWW_API {
 		// This helper method is used to sort an array (and sub-arrays) based on keys. It 
 		// essentially applies ksort() method recursively to an array.
 		// * array - Array to be sorted
-		private function ksortArray($data){
+		final private function ksortArray($data){
 			// Method is based on the current data type
 			if(is_array($data)){
 				// Sorting the current array

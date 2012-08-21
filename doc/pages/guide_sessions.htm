@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Sessions and Cookies - Wave Framework</title>
+		<title>Sessions, Cookies and Headers - Wave Framework</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width"/> 
 		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
@@ -10,13 +10,15 @@
 	</head>
 	<body>
 	
-		<h1>Using Sessions and Cookies</h1>
+		<h1>Using Sessions, Cookies and Headers</h1>
 		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
 			<h2>Introduction</h2>
 			
 				<p>Wave Framework includes a number of wrapper methods which can be used to set cookies and session variables, get data from cookies and sessions as well as unset cookies and sessions. Wave Framework also detects if session variables are unset and if nothing is stored in sessions anymore, then removing the entire session together with session cookie. Wave Framework also deals with session namespacing, which makes sure that the cookies set by Wave Framework are not easily edited by other systems that run on the same server.</p>
+				
+				<p>Wave Framework also has simple wrapper methods for setting and unsetting HTTP headers.</p>
 				
 			<h2>Cookies</h2>
 			
@@ -113,6 +115,21 @@
 </pre>
 
 				<p>It can be useful to destroy sessions when a user logs out, but if other parts of the system also use sessions, then it might destroy some sessions that were not meant to be destroyed. One way or another, the tools are there and can be used for whatever purpose deemed necessary.</p>
+				
+			<h2>Headers</h2>
+			
+				<p>Wave Framework also includes two wrapper methods for setting and unsetting headers. These are technically the exact same methods you could call with 'header()' and 'header_remove()' methods directly, but are included for possibility of adding additional functionality later on.</p>
+				
+				<p>Here are the examples of both methods:</p>
+				
+<pre>
+	<code>
+	// Adding a header
+	$this->setHeader('Location: http://www.google.com');
+	// Removing a header
+	$this->unsetHeader('Location');
+	</code>
+</pre>
 			
 	</body>
 </html>

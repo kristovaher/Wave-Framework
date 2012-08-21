@@ -141,15 +141,12 @@ class WWW_controller_url extends WWW_Factory {
 					
 				} else {
 					// Formatting and returning the expected result array
-					return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
+					return $this->returnViewData(array('view'=>$view404,'language'=>$language,'header'=>'HTTP/1.1 404 Not Found'));
 				}
 
 			}
 			
 		}
-		
-		// Notifying State of current language
-		$this->setState('language',$language);
 		
 		// All nodes of URL's that were not found as modules are stored here
 		$dynamicUrl=array();
@@ -161,7 +158,7 @@ class WWW_controller_url extends WWW_Factory {
 		$siteMap=$this->getSitemapRaw($language);
 		if(!$siteMap){
 			// Formatting and returning the expected result array
-			return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
+			return $this->returnViewData(array('view'=>$view404,'language'=>$language,'header'=>'HTTP/1.1 404 Not Found'));
 		}
 		
 		// Exploding sitemap array variables to nodes to match against
@@ -270,7 +267,7 @@ class WWW_controller_url extends WWW_Factory {
 				$view=$siteMapInfo['view'];
 			} else {
 				// Formatting and returning the expected result array
-				return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
+				return $this->returnViewData(array('view'=>$view404,'language'=>$language,'header'=>'HTTP/1.1 404 Not Found'));
 			}
 		
 			
@@ -368,9 +365,6 @@ class WWW_controller_url extends WWW_Factory {
 			if(!isset($data['robots'])){
 				$data['robots']=$this->getState('robots');
 			}
-			
-			// Notifying State of view data
-			$this->setState('view',$data);
 			
 		// HEADERS
 		

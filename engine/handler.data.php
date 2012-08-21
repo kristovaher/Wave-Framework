@@ -66,6 +66,9 @@ License: GNU Lesser General Public License Version 3
 
 	// If view data includes flags for redirection then the view itself will be ignored
 	if($view && !isset($view['www-temporary-redirect']) && !isset($view['www-permanent-redirect'])){
+			
+		// Notifying State of View data
+		$state->setState(array('view'=>$view,'language'=>$view['language']));
 		
 		// All the data sent by the user agent is stored in this variable
 		$inputData=array();

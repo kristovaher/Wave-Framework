@@ -194,7 +194,7 @@ class WWW_controller_url extends WWW_Factory {
 							switch($matched[1]){
 								case 'numeric':
 									if($matched[2]==''){
-										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey])){
+										if(!preg_match('/^[0-9]*$/i',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];
@@ -202,7 +202,7 @@ class WWW_controller_url extends WWW_Factory {
 									} else {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
-										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey]) || intval($urlNodes[$matchKey])<$parameters[0] || intval($urlNodes[$matchKey])>$parameters[1]){
+										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && intval($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && iintval($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];
@@ -219,7 +219,7 @@ class WWW_controller_url extends WWW_Factory {
 									} else {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
-										if(!preg_match('/^[a-z\-\_]*$/i',$urlNodes[$matchKey]) || strlen($urlNodes[$matchKey])<$parameters[0] || strlen($urlNodes[$matchKey])>$parameters[1]){
+										if(!preg_match('/^[a-z\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];
@@ -236,7 +236,7 @@ class WWW_controller_url extends WWW_Factory {
 									} else {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
-										if(!preg_match('/^[a-z0-9\-\_]*$/i',$urlNodes[$matchKey]) || strlen($urlNodes[$matchKey])<$parameters[0] || strlen($urlNodes[$matchKey])>$parameters[1]){
+										if(!preg_match('/^[a-z0-9\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];

@@ -354,8 +354,8 @@ class WWW_controller_url extends WWW_Factory {
 	
 		// DEFAULTS FOR VIEW DATA
 			
-			// If unsolved URL is assigned as part of cache tag
-			if(isset($data['cache-tag'],$data['cache-tag-unsolved']) && $data['cache-tag-unsolved']==1 && !empty($data['dynamic-url'])){
+			// If dynamic URL is assigned as part of cache tag
+			if(isset($data['cache-tag'],$data['cache-tag-dynamic']) && $data['cache-tag-dynamic']==1 && !empty($data['dynamic-url'])){
 				$data['cache-tag'].='-'.implode('-',$data['dynamic-url']);
 			}
 			

@@ -127,6 +127,7 @@ class WWW_State	{
 				'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'robots-cache-timeout'=>14400,
 				'server-ip'=>$_SERVER['SERVER_ADDR'],
+				'session-fingerprint'=>0,
 				'session-lifetime'=>0,
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'session-permissions-key'=>'www-permissions',
@@ -862,6 +863,8 @@ class WWW_State	{
 				session_set_cookie_params($lifetime,$this->data['web-root'],$this->data['http-host'],$secure,$httpOnly);
 				// Starting sessions
 				session_start();
+				// Flag for session state
+				$this->sessionStarted=true;
 				// If session lifetime value is not set
 				if($this->data['session-lifetime']==0 && function_exists('ini_get')){
 					$this->data['session-lifetime']=ini_get('session.gc-maxlifetime');
@@ -878,9 +881,18 @@ class WWW_State	{
 						$_SESSION[$this->data['session-namespace']]['www-session-start']=$this->data['request-time'];
 					}
 				}
+				// If session fingerprinting is used
+				if($this->data['session-fingerprint']){
+					if(!isset($_SESSION[$this->data['session-namespace']]['www-session-fingerprint'])){
+						// Storing session fingerprint in sessions
+						$_SESSION[$this->data['session-namespace']]['www-session-fingerprint']=$this->data['fingerprint'];
+					} elseif($_SESSION[$this->data['session-namespace']]['www-session-fingerprint']!=$this->data['fingerprint']){
+						// Destroying a session since fingerprints did not match
+						$this->destroySession();
+						return false;
+					}
+				}
 			}
-			// Flag for session state
-			$this->sessionStarted=true;
 			return true;
 		}
 		
@@ -898,11 +910,13 @@ class WWW_State	{
 		// This method destroys ongoing session and removes session cookie.
 		final public function destroySession(){
 			// Making sure that sessions have been started
-			if($this->sessionStarted){
+			if(!$this->sessionStarted){
 				$this->startSession();
 			}
 			// Regenerating session id
 			session_destroy();
+			// Emptying the session array
+			$_SESSION[$this->data['session-namespace']]=array();
 			// Unsetting session cookie
 			$cookieParams=session_get_cookie_params();
 			setcookie($this->data['session-namespace'],'',($this->data['request-time']-3600),$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);

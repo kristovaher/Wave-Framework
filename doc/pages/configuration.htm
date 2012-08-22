@@ -222,6 +222,10 @@
 				<p><b>session-lifetime</b></p>
 				
 				<p>This is, in seconds, the expected length of PHP sessions. This is only changed if server allows to change PHP setting of 'session.gc_maxlifetime' with ini_set() function and defaults to that same value, if left undefined in Configuration. Note that this does not necessarily mean that the session will last this amount of seconds, as PHP session garbage collection or cookie may become invalid before that. Session cookie duration is entirely independent from this value, but Wave Framework does regenerate session cookies, if it detects the session start time being beyond the value of this setting.</p>
+				
+				<p><b>session-fingerprint</b></p>
+				
+				<p>This setting allows you to tie your sessions to the specific web browser and IP address. This setting is 0 by default, but if set to 1, then Wave Framework will compare the fingerprint that was generated during session creation against current fingerprint and if they are different, then the session is removed immediately.</p>
 			
 			<h2>Request Limiter</h2>
 				

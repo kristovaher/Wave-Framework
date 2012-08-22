@@ -76,5 +76,20 @@
 					<p>Wave Framework API works through a single file that is assigned for the API and the URL's are intended for web pages themselves. Since Wave Framework can include API calls that cannot be easily mapped directly to objects or various features, it made little to no sense to restrict the developer and make them design a system that fits this URL approach.</p>
 					
 					<p>In Wave Framework, you define your model and controller in the value of 'www-command' and that's it.</p>
+					
+			<h3>Sessions are confusing to me, what is 'session-lifetime' Configuration setting different from the session cookie expiration date?</h3>
+			
+					<p>PHP sessions consist of three different components that have to work together in order for sessions to be valid:</p>
+					
+					<ul>
+						<li>Client web browser that stores cookies. Session cookie value is a session ID string.</li>
+						<li>Server that keeps session storage that can be accessed by providing the correct session ID string.</li>
+						<li>PHP Garbage Collector that deletes sessions from session storage every now and then.</li>
+					</ul>
+					
+					<p>Problem is that there can be times when session cookie is removed from client web browser and the session storage still holds data for that - now technically lost - session ID. After a while, PHP's garbage collector removes such sessions. But the same is true the other way around: PHP garbage collector may remove sessions that still have cookies in client web browsers.</p>
+					
+					<p>What 'session-lifetime' configuration cookie does is tell PHP Garbage Collector not to touch cookies before these cookies have not been accessed for X amount of time. This means that 
+					
 	</body>
 </html>

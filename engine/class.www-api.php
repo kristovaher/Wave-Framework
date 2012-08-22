@@ -103,7 +103,7 @@ final class WWW_API {
 		}
 		
 		// If APC is enabled
-		if(extension_loaded('apc') && ini_get('apc.enabled')==1 && $this->state->data['apc']==1){
+		if(extension_loaded('apc') && function_exists('ini_get') && ini_get('apc.enabled')==1 && $this->state->data['apc']==1){
 			$this->apc=true;
 		}
 		

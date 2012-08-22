@@ -127,6 +127,7 @@ class WWW_State	{
 				'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'robots-cache-timeout'=>14400,
 				'server-ip'=>$_SERVER['SERVER_ADDR'],
+				'session-lifetime'=>0,
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'session-permissions-key'=>'www-permissions',
 				'session-user-key'=>'www-user',
@@ -422,6 +423,13 @@ class WWW_State	{
 				case 'timezone':
 					// Attempting to set default timezone
 					date_default_timezone_set($value);
+					break;
+				case 'session-lifetime':
+					if($value!=0){
+						if(function_exists('ini_set') && ini_set('session.gc_maxlifetime',$value)){
+							$this->data[$variable]=$value;
+						}
+					}
 					break;
 				case 'output-compression':
 					// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
@@ -838,20 +846,38 @@ class WWW_State	{
 	// SESSION AND COOKIES
 	
 		// This method starts sessions. This is called automatically if sessions are accessed 
-		// but sessions have not yet been started. $secure flag is for session cookie to be 
-		// secure and $httpOnly will mean that cookie is for HTTP only and cannot be accessed 
-		// with scripts.
+		// but sessions have not yet been started. $lifetime is the lifetime of the cookie in 
+		// seconds. $secure flag is for session cookie to be secure and $httpOnly will mean 
+		// that cookie is for HTTP only and cannot be accessed with scripts.
+		// * lifetime - Cookie lifetime in seconds
 		// * secure - If secure cookie is used
 		// * httponly - If cookie is HTTP only
-		final public function startSession($secure=false,$httpOnly=true){
+		final public function startSession($lifetime=0,$secure=false,$httpOnly=true){
 			// Making sure that sessions have not already been started
 			if(!session_id()){
 				// Defining session name
 				session_name($this->data['session-namespace']);
+				// If lifetime has been set for a cookie in the browser
 				// Setting session cookie parameters
-				session_set_cookie_params(0,$this->data['web-root'],$this->data['http-host'],$secure,$httpOnly);
+				session_set_cookie_params($lifetime,$this->data['web-root'],$this->data['http-host'],$secure,$httpOnly);
 				// Starting sessions
 				session_start();
+				// If session lifetime value is not set
+				if($this->data['session-lifetime']==0 && function_exists('ini_get')){
+					$this->data['session-lifetime']=ini_get('session.gc-maxlifetime');
+				}
+				// This can regenerate the session ID, if enough time has passed
+				if($this->data['session-lifetime']){
+					if(!isset($_SESSION[$this->data['session-namespace']]['www-session-start'])){
+						// Storing a session creation time in sessions
+						$_SESSION[$this->data['session-namespace']]['www-session-start']=$this->data['request-time'];
+					} elseif($this->data['request-time']>($_SESSION[$this->data['session-namespace']]['www-session-start']+$this->data['session-lifetime'])){
+						// Regenerating the session ID
+						session_regenerate_id();
+						// Storing a session creation time in sessions
+						$_SESSION[$this->data['session-namespace']]['www-session-start']=$this->data['request-time'];
+					}
+				}
 			}
 			// Flag for session state
 			$this->sessionStarted=true;
@@ -967,7 +993,7 @@ class WWW_State	{
 					}
 				}
 				//If session array is empty
-				if(empty($_SESSION[$this->data['session-namespace']])){
+				if(empty($_SESSION[$this->data['session-namespace']]) || (count($_SESSION[$this->data['session-namespace']])==1 && isset($_SESSION[$this->data['session-namespace']]['www-session-start']))){
 					// Destroying the session
 					$this->destroySession();
 				}
@@ -976,13 +1002,13 @@ class WWW_State	{
 				if(isset($_SESSION[$this->data['session-namespace']][$key])){
 					unset($_SESSION[$this->data['session-namespace']][$key]);
 					//If session array is empty
-					if(empty($_SESSION[$this->data['session-namespace']])){
+					if(empty($_SESSION[$this->data['session-namespace']]) || (count($_SESSION[$this->data['session-namespace']])==1 && isset($_SESSION[$this->data['session-namespace']]['www-session-start']))){
 						// Destroying the session
 						$this->destroySession();
 					}
 				} else {
 					//If session array is empty
-					if(empty($_SESSION[$this->data['session-namespace']])){
+					if(empty($_SESSION[$this->data['session-namespace']]) || (count($_SESSION[$this->data['session-namespace']]) && isset($_SESSION[$this->data['session-namespace']]['www-session-start']))){
 						// Destroying the session
 						$this->destroySession();
 					}

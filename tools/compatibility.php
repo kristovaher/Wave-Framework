@@ -72,8 +72,7 @@ header('Content-Type: text/html;charset=utf-8');
 			}
 			
 		// SHORT OPEN TAG
-			$shortOpenTag=ini_get('short_open_tag');
-			if($shortOpenTag && $shortOpenTag==1){
+			if(function_exists('ini_get') && ini_get('short_open_tag')==1){
 				$log[]='<span class="bold">SUCCESS</span>: PHP setting short_open_tag is enabled';
 			} else {
 				$log[]='<span class="bold orange">WARNING</span>: PHP setting short_open_tag is turned off, default View controller requires this to work properly, if this is not possible then edit /controllers/controller.view.php';
@@ -148,7 +147,7 @@ header('Content-Type: text/html;charset=utf-8');
 			if(extension_loaded('curl')){
 				$log[]='<span class="bold">SUCCESS</span>: cURL is supported';
 			} else {
-				if(ini_get('allow_url_fopen')==1){
+				if(function_exists('ini_get') && ini_get('allow_url_fopen')==1){
 					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported, this is not required by Wave Framework, but is useful when making API requests to other systems that include POST data';
 				} else {
 					$log[]='<span class="bold orange">WARNING</span>: cURL PHP extension is not supported and allow_url_fopen setting is also off, these are not required by Wave Framework, but without them you cannot make API requests to other networks';

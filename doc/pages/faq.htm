@@ -44,7 +44,7 @@
 				
 				<ul>
 					<li>Remove '/tools/' folder from the server or restrict access to it entirely. Tools should be only used for debugging and by a developer or server administrator.</li>
-					<li>Remove '/doc/' folder entirely. Documentation could potentially reveal what version of Wave Framework your server is using and if the framework is outdated, then it is better if that information is kept secret in case unpatched security vulnerabilities or bugs exist in the older version.</li>
+					<li>Remove '/doc/' folder entirely. Documentation could potentially reveal what version of Wave Framework your server is using and if the framework is outdated, then it is better if that information is kept secret in case unpatched security vulnerabilities or bugs exist in the older version. Same applies to /doc/examples/ folder that might include compromising example scripts.</li>
 					<li>Make sure that you cannot access *.ini and *.tmp files from the server, like '/config.ini' file especially. By default Wave Framework blocks the access to *.ini and *.tmp files directly, but in case you have changed the default Configuration, then this will make sure that your authentication and configuration data is safe.</li>
 					<li>Remove '/readme.txt' from the server since it might carry hints about what version of Wave Framework is being used.</li>
 				</ul>

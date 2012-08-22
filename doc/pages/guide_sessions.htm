@@ -92,14 +92,14 @@
 	</code>
 </pre>
 				
-				<p>It is however possible to also start sessions manually, which allows you to set some session cookie configuration as well. The first option, for secure cookie, is 'false' by default. If this is set to true then this cookie is set only for secure HTTPS connections. Second flag, for HTTP only, means that the cookie cannot be accessed by other scripts - this is set to 'true' by default. Example here:</p>
+				<p>It is however possible to also start sessions manually, which allows you to set some session cookie configuration as well. The first option defines the cookie lifetime and it defaults to 0. The second option, for secure cookie, is 'false' by default. If this is set to true then this cookie is set only for secure HTTPS connections. Third parameter, for HTTP only, means that the cookie cannot be accessed by other scripts - this is set to 'true' by default. Example here:</p>
 				
 <pre>
 	<code>
 	// Regular session-start call (usually this is called automatically)
 	$this->startSession();
 	// Starts sessions with secure connection only and allows the cookie to be accessed with scripts
-	$this->startSession(true,false);
+	$this->startSession(0,true,false);
 	</code>
 </pre>
 

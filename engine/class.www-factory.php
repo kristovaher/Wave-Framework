@@ -676,11 +676,14 @@ class WWW_Factory {
 	// SESSION AND COOKIE WRAPPERS
 	
 		// This method starts sessions. This is called automatically if sessions are accessed 
-		// but sessions have not yet been started. $secure flag is for session cookie to be 
-		// secure and $httpOnly will mean that cookie is for HTTP only and cannot be accessed 
-		// with scripts.
-		final protected function startSession($secure=false,$httpOnly=true){
-			return $this->WWW_API->state->startSession($secure,$httpOnly);
+		// but sessions have not yet been started. $lifetime is the lifetime of the cookie in 
+		// seconds. $secure flag is for session cookie to be secure and $httpOnly will mean 
+		// that cookie is for HTTP only and cannot be accessed with scripts.
+		// * lifetime - Cookie lifetime in seconds
+		// * secure - If secure cookie is used
+		// * httponly - If cookie is HTTP only
+		final protected function startSession($lifetime=0,$secure=false,$httpOnly=true){
+			return $this->WWW_API->state->startSession($lifetime,$secure,$httpOnly);
 		}
 	
 		// This method regenerates ongoing session with a new ID.

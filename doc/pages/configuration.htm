@@ -213,10 +213,16 @@
 				
 				<p>It is possible to keep a simplified log of API requests that are sent to API Handler. This setting is a comma-separated list of API profiles that will be tracked or will not be tracked. This allows for keeping track of how actively this or that API Profile is used in the system and gives a good overview of what commands have been used the most and how frequently. Setting it to '*' will mean that every API Profile will be logged, except profiles listed with '!' in front of their name. The default setting, if used, will track all API profiles except the public profile.</p>
 				
+			<h2>Sessions</h2>
+				
 				<p><b>session-user-key<br/>session-permissions-key</b></p>
 				
 				<p>Wave Framework has a basic user and permissions handling through sessions, which can be accessed through MVC objects. This sets the keys under which user data and permissions are stored. These values are set to 'www-user' and 'www-permissions' by default.</p>
 				
+				<p><b>session-lifetime</b></p>
+				
+				<p>This is, in seconds, the expected length of PHP sessions. This is only changed if server allows to change PHP setting of 'session.gc_maxlifetime' with ini_set() function and defaults to that same value, if left undefined in Configuration. Note that this does not necessarily mean that the session will last this amount of seconds, as PHP session garbage collection or cookie may become invalid before that. Session cookie duration is entirely independent from this value, but Wave Framework does regenerate session cookies, if it detects the session start time being beyond the value of this setting.</p>
+			
 			<h2>Request Limiter</h2>
 				
 				<p><b>limiter</b></p>

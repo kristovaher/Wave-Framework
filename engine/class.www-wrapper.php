@@ -122,12 +122,12 @@ class WWW_Wrapper {
 		if(extension_loaded('curl')){
 			// Flag is checked during request creation
 			$this->curlEnabled=true;
-		} elseif(ini_get('allow_url_fopen')!=1){
+		} elseif(!function_exists('ini_get') || ini_get('allow_url_fopen')!=1){
 			// This means that requests cannot be made at all
 			$this->criticalError=true;
 			// If cURL is enabled, then file_get_contents() requires PHP setting to make requests to URL's
 			$this->responseCode=213;
-			$this->errorMessage='Cannot make URL requests: PHP cannot make URL requests, please enable allow_url_fopen setting';
+			$this->errorMessage='Cannot make URL requests: Cannot detect if PHP can make URL requests, please enable allow_url_fopen setting or ini_get() function';
 			$this->log[]=$this->errorMessage;
 		}
 		

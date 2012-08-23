@@ -887,8 +887,15 @@ class WWW_State	{
 						// Storing session fingerprint in sessions
 						$_SESSION[$this->data['session-namespace']]['www-session-fingerprint']=$this->data['fingerprint'];
 					} elseif($_SESSION[$this->data['session-namespace']]['www-session-fingerprint']!=$this->data['fingerprint']){
-						// Destroying a session since fingerprints did not match
-						$this->destroySession();
+						// Closing session data
+						session_write_close();
+						// Emptying the session array
+						$_SESSION[$this->data['session-namespace']]=array();
+						// Unsetting session cookie
+						$cookieParams=session_get_cookie_params();
+						setcookie($this->data['session-namespace'],'',1,$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
+						// Session state flag
+						$this->sessionStarted=false;
 						return false;
 					}
 				}
@@ -900,7 +907,9 @@ class WWW_State	{
 		final public function regenerateSession(){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				$this->startSession();
+				if(!$this->startSession()){
+					return false;
+				}
 			}
 			// Regenerating session id
 			session_regenerate_id();
@@ -911,7 +920,9 @@ class WWW_State	{
 		final public function destroySession(){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				$this->startSession();
+				if(!$this->startSession()){
+					return false;
+				}
 			}
 			// Regenerating session id
 			session_destroy();
@@ -919,7 +930,7 @@ class WWW_State	{
 			$_SESSION[$this->data['session-namespace']]=array();
 			// Unsetting session cookie
 			$cookieParams=session_get_cookie_params();
-			setcookie($this->data['session-namespace'],'',($this->data['request-time']-3600),$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
+			setcookie($this->data['session-namespace'],'',1,$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
 			// Session state flag
 			$this->sessionStarted=false;
 			return true;
@@ -932,7 +943,9 @@ class WWW_State	{
 		final public function setSession($key=false,$value=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				$this->startSession();
+				if(!$this->startSession()){
+					return false;
+				}
 			}
 			// Multiple values can be set if key is an array
 			if(is_array($key)){
@@ -957,7 +970,9 @@ class WWW_State	{
 		final public function getSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				$this->startSession();
+				if(!$this->startSession()){
+					return false;
+				}
 			}
 			// Multiple keys can be returned
 			if(is_array($key)){
@@ -997,7 +1012,9 @@ class WWW_State	{
 		final public function unsetSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				$this->startSession();
+				if(!$this->startSession()){
+					return false;
+				}
 			}
 			// Can unset multiple values
 			if(is_array($key)){

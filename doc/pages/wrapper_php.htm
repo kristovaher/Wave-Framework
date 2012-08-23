@@ -62,9 +62,9 @@
 					<li><b>www-api</b> - API Address, you can send this if you need to change the address of the API that was originally defined. If you wish to return unserialized data from API, then you need to define the API filename in the address as 'json.api'.</li>
 					<li><b>www-hash-validation</b> - This setting means that API hash validation is used to validate API calls. This depends on the Wave Framework API Profile configuration. Hash validation is turned on by default in API Wrapper, since it is the most secure method for making API requests. To use another validation method that is less secure, this validation has to be turned off on the server that runs the API.</li>
 					<li><b>www-request-timeout</b> - This is the timeout of how long Wrapper API will wait for response from API before timing out.</li>
-					<li><b>www-success-callback</b> - This is a method name that will get the result from API if the API call is considered a success by the API Wrapper.</li>
-					<li><b>www-failure-callback</b> - This is a method name that will get the result from API if the API call is considered a failure by the API Wrapper.</li>
-					<li><b>www-error-callback</b> - This is a method name that will get the result from API if the API call encountered an error when API Wrapper made the request.</li>
+					<li><b>www-true-callback</b> - This is a method name that will get the result from API if the API call is considered a success by the API Wrapper. You can also define an anonymous function here.</li>
+					<li><b>www-false-callback</b> - This is a method name that will get the result from API if the API call is considered a failure by the API Wrapper. You can also define an anonymous function here.</li>
+					<li><b>www-error-callback</b> - This is a method name that will get the result from API if the API call encountered an error when API Wrapper made the request. You can also define an anonymous function here.</li>
 					<li><b>www-last-modified</b> - This is a last-modified timestamp of the time the request was made last time. This allows Wave Framework to return 304 Not Modified response code and not go through the entire execution again.</li>
 					<li><b>www-get-limit</b> - This sets the request URL maximum length, it is set to 2048 by default.</li>
 					<li><b>www-reset-log</b> - This means that the API will reset the log after each API call is made.</li>
@@ -84,13 +84,42 @@
 	</code>
 </pre>
 
-				<p>It is also possible to make a request with the sendRequest shorthand, like this:</p>
+				<p>It is also possible to make a request with the sendRequest so that you send all or additional input parameters in the same request, like this:</p>
 						
 <pre>
 	<code>
 	$result=$www-&gt;sendRequest(array('www-command'=&gt;'example-get'));
 	// Simply prints out the resulting array
 	print_r($result); 
+	</code>
+</pre>
+
+				<p>To make a request that will execute a callback method, you can do the following:</p>
+				
+<pre>
+	<code>
+	function myTest($data){
+		echo $data['name'];
+	}
+	$www->setInput(array(
+		'www-command':'example-get',
+		'www-true-callback':'myTest'
+	));
+	$www->sendRequest();
+	</code>
+</pre>
+
+				<p>It is also possible to define a anonymous function (also known as anonymous function) as the callback method, like this:</p>
+				
+<pre>
+	<code>
+	$www->setInput(array(
+		'www-command':'example-get',
+		'www-true-callback':function($data){
+			echo $data['name'];
+		}
+	));
+	$www->sendRequest();
 	</code>
 </pre>
 

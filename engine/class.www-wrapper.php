@@ -37,8 +37,8 @@ class WWW_Wrapper {
 		'apiStateKey'=>false,
 		'returnHash'=>false,
 		'returnTimestamp'=>false,
-		'successCallback'=>false,
-		'failureCallback'=>false,
+		'trueCallback'=>false,
+		'falseCallback'=>false,
 		'errorCallback'=>false,
 		'requestTimeout'=>10,
 		'timestampDuration'=>60,
@@ -311,22 +311,34 @@ class WWW_Wrapper {
 					$this->apiState['unserialize']=$value;
 					$this->log[]='API serialization value set to: '.$value;
 					break;
-				case 'www-success-callback':
-					$this->apiState['successCallback']=$value;
+				case 'www-true-callback':
+					$this->apiState['trueCallback']=$value;
 					if($value){
-						$this->log[]='API return success callback set to: '.$value.'()';
+						if(gettype($value)!=='object'){
+							$this->log[]='API return true/success callback set to: '.$value.'()';
+						} else {
+							$this->log[]='API return true/success callback uses an anonymous function';
+						}
 					}
 					break;
-				case 'www-failure-callback':
-					$this->apiState['failureCallback']=$value;
+				case 'www-false-callback':
+					$this->apiState['falseCallback']=$value;
 					if($value){
-						$this->log[]='API return failure callback set to: '.$value.'()';
+						if(gettype($value)!=='object'){
+							$this->log[]='API return false/failure callback set to: '.$value.'()';
+						} else {
+							$this->log[]='API return false/failure callback uses an anonymous function';
+						}
 					}
 					break;
 				case 'www-error-callback':
 					$this->apiState['errorCallback']=$value;
 					if($value){
-						$this->log[]='API error callback set to: '.$value.'()';
+						if(gettype($value)!=='object'){
+							$this->log[]='API return error callback set to: '.$value.'()';
+						} else {
+							$this->log[]='API return error callback uses an anonymous function';
+						}
 					}
 					break;
 				case 'www-last-modified':
@@ -450,8 +462,8 @@ class WWW_Wrapper {
 			$this->apiState['unserialize']=true;
 			$this->apiState['lastModified']=false;
 			// Neutralizing callbacks
-			$this->apiState['successCallback']=false;
-			$this->apiState['failureCallback']=false;
+			$this->apiState['trueCallback']=false;
+			$this->apiState['falseCallback']=false;
 			$this->apiState['errorCallback']=false;
 			// Input data
 			$this->inputData=array();
@@ -998,23 +1010,35 @@ class WWW_Wrapper {
 				}
 				
 				// If callback has been defined
-				if($thisApiState['successCallback'] && isset($resultData['www-response-code']) && $resultData['www-response-code']>=500){
-					// Calling user function
-					if(function_exists($thisApiState['successCallback'])){
-						$this->log[]='Sending data to callback: '.$thisApiState['successCallback'].'()';
-						// Callback execution
-						return call_user_func($thisApiState['successCallback'],$resultData);
+				if($thisApiState['trueCallback'] && isset($resultData['www-response-code']) && $resultData['www-response-code']>=500){
+					// If the callback is a function name and not a function itself
+					if(gettype($thisApiState['trueCallback'])!=='object'){
+						// Calling user function
+						if(function_exists($thisApiState['trueCallback'])){
+							$this->log[]='Sending data to callback: '.$thisApiState['trueCallback'].'()';
+							// Callback execution
+							return call_user_func($thisApiState['trueCallback'],$resultData);
+						} else {
+							return $this->errorHandler($thisInputData,216,'Callback method not found',$thisApiState['errorCallback']);
+						}
 					} else {
-						return $this->errorHandler($thisInputData,216,'Callback method not found',$thisApiState['errorCallback']);
+						// Returning data from callback
+						return $thisApiState['trueCallback']($resultData);
 					}
-				} elseif($thisApiState['failureCallback'] && isset($resultData['www-response-code']) && $resultData['www-response-code']<500){
-					// Calling user function
-					if(function_exists($thisApiState['failureCallback'])){
-						$this->log[]='Sending data to callback: '.$thisApiState['failureCallback'].'()';
-						// Callback execution
-						return call_user_func($thisApiState['failureCallback'],$resultData);
+				} elseif($thisApiState['falseCallback'] && isset($resultData['www-response-code']) && $resultData['www-response-code']<500){
+					// If the callback is a function name and not a function itself
+					if(gettype($thisApiState['falseCallback'])!=='object'){
+						// Calling user function
+						if(function_exists($thisApiState['falseCallback'])){
+							$this->log[]='Sending data to callback: '.$thisApiState['falseCallback'].'()';
+							// Callback execution
+							return call_user_func($thisApiState['falseCallback'],$resultData);
+						} else {
+							return $this->errorHandler($thisInputData,216,'Callback method not found',$thisApiState['falseCallback']);
+						}
 					} else {
-						return $this->errorHandler($thisInputData,216,'Callback method not found',$thisApiState['failureCallback']);
+						// Returning data from callback
+						return $thisApiState['falseCallback']($resultData);
 					}
 				} else {
 					// Returning request result
@@ -1071,16 +1095,22 @@ class WWW_Wrapper {
 			$this->log[]=$errorMessage;
 			// If failure callback has been defined
 			if($errorCallback){
-				// Looking for function of that name
-				if(function_exists($errorCallback)){
-					$this->log[]='Sending failure data to callback: '.$errorCallback.'()';
-					// Callback execution
-					return call_user_func($errorCallback,array('www-input'=>$inputData,'www-response-code'=>$responseCode,'www-message'=>$errorMessage));
+				// If the callback is a function name and not a function itself
+				if(gettype($errorCallback)!=='object'){
+					// Looking for function of that name
+					if(function_exists($errorCallback)){
+						$this->log[]='Sending failure data to callback: '.$errorCallback.'()';
+						// Callback execution
+						return call_user_func($errorCallback,array('www-input'=>$inputData,'www-response-code'=>$responseCode,'www-message'=>$errorMessage));
+					} else {
+						$this->responseCode=217;
+						$this->errorMessage='Callback method not found: '.$errorCallback.'()';
+						$this->log[]=$this->errorMessage;
+						return false;
+					}
 				} else {
-					$this->responseCode=217;
-					$this->errorMessage='Callback method not found: '.$errorCallback.'()';
-					$this->log[]=$this->errorMessage;
-					return false;
+					// Returning data from callback
+					return $errorCallback($inputData);
 				}
 			} else {
 				return false;

@@ -164,7 +164,7 @@ class WWW_Factory {
 		final protected function getModel($model,$methodName=false,$methodData=array()){
 		
 			// Dynamically creating class name
-			$className='WWW_model_'.$model;
+			$className='WWW_model_'.str_replace('-','_',$model);
 			
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
@@ -186,6 +186,8 @@ class WWW_Factory {
 				// If method name was not defined then this function returns the entire class with current State and API set
 				return new $className($this->WWW_API,$this->WWW_API_callIndex);
 			} else {
+				// Replacing dashes with underscores
+				$methodName=str_replace('-','_',$methodName);
 				// If method name was set, then this function creates a new temporary object
 				$tempObject=new $className($this->WWW_API,$this->WWW_API_callIndex);
 				// If method exists, then the result of this method is returned as a result
@@ -211,7 +213,7 @@ class WWW_Factory {
 		final protected function getController($controller,$methodName=false,$methodData=array()){
 		
 			// Dynamically creating class name
-			$className='WWW_controller_'.$controller;
+			$className='WWW_controller_'.str_replace('-','_',$controller);
 			
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
@@ -233,6 +235,8 @@ class WWW_Factory {
 				// If method name was not defined then this function returns the entire class with current State and API set
 				return new $className($this->WWW_API,$this->WWW_API_callIndex);
 			} else {
+				// Replacing dashes with underscores
+				$methodName=str_replace('-','_',$methodName);
 				// If method name was set, then this function creates a new temporary object
 				$tempObject=new $className($this->WWW_API,$this->WWW_API_callIndex);
 				// If method exists, then the result of this method is returned as a result
@@ -258,7 +262,7 @@ class WWW_Factory {
 		final protected function getView($view,$methodName=false,$methodData=array()){
 		
 			// Dynamically creating class name
-			$className='WWW_view_'.$view;
+			$className='WWW_view_'.str_replace('-','_',$view);
 			
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
@@ -280,6 +284,8 @@ class WWW_Factory {
 				// If method name was not defined then this function returns the entire class with current State and API set
 				return new $className($this->WWW_API,$this->WWW_API_callIndex);
 			} else {
+				// Replacing dashes with underscores
+				$methodName=str_replace('-','_',$methodName);
 				// If method name was set, then this function creates a new temporary object
 				$tempObject=new $className($this->WWW_API,$this->WWW_API_callIndex);
 				// If method exists, then the result of this method is returned as a result
@@ -303,6 +309,9 @@ class WWW_Factory {
 		// * methodName - Name of the method called once the object is loaded
 		// * methodData - Input variable for the method that is called
 		final protected function getObject($className,$methodName=false,$methodData=array()){
+		
+			// Replacing dashes with underscores
+			$className=str_replace('-','_',$className);
 			
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
@@ -324,6 +333,8 @@ class WWW_Factory {
 				// Returning object
 				return new $className();
 			} else {
+				// Replacing dashes with underscores
+				$methodName=str_replace('-','_',$methodName);
 				// If method name was set, then this function creates a new temporary object
 				$tempObject=new $className();
 				// If method exists, then the result of this method is returned as a result
@@ -505,12 +516,9 @@ class WWW_Factory {
 				// Error messages have response code namespace of 1XX, 2XX and 3XX (latter is developer defined)
 				if(isset($data['www-response-code']) && $data['www-response-code']<400){
 					return true;
-				} elseif(isset($data['www-response-code']) && $data['www-response-code']>=400){
-					return false;
-				} else {
-					// Since response code was not found, system returns false, as standardized error was not found
-					return false;
 				}
+				// Since response code was not found, system returns false, as standardized error was not found
+				return false;
 			} else {
 				// Since result was not an array, system returns false, as standardized error was not found
 				return false;

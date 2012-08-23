@@ -27,11 +27,14 @@ html,body {
 	line-height: 20px; 
 	margin:0px;
 	padding:10px;
+}
+
+p,li {
 	text-align:justify;
 }
 
 body { 
-	width:800px;
+	max-width:800px;
 	margin-left:auto;
 	margin-right:auto;
 }

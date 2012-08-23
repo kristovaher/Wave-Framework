@@ -58,8 +58,44 @@
 	</code>
 </pre>
 
-				<p>The input data accepts all the API configuration and settings that HTTP API and the core API would accept. It is recommended to take a look at API Documentation to get more information about the API, caching, encryptions and other features.</p>				
+				<p>The input data accepts all the API configuration and settings that HTTP API and the core API would accept. It is recommended to take a look at API Documentation to get more information about the API, caching, encryptions and other features.</p>		
+
+			<h2>Checking the Result of an API Call</h2>
 			
+				<p>If your controllers are built by taking into account the standardized response arrays that includes www-response-code value in the array - topic which is covered in MVC Guide documentation - then there is a simple helper function that you can use to check if the API call was successful or not. This method simply returns false if the response error code below 500 was sent as response and it returns 'true' if response code of 500 or later was the response.</p>
+				
+				<p>The idea behind this is that while your API and Controllers can be very complicated in functionality, quite often you simply need to know if your API call was successful or not. For example, you can use this to test if your user was successfully logged in or if adding something to your database worked or not.</p>
+				
+				<p>Here is an example of testing if an internal API call was a success or not:</p>
+				
+<pre>
+	<code>
+	$apiResult=$this->api('user-login',array('username'=>'bluth','password'=>'123456'));
+	if($this->checkTrueFalse($apiResult)){
+		// API call was successful
+	} else {
+		// API call failed, either because of an error or failure response-code
+	}
+	</code>
+</pre>
+
+				<p>If the response array does not include a 'www-response-code' key, then this method will simply return the response data. This means that if you return an empty array, then you can still use this method to check if a call was successful or not - even though it is technically not recommended to do it this way. If you do not wish to use standardized response arrays, then you should simply use another method or just your own solution for this type of situations.</p>
+				
+				<p>Note that when 'www-response-code' has a value not in 5XX (meant for success/true responses) or 4XX (meant for failed/false responses) namespace and is in 1XX, 2XX or 3XX namespace, then Wave Framework will throw a PHP warning which will be logged in error log and is readable by Debugger script in '/tools/debugger.php'. This is because internal API calls should not encounter errors and should only get true or false type of responses.</p>
+				
+				<p>You can also check for errors yourself, if it is needed. This method call below is similar to 'checkTrueFalse()' method, except returns 'true' if an error response code was detected:</p>
+				
+<pre>
+	<code>
+	$apiResult=$this->api('user-login',array('username'=>'bluth','password'=>'123456'));
+	if($this->checkError($apiResult)){
+		// Something went wrong
+	}
+	</code>
+</pre>
+
+				<p>Standardized array responses - which have 'www-response-code' - can be very useful in a system built on Wave Framework, but they are not required. You can implement your own system and array keys which you then check when validating responses.</p>
+
 			<h2>Making API Requests Over HTTP</h2>
 			
 				<p>Wave Framework also comes with an API Wrapper for both PHP and JavaScript, which other web servers can use to communicate with Wave Framework even when these systems themselves do not use Wave Framework. These classes are independent and standalone.</p>

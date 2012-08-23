@@ -51,8 +51,8 @@ function WWW_Wrapper(address,language){
 		apiHashValidation:true,
 		returnHash:false,
 		returnTimestamp:false,
-		successCallback:false,
-		failureCallback:false,
+		trueCallback:false,
+		falseCallback:false,
 		errorCallback:false,
 		timestampDuration:60,
 		hiddenWindowCounter:0,
@@ -227,22 +227,34 @@ function WWW_Wrapper(address,language){
 						log.push('API result language uninitialized');
 					}
 					break;
-				case 'www-success-callback':
-					apiState.successCallback=value;
+				case 'www-true-callback':
+					apiState.trueCallback=value;
 					if(value){
-						log.push('API return success callback set to: '+value+'()');
+						if(typeof(value)!=='function'){
+							log.push('API return true/success callback set to: '+value+'()');
+						} else {
+							log.push('API return true/success callback uses an anonymous function');
+						}
 					}
 					break;
-				case 'www-failure-callback':
-					apiState.failureCallback=value;
+				case 'www-false-callback':
+					apiState.falseCallback=value;
 					if(value){
-						log.push('API return failure callback set to: '+value+'()');
+						if(typeof(value)!=='function'){
+							log.push('API return false/failure callback set to: '+value+'()');
+						} else {
+							log.push('API return false/failure callback uses an anonymous function');
+						}
 					}
 					break;
 				case 'www-error-callback':
 					apiState.errorCallback=value;
 					if(value){
-						log.push('API error callback set to: '+value+'()');
+						if(typeof(value)!=='function'){
+							log.push('API return error callback set to: '+value+'()');
+						} else {
+							log.push('API return error uses an anonymous function');
+						}
 					}
 					break;
 				case 'www-get-limit':
@@ -318,8 +330,8 @@ function WWW_Wrapper(address,language){
 			apiState.unserialize=true;
 			apiState.asynchronous=false;
 			// Neutralizing callbacks and submit form
-			apiState.successCallback=false;
-			apiState.failureCallback=false;
+			apiState.trueCallback=false;
+			apiState.falseCallback=false;
 			apiState.errorCallback=false;
 			apiState.apiSubmitFormId=false;
 			// Input data
@@ -695,7 +707,15 @@ function WWW_Wrapper(address,language){
 					// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
 					if(thisInputData['www-return-type']==null || thisInputData['www-return-type']=='json'){
 						// JSON support is required
-						resultData=JSON.parse(resultData);
+						if(typeof(JSON)!=='undefined'){
+							resultData=JSON.parse(resultData);
+						} else if(typeof(jQuery)!=='undefined'){
+							// Attempting to unserialize with jQuery
+							resultData=jQuery.parseJSON(resultData);
+						} else {
+							// Could not unserialize
+							return errorHandler(thisInputData,207,'Cannot unserialize returned data',thisApiState.errorCallback);
+						}
 						log.push('Returning JSON object');
 					} else if(thisApiState.unserialize){
 						// Every other unserialization attempt fails
@@ -774,28 +794,40 @@ function WWW_Wrapper(address,language){
 				if(thisInputData['www-command']=='www-create-session' && resultData['www-token']!=null){
 					apiState.apiToken=resultData['www-token'];
 					log.push('Session token was found in reply, API session token set to: '+resultData['www-token']);
-				}	
+				}					
 				
 				// If callback function is set
-				if(thisApiState.successCallback && resultData['www-response-token']!=null && resultData['www-response-token']>=500){
-					// Calling user function
-					var thisCallback=this.window[thisApiState.successCallback];
-					if(typeof(thisCallback)==='function'){
-						log.push('Sending failure data to callback: '+thisApiState.successCallback+'()');
-						// Callback execution
-						return thisCallback.call(this,resultData);
+				if(thisApiState.trueCallback && resultData['www-response-code']!=null && resultData['www-response-code']>=500){
+					// If the callback is a function name and not a function itself
+					if(typeof(thisApiState.trueCallback)!=='function'){
+						// Calling user function
+						var thisCallback=this.window[thisApiState.trueCallback];
+						if(typeof(thisCallback)==='function'){
+							log.push('Sending failure data to callback: '+thisApiState.trueCallback+'()');
+							// Callback execution
+							return thisCallback.call(this,resultData);
+						} else {
+							return errorHandler(thisInputData,216,'Callback method not found',thisApiState.errorCallback);
+						}
 					} else {
-						return errorHandler(thisInputData,216,'Callback method not found',thisApiState.errorCallback);
+						// Returning data from callback
+						thisApiState.trueCallback(resultData);
 					}
-				} else if(thisApiState.failureCallback && resultData['www-response-token']!=null && resultData['www-response-token']<500){
-					// Calling user function
-					var thisCallback=this.window[thisApiState.failureCallback];
-					if(typeof(thisCallback)==='function'){
-						log.push('Sending failure data to callback: '+thisApiState.failureCallback+'()');
-						// Callback execution
-						return thisCallback.call(this,resultData);
+				} else if(thisApiState.falseCallback && resultData['www-response-code']!=null && resultData['www-response-code']<500){
+					// If the callback is a function name and not a function itself
+					if(typeof(thisApiState.falseCallback)!=='function'){
+						// Calling user function
+						var thisCallback=this.window[thisApiState.falseCallback];
+						if(typeof(thisCallback)==='function'){
+							log.push('Sending failure data to callback: '+thisApiState.falseCallback+'()');
+							// Callback execution
+							return thisCallback.call(this,resultData);
+						} else {
+							return errorHandler(thisInputData,216,'Callback method not found',thisApiState.errorCallback);
+						}
 					} else {
-						return errorHandler(thisInputData,216,'Callback method not found',thisApiState.errorCallback);
+						// Returning data from callback
+						thisApiState.falseCallback(resultData);
 					}
 				} else {
 					// Returning request result
@@ -821,18 +853,23 @@ function WWW_Wrapper(address,language){
 			log.push(errorMessage);
 			// If failure callback has been defined
 			if(thisErrorCallback){
-				// Looking for function of that name
-				var thisCallback=this.window[thisErrorCallback];
-				if(typeof(thisCallback)==='function'){
-					log.push('Sending failure data to callback: '+thisErrorCallback+'()');
-					// Callback execution
-					var result={'www-input':thisInputData,'www-response-code':responseCode,'www-message':errorMessage};
-					return thisCallback.call(this,result);
+				// If the callback is a function name and not a function itself
+				if(typeof(thisErrorCallback)!=='function'){
+					// Looking for function of that name
+					var thisCallback=this.window[thisErrorCallback];
+					if(typeof(thisCallback)==='function'){
+						log.push('Sending failure data to callback: '+thisErrorCallback+'()');
+						// Callback execution
+						return thisCallback.call(this,{'www-input':thisInputData,'www-response-code':responseCode,'www-message':errorMessage});
+					} else {
+						responseCode=217;
+						errorMessage='Callback method not found: '+thisErrorCallback+'()';
+						log.push(errorMessage);
+						return false;
+					}
 				} else {
-					responseCode=217;
-					errorMessage='Callback method not found: '+thisErrorCallback+'()';
-					log.push(errorMessage);
-					return false;
+					// Returning data from callback
+					thisErrorCallback(thisInputData);
 				}
 			} else {
 				return false;
@@ -843,7 +880,7 @@ function WWW_Wrapper(address,language){
 		// the JavaScript object to be converted.
 		// * object - Object to be cloned
 		var clone=function(object){
-			if(object==null || typeof(object)!='object'){
+			if(object==null || typeof(object)!=='object'){
 				return object;
 			}
 			var tmp=object.constructor();

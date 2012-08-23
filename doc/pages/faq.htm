@@ -77,19 +77,19 @@
 					
 					<p>In Wave Framework, you define your model and controller in the value of 'www-command' and that's it.</p>
 					
-			<h3>Sessions are confusing to me, what is 'session-lifetime' Configuration setting different from the session cookie expiration date?</h3>
+			<h3>I have problems with Internet Explorer 8 and JavaScript API Wrapper, JSON is not defined?</h3>
 			
-					<p>PHP sessions consist of three different components that have to work together in order for sessions to be valid:</p>
-					
-					<ul>
-						<li>Client web browser that stores cookies. Session cookie value is a session ID string.</li>
-						<li>Server that keeps session storage that can be accessed by providing the correct session ID string.</li>
-						<li>PHP Garbage Collector that deletes sessions from session storage every now and then.</li>
-					</ul>
-					
-					<p>Problem is that there can be times when session cookie is removed from client web browser and the session storage still holds data for that - now technically lost - session ID. After a while, PHP's garbage collector removes such sessions. But the same is true the other way around: PHP garbage collector may remove sessions that still have cookies in client web browsers.</p>
-					
-					<p>What 'session-lifetime' configuration cookie does is tell PHP Garbage Collector not to touch cookies before these cookies have not been accessed for X amount of time. This means that 
+				<p>This can happen mainly because Internet Explorer 8 has triggered your website to work in compatibility mode of Internet Explorer 6/7 that does not support JSON object, thus throwing an error. Internet Explorer 8 often switches to compatibility mode internally (even without user intervention) when it has trouble finding what type of document is used - more specifically the doc-type of your HTML. Wave Framework View Controller has a HTML5 doc-type by default, which is not recognized by older Internet Explorer browsers, thus triggering compatibility mode.</p>
+				
+				<p>It is possible to overcome this with Internet Explorer 8 by adding the following line to your header:</p>
+				
+<pre>
+	<code>
+		 &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=8&quot; /&gt;
+	</code>
+</pre>
+
+				<p>Wave Framework JavaScript API Wrapper can also fall back to jQuery, if it detects that jQuery is enabled. If jQuery is defined and JSON object is not available in the browser, then the Wrapper will parse the response with 'parseJSON()' method from jQuery automatically.</p>
 					
 	</body>
 </html>

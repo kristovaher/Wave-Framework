@@ -25,10 +25,6 @@ class WWW_State	{
 	// Database connection is stored in this variable, if set
 	public $databaseConnection=false;
 	
-	// This is a flag that is used for testing whether sessions have been started or not. 
-	// It is used for dynamic session loading.
-	public $sessionStarted=false;
-	
 	// This holds the 'keyword' or 'passkey' of currently used State messenger.
 	private $messenger=false;
 	
@@ -86,6 +82,8 @@ class WWW_State	{
 				'file-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'fingerprint'=>'',
 				'forbidden-extensions'=>array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini'),
+				'headers-set'=>array(),
+				'headers-unset'=>array(),
 				'home-view'=>'home',
 				'http-accept'=>((isset($_SERVER['HTTP_ACCEPT']))?explode(',',$_SERVER['HTTP_ACCEPT']):''),
 				'http-accept-charset'=>((isset($_SERVER['HTTP_ACCEPT_CHARSET']))?explode(',',$_SERVER['HTTP_ACCEPT_CHARSET']):array()),
@@ -127,7 +125,9 @@ class WWW_State	{
 				'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'robots-cache-timeout'=>14400,
 				'server-ip'=>$_SERVER['SERVER_ADDR'],
+				'session-data'=>array(),
 				'session-fingerprint'=>0,
+				'session-id'=>false,
 				'session-lifetime'=>0,
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
 				'session-permissions-key'=>'www-permissions',
@@ -333,7 +333,8 @@ class WWW_State	{
 	}
 	
 	// When State class is not used anymore, then state messenger data - if set - is written 
-	// to filesystem based on the State messenger key.
+	// to filesystem based on the State messenger key. This method also deletes session cookie, 
+	// if sessions have been used but the session variable itself is empty.
 	final public function __destruct(){
 		// Only applies if request messenger actually holds data
 		if($this->messenger && !empty($this->messengerData)){
@@ -348,6 +349,10 @@ class WWW_State	{
 			if(!file_put_contents($dataFolder.$this->messenger.'.tmp',serialize($this->messengerData))){
 				trigger_error('Cannot write messenger data',E_USER_ERROR);
 			}
+		}
+		// This will commit session to the session storage
+		if(!headers_sent()){
+			$this->commitSession();
 		}
 	}
 	
@@ -442,6 +447,39 @@ class WWW_State	{
 			
 			// State has been changed
 			return true;
+			
+		}
+		
+		// This function is called before output is pushed to browser by the API or when State 
+		// object is not used anymore. This method is not accessible to Factory class, but it 
+		// is not private.
+		final public function commitHeaders(){
+			// Removes sessions and session cookies, if not used anymore
+			if($this->data['session-id']){
+				if(empty($this->data['session-data']) || (count($this->data['session-data'])==1 && isset($this->data['session-data']['www-session-start']))){
+					// Getting cookie parameters
+					$cookieParams=session_get_cookie_params();
+					// Unsetting cookie
+					setcookie($this->data['session-namespace'],'',1,$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
+					// Destroy sessions
+					session_destroy();
+				} else {
+					// Storing session data actually in session storage
+					$_SESSION[$this->data['session-namespace']]=$this->data['session-data'];
+					session_write_close();
+				}
+			}
+			// Commiting headers
+			if(!empty($this->data['headers-set'])){
+				foreach($this->data['headers-set'] as $header=>$replace){
+					header($header,$replace);
+				}
+			}
+			if(!empty($this->data['headers-unset'])){
+				foreach($this->data['headers-unset'] as $header){
+					header_remove($header);
+				}
+			}
 			
 		}
 		
@@ -854,6 +892,10 @@ class WWW_State	{
 		// * secure - If secure cookie is used
 		// * httponly - If cookie is HTTP only
 		final public function startSession($lifetime=0,$secure=false,$httpOnly=true){
+			// Sessions cannot be started if the headers have already been sent to the user agent
+			if(headers_sent()){
+				return false;
+			}
 			// Making sure that sessions have not already been started
 			if(!session_id()){
 				// Defining session name
@@ -863,36 +905,40 @@ class WWW_State	{
 				session_set_cookie_params($lifetime,$this->data['web-root'],$this->data['http-host'],$secure,$httpOnly);
 				// Starting sessions
 				session_start();
-				// Flag for session state
-				$this->sessionStarted=true;
+				// Populating the session variable
+				if(isset($_SESSION[$this->data['session-namespace']])){
+					$this->data['session-data']=$_SESSION[$this->data['session-namespace']];
+				}
 				// If session lifetime value is not set
 				if($this->data['session-lifetime']==0 && function_exists('ini_get')){
 					$this->data['session-lifetime']=ini_get('session.gc-maxlifetime');
 				}
 				// This can regenerate the session ID, if enough time has passed
 				if($this->data['session-lifetime']){
-					if(!isset($_SESSION[$this->data['session-namespace']]['www-session-start'])){
+					if(!isset($this->data['session-data']['www-session-start'])){
 						// Storing a session creation time in sessions
-						$_SESSION[$this->data['session-namespace']]['www-session-start']=$this->data['request-time'];
-					} elseif($this->data['request-time']>($_SESSION[$this->data['session-namespace']]['www-session-start']+$this->data['session-lifetime'])){
+						$this->data['session-data']['www-session-start']=$this->data['request-time'];
+					} elseif($this->data['request-time']>($this->data['session-data']['www-session-start']+$this->data['session-lifetime'])){
 						// Regenerating the session ID
 						session_regenerate_id(true);
 						// Storing a session creation time in sessions
-						$_SESSION[$this->data['session-namespace']]['www-session-start']=$this->data['request-time'];
+						$this->data['session-data']['www-session-start']=$this->data['request-time'];
 					}
 				}
 				// If session fingerprinting is used
 				if($this->data['session-fingerprint']){
-					if(!isset($_SESSION[$this->data['session-namespace']]['www-session-fingerprint'])){
+					if(!isset($this->data['session-data']['www-session-fingerprint'])){
 						// Storing session fingerprint in sessions
-						$_SESSION[$this->data['session-namespace']]['www-session-fingerprint']=$this->data['fingerprint'];
-					} elseif($_SESSION[$this->data['session-namespace']]['www-session-fingerprint']!=$this->data['fingerprint']){
+						$this->data['session-data']['www-session-fingerprint']=$this->data['fingerprint'];
+					} elseif($this->data['session-data']['www-session-fingerprint']!=$this->data['fingerprint']){
 						// Regenerating the session ID
 						session_regenerate_id(false);
 						// Emptying the session array
-						$_SESSION[$this->data['session-namespace']]=array();
+						$this->data['session-data']=array();
 					}
 				}
+				// Assigning session ID to be easily accessible from State
+				$this->data['session-id']=session_id();
 			}
 			return true;
 		}
@@ -902,7 +948,7 @@ class WWW_State	{
 		// * deleteOld - Deletes the previous one, if set to true
 		final public function regenerateSession($deleteOld=true){
 			// Making sure that sessions have been started
-			if(!$this->sessionStarted){
+			if(!$this->data['session-id']){
 				$this->startSession();
 			}
 			// Regenerating session id
@@ -910,21 +956,15 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method destroys ongoing session and removes session cookie.
+		// This method clears the session variable, if it is populated for current session.
+		// Session and the cookie is actually destroyed by State __destruct() method.
 		final public function destroySession(){
 			// Making sure that sessions have been started
-			if(!$this->sessionStarted){
+			if(!$this->data['session-id']){
 				$this->startSession();
 			}
-			// Regenerating session id
-			session_destroy();
 			// Emptying the session array
-			$_SESSION[$this->data['session-namespace']]=array();
-			// Unsetting session cookie
-			$cookieParams=session_get_cookie_params();
-			setcookie($this->data['session-namespace'],'',1,$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
-			// Session state flag
-			$this->sessionStarted=false;
+			$this->data['session-data']=array();
 			return true;
 		}
 		
@@ -934,21 +974,21 @@ class WWW_State	{
 		// * value - Value to be set
 		final public function setSession($key=false,$value=false){
 			// Making sure that sessions have been started
-			if(!$this->sessionStarted){
+			if(!$this->data['session-id']){
 				$this->startSession();
 			}
 			// Multiple values can be set if key is an array
 			if(is_array($key)){
 				foreach($key as $k=>$v){
 					// setting value based on key
-					$_SESSION[$this->data['session-namespace']][$k]=$v;
+					$this->data['session-data'][$k]=$v;
 				}
 			} elseif($key){
 				// Setting value based on key
-				$_SESSION[$this->data['session-namespace']][$key]=$value;
+				$this->data['session-data'][$key]=$value;
 			} else {
 				// If key is false, then replacing the entire session variable
-				$_SESSION[$this->data['session-namespace']]=$value;
+				$this->data['session-data']=$value;
 			}
 			return true;
 		}
@@ -959,7 +999,7 @@ class WWW_State	{
 		// * key - Key of the value to be returned
 		final public function getSession($key=false){
 			// Making sure that sessions have been started
-			if(!$this->sessionStarted){
+			if(!$this->data['session-id']){
 				$this->startSession();
 			}
 			// Multiple keys can be returned
@@ -969,8 +1009,8 @@ class WWW_State	{
 				// This array will hold multiple values
 				foreach($key as $val){
 					// Getting value based on key
-					if(isset($_SESSION[$this->data['session-namespace']][$val])){
-						$return[$val]=$_SESSION[$this->data['session-namespace']][$val];
+					if(isset($this->data['session-data'][$val])){
+						$return[$val]=$this->data['session-data'][$val];
 					} else {
 						$return[$val]=false;
 					}
@@ -978,15 +1018,15 @@ class WWW_State	{
 				return $return;
 			} elseif($key){
 				// Return data from specific key
-				if(isset($_SESSION[$this->data['session-namespace']][$key])){
-					return $_SESSION[$this->data['session-namespace']][$key];
+				if(isset($this->data['session-data'][$key])){
+					return $this->data['session-data'][$key];
 				} else {
 					return false;
 				}
 			} else {
 				// Return entire session data, if key was not set
-				if(isset($_SESSION[$this->data['session-namespace']])){
-					return $_SESSION[$this->data['session-namespace']];
+				if(isset($this->data['session-data'])){
+					return $this->data['session-data'];
 				} else {
 					return false;
 				}
@@ -999,33 +1039,33 @@ class WWW_State	{
 		// * key - Key of the value to be unset, can be an array
 		final public function unsetSession($key=false){
 			// Making sure that sessions have been started
-			if(!$this->sessionStarted){
+			if(!$this->data['session-id']){
 				$this->startSession();
 			}
 			// Can unset multiple values
 			if(is_array($key)){
 				foreach($key as $value){
-					if(isset($_SESSION[$this->data['session-namespace']][$value])){
-						unset($_SESSION[$this->data['session-namespace']][$value]);
+					if(isset($this->data['session-data'][$value])){
+						unset($this->data['session-data'][$value]);
 					}
 				}
 				//If session array is empty
-				if(empty($_SESSION[$this->data['session-namespace']]) || (count($_SESSION[$this->data['session-namespace']])==1 && isset($_SESSION[$this->data['session-namespace']]['www-session-start']))){
+				if(empty($this->data['session-data']) || (count($this->data['session-data'])==1 && isset($this->data['session-data']['www-session-start']))){
 					// Destroying the session
 					$this->destroySession();
 				}
 			} elseif($key){
 				// If key is set
-				if(isset($_SESSION[$this->data['session-namespace']][$key])){
-					unset($_SESSION[$this->data['session-namespace']][$key]);
+				if(isset($this->data['session-data'][$key])){
+					unset($this->data['session-data'][$key]);
 					//If session array is empty
-					if(empty($_SESSION[$this->data['session-namespace']]) || (count($_SESSION[$this->data['session-namespace']])==1 && isset($_SESSION[$this->data['session-namespace']]['www-session-start']))){
+					if(empty($this->data['session-data']) || (count($this->data['session-data'])==1 && isset($this->data['session-data']['www-session-start']))){
 						// Destroying the session
 						$this->destroySession();
 					}
 				} else {
 					//If session array is empty
-					if(empty($_SESSION[$this->data['session-namespace']]) || (count($_SESSION[$this->data['session-namespace']]) && isset($_SESSION[$this->data['session-namespace']]['www-session-start']))){
+					if(empty($this->data['session-data']) || (count($this->data['session-data'])==1 && isset($this->data['session-data']['www-session-start']))){
 						// Destroying the session
 						$this->destroySession();
 					}
@@ -1154,20 +1194,28 @@ class WWW_State	{
 		
 	// HEADERS
 	
-		// This is a simple wrapper function for setting a header. $header is the header 
-		// string to be sent and $replace is a true-false flag about whether previous 
-		// similar header should be replaced or not.
+		// This method adds a header to the array of headers to be added before data is pushed 
+		// to the client, when headers are sent. $header is the header string to add and $replace 
+		// is a true/false setting for whether previously sent header like this is replaced or not.
 		// * header - Header string to add
 		// * replace - Whether the header should be replaced, if previously set
 		final public function setHeader($header,$replace=true){
-			return header($header,$replace);
+			// Removing the header from unset array
+			unset($this->data['headers-unset'][$header]);
+			// Assigning the setting to headers array
+			$this->data['headers-set'][$header]=$replace;
+			return true;
 		}
 	
-		// This method is a wrapper function for simply removing a previously set header. 
-		// $string is the header that should be removed.
+		// This method adds a header to the array of headers to be removed before data is pushed 
+		// to the client, when headers are sent. $header is the header string to remove.
 		// * header - header to remove
 		final public function unsetHeader($header){
-			return header_remove($header);
+			// Unsetting the header, if previously set
+			unset($this->data['headers-set'][$header]);
+			// Assigning the setting to headers array
+			$this->data['headers-unset'][$header]=true;
+			return true;
 		}
 	
 	// TERMINAL

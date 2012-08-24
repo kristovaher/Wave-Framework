@@ -428,7 +428,7 @@
 			
 				<p>Now that we have basically created our web service, we can test if it works properly by testing it through Wave Framework's API. Wave Framework uses Index Gateway to route through all HTTP requests and when a file with the extension *.api is requested, then it attempts to send the request to API Handler, which is stored in /engine/handler.api.php if you are interested in how what user writes into URL bar is converted into data for API. But for the time being, you do not need to know more about specifics of handlers.</p>
 
-				<p>What API Handler does is that it translates all the input data sent over HTTP (GET, POST, FILES, SESSION and COOKIES) into a merged input array and then executes a controller method based on the value of www-command that is sent to API.</p>
+				<p>What API Handler does is that it translates all the input data sent over HTTP (GET, POST, FILES and COOKIES) into a merged input array - as well as starts sessions, if session cookie is detected - and then executes a controller method based on the value of www-command that is sent to API.</p>
 				
 				<p>For this project the plan was to return data in XML format. This means that we have to make a request to our API with specific API settings. This is done by requesting a filename 'xml.api' with a browser (or some other HTTP client) and supplying additional variables based on command. In the first example we're making a request to JSON API though, so we'll be using 'json.api' filename. You should be able to access your API with the following script:</p>
 				

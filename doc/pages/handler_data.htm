@@ -36,7 +36,7 @@
 				
 				<p>First it sends the current requested URL to URL Controller with 'url-solve' command, which determines what view the user agent is requesting, what language is currently defined and so on. URL Controller also redirects the client, if the URL seems to be in incorrect format. URL Controller detects the View that should be loaded based on sitemap configuration stored in /resources/[language].sitemap.ini files.</p>
 				
-				<p>Once the view is found, all input data from POST, GET, FILES, COOKIE and SESSION are merged into a single input array, which works similarly to $_REQUEST. File and cookie input is stored with additional array keys of 'www-files' and 'www-cookie'. Session is stored similarly in 'www-session', but only if Wave Framework session namespace is defined as one of the cookies.</p>
+				<p>All input data from POST, GET, FILES and COOKIE arrays are merged into a single input array, which works similarly to $_REQUEST. Sessions are also started, if session cookie is detected. File and cookie input is stored with additional array keys of 'www-files' and 'www-cookie'. Session data is stored similarly in 'www-session', but this is assigned by API itself and not the handlers.</p>
 				
 				<p>Data Handler makes a new API call to View Controller, which is usually the file from /controllers/controller.view.php but other View Controllers (and Controller methods) can be called. View Controller will load the appropriate views and return data to user agent.</p>
 				

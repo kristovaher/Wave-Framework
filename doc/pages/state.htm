@@ -113,6 +113,8 @@
 						<li><b>file-robots</b> - Robots command string for file downloads.</li>
 						<li><b>fingerprint</b> - Fingerprint string about the user agent</li>
 						<li><b>forbidden-extensions</b> - Array of file extensions that cannot be requested over HTTP.</li>
+						<li><b>headers-set</b> - This is the list of headers to be set. Value assigns whether it should replace previously set header like that or not.</li>
+						<li><b>headers-unset</b> - This is the list of headers that should be moved.</li>
 						<li><b>home-view</b> - View keyword that is considered for 'home' or 'root' pages.</li>
 						<li><b>http-accept</b> - Array of types user agent accepts as the response.</li>
 						<li><b>http-accept-charset</b> - Array of charsets accepted by the user agent.</li>
@@ -154,7 +156,9 @@
 						<li><b>robots</b> - Universal robots command string.</li>
 						<li><b>robots-cache-timeout</b> - Cache lifetime of robots.txt files.</li>
 						<li><b>server-ip</b> - Server IP address.</li>
+						<li><b>session-data</b> - This holds data from session storage or temporary data before it is stored in session storage.</li>
 						<li><b>session-fingerprint</b> - True or false flag for whether sessions are tied to IP and browser fingerprint.</li>
+						<li><b>session-id</b> - This holds the current session ID, if sessions are active.</li>
 						<li><b>session-lifetime</b> - Duration of seconds for how long sessions should last, defaults to server value of 'session.gc-maxlifetime'.</li>
 						<li><b>session-namespace</b> - Session namespace keyword.</li>
 						<li><b>session-permissions-key</b> - Keyword that is used for storing permissions.</li>
@@ -181,10 +185,6 @@
 					
 					<p>This should hold WWW_Database class and connection data, if used.</p>
 			
-				<h3>public $sessionStarted=false</h3>
-				
-					<p>This is a flag that is used for testing whether sessions have been started or not. It is used for dynamic session loading.</p>
-			
 				<h3>private $messenger=false</h3>
 				
 					<p>This holds the 'keyword' or 'passkey' of currently used State messenger.</p>
@@ -203,7 +203,7 @@
 				
 				<h3>final public function __destruct()</h3>
 				
-					<p>When State class is not used anymore, then state messenger data - if set - is written to filesystem based on the State messenger key.</p>
+					<p>When State class is not used anymore, then state messenger data - if set - is written to filesystem based on the State messenger key. This method also calls the commit-session method, if it has not been called yet.</p>
 				
 				<h3>final public function getState($variable=false,$subvariable=false)</h3>
 				
@@ -217,6 +217,10 @@
 				
 					<p>This is a private method used internally whenever configuration is changed. It has checks for cases when a variable is changed that carries additional functionality such as when changing the timezone or output compression. For example, if output compression is set, but not supported by user agent that is making the request, then output suppression is turned off.</p>
 				
+				<h3>final public function commitHeaders()</h3>
+				
+					<p>This function is called before output is pushed to browser by the API or when State object is not used anymore. This method is not accessible to Factory class, but it is not private.</p>
+					
 				<h3>final public function getTranslations($language=false,$keyword=false)</h3>
 				
 					<p>This method returns an array of currently active translations, or for a language set with $language variable. If $keyword is also set, then it returns a specific translation with that keyword from $language translations.</p>
@@ -283,7 +287,7 @@
 				
 				<h3>final public function destroySession()</h3>
 				
-					<p>This method destroys ongoing session and removes session cookie.</p>
+					<p>This method clears the session variable, if it is populated for current session. Session and the cookie is actually destroyed by State __destruct() method.</p>
 				
 				<h3>final public function setSession($key=false,$value=false)</h3>
 				

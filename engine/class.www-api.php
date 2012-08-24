@@ -244,6 +244,12 @@ final class WWW_API {
 					$this->command(array('www-return-type'=>'php','www-command'=>$this->apiObservers[$apiState['command']]['input'],'www-output'=>0,'www-return-hash'=>0,'www-content-type'=>false,'www-minify'=>false,'www-crypt-output'=>false,'www-cache-tags'=>false)+$apiInputData,((isset($this->apiObservers[$apiState['command']]['input-buffer']) && $this->apiObservers[$apiState['command']]['input-buffer']==true)?true:false),false);
 				}
 				
+				// If session data is set
+				if(!empty($this->state->data['www-session-data'])){
+					$apiInputData['www-session']=$this->state->data['www-session-data'];
+					unset($apiInputData['www-session']['www-session-fingerprint']);
+				}
+				
 				// Sorting the input array
 				$apiInputData=$this->ksortArray($apiInputData);
 				
@@ -499,7 +505,7 @@ final class WWW_API {
 								}
 							}
 							// Token for API access is generated simply from current profile name and request time
-							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time']);
+							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time'].$this->state->data['server-addr'].$this->state->data['request-id']);
 							// Session token file is created and token itself is returned to the user agent as a successful request
 							if(file_put_contents($apiState['token-directory'].$apiState['token-file'],$apiState['token'])){
 								// Token is returned to user agent together with current token timeout setting
@@ -1023,6 +1029,11 @@ final class WWW_API {
 						if($useLogger){
 							// Notifying logger of content length
 							$this->apiLoggerData['content-length']=$contentLength;
+						}
+						
+						// Session commit, if headers have not been sent yet and the output is not nested
+						if(ob_get_level()==0){
+							$this->state->commitHeaders();
 						}
 						
 						// Data is returned to the user agent

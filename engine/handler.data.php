@@ -92,10 +92,6 @@ License: GNU Lesser General Public License Version 3
 			if(isset($_COOKIE[$state->data['session-namespace']])){
 				// Starting sessions
 				$state->startSession();
-				// Checking for session variables
-				if(!empty($_SESSION[$state->data['session-namespace']])){ 
-					$inputData['www-session']=$_SESSION[$state->data['session-namespace']];
-				}
 			}
 		}
 

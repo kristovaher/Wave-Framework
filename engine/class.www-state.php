@@ -352,7 +352,7 @@ class WWW_State	{
 		}
 		// This will commit session to the session storage
 		if(!headers_sent()){
-			$this->commitSession();
+			$this->commitHeaders();
 		}
 	}
 	

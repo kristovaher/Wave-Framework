@@ -876,7 +876,7 @@ class WWW_State	{
 						$_SESSION[$this->data['session-namespace']]['www-session-start']=$this->data['request-time'];
 					} elseif($this->data['request-time']>($_SESSION[$this->data['session-namespace']]['www-session-start']+$this->data['session-lifetime'])){
 						// Regenerating the session ID
-						session_regenerate_id();
+						session_regenerate_id(true);
 						// Storing a session creation time in sessions
 						$_SESSION[$this->data['session-namespace']]['www-session-start']=$this->data['request-time'];
 					}
@@ -887,32 +887,26 @@ class WWW_State	{
 						// Storing session fingerprint in sessions
 						$_SESSION[$this->data['session-namespace']]['www-session-fingerprint']=$this->data['fingerprint'];
 					} elseif($_SESSION[$this->data['session-namespace']]['www-session-fingerprint']!=$this->data['fingerprint']){
-						// Closing session data
-						session_write_close();
+						// Regenerating the session ID
+						session_regenerate_id(false);
 						// Emptying the session array
 						$_SESSION[$this->data['session-namespace']]=array();
-						// Unsetting session cookie
-						$cookieParams=session_get_cookie_params();
-						setcookie($this->data['session-namespace'],'',1,$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
-						// Session state flag
-						$this->sessionStarted=false;
-						return false;
 					}
 				}
 			}
 			return true;
 		}
 		
-		// This method regenerates ongoing session with a new ID.
-		final public function regenerateSession(){
+		// This method regenerates ongoing session with a new ID. $deleteOld, if set, 
+		// deletes the previous session.
+		// * deleteOld - Deletes the previous one, if set to true
+		final public function regenerateSession($deleteOld=true){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				if(!$this->startSession()){
-					return false;
-				}
+				$this->startSession();
 			}
 			// Regenerating session id
-			session_regenerate_id();
+			session_regenerate_id($deleteOld);
 			return true;
 		}
 		
@@ -920,9 +914,7 @@ class WWW_State	{
 		final public function destroySession(){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				if(!$this->startSession()){
-					return false;
-				}
+				$this->startSession();
 			}
 			// Regenerating session id
 			session_destroy();
@@ -943,9 +935,7 @@ class WWW_State	{
 		final public function setSession($key=false,$value=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				if(!$this->startSession()){
-					return false;
-				}
+				$this->startSession();
 			}
 			// Multiple values can be set if key is an array
 			if(is_array($key)){
@@ -970,9 +960,7 @@ class WWW_State	{
 		final public function getSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				if(!$this->startSession()){
-					return false;
-				}
+				$this->startSession();
 			}
 			// Multiple keys can be returned
 			if(is_array($key)){
@@ -1012,9 +1000,7 @@ class WWW_State	{
 		final public function unsetSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
-				if(!$this->startSession()){
-					return false;
-				}
+				$this->startSession();
 			}
 			// Can unset multiple values
 			if(is_array($key)){

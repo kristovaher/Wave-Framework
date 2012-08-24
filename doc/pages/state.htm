@@ -277,9 +277,9 @@
 				
 					<p>This method starts sessions. This is called automatically if sessions are accessed but sessions have not yet been started. $lifetime is the lifetime of the cookie in seconds. $secure flag is for session cookie to be secure and $httpOnly will mean that cookie is for HTTP only and cannot be accessed with scripts.</p>
 				
-				<h3>final public function regenerateSession()</h3>
+				<h3>final public function regenerateSession($deleteOld=true)</h3>
 				
-					<p>This method regenerates ongoing session with a new ID.</p>
+					<p>This method regenerates ongoing session with a new ID. $deleteOld, if set, deletes the previous session.</p>
 				
 				<h3>final public function destroySession()</h3>
 				

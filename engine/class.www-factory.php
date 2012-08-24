@@ -694,9 +694,11 @@ class WWW_Factory {
 			return $this->WWW_API->state->startSession($lifetime,$secure,$httpOnly);
 		}
 	
-		// This method regenerates ongoing session with a new ID.
-		final protected function regenerateSession(){
-			return $this->WWW_API->state->regenerateSession();
+		// This method regenerates ongoing session with a new ID. $deleteOld, if set, 
+		// deletes the previous session.
+		// * deleteOld - Deletes the previous one, if set to true
+		final protected function regenerateSession($deleteOld=true){
+			return $this->WWW_API->state->regenerateSession($deleteOld);
 		}
 		
 		// This method destroys ongoing session and removes session cookie.

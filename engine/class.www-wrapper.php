@@ -615,7 +615,7 @@ class WWW_Wrapper {
 						if(extension_loaded('mcrypt')){
 							// Data is encrypted with Rijndael 256bit encryption
 							if($thisApiState['apiToken']){
-								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),json_encode($thisCryptedData),MCRYPT_MODE_CBC,$thisApiState['apiSecretKey']));
+								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),json_encode($thisCryptedData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey'])));
 							} else {
 								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiSecretKey']),json_encode($thisCryptedData),MCRYPT_MODE_ECB));
 							}
@@ -897,7 +897,7 @@ class WWW_Wrapper {
 					// Decryption is different based on whether secret key was used or not
 					if($thisApiState['apiSecretKey']){
 						// If secret key was set, then decryption uses the secret key for initialization vector
-						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_CBC,$thisApiState['apiSecretKey']);
+						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey']));
 					} else {
 						// Without secret key the system assumes that public profile is used and decryption is done in ECB mode
 						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_ECB);

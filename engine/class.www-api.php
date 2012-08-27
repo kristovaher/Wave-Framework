@@ -212,6 +212,7 @@ final class WWW_API {
 					'disable-callbacks'=>(isset($apiInputData['www-disable-callbacks']))?$apiInputData['www-disable-callbacks']:false,
 					'output-crypt-key'=>false,
 					'profile'=>$this->state->data['api-public-profile'],
+					'public-token'=>$this->state->data['api-public-token'],
 					'push-output'=>(isset($apiInputData['www-output']))?$apiInputData['www-output']:true,
 					'return-hash'=>(isset($apiInputData['www-return-hash']))?$apiInputData['www-return-hash']:false,
 					'return-timestamp'=>(isset($apiInputData['www-return-timestamp']))?$apiInputData['www-return-timestamp']:false,
@@ -267,7 +268,7 @@ final class WWW_API {
 					if(in_array($apiInputData['www-language'],$this->state->data['languages'])){
 						$this->state->data['language']=$apiInputData['www-language'];
 					} else {
-						return $this->output(array('www-message'=>'This language is not defined','www-response-code'=>115),$apiState);
+						return $this->output(array('www-message'=>'This language is not defined','www-response-code'=>116),$apiState);
 					}
 				}
 				
@@ -291,7 +292,13 @@ final class WWW_API {
 					if(isset($apiInputData['www-profile']) && $apiInputData['www-profile']!=$this->state->data['api-public-profile']){
 						$apiState['profile']=$apiInputData['www-profile'];
 					} else {
+						// Public profile is assigned
 						$apiState['profile']=$this->state->data['api-public-profile'];
+						// If public request token is required, but is not provided or is incorrect
+						if($apiState['public-token'] && $this->state->getUser() && (!isset($apiInputData['www-public-token']) || $this->state->getPublicToken()!=$apiInputData['www-public-token'])){
+							// If profile is set to be disabled
+							return $this->output(array('www-message'=>'API public requests require a public request token','www-response-code'=>102),$apiState);
+						}
 					}
 					
 					// This checks whether API profile information is defined in /resources/api.profiles.php file
@@ -300,13 +307,13 @@ final class WWW_API {
 						// Testing if API profile is disabled or not
 						if(isset($this->apiProfiles[$apiState['profile']]['disabled']) && $this->apiProfiles[$apiState['profile']]['disabled']==1){
 							// If profile is set to be disabled
-							return $this->output(array('www-message'=>'API profile is disabled','www-response-code'=>103),$apiState);
+							return $this->output(array('www-message'=>'API profile is disabled','www-response-code'=>104),$apiState);
 						} 
 						
 						// Testing if IP is in valid range
 						if(isset($this->apiProfiles[$apiState['profile']]['ip']) && $this->apiProfiles[$apiState['profile']]['ip']!='*' && !in_array($this->state->data['client-ip'],explode(',',$this->apiProfiles[$apiState['profile']]['ip']))){
 							// If profile has IP set and current IP is not allowed
-							return $this->output(array('www-message'=>'API profile not allowed from this IP','www-response-code'=>104),$apiState);
+							return $this->output(array('www-message'=>'API profile not allowed from this IP','www-response-code'=>105),$apiState);
 						}
 						
 						// Profile commands are filtered only if they are set
@@ -314,7 +321,7 @@ final class WWW_API {
 							$apiState['commands']=explode(',',$this->apiProfiles[$apiState['profile']]['commands']);
 							if((in_array('*',$apiState['commands']) && in_array('!'.$apiState['command'],$apiState['commands'])) || (!in_array('*',$apiState['commands']) && !in_array($apiState['command'],$apiState['commands']))){
 								// If profile has IP set and current IP is not allowed
-								return $this->output(array('www-message'=>'API command is not allowed for this profile','www-response-code'=>105),$apiState);
+								return $this->output(array('www-message'=>'API command is not allowed for this profile','www-response-code'=>106),$apiState);
 							}
 						}
 						
@@ -325,9 +332,9 @@ final class WWW_API {
 							if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout'])){
 								// Timestamp value has to be set and not be empty
 								if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
-									return $this->output(array('www-message'=>'API request validation timestamp is missing','www-response-code'=>106),$apiState);
+									return $this->output(array('www-message'=>'API request validation timestamp is missing','www-response-code'=>107),$apiState);
 								} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
-									return $this->output(array('www-message'=>'API request timestamp is too old','www-response-code'=>107),$apiState);
+									return $this->output(array('www-message'=>'API request timestamp is too old','www-response-code'=>108),$apiState);
 								}
 							}
 							
@@ -343,7 +350,7 @@ final class WWW_API {
 								if($apiState['hash-validation']){
 									// Hash value has to be set and not be empty
 									if(!isset($apiInputData['www-hash']) || $apiInputData['www-hash']==''){
-										return $this->output(array('www-message'=>'API request validation hash is missing','www-response-code'=>109),$apiState);
+										return $this->output(array('www-message'=>'API request validation hash is missing','www-response-code'=>110),$apiState);
 									} else {
 										// Validation hash
 										$apiState['hash']=$apiInputData['www-hash'];
@@ -354,7 +361,7 @@ final class WWW_API {
 								$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
 								
 							} else {
-								return $this->output(array('www-message'=>'API profile configuration incorrect: Secret key missing from configuration','www-response-code'=>108),$apiState);
+								return $this->output(array('www-message'=>'API profile configuration incorrect: Secret key missing from configuration','www-response-code'=>109),$apiState);
 							}
 							
 							// Checks for whether token timeout is set on the API profile					
@@ -366,7 +373,7 @@ final class WWW_API {
 						}
 						
 					} else {
-						return $this->output(array('www-message'=>'API profile not found','www-response-code'=>102),$apiState);
+						return $this->output(array('www-message'=>'API profile not found','www-response-code'=>103),$apiState);
 					}
 
 				}
@@ -414,7 +421,7 @@ final class WWW_API {
 						} elseif($apiState['command']!='www-create-session'){
 						
 							// Token is not required for commands that create or destroy existing tokens
-							return $this->output(array('www-message'=>'API session token does not exist or is timed out','www-response-code'=>110),$apiState);
+							return $this->output(array('www-message'=>'API session token does not exist or is timed out','www-response-code'=>111),$apiState);
 							
 						}
 						
@@ -442,18 +449,18 @@ final class WWW_API {
 							
 							// If validation hashes do not match
 							if($validationHash!=$apiState['hash']){
-								return $this->output(array('www-message'=>'API profile authentication failed: input hash validation failed','www-response-code'=>111),$apiState);
+								return $this->output(array('www-message'=>'API profile authentication failed: input hash validation failed','www-response-code'=>112),$apiState);
 							}
 						
 						} elseif($apiState['command']!='www-create-session' && (!isset($apiInputData['www-token']) || $apiState['token']!=$apiInputData['www-token'])){
 						
 							// If hash validation is used, then request can be made with a token or secret key alone and if these do not match then authentication error is thrown
-							return $this->output(array('www-message'=>'API profile authentication failed: session token is missing or incorrect','www-response-code'=>111),$apiState);
+							return $this->output(array('www-message'=>'API profile authentication failed: session token is missing or incorrect','www-response-code'=>112),$apiState);
 						
 						} elseif($apiState['command']=='www-create-session' && (!isset($apiInputData['www-secret-key']) || $apiInputData['www-secret-key']!=$apiState['secret-key'])){
 						
 							// If hash validation is used, then request can be made with a token or secret key alone and if these do not match then authentication error is thrown
-							return $this->output(array('www-message'=>'API profile authentication failed: secret key is missing or incorrect','www-response-code'=>111),$apiState);
+							return $this->output(array('www-message'=>'API profile authentication failed: secret key is missing or incorrect','www-response-code'=>112),$apiState);
 							
 						}
 						
@@ -465,9 +472,9 @@ final class WWW_API {
 							if(extension_loaded('mcrypt')){
 								// Rijndael 256 bit decryption is used in CBC mode
 								if($apiState['token'] && $apiState['command']!='www-create-session'){
-									$decryptedData=$this->decryptRijndael256($apiInputData['www-crypt-input'],$apiState['token'],$apiState['secret-key']);
+									$decryptedData=$this->decryptData($apiInputData['www-crypt-input'],$apiState['token'],$apiState['secret-key']);
 								} else {
-									$decryptedData=$this->decryptRijndael256($apiInputData['www-crypt-input'],$apiState['secret-key']);
+									$decryptedData=$this->decryptData($apiInputData['www-crypt-input'],$apiState['secret-key']);
 								}
 								if($decryptedData){
 									// Unserializing crypted data with JSON
@@ -477,13 +484,13 @@ final class WWW_API {
 										// Merging crypted input with set input data
 										$apiInputData=$decryptedData+$apiInputData;
 									} else {
-										return $this->output(array('www-message'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-response-code'=>113),$apiState);
+										return $this->output(array('www-message'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-response-code'=>114),$apiState);
 									}
 								} else {
-									return $this->output(array('www-message'=>'Problem decrypting encrypted data: Decryption failed','www-response-code'=>113),$apiState);
+									return $this->output(array('www-message'=>'Problem decrypting encrypted data: Decryption failed','www-response-code'=>114),$apiState);
 								}	
 							} else {
-								return $this->output(array('www-message'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>113),$apiState);
+								return $this->output(array('www-message'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>114),$apiState);
 							}
 						}
 						
@@ -505,7 +512,7 @@ final class WWW_API {
 								}
 							}
 							// Token for API access is generated simply from current profile name and request time
-							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time'].$this->state->data['server-addr'].$this->state->data['request-id']);
+							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time'].$this->state->data['server-addr'].$this->state->data['request-id'].microtime().rand(1,1000000));
 							// Session token file is created and token itself is returned to the user agent as a successful request
 							if(file_put_contents($apiState['token-directory'].$apiState['token-file'],$apiState['token'])){
 								// Token is returned to user agent together with current token timeout setting
@@ -540,7 +547,7 @@ final class WWW_API {
 				
 				} else if(in_array($apiState['command'],array('www-create-session','www-destroy-session','www-validate-session'))){
 					// Since public profile is used, the session-related tokens cannot be used
-					return $this->output(array('www-message'=>'API session token commands cannot be used with public profile','www-response-code'=>112),$apiState);
+					return $this->output(array('www-message'=>'API session token commands cannot be used with public profile','www-response-code'=>113),$apiState);
 				}
 			
 			// CACHE HANDLING IF CACHE IS USED
@@ -559,7 +566,7 @@ final class WWW_API {
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks']);
+					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);
@@ -638,7 +645,7 @@ final class WWW_API {
 							require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
 						} else {
 							// Since an error was detected, system pushes for output immediately
-							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>114),$apiState);
+							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>115),$apiState);
 						}
 					}
 					
@@ -652,7 +659,7 @@ final class WWW_API {
 						// If command method does not exist, 501 page is returned or error triggered
 						if(!method_exists($controller,$methodName) || !is_callable(array($controller,$methodName))){
 							// Since an error was detected, system pushes for output immediately
-							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>114),$apiState);
+							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>115),$apiState);
 						}
 						// Gathering every possible echoed result from method call
 						ob_start();
@@ -678,7 +685,7 @@ final class WWW_API {
 						}
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>114),$apiState);
+						return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>115),$apiState);
 					}
 					
 					// If cache timeout was set then the result is stored as a cache in the filesystem
@@ -905,10 +912,10 @@ final class WWW_API {
 					// If token timeout is set, then profile must be defined
 					if($apiState['secret-key']){
 						// If secret key is set, then output will be crypted with CBC mode
-						$apiResult=$this->encryptRijndael256($apiResult,$apiState['output-crypt-key'],$apiState['secret-key']);
+						$apiResult=$this->encryptData($apiResult,$apiState['output-crypt-key'],$apiState['secret-key']);
 					} else {
 						// If secret key is not set (for public profiles), then output will be crypted with ECB mode
-						$apiResult=$this->encryptRijndael256($apiResult,$apiState['output-crypt-key']);
+						$apiResult=$this->encryptData($apiResult,$apiState['output-crypt-key']);
 					}
 				}
 			
@@ -1191,28 +1198,39 @@ final class WWW_API {
 			// By default the result is empty
 			$return='';
 			foreach($data as $key=>$val){
-				// If element is an array then this function is called again recursively
-				if(is_array($val)){
-					// XML does not allow numeric nodes, so generic '<node>' is used
-					if(is_numeric($key)){
-						$return.='<node>';
-					} else {
-						$return.='<'.$key.'>';
+				// Keys that start with @ symbol are considered attribute containers
+				if($key[0]!='@'){
+					// Attributes gatherer
+					$attributes='';
+					// If attributes are set
+					if(isset($data['@'.$key]) && is_array($data['@'.$key])){
+						foreach($data['@'.$key] as $attKey=>$attVal){
+							$attributes.=' '.$attKey.'="'.htmlspecialchars($attVal).'"';
+						}
 					}
-					// Recursive call
-					$return.=$this->toXMLnode($val);
-					if(is_numeric($key)){
-						$return.='</node>';
+					// If element is an array then this function is called again recursively
+					if(is_array($val)){
+						// XML does not allow numeric nodes, so generic '<node>' is used
+						if(is_numeric($key)){
+							$return.='<node'.$attributes.'>';
+						} else {
+							$return.='<'.$key.$attributes.'>';
+						}
+						// Recursive call
+						$return.=$this->toXMLnode($val);
+						if(is_numeric($key)){
+							$return.='</node>';
+						} else {
+							$return.='</'.$key.'>';
+						}
 					} else {
-						$return.='</'.$key.'>';
-					}
-				} else {
-					// XML does not allow numeric nodes, so generic '<node>' is used
-					if(is_numeric($key)){
-						// Data is filtered for special characters
-						$return.='<node>'.htmlspecialchars($val).'</node>';
-					} else {
-						$return.='<'.$key.'>'.htmlspecialchars($val).'</'.$key.'>';
+						// XML does not allow numeric nodes, so generic '<node>' is used
+						if(is_numeric($key)){
+							// Data is filtered for special characters
+							$return.='<node'.$attributes.'>'.htmlspecialchars($val).'</node>';
+						} else {
+							$return.='<'.$key.$attributes.'>'.htmlspecialchars($val).'</'.$key.'>';
+						}
 					}
 				}
 			}
@@ -1350,9 +1368,13 @@ final class WWW_API {
 		// * data - data to be encrypted
 		// * key - key used for encryption
 		// * secretKey - used for calculating initialization vector (IV)
-		final public function encryptRijndael256($data,$key,$secretKey=false){
+		final public function encryptData($data,$key,$secretKey=false){
 			if($secretKey){
-				return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($key),$data,MCRYPT_MODE_CBC,md5($secretKey)));
+				// Converting key to 32 characters, if not proper length
+				if(strlen($secretKey)!=32){
+					$secretKey=md5($secretKey);
+				}
+				return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($key),$data,MCRYPT_MODE_CBC,$secretKey));
 			} else {
 				return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($key),$data,MCRYPT_MODE_ECB));
 			}
@@ -1363,14 +1385,23 @@ final class WWW_API {
 		// * data - data to be decrypted
 		// * key - key used for decryption
 		// * secretKey - used for calculating initialization vector (IV)
-		final public function decryptRijndael256($data,$key,$secretKey=false){
+		final public function decryptData($data,$key,$secretKey=false){
 			if($secretKey){
-				return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($key),base64_decode($data),MCRYPT_MODE_CBC,md5($secretKey)));
+				// Converting key to 32 characters, if not proper length
+				if(strlen($secretKey)!=32){
+					$secretKey=md5($secretKey);
+				}
+				return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($key),base64_decode($data),MCRYPT_MODE_CBC,$secretKey));
 			} else {
 				return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($key),base64_decode($data),MCRYPT_MODE_ECB));
 			}
 		}
-
+		
+		// This function returns a secret key of 32 characters in length that is suitable for
+		// Rijndael encryptions. $length is 32 characters by default.
+		final public function generateSecretKey($length=32){
+			return mcrypt_create_iv(32,MCRYPT_DEV_RANDOM);
+		}
 		
 	// CACHE AND BUFFER
 	

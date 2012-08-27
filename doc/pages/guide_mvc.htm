@@ -209,5 +209,29 @@
 					
 					<p>Wave Framework uses the response code internally to see if the method call was considered a success or not, or if an error was encountered. This is important when returning binary data (that just returns 1 or 0 to the client), or for API Wrapper that can have callbacks set for different type of responses. This is detailed more in API documentation.</p>
 
+				<h3>Array Conversion to XML/RSS</h3>
+				
+					<p>When data is requested through API, then the data that Controller returns is converted to the specific format that is requested from the API. This means that the array, which you return from Controller methods, will be converted to XML, JSON, INI or other text-based formats. Most of these conversions are pretty simple and easy to understand, but XML and RSS are a special case. While conversion to XML and RSS works as expected, it is also possible to assign 'attributes' in the array, that will be converted to XML attributes in the output.</p>
+					
+					<p>Below is an example of array that is returned from Controller method and how the API returns it after conversion:</p>
+
+<pre>
+	<code>
+		...
+		// Data returned from Controller
+		return array(
+			'id'=&gt;1,
+			'name'=&gt;'Thomas',
+			'@name'=&gt;array('myattribute'=&gt;'myvalue')
+		);
+		...
+		// How it appears through API Handler when XML is requested
+		&lt;www&gt;
+			&lt;id&gt;1&lt;/id&gt;
+			&lt;name myattribute=&quot;myvalue&quot;&gt;Thomas&lt;/name&gt;
+		&lt;/www&gt;
+	</code>
+</pre>
+
 	</body>
 </html>

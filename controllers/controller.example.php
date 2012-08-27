@@ -20,8 +20,10 @@ class WWW_controller_example extends WWW_Factory {
 		$example=$this->getModel('example');
 		// This 'loads' model with ID of 1. Note that the function call here can be anything you need, this is just used as an example
 		$example->load(1);
+		// Getting the data from the model
+		$data=$example->get();
 		// Returning the result of controller call
-		return $this->resultTrue('Data returned!',$example->get());
+		return $this->resultTrue('Data returned!',$data);
 	}
 	
 }

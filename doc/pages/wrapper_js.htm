@@ -92,9 +92,25 @@
 					<li><b>www-get-limit</b> - This sets the request URL maximum length, it is set to 2048 by default.</li>
 					<li><b>www-reset-log</b> - This means that the API will reset the log after each API call is made.</li>
 					<li><b>www-timestamp-duration</b> - This tells API Wrapper the maximum difference in seconds it accepts the timestamp from the response.</li>
+					<li><b>www-secret-key</b></li> - This stores the secret key of the application. This value is used for calculating validation hashes. It is not recommended to use this with JavaScript API Wrapper, but if you want then the option is there.</li>
 				</ul>
 				
-				<p>Please refer to Input and Output API Documentation to see the core Wave Framework API flags.</p>
+				<p>Please refer to Input and Output API Documentation to see the rest of the Wave Framework API flags and their description.</p>
+				
+				<p>It is also important to note that you do not need to send every flag every time you use the Wrapper object to make requests. Wrapper will internally store a number of those settings and you can simply send what has changed in the subsequent requests. These flags will be used on subsequent requests when the same object is used even though they are not defined in the request specifically:</p>
+				
+				<ul>
+					<li>www-profile</li>
+					<li>www-secret-key</li>
+					<li>www-token</li>
+					<li>www-public-token</li>
+					<li>www-hash-validation</li>
+					<li>www-return-hash</li>
+					<li>www-return-timestamp</li>
+					<li>www-timestamp-duration</li>
+				</ul>
+				
+				<p>In case you need to reset these settings, then you can reset them one by one individually (which overwrites the previous values) or call clearInput(true) method.</p>
 				
 				<p>For example, a simple command would be done this way:</p>
 			

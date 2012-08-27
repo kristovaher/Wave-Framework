@@ -596,8 +596,8 @@ class WWW_Factory {
 		// * data - data to be encrypted
 		// * key - key used for encryption
 		// * secretKey - used for calculating initialization vector (IV)
-		final protected function encryptRijndael256($data,$key,$secretKey=false){
-			$this->WWW_API->encryptRijndael256($data,$key,$secretKey);
+		final protected function encryptData($data,$key,$secretKey=false){
+			return $this->WWW_API->encryptData($data,$key,$secretKey);
 		}
 		
 		// This will decrypt Rijndael encoded data string, set with $data. $key and $secretKey 
@@ -605,8 +605,8 @@ class WWW_Factory {
 		// * data - data to be decrypted
 		// * key - key used for decryption
 		// * secretKey - used for calculating initialization vector (IV)
-		final protected function decryptRijndael256($data,$key,$secretKey=false){
-			$this->WWW_API->decryptRijndael256($data,$key,$secretKey);
+		final protected function decryptData($data,$key,$secretKey=false){
+			return $this->WWW_API->decryptData($data,$key,$secretKey);
 		}		
 		
 	// INTERNAL LOG ENTRY WRAPPER
@@ -799,6 +799,16 @@ class WWW_Factory {
 		// unsets user data from session.
 		final public function unsetPermissions(){
 			return $this->WWW_API->state->unsetPermissions();
+		}
+		
+		// This method returns the currently active public token that is used to increase security 
+		// against cross-site-request-forgery attacks. This method returns false if user session 
+		// is not populated, in which case public token is not needed. $regenerate sets if the token 
+		// should be regenerated if it already exists, this invalidates forms when Back button is 
+		// used after submitting data, but is more secure.
+		// * regenerate - If public token should be regenerated
+		final public function getPublicToken($regenerate=false){
+			return $this->WWW_API->state->getPublicToken($regenerate);
 		}
 		
 	// DATABASE WRAPPERS

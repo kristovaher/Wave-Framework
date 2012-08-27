@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Security - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Security</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Security is often an issue that developers give attention to once something goes wrong and their system is hacked and their users are compromised. This happens very often because creating a secure web system costs more than a non-secure one and even today there are millions of websites with ineffective security model. Wave Framework offers a handful of tools to protect a system that is built on Wave Framework, but the actual implementation of many of these methods remains up to the developer.</p>
+				
+				<p>This document will cover both the things you can do with Wave Framework as well as what you can do in general with your web server, in order to make your system as secure as possible. But remember that even if you do everything that this document says, you should always pay attention to new security alerts and vulnerabilities that may be discovered by hackers in modern web systems - from PHP exploits to database injection discoveries and bugs in all the software you use, including Wave Framework. Nothing is ever 100% secure.</p>
+				
+				<p>There is a separate document about API Security and you should also read through that documentation to learn the full capabilities of Wave Framework and its security model.</p>
+				
+			<h2>Database Injections</h2>
+			
+				<p>Database injections are the number one security threat in modern web systems. Database injection attack is about sending a malicious string to the web server, which the web server then uses as part of database query. This malicious string would modify the database query string to become different than the developer and system intended. This attack is what is responsible for majority of stolen passwords and hacked systems in modern web.</p>
+				
+				<p>Here is a code snippet that can be exploited:</p>
+				
+<pre>
+	<code>
+	...
+	// Getting the search key from URL GET query
+	$user=$_GET['user'];
+	// sending the request to database
+	$result=mysql_query('SELECT * FROM users WHERE id='.$user);
+	...
+	</code>
+</pre>
+
+				<p>The above code is exploitable, because the GET variable is never filtered or sanitized for use in our database query. For example, the hacker could change the 'user' variable on URL string to this:</p>
+				
+<pre>
+	<code>
+	// Below is the new value of what the hacker sets as the 'user' value in GET string
+	'0;DELETE * FROM users;'
+	// This would make your database query to the following
+	'SELECT * FROM users WHERE id=0;DELETE * FROM users;'
+	</code>
+</pre>
+
+				<p>As a result, all of your users would be deleted from database. There are ways to protect queries with mysql_* set of functions like this:</p>
+				
+<pre>
+	<code>
+	...
+	// Getting the search key from URL GET query
+	$user=$_GET['user'];
+	// Sanitizing the input - this escapes dangerous characters
+	$user=mysql_real_escape_string($user);
+	// sending the request to database and also adding quotes around the variable
+	$result=mysql_query('SELECT * FROM users WHERE id="'.$user.'";');
+	...
+	</code>
+</pre>
+
+				<p>This makes your database query secure. But it is still not the recommended method for protecting your website or web service. This is because you have to remember to add mysql_real_escape_string() for every single database query and reality is that this is very easy to forget.</p>
+				
+				<p>Today the modern websites and web systems make database requests with 'prepared statements'. Prepared statement is a statement that is built beforehand from two components: the query string and the array of query variables. This means that the query string is separate from the input variables entirely. Wave Framework has an internal database wrapper for PDO database class, which uses prepared statements and you can read more about making such database requests in Database documentation.</p>
+				
+				<p>But here is a secure request with prepared statements when used by Wave Framework MVC object:</p>
+				
+<pre>
+	<code>
+	...
+	// Getting the search key from URL GET query
+	$user=$_GET['user'];
+	// This builds the prepared statement, executes it and returns the result
+	$result=$this->dbSingle('SELECT * FROM users WHERE id=?;',array($user));
+	...
+	</code>
+</pre>
+				
+			<h2>Man-in-the-Middle Attacks</h2>
+			
+				<p>Man-in-the-Middle Attacks are attacks that take place by a third party that is between the user that uses your website or web service with a web browser and your web server. This 'middle man' listens to HTTP traffic and attempts to tamper with it in one way or another. Protecting against Man-in-the-Middle attacks can be difficult, depending on how your system is built and what technologies you are using.</p>
+			
+				<h3>Request Snooping and Session Hijacking</h3>
+				
+					<p>Request Snooping means that there is a middle man between your clients web browser and your web server. This means that someone can either listen to the data that client is sending to your web server, or listens to the data that is sent as a response.</p>
+					
+					<p>Every action in a modern website is a HTTP request, which is sent over internet connection to the web server. This means that all the data - including username and password when the user logs in - is sent over internet and if a third party listens in on this traffic, then that information can be stolen. This means that the 'middle man' can steal your client usernames and passwords and more sensitive information.</p>
+					
+					<p>It is also possible for the middle-man to steal cookies, including session cookies that are accessible only over HTTP, which is called Session Hijacking. This means that the attacker can steal a cookie and use this cookie to make actions on the behalf of the user.</p>
+					
+					<p><b>What you can do:</b></p>
+					
+					<ul>
+						<li><b>HTTPS</b> - If your website or web service uses HTTPS, then Request Snooping is a lot more difficult as it would require the 'middle man' to be either on the clients computer directly or on the web server, which is less likely. If client's own computer is compromised, then all the other websites that the client uses are also compromised and it is difficult - or near impossible - to detect this activity by your own web systems code. If your web server supports HTTPS, then you can turn on 'limiter' in your Wave Framework Configuration and the setting for 'https-limiter' as well, which enforces all requests on the web server to be sent over HTTPS.</li>
+						<li><b>Session Fingerprinting</b> - Session Hijacking can be protected against by assigning a unique fingerprint to the session that will be checked whenever sessions are used. If this fingerprint changes, then the session will become invalid in Wave Framework. Fingerprint consists of things like the user agent string, IP of the user and more. To use session fingerprinting you have to set the 'session-fingerprint' option in Configuration to 1. Alternative is to build your own session validation in your system that you check whenever a session is validated (like in URL Controller). Session Fingerprinting is only useful if your website or service actually uses sessions.</li>
+						<li><b>State Key</b> - If your system sends 'www-state' with the request, then Wave Framework will send the same 'www-state' back as response. If 'www-state' is different for each request, then you can be sure that the response for your request has likely not been tampered with, especially if you use hash validatations. This applies mostly only to API requests that have been sent with an API Wrapper, it is more difficult to check on a website. It is recommended to use validation hashes with these requests as well.</li>
+					</ul>
+			
+				<h3>Input/Output Tampering</h3>
+				
+					<p>Input/Output Tampering occurs when the middle man is able to see your HTTP request and change the data that is sent to your server. For example, the middle man can change the user data updating request to that of deleting the user. It is also possible for the 'middle man' to change the response before it returns to the client and even though that is more difficult it is never good to blindly trust data that is sent or received over HTTP.</p>
+					
+					<p><b>What you can do:</b></p>
+					
+					<ul>
+						<li><b>HTTPS</b> - If your website or web service uses HTTPS, then Input/Output Tampering is lot more difficult as it would require the 'middle man' to be either on the clients computer directly or on the web server, which is less likely. This is similar to how you would protect against Request Snooping and Session Hijacking detailed above.</li>
+						<li><b>Session Fingerprinting</b> - Input/Output Tampering can be protected against by assigning a unique fingerprint to the session that will be checked whenever sessions are used. If this fingerprint changes, then the session will become invalid in Wave Framework. This is similar to how you would protect against Request Snooping and Session Hijacking detailed above.</li>
+						<li><b>Data Validation</b> - Wave Framework has a data validation system that sends a hash string over HTTP that is created from input data and a session token or secret key. This means that if the data is changed before it arrives on web server, then web server will reject the request due to potential tampering. This can be used automatically through API Wrappers for PHP and JavaScript in Wave Framework.</li>
+					</ul>
+				
+				<h3>Replay Attacks</h3>
+				
+					<p>Replay Attacks are attacks that happen when the 'middle man' is able to see the request string sent to your web server by the user. This request string would be then sent again by the attacker, thus repeating the request. For example, if a user sends a request that adds a new product to your web service and middle man sees that request, then the middle man can send that request again to the server - thus creating a new product. Even if your requests are protected against tampering, it is possible to fall under replay attack, since the data that is sent with a replay attack is exactly the same.</p>
+					
+					<p>Replay Attack is most dangerous if it returns detailed information for the request sender. For example, if it returns user information as the response to the request. Replay attacks are very difficult to protect against in most cases.</p>
+					
+					<p><b>What you can do:</b></p>
+					
+					<ul>
+						<li><b>HTTPS</b> - If your website or web service uses HTTPS, then Replay Attacks are a lot more difficult as it would require the 'middle man' to be either on the clients computer directly or on the web server, which is less likely. This is similar to how you would protect against Request Snooping and Session Hijacking detailed above.</li>
+						<li><b>Session Fingerprinting</b> - Replay Attacks can be protected against by assigning a unique fingerprint to the session that will be checked whenever sessions are used. If this fingerprint changes, then the session will become invalid in Wave Framework. This is similar to how you would protect against Request Snooping and Session Hijacking detailed above.</li>
+						<li><b>Request Timestamp</b> - If your system sends 'www-timestamp' - with the current timestamp value set - with the request, then Wave Framework uses this to check if request happened within certain timeframe. If 'www-timestamp' is too old, then the request fails. This applies mostly only to API requests that have been sent with an API Wrapper, it is more difficult to check on a website. It is recommended to use validation hashes with these requests as well.</li>
+					</ul>
+				
+			<h2>XSS - Cross Site Scripting</h2>
+			
+				<p>Cross Site Scripting is one of the more common web security problems. This type of attack happens when users can enter data to a website that is then shown to other users of that website. For example, if the attacker writes a comment to an article that includes malicious code, then this malicious code would be run on every other user who enters on the website.</p>
+				
+				<p>For example, if an attacker adds this as a comment to an article:</p>
+				
+<pre>
+	<code>
+	&lt;script type=&quot;text/javascript&quot;&gt;alert('boo');&lt;/script&gt;
+	</code>
+</pre>
+
+				<p>If the above snippet is added as a comment to the article, then every user who visits that page with the comments would encounter a JavaScript alert. While an alert is just an annoyance, this type of attack can be far more destructive. For example, the user could be redirected to another malicious website or the users cookies can be stolen if they are not protected from script access.</p>
+				
+				<p><b>What you can do:</b></p>
+				
+				<ul>
+					<li><b>Escape/Sanitize/Filter</b> - Always sanitize any data that is shown as an output on your web page that the visitor of the web page has entered. Users should generally never enter JavaScript or HTML to your website that is then shown to other users. Good idea is to output data through htmlspecialchars() PHP method which converts all HTML specific characters to their HTML entities.</li>
+					<li><b>HTTPOnly Cookies</b> - Make sure that your sensitive cookies - like session cookies - are only accessible over HTTP. This means that 'httponly' is set to true if you use Wave Framework's setCookie() method. This makes sure that JavaScript cannot access your session cookie.</li>
+				</ul>
+				
+			<h2>CSRF - Cross Site Request Forgery</h2>
+			
+				<p>This type of attack is one of the more complicated attacks that modern websites and web services have to deal with today. CSRF attacks are very dangerous because they only happen to users that are already logged in to your website and to the web server they seem to be entirely authenticated and make valid requests.</p>
+				
+				<p>This is the general overview of a Cross Site Request Forgery attack:</p>
+				
+				<ul>
+					<li>User logs in to your web system with correct username and password. Session cookie is created.</li>
+					<li>User visits a malicious website. Either through e-mail spam or a link they found in comments or more, with the same browser.</li>
+					<li>This malicious website makes a request to your web system or website with the users browser.</li>
+					<li>Since your web server considers the attack as valid, the action is considered successful.</li>
+				</ul>
+				
+				<p>This type of attack can be used to delete user accounts or post spam comments and more, to other systems, that seem to originate from the actual authenticated user. Because the attack uses the same browser and the same session that the user is on, there is no easy way to make sure that the request originates from the user or not.</p>
+				
+				<p>The only protection against such an attack is to add a new 'token' to each request that the attacker cannot easily guess or steal. This token would be then validated by the system with every single request before the request will be authenticated. Since this token is only generated to the user on the form while they are on the actual website, then this token cannot be easily duplicated by the attacker.</p>
+				
+				<p>Wave Framework includes such a protection, but it is optional. It is optional primarily because there are many websites or web services that do not implement user accounts or would not really be valid targets for attackers. But to use this system, you have to change Configuration setting of 'api-public-token' to 1. This setting tells Wave Framework that if user account session exists (the one created with setUser() method calls), then it requires every API request to include a 'www-public-token' input value.</p>
+				
+				<p>For example, if you have an active user session, then this is required:</p>
+				
+<pre>
+	<code>
+	&lt;form method=&quot;POST&quot; action=&quot;http://www.example.com/php.api?www-command=example-get&quot;&gt;
+		&lt;input type=&quot;hidden&quot; name=&quot;www-public-token&quot; value=&quot;&lt;?=$this-&gt;getPublicToken()?&gt;&quot;/&gt;
+		&lt;input type=&quot;submit&quot; value=&quot;post&quot;/&gt;
+	&lt;/form&gt;
+	</code>
+</pre>
+
+				<p>As a result, this request will only be successful if the 'www-public-token' value matches as that in the server session. And since the attacker does not know the value, the CSRF attack will fail. It is also possible to regenerate the public token by sending 'true' as the first parameter, but note that this would mean that after user has submitted something and pressed Back button on their browsers, the new form submit will fail due to incorrect token.</p>
+				
+				<p>Note that this 'www-public-token' would only be required by the public API profile. So this value is not needed for server-to-server communications between validated API sessions that are not subject to Cross Site Request Forgery attacks.</p>
+				
+			<h2>Secure Passwords</h2>
+			
+				<p>Whenever you store user passwords in your database (and it is recommended to store user access credentials in your database, rather than filesystem), then there are a couple of things you should always remember. No matter what, you should never-ever store user password as plain text in your database. This means that you should never be able to tell what password the user has and you should never be able to send user their password when they have forgotten it.</p>
+				
+				<p>This means that you should implement only the forgotten-password type of mechanics where the users can generate a new password rather than retrieve their old password.</p>
+				
+				<p>All this is because should your passwords be stolen - and you can never be sure that they are not stolen in some way - then you need to make sure that the passwords are secure enough for long enough time so that the users can be notified and can change their passwords.</p>
+				
+				<p>Below are examples of badly or weakly generated passwords:</>
+				
+			<h2>Two-Step Authentication</h2>
+			
+				<p>This type of authentication system means that username and password are never 'enough' to authenticate a user to a website. This usually means that once correct username and password has been entered by the user, then the web system sends out an e-mail to the user or a text message that the user has to click or use a code from that message in order to validate their new session. This authentication is often optional, but is becoming increasingly common as a more secure way of protecting your user accounts.</p>
+			
+				<p>Two-Step Authentication is not implemented in Wave Framework natively, since there are many different ways to do such an authentication. But here is the step-by-step process for such a system:</p>
+				
+				<ul>
+					<li>User enteres username and password to your website.</li>
+					<li>System validates the username and password.</li>
+					<li>If username and password are correct, then it sends out an e-mail or text message with a link and/or code. This link/code must be unique for each log-in.</li>
+					<li>If user clicks on the link in their e-mail or enters the code they received, then they are logged in. Every link/code can only be used once.</li>
+					<li>User uses the system as before.</li>
+				</ul>
+				
+			<h2>Denial of Service Attacks</h2>
+			
+				<p>Denial of Service Attacks are attacks that are almost impossible to protect against. DoS attacks essentially mean that your web server gets a lot of requests at the same time and for a long period of time. And if your server gets a lot of requests, then it becomes slow and/or breaks entirely, making the website or service inaccessible to your users.</p>
+				
+				<p>Wave Framework implements a feature that you can limit the amount of requests from a single IP per minute. This means that if too many requests are made per minute, then the web system will quickly tell the request-making client that they have made too many requests and are blocked for certain amount of time. You can turn on 'limiter' and 'request-limiter' settings in Configuration to use this. The value of 'request-limiter' is the amount of requests that are allowed from the same IP per minute.</p>
+				
+				<p>This however is not good enough against some forms of Denial of Service Attacks. Your server still has to respond to those requests in some form. You can protect your server better by having your web administrator or hosting provider block those requests from those IP addresses through your web server software - like through Apache - directly. This will help minimize the DoS attack even further.</p>
+				
+				<p>Most problematic form of DoS attack is Distributed Denial of Service Attack. This means that multiple IP addresses across the world are pushing for DoS attack at the same time. This type of attacks are near-impossible to protect against and require the administrator and/or developer to take a look at the requests and detect a pattern in those requests that they can then block. Distributed attacks like this take a lot of resources however and most web systems are unlikely to face such attacks.</p>
+			
+	</body>
+</html>

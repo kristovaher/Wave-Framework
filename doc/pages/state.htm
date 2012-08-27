@@ -87,6 +87,7 @@
 						<li><b>api-logging</b> - If this is set to false, then API logging is not used. Otherwise this should be an array of logging flags.</li>
 						<li><b>api-profile</b> - Currently used API profile, this is set by the API.</li>
 						<li><b>api-public-profile</b> - API profile name that is considered public.</li>
+						<li><b>api-public-token</b> - If this is set to 1, then a public API token is required to be sent with all web forms.</li>
 						<li><b>base-url</b> - Base URL that is used for HTML views and resource locations.</li>
 						<li><b>blacklist-limiter</b> - Comma-separated list of IP addresses that are blocked from making HTTP requests.</li>
 						<li><b>client-ip</b> - IP address of the client that makes the request, this is detected by the system and takes into account proxies.</li>
@@ -111,7 +112,7 @@
 						<li><b>enforce-first-language-url</b> - True or false flag for whether language node is required as part of the request URL.</li>
 						<li><b>enforce-url-end-slash</b> - True or false flag for whether end URL slash is required as part of the request URL.</li>
 						<li><b>file-robots</b> - Robots command string for file downloads.</li>
-						<li><b>fingerprint</b> - Fingerprint string about the user agent</li>
+						<li><b>fingerprint</b> - Fingerprint string about the user agent that made the request.</li>
 						<li><b>forbidden-extensions</b> - Array of file extensions that cannot be requested over HTTP.</li>
 						<li><b>headers-set</b> - This is the list of headers to be set. Value assigns whether it should replace previously set header like that or not.</li>
 						<li><b>headers-unset</b> - This is the list of headers that should be moved.</li>
@@ -131,6 +132,7 @@
 						<li><b>http-host</b> - HTTP host of the server.</li>
 						<li><b>http-if-modified-since</b> - If-modified-since date if user agent sends the request with the value.</li>
 						<li><b>http-input</b> - Data stream if sent with the request, such as when sending an XML with POST.</li>
+						<li><b>http-referrer</b> - This carries the URL where the request came from. This is not sent with some browsers at all times or proxies.</li>
 						<li><b>http-request-method</b> - Request method used for current HTTP request. Usually GET or POST, but also HEAD.</li>
 						<li><b>https-limiter</b> - True or false flag for whether HTTPS is required for requests.</li>
 						<li><b>https-mode</b> - True or false flag for whether current request uses HTTPS or not.</li>
@@ -276,6 +278,10 @@
 				<h3>final public function unsetPermissions()</h3>
 				
 					<p>This unsets permissions data from session similarly to how unsetUser() method unsets user data from session.</p>
+				
+				<h3>final public function getPublicToken($regenerate=false)</h3>
+				
+					<p>This method returns the currently active public token that is used to increase security against cross-site-request-forgery attacks. This method returns false if user session is not populated, in which case public token is not needed. $regenerate sets if the token should be regenerated if it already exists, this invalidates forms when Back button is used after submitting data, but is more secure.</p>
 				
 				<h3>final public function startSession($lifetime=0,$secure=false,$httpOnly=true)</h3>
 				

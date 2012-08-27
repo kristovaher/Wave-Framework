@@ -56,6 +56,7 @@ class WWW_State	{
 				'api-logging'=>false,
 				'api-profile'=>'public',
 				'api-public-profile'=>'public',
+				'api-public-token'=>false,
 				'base-url'=>false,
 				'blacklist-limiter'=>false,
 				'client-ip'=>__IP__,
@@ -100,6 +101,7 @@ class WWW_State	{
 				'http-host'=>$_SERVER['HTTP_HOST'],
 				'http-if-modified-since'=>false,
 				'http-input'=>false,
+				'http-referrer'=>((isset($_SERVER['HTTP_REFERER']))?$_SERVER['HTTP_REFERER']:false),
 				'http-request-method'=>$_SERVER['REQUEST_METHOD'],
 				'https-limiter'=>false,
 				'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
@@ -805,7 +807,6 @@ class WWW_State	{
 				// Returning entire user array
 				return $this->data['user-data'];
 			}
-
 		}
 		
 		// This unsets user data and removes the session of user data.
@@ -880,6 +881,30 @@ class WWW_State	{
 			// Unsetting the state variable
 			$this->data['user-permissions']=false;
 			return true;
+		}
+		
+		// This method returns the currently active public token that is used to increase security 
+		// against cross-site-request-forgery attacks. This method returns false if user session 
+		// is not populated, in which case public token is not needed. $regenerate sets if the token 
+		// should be regenerated if it already exists, this invalidates forms when Back button is 
+		// used after submitting data, but is more secure.
+		// * regenerate - If public token should be regenerated
+		final public function getPublicToken($regenerate=false){
+			// This is only required to protect users with active sessions
+			if($this->getUser()){
+				// Public token is stored in the session
+				$token=$this->getSession('www-public-token');
+				if($token && $token!='' && !$regenerate){
+					return $token;
+				} else {
+					// Generating a new token
+					$token=sha1($this->data['client-ip'].$this->data['request-id'].microtime().rand(1,1000000));
+					$this->setSession('www-public-token',$token);
+					return $token;
+				}
+			} else {
+				return false;
+			}
 		}
 		
 	// SESSION AND COOKIES

@@ -154,6 +154,10 @@
 				<h3>www-disable-callbacks</h3>
 				
 					<p>If this is set to 1, then any callbacks that have been set in the system will not be used. This allows to disable things such as redirects and other similar functionality, when it would otherwise be set through the Controller.</p>
+					
+				<h3>www-public-token</h3>
+				
+					<p>This is required if public API profile is used and the setting for 'api-public-token' in Configuration is set to 1. This means that it requires that a request token - used to protect against Cross Site Request Forgery - is set and is the same as the one stored in sessions. This is only required if you use sessions and store data in Wave Framework setUser() storage.</p>
 				
 			<h2>API Output - Flags and Values</h2>
 			

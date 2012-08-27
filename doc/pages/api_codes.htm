@@ -38,6 +38,10 @@
 				
 					<p>This message is thrown when 'www-command' was missing from the API request. This variable is required for Wave Framework API to know what controller and method is being requested.</p>
 					
+				<h3>102 - API public requests require a public request token</h3>
+				
+					<p>This means that the API request, which used public API profile, did not provide a public request token. Either the token was not added to the request or was incorrect. Public request tokens protect the website from cross-site-request-forgeries.</p>
+					
 				<h3>102 - API profile not found</h3>
 				
 					<p>API profile that is used with the request (sent as 'www-profile') was not found in the API profiles file. You should double-check to make sure this profile actually exists.</p>

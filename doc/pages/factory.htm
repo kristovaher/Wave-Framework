@@ -169,6 +169,8 @@
 				<h3>final protected function setPermissions($permissions)</h3>
 			
 				<h3>final public function unsetPermissions()</h3>
+			
+				<h3>final public function getPublicToken($regenerate=false)</h3>
 				
 				<h3>final public function setHeader($header,$replace=true)</h3>
 				
@@ -196,9 +198,11 @@
 			
 				<h3>final protected function unsetCache($key)</h3>
 				
-				<h3>final protected function encryptRijndael256($data,$key,$secretKey=false)</h3>
+				<h3>final protected function encryptData($data,$key,$secretKey=false)</h3>
 			
-				<h3>final protected function decryptRijndael256($data,$key,$secretKey=false)</h3>
+				<h3>final protected function decryptData($data,$key,$secretKey=false)</h3>
+			
+				<h3>final protected function generateSecretKey($length=32)</h3>
 			
 				<h3>final protected function internalLogEntry($key,$data=false)</h3>
 			

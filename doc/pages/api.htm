@@ -190,13 +190,17 @@
 					
 					<p>This attempts to convert the data array of $apiResult to INI format. It handles also subarrays and other possible conditions in the array.</p>
 					
-				<h3>final public function encryptRijndael256($data,$key,$secretKey=false)</h3>
+				<h3>final public function encryptData($data,$key,$secretKey=false)</h3>
 					
 					<p>This method uses API class internal encryption function to encrypt $data string with a key and a secret key (if set). If only $key is set, then ECB mode is used for Rijndael encryption.</p>
 					
-				<h3>final public function decryptRijndael256($data,$key,$secretKey=false)</h3>
+				<h3>final public function decryptData($data,$key,$secretKey=false)</h3>
 					
 					<p>This will decrypt Rijndael encoded data string, set with $data. $key and $secretKey should be the same that they were when the data was encrypted.</p>
+			
+				<h3>final protected function generateSecretKey($length=32)</h3>
+				
+					<p>This function returns a secret key of 32 characters in length that is suitable for Rijndael encryptions. $length is 32 characters by default.</p>
 					
 				<h3>final public function unsetTaggedCache($tags)</h3>
 					

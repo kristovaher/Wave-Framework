@@ -48,6 +48,7 @@ function WWW_Wrapper(address,language){
 		apiProfile:false,
 		apiSecretKey:false,
 		apiToken:false,
+		apiPublicToken:false,
 		apiHashValidation:true,
 		returnHash:false,
 		returnTimestamp:false,
@@ -211,6 +212,14 @@ function WWW_Wrapper(address,language){
 						log.push('API request will not require timestamp validation');
 					}
 					break;
+				case 'www-public-token':
+					apiState.apiPublicToken=value;
+					if($value){
+						log.push('API public token set to: '+$value);
+					} else {
+						log.push('API public token unset');
+					}
+					break;
 				case 'www-return-type':
 					inputData[input]=value;
 					log.push('Input value of "'+input+'" set to: '+value);
@@ -319,10 +328,11 @@ function WWW_Wrapper(address,language){
 				apiState.apiProfile=false;
 				apiState.apiSecretKey=false;
 				apiState.apiToken=false;
+				apiState.apiPublicToken=false;
 				apiState.apiHashValidation=true;
 				apiState.returnHash=false;
 				apiState.returnTimestamp=false;
-				apiState.timestampDuration=10;
+				apiState.timestampDuration=60;
 			}
 			// Resetting the API state test key
 			apiState.apiStateKey=false;
@@ -387,9 +397,13 @@ function WWW_Wrapper(address,language){
 			if(thisApiState.returnTimestamp==true || thisApiState.returnTimestamp==1){
 				thisInputData['www-return-timestamp']=1;
 			}
-			// Assigning return-timestamp flag to request
+			// Assigning return-hash flag to request
 			if(thisApiState.returnHash==true || thisApiState.returnHash==1){
 				thisInputData['www-return-hash']=1;
+			}
+			// Assigning public API token as part of the request
+			if(thisApiState.apiPublicToken){
+				thisInputData['www-public-token']=thisApiState.apiPublicToken;
 			}
 
 			// If language is set

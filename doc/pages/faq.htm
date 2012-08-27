@@ -91,5 +91,31 @@
 
 				<p>Wave Framework JavaScript API Wrapper can also fall back to jQuery, if it detects that jQuery is enabled. If jQuery is defined and JSON object is not available in the browser, then the Wrapper will parse the response with 'parseJSON()' method from jQuery automatically.</p>
 					
+			<h3>If I want to return RSS data through API handler, how would I format the data array?</h3>
+			
+				<p>Wave Framework has simple methods that allow you to convert data to XML (and thus RSS) format from an array. An example array for an RSS feed would be like this:</p>
+				
+<pre>
+	<code>
+		$data=array(
+			'channel'=&gt;array(
+				'title'=&gt;'RSS Title',
+				'description'=&gt;'This is an example RSS description',
+				'link'=&gt;'http://www.example.com',
+				'lastBuildDate'=&gt;date('D, d M Y H:i:s O',time()),
+				'pubDate'=&gt;date('D, d M Y H:i:s O',time()),
+				'ttl'=&gt;1800,
+				'item'=&gt;array(
+					'title'=&gt;'Example title',
+					'description'=&gt;'Example description',
+					'link'=&gt;'http://www.example.com',
+					'guid'=&gt;'unique string per item',
+					'pubDate'=&gt;date('D, d M Y H:i:s O',time())
+				)
+			)
+		);
+	</code>
+</pre>
+					
 	</body>
 </html>

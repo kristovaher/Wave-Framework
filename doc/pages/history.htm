@@ -23,7 +23,8 @@
 			<h2>3.x.x</h2>
 			
 				<ul>
-					<li><b>3.1.0</b> - Much-improved session handling for situations where session data is rapidly modified and set or unset with different session ID values.</li>
+					<li><b>3.1.2</b> - Added public request tokens as methods to protect against cross-site-request-forgeries. Added Security Feature Guide documentation page.</li>
+					<li><b>3.1.0</b> - Much-improved session handling for situations where session data is rapidly modified and set or unset with different session ID values. Added support for XML attributes in the output array conversion.</li>
 					<li><b>3.0.9</b> - PHP and JavaScript wrappers now also accept anonymous functions as callbacks. Callback keywords have also been renamed to 'www-true-callback', 'www-false-callback' to be similar to standardized error arrays returned from Controllers. Also added a jQuery fallback for parsing JSON in older versions of Internet Explorer.</li>
 					<li><b>3.0.8</b> - It is now possible to set the lifetime of session cookie with startSession() method, with the lifetime as the first parameter. Also added improved session handling that now regenerates session keys based on new 'session-lifetime' configuration setting. Also added session fingerprinting to prevent some forms of session hijacking.</li>
 					<li><b>3.0.7</b> - Fixed a bug where cached result of URL Controller could have failed to change the State data about current View.</li>

@@ -33,6 +33,7 @@ class WWW_Wrapper {
 		'apiProfile'=>false,
 		'apiSecretKey'=>false,
 		'apiToken'=>false,
+		'apiPublicToken':false,
 		'apiHashValidation'=>true,
 		'apiStateKey'=>false,
 		'returnHash'=>false,
@@ -295,6 +296,14 @@ class WWW_Wrapper {
 						$this->log[]='API request will not require timestamp validation';
 					}
 					break;
+				case 'www-public-token':
+					$this->apiState['apiPublicToken']=$value;
+					if($value){
+						$this->log[]='API public token set to: '.$value;
+					} else {
+						$this->log[]='API public token unset';
+					}
+					break;
 				case 'www-return-type':
 					$this->inputData[$input]=$value;
 					$this->log[]='Input value of "'.$input.'" set to: '.$value;
@@ -450,6 +459,7 @@ class WWW_Wrapper {
 				$this->apiState['apiProfile']=false;
 				$this->apiState['apiSecretKey']=false;
 				$this->apiState['apiToken']=false;
+				$this->apiState['apiPublicToken']=false;
 				$this->apiState['apiHashValidation']=true;
 				$this->apiState['returnHash']=false;
 				$this->apiState['returnTimestamp']=false;
@@ -530,9 +540,13 @@ class WWW_Wrapper {
 			if($thisApiState['returnTimestamp']==true || $thisApiState['returnTimestamp']==1){
 				$thisInputData['www-return-timestamp']=1;
 			}
-			// Assigning return-timestamp flag to request
+			// Assigning return-hash flag to request
 			if($thisApiState['returnHash']==true || $thisApiState['returnHash']==1){
 				$thisInputData['www-return-hash']=1;
+			}
+			// Assigning public API token as part of the request
+			if($thisApiState['apiPublicToken']){
+				$thisInputData['www-public-token']=$thisApiState['apiPublicToken'];
 			}
 			
 			// If language is set
@@ -601,7 +615,7 @@ class WWW_Wrapper {
 						if(extension_loaded('mcrypt')){
 							// Data is encrypted with Rijndael 256bit encryption
 							if($thisApiState['apiToken']){
-								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),json_encode($thisCryptedData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey'])));
+								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),json_encode($thisCryptedData),MCRYPT_MODE_CBC,$thisApiState['apiSecretKey']));
 							} else {
 								$thisInputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiSecretKey']),json_encode($thisCryptedData),MCRYPT_MODE_ECB));
 							}
@@ -883,7 +897,7 @@ class WWW_Wrapper {
 					// Decryption is different based on whether secret key was used or not
 					if($thisApiState['apiSecretKey']){
 						// If secret key was set, then decryption uses the secret key for initialization vector
-						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey']));
+						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_CBC,$thisApiState['apiSecretKey']);
 					} else {
 						// Without secret key the system assumes that public profile is used and decryption is done in ECB mode
 						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_ECB);

@@ -205,6 +205,10 @@
 				
 				<p>This sets the default profile name of a public profile - when profile name itself is not set in the request. This profile must have profile settings set in /resources/api.profiles.ini file.</p>
 				
+				<p><b>api-public-token</b></p>
+				
+				<p>If this setting is set to 1, then public API requests require a 'www-public-token' as part of HTTP API requests that do not use an authenticated API profile. This token has to be generated to and submitted with all the forms on the website. This is set to 0 by default, but is recommended to be implemented on websites and services that implement user accounts and other similar systems as a protection for cross-site-request-forgery attacks. Note that this token is only actually checked if the user is 'logged in' (user session data is populated).</p>
+				
 				<p><b>internal-logging</b></p>
 				
 				<p>It's possible to log specific messages in internal log by sending such a command from MVC objects of Wave Framework. This setting here acts as a filter to those messages. Every message is stored with a 'key' and in here you can set which keys are logged and which keys are ignored. Setting it to '*' will mean that everything will be logged. If a key has exclamation mark before it, then that key will be ignored. Wave Framework has two default internal log messages 'input-data' and 'output-data' which are ignored by default, but sometimes it is recommended to turn them on for debugging purposes. This internal log can be read from developer tools as /tools/log-reader.php?internal URL. This setting is not used by default and thus internal logging is disabled.</p>

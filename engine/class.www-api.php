@@ -1370,11 +1370,7 @@ final class WWW_API {
 		// * secretKey - used for calculating initialization vector (IV)
 		final public function encryptData($data,$key,$secretKey=false){
 			if($secretKey){
-				// Converting key to 32 characters, if not proper length
-				if(strlen($secretKey)!=32){
-					$secretKey=md5($secretKey);
-				}
-				return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($key),$data,MCRYPT_MODE_CBC,$secretKey));
+				return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($key),$data,MCRYPT_MODE_CBC,md5($secretKey)));
 			} else {
 				return base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($key),$data,MCRYPT_MODE_ECB));
 			}
@@ -1387,20 +1383,10 @@ final class WWW_API {
 		// * secretKey - used for calculating initialization vector (IV)
 		final public function decryptData($data,$key,$secretKey=false){
 			if($secretKey){
-				// Converting key to 32 characters, if not proper length
-				if(strlen($secretKey)!=32){
-					$secretKey=md5($secretKey);
-				}
-				return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($key),base64_decode($data),MCRYPT_MODE_CBC,$secretKey));
+				return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($key),base64_decode($data),MCRYPT_MODE_CBC,md5($secretKey)));
 			} else {
 				return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($key),base64_decode($data),MCRYPT_MODE_ECB));
 			}
-		}
-		
-		// This function returns a secret key of 32 characters in length that is suitable for
-		// Rijndael encryptions. $length is 32 characters by default.
-		final public function generateSecretKey($length=32){
-			return mcrypt_create_iv(32,MCRYPT_DEV_RANDOM);
 		}
 		
 	// CACHE AND BUFFER

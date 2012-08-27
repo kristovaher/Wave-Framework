@@ -24,7 +24,7 @@
 				
 				<ul>
 					<li>It uses ECB mode if secret key (technically initialization vector) is not used and uses CBC mode if it is used. CBC mode is more secure than ECB mode.</li>
-					<li>It makes sure that the key and initialization vector are always in the accepted length. Best secret key - that the wrapper uses as initialization vector - has 32 non-ASCII characters.</li>
+					<li>It makes sure that the key and initialization vector are always in the accepted length. It does this by casting md5() on the key and initialization vector. This reduces the effectiveness of encryption algorithm but makes it more flexible for use.</li>
 					<li>Wrapper also encodes the encryption in Base64, so it can be handled easier and decodes it from Base64 when doing the decryption.</li>
 					<li>Wrapper also trims the decrypted string of any characters that might make the decrypted string not match the source. This is important when validating with encryption.</li>
 				</ul>
@@ -81,16 +81,6 @@
 </pre>
 
 				<p>Whether to encrypt data in ECB or CBC mode is entirely up to the developer. Even an encryption without the initialization vector or secret key is very difficult to decrypt, but the CBC mode should be used whenever you wish to make sure that you are using the best encryption that is available through Wave Framework.</p>
-				
-				<p>It is also possible to easily generate a secure secret key that is used as initialization vector, like this:</p>
-			
-<pre>
-	<code>
-	...
-	$newSecretKey=$this->generateSecretKey();
-	...
-	</code>
-</pre>
 			
 	</body>
 </html>

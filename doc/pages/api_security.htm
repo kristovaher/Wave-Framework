@@ -53,21 +53,13 @@
 				<p>These settings are used for non-public and authenticated API profiles only:</p>
 				
 				<ul>
-					<li><b>secret-key</b> - This is the secret key (or password) of the API profile. This is used for creating new session tokens as well as for encryption and decryption of data. This must be at least 32 characters in length for adequate security. 32 of non-ASCII characters offers the best security.</li>
+					<li><b>secret-key</b> - This is the secret key (or password) of the API profile. This is used for creating new session tokens as well as for encryption and decryption of data.</li>
 					<li><b>token-timeout</b> - This setting tells API how long, in seconds, can an API token remain unused before being considered timed out. By default this value is 'infinite' and API session tokens do not expire.</li>
 					<li><b>timestamp-timeout</b> - This tells API that if www-timestamp is provided with the HTTP request, then how big a difference is accepted by the API profile in seconds for the request to still be considered valid. If request 'www-timestamp' value is different more than the value of this setting, compared to server timestamp, then the request is considered as failed.</li>
 					<li><b>hash-validation</b> - This setting is set to 1 by default. If this is set to 1, then hash-based validation is used, which means that a 'www-hash' value has to be generated from input data together with secret key or session token and sent with the request. Server will compare this value to its own calculated value and if it finds a difference, then the request is considered as failed.</li>
 				</ul>
 				
 				<p>You can define as many API profiles as you need in this file, or you can also generate this file yourself from database or through other methods.</p>
-				
-				<p>If you are adding new secret keys, then you can generate them in Wave Framework with the following method call:</p>
-				
-<pre>
-	<code>
-	$newSecretKey=$this->generateSecretKey();
-	</code>
-</pre>
 				
 			<h2>Basic Request from PHP</h2>
 			
@@ -486,7 +478,7 @@
 	...
 	// $myApiToken would be the 'www-token' value returned from API
 	// $mySecretKey would be the secret key of the API profile
-	$inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($myApiToken),json_encode($secretData),MCRYPT_MODE_CBC,$mySecretKey));
+	$inputData['www-crypt-input']=base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256,md5($myApiToken),json_encode($secretData),MCRYPT_MODE_CBC,md5($mySecretKey)));
 	...
 	</code>
 </pre>

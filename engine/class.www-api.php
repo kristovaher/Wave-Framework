@@ -507,7 +507,7 @@ final class WWW_API {
 						
 							// If session token subdirectory does not exist, it is created
 							if(!is_dir($apiState['token-directory'])){
-								if(!mkdir($apiState['token-directory'],0777)){
+								if(!mkdir($apiState['token-directory'],0755)){
 									return $this->output(array('www-message'=>'Server configuration error: Cannot create session token folder','www-response-code'=>100),$apiState);
 								}
 							}
@@ -696,7 +696,7 @@ final class WWW_API {
 						
 							// If cache subdirectory does not exist, it is created
 							if(!is_dir($cacheFolder)){
-								if(!mkdir($cacheFolder,0777)){
+								if(!mkdir($cacheFolder,0755)){
 									return $this->output(array('www-message'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),$apiState);
 								}
 							}

@@ -343,7 +343,7 @@ class WWW_State	{
 			// Finding data folder
 			$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
 			if(!is_dir($dataFolder)){
-				if(!mkdir($dataFolder,0777)){
+				if(!mkdir($dataFolder,0755)){
 					trigger_error('Cannot create messenger folder',E_USER_ERROR);
 				}
 			}

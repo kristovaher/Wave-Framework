@@ -187,7 +187,7 @@ class WWW_Logger {
 			// Finding the subfolder of the log file, if subfolder does not exist then it is created
 			$logSubfolder=substr($logFileName,0,10);
 			if(!is_dir($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR)){
-				if(!mkdir($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR,0777)){
+				if(!mkdir($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR,0755)){
 					trigger_error('Cannot create log folder',E_USER_ERROR);
 				}
 			}

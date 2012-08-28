@@ -68,7 +68,7 @@ class WWW_Limiter {
 			$this->logDir.=$cacheSubfolder.DIRECTORY_SEPARATOR;
 			if(!is_dir($this->logDir)){
 				// Error is returned if creating the limiter folder with proper permissions does not work
-				if(!mkdir($this->logDir,0777)){
+				if(!mkdir($this->logDir,0755)){
 					trigger_error('Cannot create limiter folder',E_USER_ERROR);
 				}
 			}

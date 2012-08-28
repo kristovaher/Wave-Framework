@@ -61,7 +61,7 @@ INSTALLATION
 
  1. Unpack the Wave Framework downloaded archive.
  2. Configuration file in root directory /config.ini of the archive should be configured according to your needs. Read more about configuration from Wiki.
- 3. Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writable by PHP, for example with command chmod 0777 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 777) or with any other FTP software. This is not required on Windows server.
+ 3. Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writable by PHP, for example with command chmod 0755 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 0755) or with any other FTP software. This is not required on Windows server.
  4. Wave Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 6a and 6b, depending on your server.
  5a. This only applies to Apache server: In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again.
  5b. This only applies to Nginx server: For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.

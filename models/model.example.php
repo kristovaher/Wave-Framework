@@ -1,50 +1,87 @@
 <?php
 
-/*
-Wave Framework
-Example Model
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Example Model
+ *
+ * It is recommended to extend View classes from WWW_Factory in order to 
+ * provide various useful functions and API access for the view.
+ *
+ * @package    Factory
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    Unrestricted
+ * @tutorial   /doc/pages/guide_mvc.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
-Minimal example model for demonstration purposes.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: This file can be copied, changed and re-published under another license without any restrictions
-*/
-
-// WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_model_example extends WWW_Factory {
 
-	// All the variables of this model should be stored here
+	/**
+	 * It is recommended to define all data variables here. Usually the 
+	 * data variables have the same names as the column names of database 
+	 * rows from a table.
+	 */
 	public $id=0;
 	public $name='';
-	
-	// This is like __construct() but for Factory-created objects
+
+	/**
+	 * Alternative to __construct()
+	 *
+	 * WWW_Factory does not allow to overwrite __construct() method, so 
+	 * this __initialize() is used instead and loaded automatically when 
+	 * object is created.
+	 *
+	 * @return boolean
+	 */
 	public function __initialize(){
 		// Do something here
 		return true;
 	}
 
-	// This is intended to load data from database
-	// * id - Identifier of the object loaded
+	/**
+	 * This is intended to load data from database
+	 *
+	 * @param integer [$id] identifier of the object loaded
+	 * @return boolean
+	 */
 	public function load($id){
-		// Actual database query should be built here
-		$this->id=$id;
-		$this->name='Lorem Ipsum #'.rand(1,1000); // This is used for simply testing cache
-		return true;
+		// $data=$this->dbSingle('SELECT * FROM table WHERE id=?',array($id));
+		// if($data){ 
+			$this->id=$id;
+			$this->name='Lorem Ipsum #'.rand(1,1000); // This is used for simply testing cache
+			return true;
+		// } else {
+			// return false; 
+		// }
 	}
 
-	// This returns all of the data of currently open object
+	/**
+	 * This returns all of the data of currently open object
+	 *
+	 * @return array
+	 */
 	public function get(){
-		// Data is returned as an array
+		// Current Data is returned as an array
 		return array(
 			'id' => $this->id,
 			'name'=>$this->name
 		);
 	}
 
-	// This function is intended to save data to database
+	/**
+	 * This function is intended to save data to database
+	 *
+	 * @return boolean
+	 */
 	public function save(){
-		// Actual database query should be built here
-		return true;
+		// $update=$this->dbCommand('UPDATE table SET name=? WHERE id=?',array($this->name,$this->id));
+		// if($update){
+			return true;
+		// } else { 
+			// return false;
+		// }
 	}
 
 }

@@ -1,22 +1,33 @@
 <?php
 
-/*
-Wave Framework
-View Controller
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * URL Controller
+ *
+ * Wave Framework comes with a View Controller and a translations system that is used to build 
+ * a website on Wave Framework. This View Controller is entirely optional and can be removed 
+ * from a system if you plan to implement your own View Controller or simply use Wave Framework 
+ * for API, without a website.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_view.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
-Wave Framework comes with a View Controller and a translations system that is used to build 
-a website on Wave Framework. This View Controller is entirely optional and can be removed 
-from a system if you plan to implement your own View Controller or simply use Wave Framework 
-for API, without a website.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: This file can be copied, changed and re-published under another license without any restrictions
-*/
-
-// WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_controller_view extends WWW_Factory {
 
-	// This is called by index.php gateway when initializing view
+	/**
+	 * This method is called by Data Handler to render View contents based on values from 
+	 * URL Controller.
+	 *
+	 * @param array [$input] input data sent to controller
+	 * @input mixed input data from URL Controller output
+	 * @return null
+	 */
 	public function load($input){
 	
 		// Unsetting input data that are only used by API and are accessible elsewhere by the user
@@ -131,6 +142,9 @@ class WWW_controller_view extends WWW_Factory {
 				</body>
 			</html>
 		<?php
+		
+		// API Will load result data from output buffer
+		return null;
 	
 	}
 	

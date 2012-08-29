@@ -1,33 +1,48 @@
 <?php
 
-/*
-Wave Framework
-URL Controller
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * URL Controller
+ *
+ * Wave Framework comes with a URL Controller and a sitemap system that is used to build a 
+ * website on Wave Framework. This URL controller is entirely optional and can be removed 
+ * from a system if you plan to implement your own URL Controller or simply use Wave 
+ * Framework for API, without a website.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_url.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
-Wave Framework comes with a URL Controller and a sitemap system that is used to build a 
-website on Wave Framework. This URL controller is entirely optional and can be removed 
-from a system if you plan to implement your own URL Controller or simply use Wave 
-Framework for API, without a website.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: This file can be copied, changed and re-published under another license without any restrictions
-*/
-
-// WWW_Factory is parent class for all MVC classes of WWW
 class WWW_controller_url extends WWW_Factory {
 
-	// This method is called by index.php gateway when trying to solve request URL to view
-	// * www-request - This is the request URL that will be parsed
-	// Returns modified data about the view from sitemap file
+	/**
+	 * This method is called by Data Handler to find the View that is being requested based 
+	 * on the URL that (usually) comes from the user agent request URL.
+	 *
+	 * @param array [$input] input data sent to controller
+	 * @input [url] This is URL to be solved
+	 * @return array through returnViewData method
+	 * @output [controller] controller to use for View
+	 * @output [controller-method] what controller method to use
+	 * @output [view-method] what View method to use
+	 * @output [subview] subview variable
+	 * @output [hidden] if the page should be hidden from menu lists
+	 * @output mixed might include many other View-specific variables
+	 */
 	public function solve($input){
 		
 		// Default view is loaded from State (this is loaded when no URL is defined)
 		$view404=$this->getState('404-view');
 		
 		// Custom request URL can be used, this is required
-		if(isset($input['www-request'])){
+		if(isset($input['url'])){
 			// Request string is loaded from input
-			$request=$input['www-request'];
+			$request=$input['url'];
 		} else {
 			// Formatting and returning the expected result array
 			return $this->returnViewData(array('view'=>$view404,'header'=>'HTTP/1.1 404 Not Found'));
@@ -336,7 +351,12 @@ class WWW_controller_url extends WWW_Factory {
 		
 	}
 	
-	// This function returns view data
+	/**
+	 * This function formats and returns View data for View Controller
+	 *
+	 * @param array [$data] data from Sitemap
+	 * @return array
+	 */
 	private function returnViewData($data){
 	
 		// VIEW DEFAULTS

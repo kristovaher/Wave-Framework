@@ -1,12 +1,17 @@
 
 /*
-Wave Framework
-View JavaScript
-
-It is possible to load view specific JavaScript, this file is included among HTML resources 
-by WWW_controller_view if it is detected and found for the view it loads. This file is 
-loaded after other JavaScript files.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: This file can be copied, changed and re-published under another license without any restrictions
-*/
+ * Wave Framework <http://www.waveframework.com>
+ * View JavaScript
+ *
+ * It is possible to load view specific JavaScript, this file is included among HTML resources 
+ * by WWW_controller_view if it is detected and found for the view it loads. This file is 
+ * loaded after other JavaScript files.
+ *
+ * @package    View Controller
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    Unrestricted
+ * @tutorial   /doc/pages/guide_view.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */

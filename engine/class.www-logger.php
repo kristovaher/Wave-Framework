@@ -1,43 +1,58 @@
 <?php
 
-/*
-Wave Framework
-Logger class
-
-This is an optional class that is used to log requests on system by Index Gateway. WWW_Logger 
-is used to keep track of performance of requests made to Index Gateway files, it keeps track 
-of how long the request took, what data it included, how high was the memory use, server load, 
-CPU usage and so on. If this logger is used, then every single request is logged as serialized 
-arrays in filesystem in /filesystem/log/ subfolders. It is a good idea to clean that folder 
-every now and then. There is a separate log-reader.php script for reading those log files 
-situated in /tools/ subfolder.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Logger Class
+ *
+ * This is an optional class that is used to log requests on system by Index Gateway. WWW_Logger 
+ * is used to keep track of performance of requests made to Index Gateway files, it keeps track 
+ * of how long the request took, what data it included, how high was the memory use, server load, 
+ * CPU usage and so on. If this logger is used, then every single request is logged as serialized 
+ * arrays in filesystem in /filesystem/log/ subfolders. It is a good idea to clean that folder 
+ * every now and then. There is a separate log-reader.php script for reading those log files 
+ * situated in /tools/ subfolder.
+ *
+ * @package    Logger
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/logger.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 class WWW_Logger {
 
-	// This stores microtime of the request at the moment Logger object was created. This 
-	// microtime is used by Logger to calculate execution time of the script. If this value 
-	// is not defined at the moment Logger object is created, then it is defined automatically.
+	/**
+	 * This stores microtime of the request at the moment Logger object was created. This 
+	 * microtime is used by Logger to calculate execution time of the script. If this value 
+	 * is not defined at the moment Logger object is created, then it is defined automatically.
+	 */
 	private $requestMicrotime=false;
 	
-	// This is the main address of the folder where log files will be stored. This folder 
-	// should be writable by PHP. Logger creates subfolders under this folder and stores log 
-	// files in those subfolders.
+	/**
+	 * This is the main address of the folder where log files will be stored. This folder 
+	 * should be writable by PHP. Logger creates subfolders under this folder and stores log 
+	 * files in those subfolders.
+	 */
 	private $logDir='./';
 	
-	// This array variable stores custom data sent to logger. Keys of this array will be stored 
-	// as keys in the log entry.
+	/**
+	 * This array variable stores custom data sent to logger. Keys of this array will be stored 
+	 * as keys in the log entry.
+	 */
 	public $logData=array('response-code'=>200);
 	
-	// Construction method of Logger requires just one variable: $logDir, which is the folder 
-	// where log files will be stored. Second variable, $microTime, is used to calculate the 
-	// execution time of the script. This microtime should be the microtime from the very start 
-	// of the script, if it is not defined then Logger defines it by itself.
-	// * logDir - location of directory to store log files at
-	// * microTime - Starting microtime
+	/**
+	 * Construction method of Logger requires just one variable: $logDir, which is the folder 
+	 * where log files will be stored. Second variable, $microTime, is used to calculate the 
+	 * execution time of the script. This microtime should be the microtime from the very start 
+	 * of the script, if it is not defined then Logger defines it by itself.
+	 *
+	 * @param string [$logDir] location of directory to store log files at
+	 * @param float [$microTime] starting microtime
+	 * @return object
+	 */
 	public function __construct($logDir='./',$microTime=false){
 	
 		// Defining IP
@@ -62,11 +77,15 @@ class WWW_Logger {
 		
 	}
 	
-	// This method is used to add data to objects $logData array. Key will be the same key defined 
-	// in the log entry array and value will be the value of this key. It is also possible to send
-	// multiple keys and values in the same method, if $key is an array of keys and values, instead 
-	// of a string.
-	// * setting - single key or array of data
+	/**
+	 * This method is used to add data to objects $logData array. Key will be the same key defined 
+	 * in the log entry array and value will be the value of this key. It is also possible to send
+	 * multiple keys and values in the same method, if $key is an array of keys and values, instead 
+	 * of a string.
+	 *
+	 * @param string/array [$key] single key or array of log keys and values
+	 * @return boolean
+	 */
 	public function setCustomLogData($key,$value=true){
 		if(is_array($key)){
 			$this->logData=$key+$this->logData;
@@ -76,12 +95,15 @@ class WWW_Logger {
 		return true;
 	}
 	
-	// This is the main method of Logger. This method attempts to gather a lot of data about the 
-	// HTTP request and calculate things such as execution time, memory usage and more. It also 
-	// creates a logger entry array and combines it with custom log array of $logData. It also 
-	// creates subfolder in the log folder directory, if it doesn't exist, and writes serialized 
-	// log entry array in that folder.
-	// * category - Category under which log is assigned
+	/**
+	 * This is the main method of Logger. This method attempts to gather a lot of data about the 
+	 * HTTP request and calculate things such as execution time, memory usage and more. It also 
+	 * creates a logger entry array and combines it with custom log array of $logData. It also 
+	 * creates subfolder in the log folder directory, if it doesn't exist, and writes serialized 
+	 * log entry array in that folder.
+	 *
+	 * @return boolean
+	 */
 	public function writeLog(){
 	
 		// All log data is gathered to this variable

@@ -1,34 +1,45 @@
 <?php
 
-/*
-Wave Framework
-JavaScript PHP Wrapper Class
-
-Main purpose of an API Wrapper is to make it easier to make API requests over HTTP to a system 
-built on Wave Framework. API Wrapper class does everything for the developer without requiring 
-the developer to learn the ins and outs of technical details about how to build an API request. 
-Wave Framework comes with two separate API authentication methods, one more secure than the 
-other, as well as data encryption and decryption methods, all of which are handled by this 
-Wrapper class.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * PHP API Wrapper Class
+ *
+ * Main purpose of an API Wrapper is to make it easier to make API requests over HTTP to a system 
+ * built on Wave Framework. API Wrapper class does everything for the developer without requiring 
+ * the developer to learn the ins and outs of technical details about how to build an API request. 
+ * Wave Framework comes with two separate API authentication methods, one more secure than the 
+ * other, both which are handled by this Wrapper class.
+ *
+ * @package    API
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/wrapper_php.htm
+ * @since      2.0.0
+ * @version    3.1.3
+ */
 
 class WWW_Wrapper {
 
-	// This is the address and URL of the API that the Wrapper will connect to. The API address 
-	// must be for Wave Framework API. This value is set either in object creation or when setting 
-	// 'www-address' input variable.
+	/**
+	 * This is the address and URL of the API that the Wrapper will connect to. The API address 
+	 * must be for Wave Framework API. This value is set either in object creation or when 
+	 * setting 'www-address' input variable.
+	 */
 	private $apiAddress;
 	
-	// This holds the current language of the API, it can be useful if the API commands return 
-	// language-specific responses and translations from the API. This variable is set by sending 
-	// 'www-language' input variable.
+	/**
+	 * This holds the current language of the API, it can be useful if the API commands return 
+	 * language-specific responses and translations from the API. This variable is set by sending 
+	 * 'www-language' input variable.
+	 */
 	private $apiLanguage=false;
 	
-	// This holds information about current API state, such as profile name, secret key and various 
-	// API-related flags for callbacks, timeouts and more. This variable is passed around per each API call.
+	/**
+	 * This holds information about current API state, such as profile name, secret key and 
+	 * various API-related flags for callbacks, asyncrhonous status and more. This variable is 
+	 * passed around per each API call.
+	 */
 	private $apiState=array(
 		'apiProfile'=>false,
 		'apiSecretKey'=>false,
@@ -47,76 +58,105 @@ class WWW_Wrapper {
 		'lastModified'=>false
 	);
 	
-	// This variable holds the last known error message returned from the API.
+	/**
+	 * This variable holds the last known error message returned from the API.
+	 */
 	public $errorMessage=false;
 	
-	// This variable holds the last known response code returned from the API.
+	/**
+	 * This variable holds the last known response code returned from the API.
+	 */
 	public $responseCode=false;
 	
-	// Input data is a variable that stores all the plain-text input sent with the API request, 
-	// it's a key-value pair of variables and their values for the API.
+	/**
+	 * Input data is a variable that stores all the plain-text input sent with the API request, 
+	 * it's a key-value pair of variables and their values for the API.
+	 */
 	private $inputData=array();
 	
-	// Crypted input is an array of keys and values that holds data that will be encrypted 
-	// prior to be sent to API. This will be encrypted with the session token of the API in 
-	// serialized form.
+	/**
+	 * Crypted input is an array of keys and values that holds data that will be encrypted 
+	 * prior to be sent to API. This will be encrypted with the session token of the API in 
+	 * serialized form.
+	 */
 	private $cryptedData=array();
 	
-	// This array stores keys and values for files that will be sent to API. Key is the 'input 
-	// file name' and value is the location of the file in filesystem.
+	/**
+	 * This array stores keys and values for files that will be sent to API. Key is the 'input 
+	 * file name' and value is the location of the file in filesystem.
+	 */
 	private $inputFiles=array();
 	
-	// This flag holds state about support for cURL. cURL will be used to make requests unless 
-	// it is not enabled on the server.
+	/**
+	 * This flag holds state about support for cURL. cURL will be used to make requests unless 
+	 * it is not enabled on the server.
+	 */
 	private $curlEnabled=false;
 	
-	// This is an array that gathers log information about the requests made through the API that 
-	// can be used for debugging purposes should something go wrong.
+	/**
+	 * This is an array that gathers log information about the requests made through the API 
+	 * that can be used for debugging purposes should something go wrong.
+	 */
 	private $log=array();
 	
-	// This is a flag that halts the entire functionality of the Wrapper object, if it is set. 
-	// Once this happens you should check the log to see what went wrong.
+	/**
+	 * This is a flag that halts the entire functionality of the Wrapper object, if it is set. 
+	 * Once this happens you should check the log to see what went wrong.
+	 */
 	private $criticalError=false;
 	
-	// This variable holds the address for the file that is used as a cookie container in the 
-	// file system. This allows Wrapper to use cookies when making API requests.
+	/**
+	 * This variable holds the address for the file that is used as a cookie container in the 
+	 * file system. This allows Wrapper to use cookies when making API requests.
+	 */
 	private $cookieContainer=false;
 	
-	// This is the user-agent string of the API Wrapper and it is sent by the Wrapper when making 
-	// cURL requests. It is useful later on to determine where the requests come from. Note that 
-	// when cURL is not supported and file_get_contents() makes the request, then user agent is 
-	// not sent with the request.
+	/**
+	 * This is the user-agent string of the API Wrapper and it is sent by the Wrapper when making 
+	 * cURL requests. It is useful later on to determine where the requests come from. Note that 
+	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
+	 * not sent with the request.
+	 */
 	private $userAgent='WaveFramework/3.0.0 (PHP)';
 	
-	// This is the GET string maximum length. Most servers should easily be able to deal with 2048 
-	// bytes of request string length, but this value can be changed by submitting a different length 
-	// with 'www-get-length' input value.
+	/**
+	 * This is the GET string maximum length. Most servers should easily be able to deal with 
+	 * 2048 bytes of request string length, but this value can be changed by submitting a 
+	 * different length with 'www-get-length' input value.
+	 */
 	private $getLimit=2048;
 	
-	// If this value is set, then API log will be reset after each API request. This value can be 
-	// sent with 'www-reset-log' keyword sent to Wrapper.
+	/**
+	 * If this value is set, then API log will be reset after each API request. This value can 
+	 * be sent with 'www-reset-log' keyword sent to Wrapper.
+	 */
 	private $resetLog=true;
 
-	// Wrapper object creation requires an $apiAddress, which is the address that Wrapper will make 
-	// API requests to. If this is not defined, then $apiAddress assumes that the system it makes 
-	// requests to is the system that is making the request. $language is a language keyword from 
-	// the system that API makes a connection with and is used whenever language-specific results 
-	// are returned from API.
-	// * apiAddress - Full URL is required, like http://www.example.com/json.api
-	public function __construct($apiAddress=false,$language=false){
+	/**
+	 * Wrapper object creation requires an 'address', which is the address that Wrapper will make 
+	 * API requests to. If this is not defined, then 'address' assumes that the system it makes 
+	 * requests to is the same where the API is loaded from. 'language' is a language keyword from 
+	 * the system that API makes a connection with and is used whenever language-specific results 
+	 * are returned from API.
+	 * 
+	 * @param string [$address] API address, default value is current domain presumed API address
+	 * @param string [$language] language keyword, default value is current document language
+	 * @return object
+	 */
+	public function __construct($address=false,$language=false){
 	
 		// For cases when the API address is not set
-		if(!$apiAddress){
-			$apiAddress=((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?'https://':'http://').$_SERVER['HTTP_HOST'].'/json.api';
+		if(!$address){
+			$address=((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?'https://':'http://').$_SERVER['HTTP_HOST'].'/json.api';
 		}
 		
 		// If language is set, then this language is used across API
 		if($language){
-			$this->language=$language;
+			$this->apiLanguage=$language;
 		}
 		
 		// This should be URL to API of Wave Framework
-		$this->apiAddress=$apiAddress;
+		$this->apiAddress=$address;
 		
 		// This checks for cURL support, which is required for making POST requests
 		// cURL is also faster than file_get_contents() method
@@ -148,10 +188,13 @@ class WWW_Wrapper {
 	
 	// SETTINGS
 		
-		// This method returns current log of the API wrapper. If $implode is set, then the 
-		// value of $implode is used as a character to implode the log with. Otherwise the 
-		// log is returned as an array.
-		// * implode - String to implode the log with
+		/**
+		 * This method returns current log of the API wrapper. If $implode is set, then the 
+		 * value of $implode is used as a character to implode the log with. Otherwise the 
+		 * log is returned as an array.
+		 * 
+		 * @param string [$implode] string to implode the log with
+		 */
 		public function returnLog($implode=false){
 			$this->log[]='Returning log';
 			// Imploding, if requested
@@ -162,18 +205,26 @@ class WWW_Wrapper {
 			}
 		}
 		
-		// This method clears the API log. This method can be called manually or is called 
-		// automatically if log is assigned to be reset with each new API request made by 
-		// the object.
+		/**
+		 * This method clears the API log. This method can be called manually or is called 
+		 * automatically if log is assigned to be reset with each new API request made by 
+		 * the object.
+		 * 
+		 * @return boolean
+		 */
 		public function clearLog(){
 			$this->log=array();
 			return true;
 		}
 		
-		// This method allows to set cookie container for cURL calls. If this is set to false, 
-		// then cookies are not used at all. $location is the file that is used for cookie 
-		// container, it is automatically created if the file does not exist.
-		// * location - Location for cookie file in file system
+		/**
+		 * This method allows to set cookie container for cURL calls. If this is set to false, 
+		 * then cookies are not used at all. $location is the file that is used for cookie 
+		 * container, it is automatically created if the file does not exist.
+		 *
+		 * @param string [$location] cookie container file location in filesystem
+		 * @return boolean
+		 */
 		public function setCookieContainer($location=false){
 			// If value is anything but false
 			if($location){
@@ -199,11 +250,14 @@ class WWW_Wrapper {
 			}
 		}
 		
-		// This method will clear and delete all cookies stored in cookie container defined 
-		// in $location or in general. Warning, this method technically removes the contents 
-		// of any writable file if set in $location. If $location is not set, then it attempts 
-		// to use the previously defined cookie container.
-		// * location - Location of cookies file, if this is not set then uses currently defined cookie file
+		/**
+		 * This method will clear and delete all cookies stored in cookie container defined 
+		 * in $location or in general. Warning, this method technically removes the contents 
+		 * of any writable file if set in $location. If $location is not set, then it attempts 
+		 * to use the previously defined cookie container.
+		 * @param string [$location] location of cookies file, if this is not set then uses current one
+		 * @return boolean
+		 */
 		public function clearCookieContainer($location=false){
 			if(!$location){
 				$location=$this->cookieContainer;
@@ -223,13 +277,17 @@ class WWW_Wrapper {
 		
 	// INPUT
 		
-		// This method is used to set an input value in the API Wrapper. $input is the key 
-		// to set and $value is the value of the input key. $input can also be an array, 
-		// in which case multiple input values will be set in the same call. This method 
-		// calls private inputSetter() function that checks the input value for any internal 
-		// flags that might not actually be sent as an input to the API.
-		// * input - Can be an array or a key value of input
-		// * value - If input value is not an array, then this is what the input key will get as a value
+		/**
+		 * This method is used to set an input value in the API Wrapper. $input is the key 
+		 * to set and $value is the value of the input key. $input can also be an array, 
+		 * in which case multiple input values will be set in the same call. This method 
+		 * calls private inputSetter() function that checks the input value for any internal 
+		 * flags that might not actually be sent as an input to the API.
+		 * 
+		 * @param string/array [$input] key of the input data, or an array of keys and values
+		 * @param string [$value] value of the input data
+		 * @return boolean
+		 */
 		public function setInput($input,$value=false){
 			// If this is an array then it populates input array recursively
 			if(is_array($input)){
@@ -244,12 +302,16 @@ class WWW_Wrapper {
 			return true;
 		}
 		
-		// This is a helper function that setInput() method uses to actually assign $value 
-		// to the $input keyword. A lot of the keywords set carry additional functionality 
-		// that may entirely be API Wrapper specific. This method also creates a log entry 
-		// for any value that is changed or set.
-		// * input - Input data key
-		// * value - Input data value
+		/**
+		 * This is a helper function that setInput() method uses to actually assign $value 
+		 * to the $input keyword. A lot of the keywords set carry additional functionality 
+		 * that may entirely be API Wrapper specific. This method also creates a log entry 
+		 * for any value that is changed or set.
+		 * 
+		 * @param string [$input] input data key
+		 * @param string [$value] input data value
+		 * @return boolean
+		 */
 		private function inputSetter($input,$value){
 			switch($input){
 				case 'www-api':
@@ -395,14 +457,18 @@ class WWW_Wrapper {
 			return true;
 		}
 		
-		// This method sets a crypted input data that will be encrypted with secret key or a 
-		// token prior to making the HTTP request. This allows to transmit secure data across 
-		// servers. Note that crypted input should not be used when hash validation is not used 
-		// for making a request, since the token or secret key would also be sent with the 
-		// request. $input is the keyword and $value is the value. $input can also be an array 
-		// of keys and values.
-		// * input - Can be an array or a key value of input
-		// * value - If input value is not an array, then this is what the input key will get as a value
+		/**
+		 * This method sets a crypted input data that will be encrypted with secret key or a 
+		 * token prior to making the HTTP request. This allows to transmit secure data across 
+		 * servers. Note that crypted input should not be used when hash validation is not used 
+		 * for making a request, since the token or secret key would also be sent with the 
+		 * request. $input is the keyword and $value is the value. $input can also be an array 
+		 * of keys and values.
+		 *
+		 * @param string/array [$input] input data key or an array of keys and values
+		 * @value string [$value] input data value
+		 * @return boolean
+		 */
 		public function setCryptedInput($input,$value=false){
 			// If this is an array then it populates input array recursively
 			if(is_array($input)){
@@ -419,12 +485,16 @@ class WWW_Wrapper {
 			return true;
 		}
 		
-		// This method sets files that will be uploaded with the API request. $file is the name
-		// of the file and $location is the address of the file in filesystem. Multiple files
-		// can be attached at once by sending $file as an array of filenames and locations. This 
-		// method also checks if the file actually exists.
-		// * file - Can be an array or a key value of file
-		// * location - If input value is not an array, then this is what the input file address is
+		/**
+		 * This method sets files that will be uploaded with the API request. $file is the name
+		 * of the file and $location is the address of the file in filesystem. Multiple files
+		 * can be attached at once by sending $file as an array of filenames and locations. This 
+		 * method also checks if the file actually exists.
+		 *
+		 * @param string/array [$file] file keyword or an array of keywords and file locations
+		 * @param string [$file] file location in filesystem
+		 * @return boolean/error depending on whether file exists or not
+		 */
 		public function setFile($file,$location=false){
 			// If this is an array then it populates input array recursively
 			if(is_array($file)){
@@ -449,10 +519,14 @@ class WWW_Wrapper {
 			return true;
 		}
 		
-		// This method resets the state of API. It is called after each API request with 
-		// $clearAuth set to false. To entirely reset the state of API $clearAuth should be 
-		// set to true and this will reset everything except the log file.
-		// * clearAuth - True or false flag whether to also reset authentication and state data
+		/**
+		 * This method resets the state of API. It is called after each API request with 
+		 * $clearAuth set to false. To entirely reset the state of API $clearAuth should be 
+		 * set to true and this will reset everything except the log file.
+		 * 
+		 * @param boolean [$clearAuth] whether to also reset authentication and state data
+		 * @return boolean
+		 */
 		public function clearInput($clearAuth=false){
 			// If authentication should also be cleared
 			if($clearAuth){
@@ -486,14 +560,19 @@ class WWW_Wrapper {
 		
 	// SENDING REQUEST
 		
-		// This method executes the API request by building the request based on set input 
-		// data and sending it to API using cURL or file_get_contents() methods. It also 
-		//builds all validations as well as validates the returned response from the server 
-		// and calls callback functions, if they are set. It is possible to send input 
-		// variables directly with a single call by supplying $variables, $fileVariables and $cryptedVariables arrays.
-		// * variables - This is an array of input variables
-		// * fileVariables - This is an array of filenames and their locations
-		// * cryptedVariables - This is an array of crypted input variables
+		/**
+		 * This method executes the API request by building the request based on set input 
+		 * data and sending it to API using cURL or file_get_contents() methods. It also 
+		 * builds all validations as well as validates the returned response from the server 
+		 * and calls callback functions, if they are set. It is possible to send input 
+		 * variables directly with a single call by supplying $variables, $fileVariables and 
+		 * $cryptedVariables arrays.
+		 * 
+		 * @param array [$variables] array of input variables
+		 * @param array [$fileVariables] array of filenames and locations to upload
+		 * @param array [$cryptedVariables] array of input data to be encrypted
+		 * @return array/string depending on what is requested
+		 */
 		public function sendRequest($variables=false,$fileVariables=false,$cryptedVariables=false){
 		
 			// If log is assigned to be reset with each new API request
@@ -1065,12 +1144,16 @@ class WWW_Wrapper {
 		
 	// REQUIRED FUNCTIONS
 	
-		// This method is used to build an input data validation hash string for authenticating 
-		// API requests. The entire input array of $validationData is serialized and hashed 
-		// with SHA-1 and a salt string set in $postFix. This is used for all API requests where 
-		// input has to be validated.
-		// * validationData - Data to build a hash from
-		// * postFix - Data used to salt the hash
+		/**
+		 * This method is used to build an input data validation hash string for authenticating 
+		 * API requests. The entire input array of $validationData is serialized and hashed 
+		 * with SHA-1 and a salt string set in $postFix. This is used for all API requests where 
+		 * input has to be validated.
+		 *
+		 * @param array [$validationData] array to build a hash from
+		 * @param string [$postFix] string that is used to salt the hash
+		 * @return string
+		 */
 		private function validationHash($validationData,$postFix){
 			// Sorting and encoding the output data
 			$validationData=$this->ksortArray($validationData);
@@ -1078,10 +1161,14 @@ class WWW_Wrapper {
 			return sha1(http_build_query($validationData).$postFix);
 		}
 		
-		// This is a helper function used by validationHash() function to serialize an array 
-		// recursively. It applies ksort() to main method as well as to all sub-arrays. $data 
-		// is the array to be sorted.
-		// * data - Array to be sorted
+		/**
+		 * This is a helper function used by validationHash() function to serialize an array 
+		 * recursively. It applies ksort() to main method as well as to all sub-arrays. $data 
+		 * is the array to be sorted.
+		 * 
+		 * @param array/mixed [$data] variable to be sorted
+		 * @return array/mixed
+		 */
 		private function ksortArray($data){
 			// Method is based on the current data type
 			if(is_array($data)){
@@ -1097,11 +1184,16 @@ class WWW_Wrapper {
 			return $data;
 		}
 		
-		// This method is simply meant for returning a result if there was an error in the sent request
-		// * inputData - Data sent to request
-		// * responseCode - Code number to be set as an error
-		// * errorMessage - Clear text error message
-		// * errorCallback - Callback function to call with the error message
+		/**
+		 * This method is simply meant for returning a result if there was an error in the 
+		 * sent request.
+		 * 
+		 * @param array [$inputData] data that was sent as input
+		 * @param string [$responseCode] response code of the error
+		 * @param string [$errorMessage] verbose error message
+		 * @param string/function [$errorCallback] anonymous function or function name to call
+		 * @return boolean/mixed depending on if callback function was used
+		 */
 		private function errorHandler($inputData,$responseCode,$errorMessage,$errorCallback){
 			// Assigning error details to object state
 			$this->responseCode=$responseCode;

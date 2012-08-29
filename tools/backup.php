@@ -1,18 +1,21 @@
 <?php
 
-/*
-Wave Framework
-System backup creator
-
-This script creates backup of entire system together with filesystem or just a backup of the main core 
-files. The type of backup depends on GET variable. 'all' creates backup of everything, 'system' creates 
-backup of just the system files. Files are stored in /filesystem/backups/ folder.
-
-* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * System Backup Archiver
+ *
+ * This script creates backup of entire system together with filesystem or just a backup of the main core 
+ * files. The type of backup depends on GET variable. 'all' creates backup of everything, 'system' creates 
+ * backup of just the system files. Files are stored in /filesystem/backups/ folder.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_tools.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 // This initializes tools and authentication
 require('.'.DIRECTORY_SEPARATOR.'tools_autoload.php');

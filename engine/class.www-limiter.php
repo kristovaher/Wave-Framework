@@ -1,35 +1,48 @@
 <?php
 
-/*
-Wave Framework
-Request limiter class
-
-This is an optional class that is used to limit HTTP requests based on user agent, IP, 
-server condition and other information. This class is loaded by Index Gateway. WWW_Limiter 
-can be used to block IP's if they make too many requests per minute, block requests if 
-server load is detected as too high, block the request if it comes from blacklist provided 
-by the system, allow only whitelisted IP's to access, ask for HTTP authentication or force 
-the user agent to use HTTPS. Note that some of this functionality can be achieved by Apache 
-configuration and modules, but it is provided here for cases where the project developer 
-might not have control over server configuration.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Limiter Class
+ *
+ * This is an optional class that is used to limit HTTP requests based on user agent, IP, 
+ * server condition and other information. This class is loaded by Index Gateway. WWW_Limiter 
+ * can be used to block IP's if they make too many requests per minute, block requests if 
+ * server load is detected as too high, block the request if it comes from blacklist provided 
+ * by the system, allow only whitelisted IP's to access, ask for HTTP authentication or force 
+ * the user agent to use HTTPS. Note that some of this functionality can be achieved by Apache 
+ * configuration and modules, but it is provided here for cases where the project developer 
+ * might not have control over server configuration.
+ *
+ * @package    Limiter
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/limiter.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 class WWW_Limiter {
 
-	// This is the main address of the folder where limiter stores log files for 
-	// request limiter.
+	/**
+	 * This is the main address of the folder where limiter stores log files for 
+	 * request limiter.
+	 */
 	private $logDir='./';
 	
-	// This holds the WWW_Logger object, if it is used. This makes it possible for Limiter 
-	// to write proper log files through Logger in case requests are blocked.
+	/**
+	 * This holds the WWW_Logger object, if it is used. This makes it possible for Limiter 
+	 * to write proper log files through Logger in case requests are blocked.
+	 */
 	public $logger=false;
 	
-	// Construction method of Logger expects just one variable: $logDir, which is the folder where 
-	// limiter stores files for specific limiter methods. This folder should be writable by PHP.
-	// * logDir - location of directory to store log files at
+	/**
+	 * Construction method of Logger expects just one variable: $logDir, which is the folder where 
+	 * limiter stores files for specific limiter methods. This folder should be writable by PHP.
+	 *
+	 * @param string [$logDir] location of directory to store log files at
+	 * @return object
+	 */
 	public function __construct($logDir='./'){
 	
 		// Defining IP
@@ -48,12 +61,16 @@ class WWW_Limiter {
 		
 	}
 	
-	// This method will block requests from the request-making IP address for $duration amount 
-	// of seconds, if the IP address makes more than $limit amount of requests per minute. It 
-	// keeps track of the amount of requests by storing minimal log files in filesystem, in 
-	// $logDir subfolder. Returns true if not limited, throws 403 error if limit exceeded.
-	// * limit - Amount of requests that cannot be exceeded per minute
-	// * duration - Duration of how long the IP will be blocked if limit is exceeded
+	/**
+	 * This method will block requests from the request-making IP address for $duration amount 
+	 * of seconds, if the IP address makes more than $limit amount of requests per minute. It 
+	 * keeps track of the amount of requests by storing minimal log files in filesystem, in 
+	 * $logDir subfolder. Returns true if not limited, throws 403 error if limit exceeded.
+	 *
+	 * @param integer [$limit] amount of requests that cannot be exceeded per minute
+	 * @param integer [$duration] duration of how long the IP will be blocked if limit is exceeded
+	 * @return boolean or exit if limiter hit
+	 */
 	public function limitRequestCount($limit=400,$duration=3600){
 	
 		// Limiter is only used if limit is set higher than 0 and request does not originate from the same server
@@ -153,9 +170,13 @@ class WWW_Limiter {
 		
 	}
 	
-	// This method will block HTTP requests if server load is more than $limit. It throws 
-	// 503 Service Unavailable message should that happen.
-	// * limit - Server load that, if exceeded, causes the user agents request to be blocked
+	/**
+	 * This method will block HTTP requests if server load is more than $limit. It throws 
+	 * 503 Service Unavailable message should that happen.
+	 *
+	 * @param integer [$limit] server load that, if exceeded, causes the user agents request to be blocked
+	 * @return boolean or exit if limiter hit
+	 */
 	public function limitServerLoad($limit=80){
 	
 		// System load is checked only if limit is not set
@@ -188,9 +209,13 @@ class WWW_Limiter {
 	
 	}
 	
-	// This method only allows HTTP requests from a comma-separated list of IP addresses 
-	// sent with $whitelist. For every other IP address it throws a 403 Forbidden error.
-	// * whiteList - comma-separated list of whitelisted IP addresses
+	/**
+	 * This method only allows HTTP requests from a comma-separated list of IP addresses 
+	 * sent with $whitelist. For every other IP address it throws a 403 Forbidden error.
+	 *
+	 * @param string [$whiteList] comma-separated list of whitelisted IP addresses
+	 * @return boolean or exit if limiter hit
+	 */
 	public function limitWhitelisted($whiteList=''){
 	
 		// This value should be a comma-separated string of blacklisted IP's
@@ -218,9 +243,13 @@ class WWW_Limiter {
 		
 	}
 	
-	// This method blocks IP addresses sent with $blackList as a comma-separated list. If HTTP 
-	// request has an IP defined in that list, then Limiter throws a 403 Forbidden error.
-	// * blackList - comma-separated list of blacklisted IP addresses
+	/**
+	 * This method blocks IP addresses sent with $blackList as a comma-separated list. If HTTP 
+	 * request has an IP defined in that list, then Limiter throws a 403 Forbidden error.
+	 *
+	 * @param string [$blackList] comma-separated list of blacklisted IP addresses
+	 * @return boolean or exit if limiter hit
+	 */
 	public function limitBlacklisted($blackList=''){
 	
 		// This value should be a comma-separated string of blacklisted IP's
@@ -248,13 +277,17 @@ class WWW_Limiter {
 		
 	}
 	
-	// This method asks for basic HTTP authentication $username and $password and throws a 
-	// 403 Forbidden error if provided credentials are incorrect or missing. It is also 
-	// possible to provide a comma-separated list of IP addresses in $ip that allow this 
-	// type of authentication for additional security.
-	// * username - correct username for the request
-	// * password - correct password for the request
-	// * ip - comma separated list of allowed IP addresses
+	/**
+	 * This method asks for basic HTTP authentication $username and $password and throws a 
+	 * 403 Forbidden error if provided credentials are incorrect or missing. It is also 
+	 * possible to provide a comma-separated list of IP addresses in $ip that allow this 
+	 * type of authentication for additional security.
+	 *
+	 * @param string [$username] correct username for the request
+	 * @param string [$password] correct password for the request
+	 * @param string [$ip] comma separated list of allowed IP addresses
+	 * @return boolean or exit if limiter hit
+	 */
 	public function limitUnauthorized($username,$password,$ip='*'){
 	
 		// If all IP's are not allowed
@@ -289,10 +322,14 @@ class WWW_Limiter {
 		
 	}
 	
-	// This method either throws a 403 Forbidden error if non-HTTPS connection is used to make 
-	// a request, or redirects the request to HTTPS. If $autoRedirect is set to true, then HTTP 
-	// requests are automatically redirected.
-	// * autoRedirect - If this is set to true, then system redirects user agent to HTTPS
+	/**
+	 * This method either throws a 403 Forbidden error if non-HTTPS connection is used to make 
+	 * a request, or redirects the request to HTTPS. If $autoRedirect is set to true, then HTTP 
+	 * requests are automatically redirected.
+	 *
+	 * @param boolean [$autoRedirect] if this is set to true, then system redirects user agent to HTTPS
+	 * @return boolean or exit if limiter hit
+	 */
 	public function limitNonSecureRequests($autoRedirect=true){
 	
 		// HTTPS is detected from $_SERVER variables

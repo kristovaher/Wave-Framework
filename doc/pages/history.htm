@@ -15,14 +15,17 @@
 			<h2>Roadmap</h2>
 			
 				<ul>
-					<li><b>Q4 2012</b> - Additional tutorials about AJAX and User Sessions</li>
-					<li><b>Q4 2012</b> - Testing suite for Wave Framework that can be used to test Wave Framework with mock Models and actual Controllers.</li>
-					<li><b>Q4 2012</b> - OpenSSL public and private-key based two-way API security for API profiles. OpenSSL based helper functions for creating hashes and validating hashes with a certificate key. OpenSSL based developer tool for generating cryptography public and private keys.</li>
+					<li><b>Q4 2012</b> - AJAX Tutorial</li>
+					<li><b>Q4 2012</b> - Users/Permissions Tutorial</li>
+					<li><b>Q4 2012</b> - API Testing Suite</li>
+					<li><b>Q4 2012</b> - OpenSSL Tools</li>
+					<li><b>Q4 2012</b> - Java API Wrapper</li>
 				</ul>
 		
 			<h2>3.x.x</h2>
 			
 				<ul>
+					<li><b>3.1.3</b> - Updated comments to follow Zend style guidelines. Added a section about commenting guidelines to documentation.</li>
 					<li><b>3.1.2</b> - Added public request tokens as methods to protect against cross-site-request-forgeries. Added Security Feature Guide documentation page.</li>
 					<li><b>3.1.0</b> - Much-improved session handling for situations where session data is rapidly modified and set or unset with different session ID values. Added support for XML attributes in the output array conversion.</li>
 					<li><b>3.0.9</b> - PHP and JavaScript wrappers now also accept anonymous functions as callbacks. Callback keywords have also been renamed to 'www-true-callback', 'www-false-callback' to be similar to standardized error arrays returned from Controllers. Also added a jQuery fallback for parsing JSON in older versions of Internet Explorer.</li>
@@ -88,7 +91,7 @@
 			<h2>1.x.x</h2>
 			
 				<ul>
-					<li><b>1.9.11</b> -Logger now tracks every request made through Index Gateway. Logger also includes data about returned content-length for approximate bandwidth tracking.</li>
+					<li><b>1.9.11</b> - Logger now tracks every request made through Index Gateway. Logger also includes data about returned content-length for approximate bandwidth tracking.</li>
 					<li><b>1.9.10</b> - Entire resource handling now returns 304 Not-Modified headers, if system detects that the file has not been modified. Optimized single-resource requests.</li>
 					<li><b>1.9.9</b> - Project title possible to be set in configuration. All input data is now transmitted to view files properly. Some bug fixes.</li>
 					<li><b>1.9.8</b> - Compartmentalized API commands better, making one API command affect another less.</li>
@@ -104,7 +107,7 @@
 					<li><b>1.7.2</b> - Minor bugfix regarding positioning of dynamically created pictures. </li>
 					<li><b>1.7.1</b> - Image filtering options added for dynamic image loading. More accurate last modified date in response headers. Imager stops from resizing images if the size is already the same. Fixed some PNG alpha problems. </li>
 					<li><b>1.7.0</b> - Minifier class added and functionality implemented in both Resource handler as well as for API requests. New configuration option for using minification in response. File paths and inclusions much improved. Limiter and Logger have now a more streamlined process for logging. Index Gateway now also supports IP based blacklists. Resource cache default time is one year by default. File Handlers 'nocache' functionality did not work before. New configuration options. Much better URL Map functionality which allows to set whether unsolved URL's are allowed or not Basic minifiers for HTML and XML added. Default View controller now uses unified resources. Alpha support for dynamically resized images. </li>
-					<li><b>1.5.4</b> -Logger is now also implemented to Limiter class. Vary Accept-Encoding header added for proxies. </li>
+					<li><b>1.5.4</b> - Logger is now also implemented to Limiter class. Vary Accept-Encoding header added for proxies. </li>
 					<li><b>1.5.3</b> - Additional PHP extension checks throughout the system. </li>
 					<li><b>1.5.2</b> - Fileinfo is now used by File Handler to determine MIME type. </li>
 					<li><b>1.5.1</b> - Added compatibility script. </li>

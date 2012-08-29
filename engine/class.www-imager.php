@@ -1,37 +1,54 @@
 <?php
 
-/*
-Wave Framework
-Image editor class
-
-Imager is a class that acts as a wrapper to PHP GD library and has a number of methods to 
-resize images with different resize algorithms as well as apply filtering to images and deal 
-with image conversions between different formats. It can load an image resource from server 
-or a URL and either store the edited image in a filesystem or push it to output buffer.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Imager Class
+ *
+ * Imager is a class that acts as a wrapper to PHP GD library and has a number of methods to 
+ * resize images with different resize algorithms as well as apply filtering to images and deal 
+ * with image conversions between different formats. It can load an image resource from server 
+ * or a URL and either store the edited image in a filesystem or push it to output buffer.
+ *
+ * @package    Imager
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/imager.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 class WWW_Imager {
 
-	// This variable holds the image resource that Imager class handles during its operation.
+	/**
+	 * This variable holds the image resource that Imager class handles during its operation.
+	 */
 	public $resource=false;
 	
-	// This variable holds currently known image width in pixels.
+	/**
+	 * This variable holds currently known image width in pixels.
+	 */
 	public $width=0;
 	
-	// This variable holds currently known image height in pixels.
+	/**
+	 * This variable holds currently known image height in pixels.
+	 */
 	public $height=0;
 
-	// Current image IMAGETYPE_X type value
+	/**
+	 * Current image IMAGETYPE_X type value.
+	 */
 	public $type=false;
 	
-	// This method is used to load an image resource for the Imager class. $location should 
-	// be a file location in the system a web URL. This method automatically detects the type 
-	// of image as well as image resolution, which is stored in $width and $height variables.
-	// Method returns true if image was loaded successfully.
-	// * location - Source file location in file system
+	/** 
+	 * This method is used to load an image resource for the Imager class. $location should 
+	 * be a file location in the system a web URL. This method automatically detects the type 
+	 * of image as well as image resolution, which is stored in $width and $height variables.
+	 * Method returns true if image was loaded successfully.
+	 *
+	 * @param string [$location] source file location in file system
+	 * @return boolean
+	 */
 	public function input($location){
 	
 		// Checking if file actually exists in file system
@@ -80,13 +97,17 @@ class WWW_Imager {
 		
 	}
 	
-	// This method stores the image in filesystem in $location folder and filename. If $location 
-	// is not set, then image is returned to output buffer. $quality is used for the compression 
-	// quality (from 0-100) and $format is used to define what file format the picture is 
-	// returned. $format can be 'jpg', 'png' or 'gif'.
-	// * location - new file location in file system. If not set, then returns file data to output
-	// * quality - Quality percentage, higher is better
-	// * format - Output file extension or type
+	/**
+	 * This method stores the image in filesystem in $location folder and filename. If $location 
+	 * is not set, then image is returned to output buffer. $quality is used for the compression 
+	 * quality (from 0-100) and $format is used to define what file format the picture is 
+	 * returned. $format can be 'jpg', 'png' or 'gif'.
+	 *
+	 * @param string [$location] new file location in file system. If not set, then returns file data to output
+	 * @param integer [$quality] quality percentage, higher is better
+	 * @param string [$format] output file extension or type, 'png', 'jpg' or 'gif'
+	 * @return boolean
+	 */
 	public function output($location=false,$quality=90,$format=false){
 	
 		// Making sure quality is between acceptable values
@@ -187,12 +208,16 @@ class WWW_Imager {
 		
 	}
 	
-	// This method is a shorthand method to apply series of $commands, similar to Wave Framework 
-	// on-demand image loading parameters, to an image in $source folder and stored in $target 
-	// folder. If $target is not set, then image is returned to output buffer.
-	// * source - Source file location
-	// * command - Series of commands that will be applied to the image
-	// * target - Target file location
+	/**
+	 * This method is a shorthand method to apply series of $commands, similar to Wave Framework 
+	 * on-demand image loading parameters, to an image in $source folder and stored in $target 
+	 * folder. If $target is not set, then image is returned to output buffer.
+	 *
+	 * @param string [$source] source file location
+	 * @param string [$command] series of commands that will be applied to the image
+	 * @param string [$target] target file location
+	 * @return boolean
+	 */
 	public function commands($source,$command,$target=false){
 		
 		// This attempts to load the source image
@@ -433,21 +458,27 @@ class WWW_Imager {
 				if(!$this->output($target,$quality,$format)){
 					trigger_error('Cannot output image file',E_USER_ERROR);
 				}
+				
+			return true;
 		
 		} else {
 			return false;
 		}
 	}
 	
-	// This is a resize-algorithm method that resizes the current image resource to $width and 
-	// $height. This resize method crops the image by removing the parts of picture that are left 
-	// out of $width and $height dimensions. Variables $left and $top can be used to set the 
-	// position of the image on the new, resized canvas and accept both numeric (pixel) values 
-	// as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'.
-	// * width - Width of resulting image
-	// * height - Height of resulting image
-	// * left - Position from the left edge. Can be 'center', 'left', 'right' or a pixel value.
-	// * top - Position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value.
+	/**
+	 * This is a resize-algorithm method that resizes the current image resource to $width and 
+	 * $height. This resize method crops the image by removing the parts of picture that are left 
+	 * out of $width and $height dimensions. Variables $left and $top can be used to set the 
+	 * position of the image on the new, resized canvas and accept both numeric (pixel) values 
+	 * as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'.
+	 *
+	 * @param integer [$width] width of resulting image
+	 * @param integer [$height] height of resulting image
+	 * @param string [$left] position from the left edge,an be 'center', 'left', 'right' or a pixel value.
+	 * @param string [$top] position from the top edge,an be 'center', 'top', 'bottom' or a pixel value.
+	 * @return boolean
+	 */
 	public function resizeFitCrop($width,$height,$left='center',$top='center'){
 	
 		// Canceling function if resizing is not needed
@@ -530,20 +561,24 @@ class WWW_Imager {
 		
 	}
 	
-	// This is a resize-algorithm method that resizes the current image resource to $width 
-	// and $height without resizing the actual image. This resize method crops the image by 
-	// removing the parts of picture that are left out of $width and $height dimensions. 
-	// Variables $left and $top can be used to set the position of the image on the new, 
-	// resized canvas and accept both numeric (pixel) values as well as relative ones, such 
-	// as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values 
-	// for background color in case background is required (not used for PNG images).
-	// * width - Width of resulting image
-	// * height - Height of resulting image
-	// * left - Position from the left edge. Can be 'center', 'left', 'right' or a pixel value.
-	// * top - Position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value.
-	// * red - Amount of red color for background, from 0-255
-	// * green - Amount of green color for background, from 0-255
-	// * blue - Amount of blue color for background, from 0-255
+	/**
+	 * This is a resize-algorithm method that resizes the current image resource to $width 
+	 * and $height without resizing the actual image. This resize method crops the image by 
+	 * removing the parts of picture that are left out of $width and $height dimensions. 
+	 * Variables $left and $top can be used to set the position of the image on the new, 
+	 * resized canvas and accept both numeric (pixel) values as well as relative ones, such 
+	 * as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values 
+	 * for background color in case background is required (not used for PNG images).
+	 *
+	 * @param integer [$width] width of resulting image
+	 * @param integer [$height] height of resulting image
+	 * @param string [$left] position from the left edge, can be 'center', 'left', 'right' or a pixel value
+	 * @param string [$top] position from the top edge, can be 'center', 'top', 'bottom' or a pixel value
+	 * @param integer [$red] amount of red color for background, from 0-255
+	 * @param integer [$green] amount of green color for background, from 0-255
+	 * @param integer [$blue] amount of blue color for background, from 0-255
+	 * @return boolean
+	 */
 	public function resizeCrop($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0){
 	
 		// Canceling function if resizing is not needed
@@ -641,20 +676,24 @@ class WWW_Imager {
 		
 	}
 	
-	// This is a resize-algorithm method that resizes the current image simply by resizing the 
-	// image to $width and $height and leaves the remaining space for background color. This 
-	// resize method crops the image by removing the parts of picture that are left out of $width 
-	// and $height dimensions. Variables $left and $top can be used to set the position of the 
-	// image on the new, resized canvas and accept both numeric (pixel) values as well as relative 
-	// ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB 
-	// values for background color in case background is required (not used for PNG images).
-	// * width - Width of resulting image
-	// * height - Height of resulting image
-	// * left - Position from the left edge. Can be 'center', 'left', 'right' or a pixel value.
-	// * top - Position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value.
-	// * red - Amount of red color for background, from 0-255
-	// * green - Amount of green color for background, from 0-255
-	// * blue - Amount of blue color for background, from 0-255
+	/**
+	 * This is a resize-algorithm method that resizes the current image simply by resizing the 
+	 * image to $width and $height and leaves the remaining space for background color. This 
+	 * resize method crops the image by removing the parts of picture that are left out of $width 
+	 * and $height dimensions. Variables $left and $top can be used to set the position of the 
+	 * image on the new, resized canvas and accept both numeric (pixel) values as well as relative 
+	 * ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB 
+	 * values for background color in case background is required (not used for PNG images).
+	 * 
+	 * @param integer [$width] width of resulting image
+	 * @param integer [$height] height of resulting image
+	 * @param integer [$left] position from the left edge. Can be 'center', 'left', 'right' or a pixel value
+	 * @param integer [$top] position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value
+	 * @param integer [$red] amount of red color for background, from 0-255
+	 * @param integer [$green] amount of green color for background, from 0-255
+	 * @param integer [$blue] amount of blue color for background, from 0-255
+	 * @return boolean
+	 */
 	public function resizeFit($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0){
 	
 		// Canceling function if resizing is not needed
@@ -763,16 +802,20 @@ class WWW_Imager {
 		
 	}
 	
-	// This is a resize-algorithm method that resizes the current image simply by resizing the 
-	// image to $width and $height and removing the dimensions that would otherwise be left for 
-	// a background. This resize method crops the image by removing the parts of picture that are 
-	// left out of $width and $height dimensions. Variables $left and $top can be used to set the 
-	// position of the image on the new, resized canvas and accept both numeric (pixel) values as 
-	// well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green 
-	// and $blue are RGB values for background color in case background is required (not used for 
-	// PNG images).
-	// * width - Width of resulting image
-	// * height - Height of resulting image
+	/**
+	 * This is a resize-algorithm method that resizes the current image simply by resizing the 
+	 * image to $width and $height and removing the dimensions that would otherwise be left for 
+	 * a background. This resize method crops the image by removing the parts of picture that are 
+	 * left out of $width and $height dimensions. Variables $left and $top can be used to set the 
+	 * position of the image on the new, resized canvas and accept both numeric (pixel) values as 
+	 * well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green 
+	 * and $blue are RGB values for background color in case background is required (not used for 
+	 * PNG images).
+	 *
+	 * @param integer [$width] width of resulting image
+	 * @param integer [$height] height of resulting image
+	 * @return boolean
+	 */
 	public function resizeFitNoBackground($width,$height){
 	
 		// Canceling function if resizing is not needed
@@ -800,9 +843,13 @@ class WWW_Imager {
 		
 	}
 	
-	// This method simply resizes the image to fixed width set with $width variable. New image 
-	// height depends on the result of the resize.
-	// * width - Width of resulting image
+	/**
+	 * This method simply resizes the image to fixed width set with $width variable. New image 
+	 * height depends on the result of the resize.
+	 *
+	 * @param integer [$width] width of resulting image
+	 * @return boolean
+	 */
 	public function resizeWidth($width){
 	
 		// Canceling function if resizing is not needed
@@ -836,9 +883,13 @@ class WWW_Imager {
 		
 	}
 	
-	// This method simply resizes the image to fixed height set with $height variable. New image 
-	// width depends on the result of the resize.
-	// * height - Height of resulting image
+	/**
+	 * This method simply resizes the image to fixed height set with $height variable. New image 
+	 * width depends on the result of the resize.
+	 *
+	 * @param integer [$height] height of resulting image
+	 * @return boolean
+	 */
 	public function resizeHeight($height){
 	
 		// Canceling function if resizing is not needed
@@ -872,15 +923,19 @@ class WWW_Imager {
 		
 	}
 	
-	// This method is a wrapper for imagefilter() and imageconvolution() methods. $type can be 
-	// 'negative', 'grayscale', 'brightness', 'contrast', 'colorize', 'alphacolorize', 'edge', 
-	// 'emboss', 'blur', 'soften', 'sketch', 'smooth', 'pixelate' and 'convulate'. $alpha is 
-	// the percentage that this filter effect will be applied to the original image as a layer. 
-	// $settings is an array of variables that are expected to be sent with imagefilter() and 
-	// imageconvulation() methods.
-	// * type - Filtering type
-	// * alpha - Level of alpha layering to use on top of original image
-	// * settings - Filter settings is an array that carries up to three variables
+	/**
+	 * This method is a wrapper for imagefilter() and imageconvolution() methods. $type can be 
+	 * 'negative', 'grayscale', 'brightness', 'contrast', 'colorize', 'alphacolorize', 'edge', 
+	 * 'emboss', 'blur', 'soften', 'sketch', 'smooth', 'pixelate' and 'convulate'. $alpha is 
+	 * the percentage that this filter effect will be applied to the original image as a layer. 
+	 * $settings is an array of variables that are expected to be sent with imagefilter() and 
+	 * imageconvulation() methods.
+	 *
+	 * @param integer [$type] filtering type
+	 * @param integer [$alpha] level of alpha layering to use on top of original image
+	 * @param integer [$settings] filter settings is an array that carries up to three variables
+	 * @return boolean
+	 */
 	public function applyFilter($type,$alpha=100,$settings=array()){
 	
 		// If alpha level is outside the permitted values

@@ -1,17 +1,20 @@
 <?php
 
-/*
-Wave Framework
-Maintenance tools autoloader
-
-This script includes authentication, timezone detection and software version detection and 
-other functionality that is useful for developer tools scripts.
-
-* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Tools Autoloader
+ *
+ * This script includes authentication, timezone detection and software version detection and 
+ * other functionality that is useful for developer tools scripts.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_tools.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 // Main configuration file is included
 $config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');

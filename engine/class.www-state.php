@@ -1,40 +1,58 @@
 <?php
 
-/*
-Wave Framework
-State class
-
-State is always required by Wave Framework. It is used by API and some handlers. State is used 
-to keep track of system state, configuration and its changes, such as relevant PHP settings. 
-It allows changing these settings, and thus affecting API or PHP configuration. State also 
-includes functionality for State Messenger, sessions, cookies, translations and sitemap data. 
-State is assigned in API and is accessible in MVC objects through Factory wrapper methods. 
-Multiple different states can be used by the same request, but usually just one is used per 
-request. State is only kept for the duration of the request processing and is not stored 
-beyond its use in the request.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * State Class
+ *
+ * State is always required by Wave Framework. It is used by API and some handlers. State is used 
+ * to keep track of system state, configuration and its changes, such as relevant PHP settings. 
+ * It allows changing these settings, and thus affecting API or PHP configuration. State also 
+ * includes functionality for State Messenger, sessions, cookies, translations and sitemap data. 
+ * State is assigned in API and is accessible in MVC objects through Factory wrapper methods. 
+ * Multiple different states can be used by the same request, but usually just one is used per 
+ * request. State is only kept for the duration of the request processing and is not stored 
+ * beyond its use in the request.
+ *
+ * @package    State
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/state.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 class WWW_State	{
 
-	// This should hold WWW_Database class and connection data, if used.
+	/**
+	 * This should hold WWW_Database class and connection data, if used.
+	 */
 	public $data=array();
 	
-	// Database connection is stored in this variable, if set
+	/**
+	 * Database connection is stored in this variable, if set
+	 */
 	public $databaseConnection=false;
 	
-	// This holds the 'keyword' or 'passkey' of currently used State messenger.
+	/**
+	 * This holds the 'keyword' or 'passkey' of currently used State messenger.
+	 */
 	private $messenger=false;
 	
-	// This holds state messenger data as an array.
+	/**
+	 * This holds state messenger data as an array.
+	 */
 	private $messengerData=array();
 	
-	// Construction of State object initializes the defaults for $data variable. A lot of the 
-	// data is either loaded from /config.ini file or initialized based on server environment 
-	// variables. Fingerprint string is also created during construction as well as input data 
-	// loaded from XML or JSON strings, if sent with POST directly.
+	/**
+	 * Construction of State object initializes the defaults for $data variable. A lot of the 
+	 * data is either loaded from /config.ini file or initialized based on server environment 
+	 * variables. Fingerprint string is also created during construction as well as input data 
+	 * loaded from XML or JSON strings, if sent with POST directly.
+	 *
+	 * @param array [$config] configuration array
+	 * @return object
+	 */
 	final public function __construct($config=array()){
 	
 		// PRE-DEFINED STATE VALUES
@@ -334,9 +352,13 @@ class WWW_State	{
 		
 	}
 	
-	// When State class is not used anymore, then state messenger data - if set - is written 
-	// to filesystem based on the State messenger key. This method also deletes session cookie, 
-	// if sessions have been used but the session variable itself is empty.
+	/**
+	 * When State class is not used anymore, then state messenger data - if set - is written 
+	 * to filesystem based on the State messenger key. This method also deletes session cookie, 
+	 * if sessions have been used but the session variable itself is empty.
+	 *
+	 * @return null
+	 */
 	final public function __destruct(){
 		// Only applies if request messenger actually holds data
 		if($this->messenger && !empty($this->messengerData)){
@@ -360,20 +382,24 @@ class WWW_State	{
 	
 	// STATE MANIPULATION
 	
-		// This is the basic call to return a State variable from the object. When call is made 
-		// without any parameters, then the entire State data variable is returned. When 
-		// $variable is set, then this method returns key of that $variable from $data array. 
-		// If the returned array is an array as well, then setting $subvariable can set the 
-		// sub-key of that array and return that instead.
-		// * variable - data array key to be returned
-		// * subvariable - if returned element is an array itself, this returns the value of that key
-		final public function getState($variable=false,$subvariable=false){
+		/**
+		 * This is the basic call to return a State variable from the object. When call is made 
+		 * without any parameters, then the entire State data variable is returned. When 
+		 * $variable is set, then this method returns key of that $variable from $data array. 
+		 * If the returned array is an array as well, then setting $subvariable can set the 
+		 * sub-key of that array and return that instead.
+		 *
+		 * @param string [$variable] data array key to be returned
+		 * @param string [$subVariable] if returned element is an array itself, this returns the value of that key
+		 * @return mixed
+		 */
+		final public function getState($variable=false,$subVariable=false){
 		
 			// Unless variable and subvariable are set, the script returns entire State data array
-			if($subvariable && $variable){
+			if($subVariable && $variable){
 				// If variable and subvariable are both defined and data exists
-				if(isset($this->data[$variable][$subvariable])){
-					return $this->data[$variable][$subvariable];
+				if(isset($this->data[$variable][$subVariable])){
+					return $this->data[$variable][$subVariable];
 				} else {
 					return false;
 				}
@@ -391,12 +417,16 @@ class WWW_State	{
 			
 		}
 		
-		// This method is used to set a $data variable value in State object. $variable can 
-		// also be an array of keys and values, in which case multiple variables are set at 
-		// once. This method uses stateChanged() for variables that carry additional 
-		// functionality, such as setting timezone.
-		// * variable - Data key to be set
-		// * value - Value of the new data
+		/**
+		 * This method is used to set a $data variable value in State object. $variable can 
+		 * also be an array of keys and values, in which case multiple variables are set at 
+		 * once. This method uses stateChanged() for variables that carry additional 
+		 * functionality, such as setting timezone.
+		 *
+		 * @param string/array [$variable] data key to be set or an array of keys and values
+		 * @param mixed [$value] value of the new data
+		 * @return boolean
+		 */
 		final public function setState($variable,$value=true){
 		
 			// If variable is an array with values it assumes that array keys are variables and values are to be set for those variables
@@ -414,13 +444,17 @@ class WWW_State	{
 			
 		}
 		
-		// This is a private method used internally whenever configuration is changed. It has 
-		// checks for cases when a variable is changed that carries additional functionality 
-		// such as when changing the timezone or output compression. For example, if output 
-		// compression is set, but not supported by user agent that is making the request, 
-		// then output supression is turned off.
-		// * variable - Variable name that is changed
-		// * value - New value of the variable
+		/**
+		 * This is a private method used internally whenever configuration is changed. It has 
+		 * checks for cases when a variable is changed that carries additional functionality 
+		 * such as when changing the timezone or output compression. For example, if output 
+		 * compression is set, but not supported by user agent that is making the request, 
+		 * then output supression is turned off.
+		 *
+		 * @param string [$variable] variable name that is changed
+		 * @param mixed [$value] new value of the variable
+		 * @return boolean
+		 */
 		final private function stateChanged($variable,$value=true){
 		
 			// Value is set instantly
@@ -452,9 +486,13 @@ class WWW_State	{
 			
 		}
 		
-		// This function is called before output is pushed to browser by the API or when State 
-		// object is not used anymore. This method is not accessible to Factory class, but it 
-		// is not private.
+		/**
+		 * This function is called before output is pushed to browser by the API or when State 
+		 * object is not used anymore. This method is not accessible to Factory class, but it 
+		 * is not private.
+		 *
+		 * @return boolean
+		 */
 		final public function commitHeaders(){
 			// Removes sessions and session cookies, if not used anymore
 			if($this->data['session-id']){
@@ -483,15 +521,22 @@ class WWW_State	{
 				}
 			}
 			
+			// Headers have been commited
+			return true;
+			
 		}
 		
 	// SITEMAP AND TRANSLATIONS
 
-		// This method returns an array of currently active translations, or for a language set 
-		// with $language variable. If $keyword is also set, then it returns a specific translation 
-		// with that keyword from $language translations.
-		// * language - Language keyword, if this is not set then returns current language translations
-		// * keyword - If only single keyword needs to be returned
+		/**
+		 * This method returns an array of currently active translations, or for a language set 
+		 * with $language variable. If $keyword is also set, then it returns a specific translation 
+		 * with that keyword from $language translations.
+		 *
+		 * @param string [$language] language keyword, if this is not set then returns current language translations
+		 * @param string [$keyword] if only single keyword needs to be returned
+		 * @return array, string or false if failed
+		 */
 		final public function getTranslations($language=false,$keyword=false){
 			// If language is not set, then assuming current language
 			if(!$language){
@@ -538,12 +583,16 @@ class WWW_State	{
 			}
 		}
 		
-		// This method returns an array of currently active sitemap, or a sitemap for a language 
-		// set with $language variable. If $keyword is also set, then it returns a specific 
-		// sitemap node with that keyword from $language sitemap file. This method returns the 
-		// original, non-modified sitemap that has not been parsed for use with URL controller.
-		// * language - Language keyword, if this is not set then returns current language sitemap
-		// * keyword - If only a single URL node needs to be returned
+		/**
+		 * This method returns an array of currently active sitemap, or a sitemap for a language 
+		 * set with $language variable. If $keyword is also set, then it returns a specific 
+		 * sitemap node with that keyword from $language sitemap file. This method returns the 
+		 * original, non-modified sitemap that has not been parsed for use with URL controller.
+		 *
+		 * @param string [$language] language keyword, if this is not set then returns current language sitemap
+		 * @param string [$keyword] if only a single URL node needs to be returned
+		 * @return array or false if failed
+		 */
 		final public function getSitemapRaw($language=false,$keyword=false){
 		
 			// If language is not set, then assuming current language
@@ -592,11 +641,15 @@ class WWW_State	{
 			
 		}
 		
-		// This returns sitemap array that is modified for use with View controller and other 
-		// parts of the system. It returns sitemap for current language or a language set with 
-		// $language variable and can return a specific sitemap node based on $keyword.
-		// * language - Language keyword, if this is not set then returns current language sitemap
-		// * keyword - If only a single URL node needs to be returned
+		/**
+		 * This returns sitemap array that is modified for use with View controller and other 
+		 * parts of the system. It returns sitemap for current language or a language set with 
+		 * $language variable and can return a specific sitemap node based on $keyword.
+		 *
+		 * @param string [$language] language keyword, if this is not set then returns current language sitemap
+		 * @param string [$keyword] if only a single URL node needs to be returned
+		 * @return array or false if failed
+		 */
 		final public function getSitemap($language=false,$keyword=false){
 			// If language is not set, then assuming current language
 			if(!$language){
@@ -667,13 +720,17 @@ class WWW_State	{
 			}
 		}
 		
-	// REQUEST MESSENGER
+	// STATE MESSENGER
 	
-		// This method initializes State messenger by giving it an address and assigning the file 
-		// that State messenger will be stored under. If the file already exists and $overwrite is 
-		// not turned on, then it automatically loads contents of that file from filesystem.
-		// * address - Key that messenger data will be saved under
-		// * overwrite - If this is set then existing state messenger file will be overwritten
+		/**
+		 * This method initializes State messenger by giving it an address and assigning the file 
+		 * that State messenger will be stored under. If the file already exists and $overwrite is 
+		 * not turned on, then it automatically loads contents of that file from filesystem.
+		 *
+		 * @param string [$address] key that messenger data will be saved under
+		 * @param boolean [$overwrite] if this is set then existing state messenger file will be overwritten
+		 * @return boolean
+		 */
 		final public function stateMessenger($address,$overwrite=false){
 			// File is stored in file system as hashed
 			$this->messenger=md5($address);
@@ -685,11 +742,15 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This writes data to State messenger. $data is the key and $value is the value of the 
-		// key. $data can also be an array of keys and values, in which case multiple values are 
-		// set at the same time.
-		// * data - Key or data array
-		// * value - Value, if data is a key
+		/**
+		 * This writes data to State messenger. $data is the key and $value is the value of the 
+		 * key. $data can also be an array of keys and values, in which case multiple values are 
+		 * set at the same time.
+		 *
+		 * @param array/string [$data] key or data array
+		 * @param mixed [$value] value, if data is a key
+		 * @return boolean
+		 */
 		final public function setMessengerData($data,$value=false){
 			// If messenger address is set
 			if($this->messenger){
@@ -709,9 +770,13 @@ class WWW_State	{
 			}
 		}
 		
-		// This method removes key from State messenger based on value of $key. If $key is not 
-		// set, then the entire State messenger data is cleared.
-		// * key - Key that will be removed, if set to false then removes the entire data
+		/**
+		 * This method removes key from State messenger based on value of $key. If $key is not 
+		 * set, then the entire State messenger data is cleared.
+		 *
+		 * @param string [$key] key that will be removed, if set to false then removes the entire data
+		 * @return boolean
+		 */
 		final public function unsetMessengerData($key=false){
 			// If messenger address is set
 			if($this->messenger && $key){
@@ -722,18 +787,23 @@ class WWW_State	{
 					return false;
 				}
 			} elseif($this->messenger){
-				$this->messengerData=array();			
+				$this->messengerData=array();	
+				return true;
 			} else {
 				return false;
 			}
 		}
 		
-		// This method returns data from State messenger. It returns the entire State messenger 
-		// data as an array based on $address keyword that is used as the fingerprint for data. 
-		// If $remove is set, then State messenger data is removed from filesystem or State 
-		// object after being called.
-		// * address - Messenger address
-		// * remove - True or false flag whether to delete the request data after returning it
+		/**
+		 * This method returns data from State messenger. It returns the entire State messenger 
+		 * data as an array based on $address keyword that is used as the fingerprint for data. 
+		 * If $remove is set, then State messenger data is removed from filesystem or State 
+		 * object after being called.
+		 *
+		 * @param string [$address] messenger address
+		 * @param boolean [$remove] true or false flag whether to delete the request data after returning it
+		 * $return mixed or false if failed
+		 */
 		final public function getMessengerData($address=false,$remove=true){
 			// If messenger address is set
 			if($address){
@@ -772,9 +842,13 @@ class WWW_State	{
 		
 	// SESSION USER AND PERMISSIONS
 	
-		// This method sets user data array in session. This is a simple helper function used 
-		// for holding user-specific data for a web service. $data is an array of user data.
-		// * data - Data array set to user
+		/**
+		 * This method sets user data array in session. This is a simple helper function used 
+		 * for holding user-specific data for a web service. $data is an array of user data.
+		 *
+		 * @param array [$data] data array set to user
+		 * @return boolean
+		 */
 		final public function setUser($data){
 			// Setting the session
 			$this->setSession($this->data['session-user-key'],$data);
@@ -783,9 +857,13 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This either returns the entire user data array or just a specific $key of user data 
-		// from the session.
-		// * key - Element returned from user data, if not set then returns the entire user data
+		/**
+		 * This either returns the entire user data array or just a specific $key of user data 
+		 * from the session.
+		 *
+		 * @param string [$key] element returned from user data, if not set then returns the entire user data
+		 * @return mixed
+		 */
 		final public function getUser($key=false){
 			// Testing if permissions state has been populated or not
 			if(!$this->data['user-data']){
@@ -809,7 +887,11 @@ class WWW_State	{
 			}
 		}
 		
-		// This unsets user data and removes the session of user data.
+		/**
+		 * This unsets user data and removes the session of user data.
+		 *
+		 * @return boolean
+		 */
 		final public function unsetUser(){
 			// Unsetting the session
 			$this->unsetSession($this->data['session-user-key']);
@@ -818,9 +900,13 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method sets an array of $permissions or a comma-separated string of permissions 
-		// for the current user permissions session.
-		// * permissions - An array or a string of permissions
+		/**
+		 * This method sets an array of $permissions or a comma-separated string of permissions 
+		 * for the current user permissions session.
+		 *
+		 * @param array/string [$permissions] an array or a string of permissions
+		 * @return boolean
+		 */
 		final public function setPermissions($permissions){
 			if(!is_array($permissions)){
 				$permissions=explode(',',$permissions);
@@ -832,7 +918,11 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method returns an array of currently set user permissions from the session.
+		/**
+		 * This method returns an array of currently set user permissions from the session.
+		 *
+		 * @return array
+		 */
 		final public function getPermissions(){
 			// Testing if permissions state has been populated or not
 			if(!$this->data['user-permissions']){
@@ -841,12 +931,16 @@ class WWW_State	{
 			return $this->data['user-permissions'];
 		}
 	
-		// This checks for an existence of permissions in the user permissions session array.
-		// $permissions is either a comma-separated string of permissions to be checked, or an 
-		// array. This method returns false when one of those permission keys is not set in the
-		// permissions session. Method returns true, if $permissions exist in the permissions 
-		// session array.
-		// * permissions - Comma-separated string or an array that is checked against permissions array
+		/**
+		 * This checks for an existence of permissions in the user permissions session array.
+		 * $permissions is either a comma-separated string of permissions to be checked, or an 
+		 * array. This method returns false when one of those permission keys is not set in the
+		 * permissions session. Method returns true, if $permissions exist in the permissions 
+		 * session array.
+		 *
+		 * @param string/array [$permissions] comma-separated string or an array that is checked against permissions array
+		 * @return boolean
+		 */
 		final public function checkPermissions($permissions){
 			// Testing if permissions state has been populated or not
 			if(!$this->data['user-permissions']){
@@ -873,8 +967,12 @@ class WWW_State	{
 			}
 		}
 		
-		// This unsets permissions data from session similarly to how unsetUser() method unsets 
-		// user data from session.
+		/**
+		 * This unsets permissions data from session similarly to how unsetUser() method unsets 
+		 * user data from session.
+		 *
+		 * @return boolean
+		 */
 		final public function unsetPermissions(){
 			// Unsetting the session
 			$this->unsetSession($this->data['session-permissions-key']);
@@ -883,12 +981,16 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method returns the currently active public token that is used to increase security 
-		// against cross-site-request-forgery attacks. This method returns false if user session 
-		// is not populated, in which case public token is not needed. $regenerate sets if the token 
-		// should be regenerated if it already exists, this invalidates forms when Back button is 
-		// used after submitting data, but is more secure.
-		// * regenerate - If public token should be regenerated
+		/**
+		 * This method returns the currently active public token that is used to increase security 
+		 * against cross-site-request-forgery attacks. This method returns false if user session 
+		 * is not populated, in which case public token is not needed. $regenerate sets if the token 
+		 * should be regenerated if it already exists, this invalidates forms when Back button is 
+		 * used after submitting data, but is more secure.
+		 *
+		 * @param boolean [$regenerate] if public token should be regenerated
+		 * @return string or boolean if no user session active
+		 */
 		final public function getPublicToken($regenerate=false){
 			// This is only required to protect users with active sessions
 			if($this->getUser()){
@@ -909,13 +1011,17 @@ class WWW_State	{
 		
 	// SESSION AND COOKIES
 	
-		// This method starts sessions. This is called automatically if sessions are accessed 
-		// but sessions have not yet been started. $lifetime is the lifetime of the cookie in 
-		// seconds. $secure flag is for session cookie to be secure and $httpOnly will mean 
-		// that cookie is for HTTP only and cannot be accessed with scripts.
-		// * lifetime - Cookie lifetime in seconds
-		// * secure - If secure cookie is used
-		// * httponly - If cookie is HTTP only
+		/**
+		 * This method starts sessions. This is called automatically if sessions are accessed 
+		 * but sessions have not yet been started. $lifetime is the lifetime of the cookie in 
+		 * seconds. $secure flag is for session cookie to be secure and $httpOnly will mean 
+		 * that cookie is for HTTP only and cannot be accessed with scripts.
+		 *
+		 * @param integer [$lifetime] cookie lifetime in seconds
+		 * @param boolean [$secure] if secure cookie is used
+		 * @param boolean [$httpOnly] if cookie is HTTP only
+		 * @return booleam
+		 */
 		final public function startSession($lifetime=0,$secure=false,$httpOnly=true){
 			// Sessions cannot be started if the headers have already been sent to the user agent
 			if(headers_sent()){
@@ -968,9 +1074,13 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method regenerates ongoing session with a new ID. $deleteOld, if set, 
-		// deletes the previous session.
-		// * deleteOld - Deletes the previous one, if set to true
+		/**
+		 * This method regenerates ongoing session with a new ID. $deleteOld, if set, 
+		 * deletes the previous session.
+		 *
+		 * @param boolean [$deleteOld] deletes the previous one, if set to true
+		 * @return boolean
+		 */
 		final public function regenerateSession($deleteOld=true){
 			// Making sure that sessions have been started
 			if(!$this->data['session-id']){
@@ -981,8 +1091,12 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method clears the session variable, if it is populated for current session.
-		// Session and the cookie is actually destroyed by State __destruct() method.
+		/**
+		 * This method clears the session variable, if it is populated for current session.
+		 * Session and the cookie is actually destroyed by State __destruct() method.
+		 *
+		 * @return boolean
+		 */
 		final public function destroySession(){
 			// Making sure that sessions have been started
 			if(!$this->data['session-id']){
@@ -993,10 +1107,14 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method sets a session variable $key with a value $value. If $key is an array of 
-		// keys and values, then multiple session variables are set at once.
-		// * key - Key of the variable, can be an array
-		// * value - Value to be set
+		/**
+		 * This method sets a session variable $key with a value $value. If $key is an array of 
+		 * keys and values, then multiple session variables are set at once.
+		 *
+		 * @param array/string [$key] key of the variable or an array of keys and values
+		 * @param mixed [$value] value to be set
+		 * @return boolean
+		 */
 		final public function setSession($key=false,$value=false){
 			// Making sure that sessions have been started
 			if(!$this->data['session-id']){
@@ -1018,10 +1136,14 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method returns $key value from session data. If $key is an array of keys, then 
-		// it can return multiple variables from session at once. If $key is not set, then entire 
-		// session array is returned.
-		// * key - Key of the value to be returned
+		/**
+		 * This method returns $key value from session data. If $key is an array of keys, then 
+		 * it can return multiple variables from session at once. If $key is not set, then entire 
+		 * session array is returned.
+		 *
+		 * @param string/array [$key] key to return or an array of keys
+		 * @return mixed
+		 */
 		final public function getSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->data['session-id']){
@@ -1058,10 +1180,14 @@ class WWW_State	{
 			}
 		}
 		
-		// This method unsets $key value from current session. If $key is an array of keys, then 
-		// multiple variables can be unset at once. If $key is not set at all, then this simply 
-		// destroys the entire session.
-		// * key - Key of the value to be unset, can be an array
+		/**
+		 * This method unsets $key value from current session. If $key is an array of keys, then 
+		 * multiple variables can be unset at once. If $key is not set at all, then this simply 
+		 * destroys the entire session.
+		 *
+		 * @param string/array [$key] key of the value to be unset, or an array of keys
+		 * @return boolean
+		 */
 		final public function unsetSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->data['session-id']){
@@ -1103,11 +1229,15 @@ class WWW_State	{
 			return true;
 		}
 		
-		// This method sets a cookie with $key and a $value. $configuration is an array of 
-		// cookie parameters that can be set.
-		// * key - Key of the variable, can be an array
-		// * value - Value to be set, can also be an array
-		// * configuration - Cookie configuration options
+		/**
+		 * This method sets a cookie with $key and a $value. $configuration is an array of 
+		 * cookie parameters that can be set.
+		 *
+		 * @param string/array [$key] key of the variable, or an array of keys and values
+		 * @param string/array [$value] value to be set, can also be an array
+		 * @param array [$configuration] cookie configuration options
+		 * @return boolean
+		 */
 		final public function setCookie($key,$value,$configuration=array()){
 			// Checking for configuration options
 			if(!isset($configuration['expire'])){
@@ -1167,9 +1297,13 @@ class WWW_State	{
 			}
 		}
 		
-		// This method returns a cookie value with the set $key. $key can also be an array of 
-		// keys, in which case multiple cookie values are returned in an array.
-		// * key - Key of the value to be returned, can be an array
+		/**
+		 * This method returns a cookie value with the set $key. $key can also be an array of 
+		 * keys, in which case multiple cookie values are returned in an array.
+		 *
+		 * @param string [$key] key of the value to be returned, can be an array
+		 * @return mixed
+		 */
 		final public function getCookie($key){
 			// Multiple keys can be returned
 			if(is_array($key)){
@@ -1193,10 +1327,13 @@ class WWW_State	{
 			}
 		}
 		
-		// This method unsets a cookie with the set key of $key. If $key is an array, then 
-		// it can remove multiple cookies at once.
-		// * key - Key of the value to be unset
-		// * config - Additional configuration options about the cookie, such as path
+		/**
+		 * This method unsets a cookie with the set key of $key. If $key is an array, then 
+		 * it can remove multiple cookies at once.
+		 *
+		 * @param string/array [$key] key of the value to be unset or an array of keys
+		 * @return boolean
+		 */
 		final public function unsetCookie($key){
 			// Can set multiple values
 			if(is_array($key)){
@@ -1219,36 +1356,68 @@ class WWW_State	{
 		
 	// HEADERS
 	
-		// This method adds a header to the array of headers to be added before data is pushed 
-		// to the client, when headers are sent. $header is the header string to add and $replace 
-		// is a true/false setting for whether previously sent header like this is replaced or not.
-		// * header - Header string to add
-		// * replace - Whether the header should be replaced, if previously set
+		/**
+		 * This method adds a header to the array of headers to be added before data is pushed 
+		 * to the client, when headers are sent. $header is the header string to add and $replace 
+		 * is a true/false setting for whether previously sent header like this is replaced or not.
+		 *
+		 * @param string/array [$header] header string to add or an array of header strings
+		 * @param boolean [$replace] whether the header should be replaced, if previously set
+		 * @return boolean
+		 */
 		final public function setHeader($header,$replace=true){
-			// Removing the header from unset array
-			unset($this->data['headers-unset'][$header]);
-			// Assigning the setting to headers array
-			$this->data['headers-set'][$header]=$replace;
+			// Multiple headers can be set at once
+			if(is_array($header)){
+				foreach($header as $h){
+					// Removing the header from unset array
+					unset($this->data['headers-unset'][$h]);
+					// Assigning the setting to headers array
+					$this->data['headers-set'][$h]=$replace;
+				}
+			} else {
+				// Removing the header from unset array
+				unset($this->data['headers-unset'][$header]);
+				// Assigning the setting to headers array
+				$this->data['headers-set'][$header]=$replace;
+			}
 			return true;
 		}
 	
-		// This method adds a header to the array of headers to be removed before data is pushed 
-		// to the client, when headers are sent. $header is the header string to remove.
-		// * header - header to remove
+		/**
+		 * This method adds a header to the array of headers to be removed before data is pushed 
+		 * to the client, when headers are sent. $header is the header string to remove.
+		 *
+		 * @param string/array [$header] header string to add or an array of header strings
+		 * @return boolean
+		 */
 		final public function unsetHeader($header){
-			// Unsetting the header, if previously set
-			unset($this->data['headers-set'][$header]);
-			// Assigning the setting to headers array
-			$this->data['headers-unset'][$header]=true;
+			// Multiple headers can be unset at once
+			if(is_array($header)){
+				foreach($header as $h){
+					// Removing the header from unset array
+					unset($this->data['headers-set'][$h]);
+					// Assigning the setting to headers array
+					$this->data['headers-unset'][$h]=true;
+				}
+			} else {
+				// Unsetting the header, if previously set
+				unset($this->data['headers-set'][$header]);
+				// Assigning the setting to headers array
+				$this->data['headers-unset'][$header]=true;
+			}
 			return true;
 		}
 	
 	// TERMINAL
 	
-		// This method is wrapper function for making terminal calls. It attempts to detect 
-		// what terminal is available on the system, if any, and then execute the call and 
-		// return the results of the call.
-		// * command - Command to be executed
+		/**
+		 * This method is wrapper function for making terminal calls. It attempts to detect 
+		 * what terminal is available on the system, if any, and then execute the call and 
+		 * return the results of the call.
+		 *
+		 * @param string [$command] command to be executed
+		 * return mixed
+		 */
 		final public function terminal($command){
 		
 			// Status variable

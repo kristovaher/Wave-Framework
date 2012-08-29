@@ -1,10 +1,16 @@
 
-# Wave Framework
+# Wave Framework <http://www.waveframework.com>
+# URL Rewrite Tester
 # 
 # This script is simply used to test whether mod_rewrite works for compatibility script
 # 
-# Author and support: Kristo Vaher - kristo@waher.net
-# License: GNU Lesser General Public License Version 3
+# @package    Index Gateway
+# @author     Kristo Vaher <kristo@waher.net>
+# @copyright  Copyright (c) 2012, Kristo Vaher
+# @license    GNU Lesser General Public License Version 3
+# @tutorial   /doc/pages/rewrites.htm
+# @since      1.0.0
+# @version    3.1.3
 
 # This is required on some server setups for RewriteEngine to work properly
 # But this can also throw 500 errors on some hosting environments, if it does then remove it

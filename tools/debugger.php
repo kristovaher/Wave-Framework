@@ -1,18 +1,21 @@
 <?php
 
-/*
-Wave Framework
-Error message debugger
-
-This is a script that collects error messages that have been written to filesystem. It also provides method 
-to easily delete the error log about a specific error message, once it is considered 'fixed'. This script 
-should be checked every now and then to test and make sure that there are no outstanding problems in the system.
-
-* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Errors and Warnings Debugger
+ *
+ * This is a script that collects error messages that have been written to filesystem. It also provides method 
+ * to easily delete the error log about a specific error message, once it is considered 'fixed'. This script 
+ * should be checked every now and then to test and make sure that there are no outstanding problems in the system.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_tools.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 // This initializes tools and authentication
 require('.'.DIRECTORY_SEPARATOR.'tools_autoload.php');

@@ -1,27 +1,63 @@
 <?php
 
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Tutorial Movie Model
+ *
+ * It is recommended to extend View classes from WWW_Factory in order to 
+ * provide various useful functions and API access for the view.
+ *
+ * @package    Factory
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    Unrestricted
+ * @tutorial   /doc/pages/tutorial_webservice.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
+
 class WWW_model_movie extends WWW_Factory {
 
-	// This is the 'data' that movie object holds
-	// These values should usually be re-presented in database
+	/**
+	 * It is recommended to define all data variables here. Usually the 
+	 * data variables have the same names as the column names of database 
+	 * rows from a table.
+	 */
 	public $id=0;
 	public $title;
 	public $year;
 	
-	// This function simply sets the title of the movie
-	// You can do additional data validation here, if needed
+	/**
+	 * This function simply sets the title of the movie
+	 *
+	 * @param string [$title] movie title
+	 * @return boolean
+	 */
 	public function setTitle($title){
 		$this->title=$title;
+		return true;
 	}
 	
-	// This function simply sets the year of the movie
-	// You can do additional data validation here, if needed
+	/**
+	 * This function simply sets the year of the movie
+	 *
+	 * @param string [$year] movie year
+	 * @return boolean
+	 */
 	public function setYear($year){
 		$this->year=$year;
+		return true;
 	}
 	
-	// This loads a movie based on its ID
-	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
+	/**
+	 * This loads a movie based on its ID
+	 *
+	 * This example uses simple serialized database in filesystem, but it 
+	 * could load data from MySQL or other databases
+	 * 
+	 * @param string [$id] movie ID
+	 * @return array if success, boolean if fails
+	 */
 	public function loadMovie($id=0){
 		if($id!=0){
 			// Database location
@@ -51,8 +87,14 @@ class WWW_model_movie extends WWW_Factory {
 		}
 	}
 
-	// This loads all movies from database into returned value
-	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
+	/**
+	 * This loads all movies from database into returned value
+	 *
+	 * This example uses simple serialized database in filesystem, but it 
+	 * could load data from MySQL or other databases
+	 *
+	 * @return array
+	 */
 	public function loadAllMovies(){
 		// Database location
 		$dbLoc=$this->getState('data-root').'movies.db';
@@ -75,8 +117,14 @@ class WWW_model_movie extends WWW_Factory {
 		return $allMovies;
 	}
 
-	// This saves the current movie in database
-	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
+	/**
+	 * This saves the current movie in database
+	 *
+	 * This example uses simple serialized database in filesystem, but it 
+	 * could load data from MySQL or other databases
+	 *
+	 * @return integer for movie ID if success, false if fails
+	 */
 	public function saveMovie(){
 		// Making sure that title and year are both set
 		if($this->title!='' && $this->year!=''){
@@ -109,8 +157,15 @@ class WWW_model_movie extends WWW_Factory {
 		}
 	}
 
-	// This deletes movie with a specific ID from database
-	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
+	/**
+	 * This deletes movie with a specific ID from database
+	 *
+	 * This example uses simple serialized database in filesystem, but it 
+	 * could load data from MySQL or other databases
+	 * 
+	 * @param string [$id] movie ID
+	 * @return boolean
+	 */
 	public function deleteMovie($id=0){
 		// This function, if defined with an ID, deletes specific ID, otherwise it deletes currently active ID
 		if($id!=0){

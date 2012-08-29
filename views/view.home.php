@@ -1,21 +1,34 @@
 <?php
 
-/*
-Wave Framework
-Home View
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Home View
+ * 
+ * This view is loaded when WWW_controller_view finds root or home page as the view file. Name 
+ * of the 'home' view is defined as a default in WWW_State class. This home view example also 
+ * shows how to use translations.
+ * 
+ * @package    Factory
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    Unrestricted
+ * @tutorial   /doc/pages/guide_mvc.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
-This view is loaded when WWW_controller_view finds root or home page as the view file. Name 
-of the 'home' view is defined as a default in WWW_State class. This home view example also 
-shows how to use translations.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: This file can be copied, changed and re-published under another license without any restrictions
-*/
-
-// WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_view_home extends WWW_Factory {
 
-	// View Controller calls this function as output for page content
+	/**
+	 * View Controller calls this function as output for page content.
+	 * 
+	 * This method returns null by default because the API will load the 
+	 * result from output buffer, if the API call echoes/prints any output. 
+	 * It is recommended for View methods not to return any variable data.
+	 *
+	 * @param array [$input] input array from View Controller
+	 * @return null
+	 */
 	public function render($input){
 		
 		// Translations are stored in input variables and can be used within the view
@@ -29,6 +42,9 @@ class WWW_view_home extends WWW_Factory {
 				<img width="160" height="160" src="resources/images/160x160&logo.png"/>
 			</div>
 		<?php
+		
+		// API Will load result data from output buffer
+		return null;
 		
 	}
 

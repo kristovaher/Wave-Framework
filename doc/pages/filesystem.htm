@@ -14,7 +14,7 @@
 
 			<p>General overview of the files included in the setup archive of Wave Framework in alphabetical order.</p>
 
-			<p><b>/controllers/*.*</b></p>
+			<p><b>/controllers/</b></p>
 
 			<p>Includes all controllers used by the system. Controllers are built with the following standard, where controllers name is written in filename as controller.{name}.php, class itself is defined as WWW_controller_{name} and when this controller is called with API, the command is $API-&gt;command({name}-{method}), where method is a method of that class. When this controller is created through WWW_Factory (within one of the MVC objects), the command is $this-&gt;getController({name},{method},{data}), where method is a method of that class and {data} is input data to that method. If method and data are not defined, then object itself is returned instead of the function result.</p>
 
@@ -31,8 +31,8 @@
 			<p>View class is used by index.php to load view from /views/ folder and output it to the requesting user agent. View generates typical HTML header, includes various resource files and loads a view that WWW_controller_url detected being the proper URL that is loaded. This class also loads JavaScript, jQuery and API Wrapper library.</p>
 
 			<p><b>/doc/<br/>
-			/doc/pages/*.*<br/>
-			/doc/start.htm<br/>
+			/doc/pages/*.htm<br/>
+			/doc/index.htm<br/>
 			/doc/style.css</b></p>
 
 			<p>Documentation subfolder includes all documentation about Wave Framework. Please refer to /doc/start.htm file as the starting point to get further information about this framework.</p>
@@ -41,7 +41,7 @@
 
 			<p>This folder holds all the example files of Wave Framework. How to use these files are detailed in documentation tutorials.</p>
 
-			<p><b>/engine/*.*</b></p>
+			<p><b>/engine/</b></p>
 
 			<p>This folder includes all the core classes of Wave as well as all Index Gateway handlers. These files should not be modified unless deemed necessary, as they are part of core functionality of Wave Framework.</p>
 

@@ -1,19 +1,33 @@
 <?php
 
-/*
-Wave Framework
-Example View
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Example View
+ *
+ * It is recommended to extend View classes from WWW_Factory in order to 
+ * provide various useful functions and API access for the view.
+ *
+ * @package    Factory
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    Unrestricted
+ * @tutorial   /doc/pages/guide_mvc.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
-Minimal example view for demonstration purposes.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: This file can be copied, changed and re-published under another license without any restrictions
-*/
-
-// WWW_Factory is parent class for all MVC classes of Wave Framework
 class WWW_view_example extends WWW_Factory {
 
-	// View Controller calls this function as output for page content
+	/**
+	 * View Controller calls this function as output for page content.
+	 * 
+	 * This method returns null by default because the API will load the 
+	 * result from output buffer, if the API call echoes/prints any output. 
+	 * It is recommended for View methods not to return any variable data.
+	 *
+	 * @param array [$input] input array from View Controller
+	 * @return null
+	 */
 	public function render($input){
 		
 		?>
@@ -50,6 +64,9 @@ class WWW_view_example extends WWW_Factory {
 				</pre>
 			</div>
 		<?php
+		
+		// API Will load result data from output buffer
+		return null;
 		
 	}
 

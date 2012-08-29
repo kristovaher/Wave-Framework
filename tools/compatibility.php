@@ -1,18 +1,21 @@
 <?php
 
-/*
-Wave Framework
-Server compatibility script
-
-This script checks if installation is ready for Wave Framework. It checks for PHP version, whether 
-Apache mod_rewrite RewriteEngine or Nginx URL rewriting is turned on and whether filesystem can be 
-written to.
-
-* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * System Compatibility Script
+ *
+ * This script checks if installation is ready for Wave Framework. It checks for PHP version, whether 
+ * Apache mod_rewrite RewriteEngine or Nginx URL rewriting is turned on and whether filesystem can be 
+ * written to.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_tools.htm
+ * @since      1.5.1
+ * @version    3.1.3
+ */
 
 // This initializes tools and authentication
 require('.'.DIRECTORY_SEPARATOR.'tools_autoload.php');
@@ -341,13 +344,13 @@ header('Content-Type: text/html;charset=utf-8');
 				$log[]='<span class="bold orange">WARNING</span>: /filesystem/errors/ is not writable, it is recommended to keep this folder writable, since it is useful for debugging purposes';
 			}
 			
-			// FILESYSTEM SESSIONS
+			// FILESYSTEM SESSION TOKENS
 			// This stores all API sessions and tokens per API profile
-			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.'test.tmp','1')){
-				$log[]='<span class="bold">SUCCESS</span>: /filesystem/sessions/ is writable';
-				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.'test.tmp');
+			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+				$log[]='<span class="bold">SUCCESS</span>: /filesystem/tokens/ is writable';
+				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR.'test.tmp');
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: /filesystem/sessions/ is not writable, this warning can be ignored if API keys and security features are not used';
+				$log[]='<span class="bold orange">WARNING</span>: /filesystem/tokens/ is not writable, this warning can be ignored if API keys and security features are not used';
 			}
 			
 			// FILESYSTEM TEMPORARY FILES
@@ -368,6 +371,36 @@ header('Content-Type: text/html;charset=utf-8');
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'userdata'.DIRECTORY_SEPARATOR.'test.tmp');
 			} else {
 				$log[]='<span class="bold orange">WARNING</span>: /filesystem/userdata/ is not writable, this warning can be ignored if your system does not write anything to that folder';
+			}
+			
+			// BACKUPS
+			// System backups are stored here
+			// Wave Framework itself does not use this folder and this should be used by developer, if necessary
+			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'backups'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+				$log[]='<span class="bold">SUCCESS</span>: /filesystem/backups/ is writable';
+				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'backups'.DIRECTORY_SEPARATOR.'test.tmp');
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: /filesystem/backups/ is not writable, this means that default update script cannot store backup archives when used';
+			}
+			
+			// STATIC
+			// Static uploads are stored here
+			// Wave Framework itself does not use this folder and this should be used by developer, if necessary
+			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'static'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+				$log[]='<span class="bold">SUCCESS</span>: /filesystem/static/ is writable';
+				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'static'.DIRECTORY_SEPARATOR.'test.tmp');
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: /filesystem/static/ is not writable, this warning can be ignored if you do not intend to write anything in static folder';
+			}
+			
+			// UPDATES
+			// Update archives are stored here
+			// Wave Framework itself does not use this folder and this should be used by developer, if necessary
+			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'updates'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+				$log[]='<span class="bold">SUCCESS</span>: /filesystem/updates/ is writable';
+				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'updates'.DIRECTORY_SEPARATOR.'test.tmp');
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: /filesystem/updates/ is not writable, this means that default update script cannot store update archives when used';
 			}
 			
 			// FILESYSTEM DATA

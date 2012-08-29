@@ -1,20 +1,23 @@
 <?php
 
-/*
-Wave Framework
-Log reader for reading performance logs
-
-This is a simple script that is used to read log files stored by WWW_Logger class. 
-It loads a log file defined by specific timestamp formatted as Y-m-d-H. By default 
-it displays information about all the requests that have happened in the current 
-hour, but if GET variable 'log' is supplied in same timestamp format, then that 
-log file data is returned instead.
-
-* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Log Reader
+ *
+ * This is a simple script that is used to read log files stored by WWW_Logger class. 
+ * It loads a log file defined by specific timestamp formatted as Y-m-d-H. By default 
+ * it displays information about all the requests that have happened in the current 
+ * hour, but if GET variable 'log' is supplied in same timestamp format, then that 
+ * log file data is returned instead.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_tools.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 // This initializes tools and authentication
 require('.'.DIRECTORY_SEPARATOR.'tools_autoload.php');

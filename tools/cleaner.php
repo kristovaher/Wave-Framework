@@ -1,27 +1,30 @@
 <?php
 
-/*
-Wave Framework
-Filesystem cleaner
-
-This script is used to clear Wave Framework system generated filesystem. It should be used 
-for debugging purposes during development or for maintenance once system is deployed. This 
-script can be configured by running it with a GET variable. Possible values are 'maintenance' 
-(clears only cache and temporary files), 'all' (clears everything), 'output' (clears output 
-cache), 'images' (clears images cache), 'resources' (clears cache of JavaScript and CSS), 
-'custom' (clears custom cache), 'tags' (clears cache tags), 'messenger' (clears State Messenger 
-data), 'errors' (clears debugging errors), 'limiter' (clears request data of user agent IP's), 
-'logs' (clears system logs), 'tokens' (clears API session tokens), 'tmp' (clears folder from 
-everything that might be stored here), 'data' (clears the folder intended for database 
-storage), 'backups' and 'updates' (clears folders that store backup and update archives) 
-and 'userdata' (entirely custom storage folder). Please make sure to use 'all' carefully, 
-since it might remove sensitive data. The script runs in 'maintenance' mode by default.
-
-* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Filesystem Cleaner
+ *
+ * This script is used to clear Wave Framework system generated filesystem. It should be used 
+ * for debugging purposes during development or for maintenance once system is deployed. This 
+ * script can be configured by running it with a GET variable. Possible values are 'maintenance' 
+ * (clears only cache and temporary files), 'all' (clears everything), 'output' (clears output 
+ * cache), 'images' (clears images cache), 'resources' (clears cache of JavaScript and CSS), 
+ * 'custom' (clears custom cache), 'tags' (clears cache tags), 'messenger' (clears State Messenger 
+ * data), 'errors' (clears debugging errors), 'limiter' (clears request data of user agent IP's), 
+ * 'logs' (clears system logs), 'tokens' (clears API session tokens), 'tmp' (clears folder from 
+ * everything that might be stored here), 'data' (clears the folder intended for database 
+ * storage), 'backups' and 'updates' (clears folders that store backup and update archives) 
+ * and 'userdata' (entirely custom storage folder). Please make sure to use 'all' carefully, 
+ * since it might remove sensitive data. The script runs in 'maintenance' mode by default.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_tools.htm
+ * @since      1.4.9
+ * @version    3.1.3
+ */
 
 // This initializes tools and authentication
 require('.'.DIRECTORY_SEPARATOR.'tools_autoload.php');

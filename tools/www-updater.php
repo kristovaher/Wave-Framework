@@ -1,17 +1,22 @@
 <?php
 
-/*
-Wave Framework
-Wave Framework Updater script
-
-This is an update script template, if file with this name is added to root archive of update zip 
-files that is given to /tools/updater.php, then this script is also executed (and then removed). 
-This script is useful to store in other update-related commands, such as file permissions, database 
-changes and so on.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Self-Executed Updater Script
+ *
+ * This is an update script template, if file with this name is added to root archive of update zip 
+ * files that is given to /tools/updater.php, then this script is also executed (and then removed). 
+ * This script is useful to store in other update-related commands, such as file permissions, database 
+ * changes and so on.
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_tools.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 // It is always recommended to have this file return a plain-text log where each log entry is on a new line
 header('Content-Type: text/plain;charset=utf-8');

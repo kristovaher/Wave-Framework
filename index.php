@@ -1,18 +1,23 @@
 <?php
 
-/* 
-Wave Framework
-Index Gateway
-
-Index Gateway is an index/bootstrap file of Wave Framework that will serve almost every HTTP 
-request made to the system built on Wave Framework. It analyzes the HTTP request, loads Logger 
-and configuration as well as HTTP request Limiter, overwrites error handler of PHP and then 
-executes the command through one of the request handlers that are stored in 
-/engine/handler.[handler-type].php files.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Index Gateway
+ *
+ * Index Gateway is an index/bootstrap file of Wave Framework that will serve almost every HTTP 
+ * request made to the system built on Wave Framework. It analyzes the HTTP request, loads Logger 
+ * and configuration as well as HTTP request Limiter, overwrites error handler of PHP and then 
+ * executes the command through one of the request handlers that are stored in 
+ * /engine/handler.[handler-type].php files.
+ *
+ * @package    Index Gateway
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/gateway.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
 // SOLVING THE HTTP REQUEST
 
@@ -347,7 +352,9 @@ License: GNU Lesser General Public License Version 3
 			
 				// This allows API filename to define what type of data should be returned
 				if($apiHandler=='www'){
-					$_GET['www-return-type']='php';
+					if(!isset($_GET['www-return-type'])){
+						$_GET['www-return-type']='php';
+					}
 				} elseif($apiHandler!='json' && $apiHandler!='www'){
 					$_GET['www-return-type']=$apiHandler;
 				}

@@ -1,18 +1,23 @@
 <?php
 
-/* 
-Wave Framework
-Data Handler
-
-Data Handler is loaded in situations when other handlers were not used, which is most commonly for 
-regular web page requests. Data Handler takes all the input from GET, POST, FILES; SESSION and 
-COOKIE variables, loads Wave Framework API and sends all the input to the API. It first uses URL 
-Controller to find out what page the user agent is looking for and then a View Controller to 
-generate that requested page.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Data Handler
+ *
+ * Data Handler is loaded in situations when other handlers were not used, which is most commonly for 
+ * regular web page requests. Data Handler takes all the input from GET, POST, FILES; SESSION and 
+ * COOKIE variables, loads Wave Framework API and sends all the input to the API. It first uses URL 
+ * Controller to find out what page the user agent is looking for and then a View Controller to 
+ * generate that requested page.
+ *
+ * @package    Index Gateway
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/handler_data.htm
+ * @since      1.5.0
+ * @version    3.1.3
+ */
 
 // INITIALIZATION
 
@@ -60,7 +65,7 @@ License: GNU Lesser General Public License Version 3
 
 	// This uses current request URI to find out which view should be loaded, by default it uses the request set by State
 	// API check is turned off, since index.php is considered a public gateway
-	$view=$api->command(array('www-command'=>'url-solve','www-output'=>0,'www-return-type'=>'php','www-request'=>$state->data['true-request'],'www-cache-timeout'=>$config['index-url-cache-timeout']),false,false,true);
+	$view=$api->command(array('url'=>$state->data['true-request'],'www-command'=>'url-solve','www-output'=>0,'www-return-type'=>'php','www-cache-timeout'=>$config['index-url-cache-timeout']),false,false,true);
 
 // CALLING DEFAULT VIEW CONTROLLER IF URL DID NOT ORDER A REDIRECTION
 

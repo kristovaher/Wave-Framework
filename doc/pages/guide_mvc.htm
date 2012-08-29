@@ -233,5 +233,101 @@
 	</code>
 </pre>
 
+			<h2>Comments and Documenting</h2>
+			
+				<p>You should always document your variables and methods. There are a number of ways and guidelines how to document your code in PHP and while Wave Framework does not enforce you to use one type of documenting style over another, there are some things that you should keep in mind when documenting your MVC objects.</p>
+				
+				<p>Controller documentation is actually reflected in API Info Developer Tool. This tool is situated in '/tools/api-info.php' file and can be technically considered the preliminary documentation for your actual API. This API Info tool generates documentation page for all of your public methods of your defined Controllers and whether they are accessible over API and if they are, then by what API Profiles (which are defined in '/resources/api.profiles.ini' file).</p>
+				
+				<p>Models and View documentation and comments are not visible through any tool and are only a guide to the developer who is implementing these Models and Views.</p>
+				
+				<h3>File Headers</h3>
+				
+					<p>MVC class definition header should give a brief overview about what the class is about as well as its version number, license information and author information. This data is needed since if someone stumbles upon the file, they should get a general idea about what this class does and how it can be used.</p>
+					
+					<p>Here is a recommended header for a MVC class definition file:</p>
+					
+<pre>
+	<code>
+	/**
+	 * Project Name <http://www.example.com>
+	 * Brief Class Description
+	 *
+	 * Detailed class description about what the Model, View, or 
+	 * Controller class does and how it can be used.
+	 *
+	 * @package    Package of this class (or what it is extended from) 
+	 * @author     My Name <email@example.net> (name and e-mail)
+	 * @copyright  Copyright (c) 2012, My Name (copyright information)
+	 * @license    License <http://www.example.com> (class license and use restriction)
+	 * @tutorial   /doc/class.htm (link to a document that shows how to use this class)
+	 * @since      1.0.0 (version this class was originally implemented)
+	 * @version    1.0.0 (since when has this class has been edited)
+	 */
+	</code>
+</pre>
+
+				<h3>Model/View Function Comments</h3>
+				
+					<p>Model and View classes include methods that should also be well documented and commented. Differently from class documentation, it is not really needed to define author information and license information and version information, unless these methods have a different information in those fields than in the class itself.</p>
+					
+					<p>Method/function comments however also need two other variables:</p>
+					
+					<ul>
+						<li><b>@param</b> - This is an input parameter. This defines the 'type', variable name and description.</li>
+						<li><b>@return</b> - This is what type of variable the function/method returns. This defines the type of data that is returned (or multiple types) and optional description about what the variable is.</li>
+					</ul>
+					
+					<p>Here is a simple example documented method:</p>
+	
+<pre>
+	<code>
+	/**
+	 * This adds two numbers together.
+	 *
+	 * @param integer [$a] first variable
+	 * @param integer [$b] second variable
+	 * @return integer
+	 */
+	public function example($a,$b){
+		return $a+$b;
+	}
+	</code>
+</pre>
+
+				<h3>Controller Function Comments</h3>
+				
+					<p>Controller functions should be documented similarly to Model/View class methods. But since Wave Framework also uses Controllers for the API, there are some notable differences.</p>
+					
+					<p>Public methods of Controllers are also shown in API Info tool as described above. Public methods of Controllers can thus be used by the Wave Framework API. And the way Wave Framework functions is that it executes the Controller method by generally using one array for input and (generally) returning an array as output.</p>
+					
+					<p>This means that two new parameters should be defined for Controller comments:</p>
+					
+					<ul>
+						<li><b>@input</b> - A key in input array.</li>
+						<li><b>@output</b> - A key in output array.</li>
+					</ul>
+					
+					<p>Here is a simple example documented Controller method:</p>
+					
+<pre>
+	<code>
+	/**
+	 * This adds two numbers together.
+	 *
+	 * @param array [$input] input data array
+	 * @input [a] first variable
+	 * @input [b] second variable
+	 * @return array
+	 * @output [result] result of the function
+	 */
+	public function example($a,$b){
+		return array('result'=>$a+$b);
+	}
+	</code>
+</pre>
+
+					<p>As a result, the documentation will be detailed also in API Info tool. Though you can write your documentation in any way you wish (and it would be shown in API Info as well), it is recommended to stay consistent with documentation so that it is understood by most developers who happen to look into your code or work with it.</p>
+
 	</body>
 </html>

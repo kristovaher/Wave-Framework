@@ -1,27 +1,35 @@
 <?php
 
-/*
-Wave Framework
-Maintenance function library
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * Tools Functions Library
+ *
+ * This script includes various general-use functions that are used by developer tools in Wave Framework 
+ * that are stored in /tools/ folder. This includes scripts such as directory cleaner and mass-file mover 
+ * through FTP.
+ * 
+ * - Directory cleaner function
+ * - File index creation function
+ * - FTP file mover
+ * - System backup archive creator
+ * - It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
+ *
+ * @package    Tools
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/guide_tools.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */
 
-This script includes various general-use functions that are used by developer tools in Wave Framework 
-that are stored in /tools/ folder. This includes scripts such as directory cleaner and mass-file mover 
-through FTP.
-
-* Directory cleaner function
-* File index creation function
-* FTP file mover
-* System backup archive creator
-* It is recommended to remove all files from /tools/ subfolder prior to deploying project in live
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
-
-// This function clears a folder and all of its subfolders and is run recursively
-// * directory - Directory of the file to be moved
-// * olderThan - Timestamp that will act as a cut-off point of the file modification date, if file is older than that timestamp, it is deleted
-// Returns plain text log
+/**
+ * This function clears a folder and all of its subfolders and is run recursively
+ *
+ * @param string [$directory] location of directory in filesystem
+ * @param integer [$cutoff] UNIX timestamp after which files will not be removed
+ * @return array as log
+ */
 function dirCleaner($directory,$cutoff=0){
 
 	// Log will be stored in this array
@@ -71,14 +79,19 @@ function dirCleaner($directory,$cutoff=0){
 	
 }
 
-// This function lists all files and directories in a specific directory
-// * directory - Basepath of all files
-// * type - What type of index this is, can be 'all', 'files' or 'folders'
-// Returns an array with all file and folder addresses
+/**
+ * This function lists all files and directories in a specific directory
+ *
+ * @param string [$directory] location of directory in filesystem
+ * @param string [$type] can be 'all', 'folders', 'files'
+ * @param integer [$files] internal parameter used recursively
+ * @return array as file index
+ */
 function fileIndex($directory,$type='all',$files=false){
 
 	// File names are stored in this array
 	$index=array();
+	
 	// Scanning the current directory
 	if(!$files){
 		$files=scandir($directory);
@@ -112,11 +125,14 @@ function fileIndex($directory,$type='all',$files=false){
 	
 }
 
-// This function clears a folder and all of its subfolders and is run recursively
-// * ftp - FTP connection link
-// * from - FTP folder to move files from
-// * to - FTP folder to move files to
-// Returns plain text log
+/**
+ * This function clears a folder and all of its subfolders and is run recursively
+ *
+ * @param resource [$ftp] FTP connection resource
+ * @param string [$from] source folder
+ * @param string [$to] target folder
+ * @return array as log
+ */
 function ftpFileMover($ftp,$from,$to){
 
 	// Log will be stored in this array
@@ -168,14 +184,18 @@ function ftpFileMover($ftp,$from,$to){
 
 }
 
-// This function creates a *.zip archive of all the core files (everything except /filesystem/)
-// * source - This is the root folder to create archive from
-// * target - This is the target directory where to store the backup
-// Returns true if successful
-function systemBackup($source,$target,$filesystemBackup=false){
+/**
+ * This function creates a *.zip archive of all the core files (everything except /filesystem/)
+ *
+ * @param string [$source] root folder to backup
+ * @param string [$archive] archive location and filename for backup
+ * @param boolean [$filesystemBackup] whether filesystem folder will also be backed up
+ * @return boolean
+ */
+function systemBackup($source,$archive,$filesystemBackup=false){
 
 	// This is to find absolute path of source directory
-	$root=realpath($source).DIRECTORY_SEPARATOR;
+	$source=realpath($source).DIRECTORY_SEPARATOR;
 	
 	// Default framework file system
 	$files=array(
@@ -198,20 +218,20 @@ function systemBackup($source,$target,$filesystemBackup=false){
 	);
 	
 	// This returns all absolute paths of all files in $source directory
-	$files=fileIndex($root,'files',$files);
+	$files=fileIndex($source,'files',$files);
 	
 	// If files exist
 	if(!empty($files)){
 		// Creating Zip archive
 		$zip=new ZipArchive;
-		if($zip->open($target,ZipArchive::CREATE)){
+		if($zip->open($archive,ZipArchive::CREATE)){
 			// Archive comment notes the creation date and time
 			$zip->setArchiveComment('Wave Framework backup created at '.date('d.m.Y H:i:s').' by script run at '.$_SERVER['REQUEST_URI']);
 			// Each file is added to archive
 			foreach($files as $f){
 				if(is_readable($f)){
 					//This is the path it will be stored as in archive
-					$archivePath=str_replace($root,'',$f);
+					$archivePath=str_replace($source,'',$f);
 					// Checking for directory filtering
 					$dir=explode(DIRECTORY_SEPARATOR,$archivePath);
 					// Backup ignores filesystem scripts entirely if it is not enabled
@@ -223,7 +243,7 @@ function systemBackup($source,$target,$filesystemBackup=false){
 							// Archive is closed and function returns false
 							$zip->close();
 							// Removing incomplete archive
-							unlink($target);
+							unlink($archive);
 							// Archive creation failed
 							return false;
 						}
@@ -245,9 +265,12 @@ function systemBackup($source,$target,$filesystemBackup=false){
 	
 }
 
-// This returns true IP
-// * trustedProxies - Array of trusted proxies
-// Returns true IP
+/**
+ * This returns true IP
+ *
+ * @param array [$trustedProxies] array of trusted proxies
+ * @return string
+ */
 function getTrueIP($trustedProxies=false){
 
 	// Default for trusted proxies, * means all are trusted

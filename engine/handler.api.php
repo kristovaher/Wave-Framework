@@ -1,17 +1,22 @@
 <?php
 
-/* 
-Wave Framework
-API Handler
-
-API Handler is loaded whenever a HTTP request is made to *.api extension. API Handler takes all 
-the input from GET, POST, FILES; SESSION and COOKIE variables, loads Wave Framework API and sends 
-all the input to the API and then returns the result to the user agent. By default the API Handler 
-returns data in JSON format. It also loads Database class for additional functionality.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
+/**
+ * Wave Framework <http://www.waveframework.com>
+ * API Handler
+ *
+ * API Handler is loaded whenever a HTTP request is made to *.api extension. API Handler takes all 
+ * the input from GET, POST, FILES; SESSION and COOKIE variables, loads Wave Framework API and sends 
+ * all the input to the API and then returns the result to the user agent. By default the API Handler 
+ * returns data in JSON format. It also loads Database class for additional functionality.
+ *
+ * @package    Index Gateway
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/handler_api.htm
+ * @since      1.5.0
+ * @version    3.1.3
+ */
 
 //INITIALIZATION
 

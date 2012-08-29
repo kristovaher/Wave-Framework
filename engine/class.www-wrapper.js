@@ -1,49 +1,66 @@
-	
+
 /*
-Wave Framework
-JavaScript API Wrapper Class
+ * Wave Framework <http://www.waveframework.com>
+ * JavaScript API Wrapper Class
+ *
+ * Main purpose of an API Wrapper is to make it easier to make API requests over HTTP to a system 
+ * built on Wave Framework. API Wrapper class does everything for the developer without requiring 
+ * the developer to learn the ins and outs of technical details about how to build an API request. 
+ * Wave Framework comes with two separate API authentication methods, one more secure than the 
+ * other, both which are handled by this Wrapper class. JavaScript API Wrapper does not support 
+ * sending data in encrypted form or decrypting encrypted data from a response.
+ *
+ * @package    API
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    GNU Lesser General Public License Version 3
+ * @tutorial   /doc/pages/wrapper_js.htm
+ * @since      2.0.1
+ * @version    3.1.3
+ */
 
-Main purpose of an API Wrapper is to make it easier to make API requests over HTTP to a system 
-built on Wave Framework. API Wrapper class does everything for the developer without requiring 
-the developer to learn the ins and outs of technical details about how to build an API request. 
-Wave Framework comes with two separate API authentication methods, one more secure than the 
-other, both which are handled by this Wrapper class. JavaScript API Wrapper does not support 
-sending data in encrypted form or decrypting encrypted data from a response.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: GNU Lesser General Public License Version 3
-*/
-
-// Wrapper object creation requires an 'address', which is the address that Wrapper will make 
-// API requests to. If this is not defined, then 'address' assumes that the system it makes 
-// requests to is the same where the API is loaded from. 'language' is a language keyword from 
-// the system that API makes a connection with and is used whenever language-specific results 
-// are returned from API.
+/*
+ * Wrapper object creation requires an 'address', which is the address that Wrapper will make 
+ * API requests to. If this is not defined, then 'address' assumes that the system it makes 
+ * requests to is the same where the API is loaded from. 'language' is a language keyword from 
+ * the system that API makes a connection with and is used whenever language-specific results 
+ * are returned from API.
+ * 
+ * @param string [address] API address, default value is current domain presumed API address
+ * @param string [language] language keyword, default value is current document language
+ * @return object
+ */
 function WWW_Wrapper(address,language){
 
-	// For cases when the API address is not set
+	// Finding a default, if not set
 	if(address==null){
 		address=document.baseURI+'json.api';
 	}
 	
-	// If language is not set, then we take the language from document
-	if(language==null){
+	// Finding a default, if not set
+	if(language==null && document.documentElement.lang!=null){
 		language=document.documentElement.lang;
 	}
 
-	// This is the address and URL of the API that the Wrapper will connect to. The API address 
-	// must be for Wave Framework API. This value is set either in object creation or when 
-	// setting 'www-address' input variable.
+	/* 
+	 * This is the address and URL of the API that the Wrapper will connect to. The API address 
+	 * must be for Wave Framework API. This value is set either in object creation or when 
+	 * setting 'www-address' input variable.
+	 */
 	var apiAddress=address;
 	
-	// This holds the current language of the API, it can be useful if the API commands return 
-	// language-specific responses and translations from the API. This variable is set by sending 
-	// 'www-language' input variable.
+	/*
+	 * This holds the current language of the API, it can be useful if the API commands return 
+	 * language-specific responses and translations from the API. This variable is set by sending 
+	 * 'www-language' input variable.
+	 */
 	var apiLanguage=language;
 	
-	// This holds information about current API state, such as profile name, secret key and 
-	// various API-related flags for callbacks, asyncrhonous status and more. This variable is 
-	// passed around per each API call.
+	/*
+	 * This holds information about current API state, such as profile name, secret key and 
+	 * various API-related flags for callbacks, asyncrhonous status and more. This variable is 
+	 * passed around per each API call.
+	 */
 	var apiState={
 		apiProfile:false,
 		apiSecretKey:false,
@@ -62,32 +79,46 @@ function WWW_Wrapper(address,language){
 		unserialize:true
 	}
 	
-	// This variable holds the last known error message returned from the API.
+	/*
+	 * This variable holds the last known error message returned from the API.
+	 */
 	var errorMessage=false;
 	
-	// This variable holds the last known response code returned from the API.
+	/*
+	 * This variable holds the last known response code returned from the API.
+	 */
 	var responseCode=false;
 	
-	// Input data is a variable that stores all the plain-text input sent with the API request, 
-	// it's a key-value pair of variables and their values for the API.
+	/*
+	 * Input data is a variable that stores all the plain-text input sent with the API request, 
+	 * it's a key-value pair of variables and their values for the API.
+	 */
 	var inputData=new Object();
 	
-	// This is an array that gathers log information about the requests made through the API 
-	// that can be used for debugging purposes should something go wrong.
+	/*
+	 * This is an array that gathers log information about the requests made through the API 
+	 * that can be used for debugging purposes should something go wrong.
+	 */
 	var log=new Array();
 	
-	// This is the user-agent string of the API Wrapper. At the moment it is not possible to 
-	// set custom headers with AJAX requests, so this variable is unused in the class and only 
-	// defined for future purpose.
+	/*
+	 * This is the user-agent string of the API Wrapper. At the moment it is not possible to 
+	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
+	 * defined for future purpose.
+	 */
 	var userAgent='WWWFramework/3.0.0 (JavaScript)';
 	
-	// This is the GET string maximum length. Most servers should easily be able to deal with 
-	// 2048 bytes of request string length, but this value can be changed by submitting a 
-	// different length with 'www-get-length' input value.
+	/*
+	 * This is the GET string maximum length. Most servers should easily be able to deal with 
+	 * 2048 bytes of request string length, but this value can be changed by submitting a 
+	 * different length with 'www-get-length' input value.
+	 */
 	var getLimit=2048;
 	
-	// If this value is set, then API log will be reset after each API request. This value can 
-	// be sent with 'www-reset-log' keyword sent to Wrapper.
+	/*
+	 * If this value is set, then API log will be reset after each API request. This value can 
+	 * be sent with 'www-reset-log' keyword sent to Wrapper.
+	 */
 	var resetLog=true;
 		
 	// Log entry
@@ -95,10 +126,14 @@ function WWW_Wrapper(address,language){
 	
 	// SETTINGS
 		
-		// This method returns current log of the API wrapper. If 'implode' is set, then the 
-		// value of 'implode' is used as a character to implode the log with. Otherwise the log 
-		// is returned as an array.
-		// * implode - String to implode the log with
+		/*
+		 * This method returns current log of the API wrapper. If 'implode' is set, then the 
+		 * value of 'implode' is used as a character to implode the log with. Otherwise the log 
+		 * is returned as an array.
+		 *
+		 * @param string [implode] String to implode the log entries with
+		 * @return array or string, depending on implode setting
+		 */
 		this.returnLog=function(implode){
 			log.push('Returning log');
 			// Imploding, if requested
@@ -109,23 +144,31 @@ function WWW_Wrapper(address,language){
 			}
 		}
 		
-		// This method clears the API log. This method can be called manually or is called 
-		// automatically if log is assigned to be reset with each new API request made by the 
-		// object.
+		/*
+		 * This method clears the API log. This method can be called manually or is called 
+		 * automatically if log is assigned to be reset with each new API request made by the 
+		 * object.
+		 * 
+		 * @return boolean
+		 */
 		this.clearLog=function(){
 			log=new Array();
 			return true;
 		}
 		
 	// INPUT
-	
-		// This method is used to set an input value in the API Wrapper. 'input' is the key 
-		// to set and 'value' is the value of the input key. 'input' can also be an array, 
-		// in which case multiple input values will be set in the same call. This method calls 
-		// private inputSetter() function that checks the input value for any internal flags 
-		// that might not actually be sent as an input to the API.
-		// * input - Can be an array or a key value of input
-		// * value - If input value is not an array, then this is what the input keys value
+		
+		/*
+		 * This method is used to set an input value in the API Wrapper. 'input' is the key 
+		 * to set and 'value' is the value of the input key. 'input' can also be an array, 
+		 * in which case multiple input values will be set in the same call. This method calls 
+		 * private inputSetter() function that checks the input value for any internal flags 
+		 * that might not actually be sent as an input to the API.
+		 *
+		 * @param string/object [input] input data keyword or an object of input data
+		 * @param string [value] input value
+		 * @return boolean
+		 */
 		this.setInput=function(input,value){
 			//Default value
 			if(value==null || value==false){
@@ -142,12 +185,16 @@ function WWW_Wrapper(address,language){
 			return true;
 		}
 		
-		// This is a helper function that setInput() method uses to actually assign 'value' 
-		// to the 'input' keyword. A lot of the keywords set carry additional functionality 
-		// that may entirely be API Wrapper specific. This method also creates a log entry 
-		// for any value that is changed or set.
-		// * input - Input data key
-		// * value - Input data value
+		/*
+		 * This is a helper function that setInput() method uses to actually assign 'value' 
+		 * to the 'input' keyword. A lot of the keywords set carry additional functionality 
+		 * that may entirely be API Wrapper specific. This method also creates a log entry 
+		 * for any value that is changed or set.
+		 * 
+		 * @param string [input] input data key
+		 * @param string [value] value to be set
+		 * @return boolean
+		 */
 		var inputSetter=function(input,value){
 			switch(input){
 				case 'www-api':
@@ -298,11 +345,14 @@ function WWW_Wrapper(address,language){
 			return true;
 		}
 		
-		// This method sets the form ID that is used to fetch input data from. This form can 
-		// be used for uploading files with JavaScript API Wrapper or making it easy to send 
-		// large form-based requests to API over AJAX.
-		// * form - ID of the form to be used
-		// * location - If input value is not an array, then this is what the input file address is
+		/*
+		 * This method sets the form ID that is used to fetch input data from. This form can 
+		 * be used for uploading files with JavaScript API Wrapper or making it easy to send 
+		 * large form-based requests to API over AJAX.
+		 * 
+		 * @param string [formId] form ID value
+		 * @return boolean
+		 */
 		this.setForm=function(formId){
 			// Sets the form handler
 			apiState.apiSubmitFormId=formId;
@@ -312,16 +362,25 @@ function WWW_Wrapper(address,language){
 			return true;
 		}
 		
-		// This method unsets the attached form from the API request.
+		/*
+		 * This method unsets the attached form from the API request.
+		 *
+		 * @return boolean
+		 */
 		this.clearForm=function(){
 			if(inputData['www-content-type']!=null){
 				delete inputData['www-content-type'];
 			}
 			apiState.apiSubmitFormId=false;
+			return true;
 		}
 		
-		// This function simply deletes current input values
-		// * clearAuth - True or false flag whether to also reset authentication and state data
+		/*
+		 * This function simply deletes current input values
+		 *
+		 * @param boolean [clearAuth] whether to also reset authentication and state data
+		 * @return boolean
+		 */
 		this.clearInput=function(clearAuth){
 			if(clearAuth!=null && clearAuth==true){
 				// Settings
@@ -351,16 +410,20 @@ function WWW_Wrapper(address,language){
 			return true;
 		}
 		
-	// SENDING REQUEST
+	// SENDING REQUEST		
 		
-		// This method executes the API request by building the request based on set input data 
-		// and set forms and sending it to API using XmlHttpRequest() or through hidden iFrame 
-		// forms. It also builds all validations as well as validates the returned response 
-		// from the server and calls callback functions, if they are set. It is possible to 
-		// send input variables directly with a single call by supplying the 'variable' array. 
-		// Form ID can also be sent with the request directly.
-		// * variables - This is an array of input variables
-		// * formId - Form ID that will be used to take the input data from
+		/*
+		 * This method executes the API request by building the request based on set input data 
+		 * and set forms and sending it to API using XmlHttpRequest() or through hidden iFrame 
+		 * forms. It also builds all validations as well as validates the returned response 
+		 * from the server and calls callback functions, if they are set. It is possible to 
+		 * send input variables directly with a single call by supplying the 'variable' array. 
+		 * Form ID can also be sent with the request directly.
+		 *
+		 * @param object [variables] object of keys and values to use as input data
+		 * @param string [formId] form ID value
+		 * @return object/void returns object on only non-async requests
+		 */
 		this.sendRequest=function(variables,formId){
 		
 			// If log is assigned to be reset with each new API request
@@ -694,16 +757,20 @@ function WWW_Wrapper(address,language){
 				}
 			
 		}
-		
-		// JavaScript API Wrapper handles asynchronous requests and all of request callbacks, 
-		// which allows to make multiple API requests at the same time or in sequence. This 
-		// method validates the response data, if validation is requested and executes set 
-		// callbacks with the results. 'resultData' is the response from the API call, 
-		// 'thisInputData' is the original input sent to the request and 'thisApiState' is 
-		// the API Wrapper state at the time of the request.
-		// * result - Result from the request
-		// * thisInputData - Input data sent to request
-		// * thisApiState - API state at the time of the request
+				
+		/*
+		 * JavaScript API Wrapper handles asynchronous requests and all of request callbacks, 
+		 * which allows to make multiple API requests at the same time or in sequence. This 
+		 * method validates the response data, if validation is requested and executes set 
+		 * callbacks with the results. 'resultData' is the response from the API call, 
+		 * 'thisInputData' is the original input sent to the request and 'thisApiState' is 
+		 * the API Wrapper state at the time of the request.
+		 *
+		 * @param string [resultData] result string from response
+		 * @param object [thisInputData] data that was sent as input
+		 * @param object [thisApiState] api state for this request
+		 * @return object/string response data from request depending on settings
+		 */
 		var parseResult=function(resultData,thisInputData,thisApiState){
 		
 			// Returning the result directly if the result is not intended to be unserialized
@@ -854,12 +921,15 @@ function WWW_Wrapper(address,language){
 		
 	// REQUIRED FUNCTIONS
 	
-		// This method is simply meant for returning a result if there was an error in the sent request
-		// * thisInputData - Data sent to request
-		// * thisresponseCode - Code number to be set as an error
-		// * thisErrorMessage - Clear text error message
-		// * thisErrorCallback - Callback function to call with the error message
-		// Returns either false or the result of callback function
+		/*
+		 * This method is simply meant for returning a result if there was an error in the sent request
+		 *
+		 * @param object [thisInputData] input data sent to the request
+		 * @param string [thisResponseCode] response code value
+		 * @param string [thisErrorMessage] returned error message text
+		 * @param string/function [thisErrorCallback] anonymous function or function name to be called
+		 * @return boolean/mixed depending on whether callback function is called or not
+		 */
 		var errorHandler=function(thisInputData,thisResponseCode,thisErrorMessage,thisErrorCallback){
 			// Assigning error details to object state
 			responseCode=thisResponseCode;
@@ -889,10 +959,14 @@ function WWW_Wrapper(address,language){
 				return false;
 			}
 		}
-	
-		// This helper method is used to clone one JavaScript object to another 'object' is 
-		// the JavaScript object to be converted.
-		// * object - Object to be cloned
+		
+		/*
+		 * This helper method is used to clone one JavaScript object to another 'object' is 
+		 * the JavaScript object to be converted.
+		 *
+		 * @param object [object] object to be cloned
+		 * @return object
+		 */
 		var clone=function(object){
 			if(object==null || typeof(object)!=='object'){
 				return object;
@@ -904,12 +978,16 @@ function WWW_Wrapper(address,language){
 			return tmp;
 		}
 		
-		// This method is used to build an input data validation hash string for authenticating 
-		// API requests. The entire input array of 'validationData' is serialized and hashed 
-		// with SHA-1 and a salt string set in 'postFix'. This is used for all API requests 
-		// where input has to be validated.
-		// * apiResult - Data array to calculate validation hash from
-		// * postFix - Part of the validation that is only known to sender and recipient
+		/*
+		 * This method is used to build an input data validation hash string for authenticating 
+		 * API requests. The entire input array of 'validationData' is serialized and hashed 
+		 * with SHA-1 and a salt string set in 'postFix'. This is used for all API requests 
+		 * where input has to be validated.
+		 * 
+		 * @param object [validationData] data to be used for hash generation
+		 * @param string [postFix] will be appended prior to hash being generated
+		 * @return string
+		 */
 		var validationHash=function(validationData,postFix){
 			// Sorting and encoding the output data
 			validationData=ksortArray(validationData);
@@ -917,10 +995,14 @@ function WWW_Wrapper(address,language){
 			return sha1(buildRequestData(validationData)+postFix);
 		}
 		
-		// This is a helper function used by validationHash() function to serialize an array 
-		// recursively. It applies ksort() to main method as well as to all sub-arrays. 'data' 
-		// is the array or object to be sorted.
-		// * data - Array to be sorted
+		/*
+		 * This is a helper function used by validationHash() function to serialize an array 
+		 * recursively. It applies ksort() to main method as well as to all sub-arrays. 'data' 
+		 * is the array or object to be sorted.
+		 *
+		 * @param object/mixed [data] variable to be sorted
+		 * @return mixed
+		 */
 		var ksortArray=function(data){
 			// Method is based on the current data type
 			if(typeof(data)==='array' || typeof(data)==='object'){
@@ -934,9 +1016,13 @@ function WWW_Wrapper(address,language){
 			return data;
 		}
 		
-		// This is a method that is similar to PHP http_build_query() function. It builds a 
-		// GET request string of input variables set in 'data'.
-		// * data - input data object to be converted
+		/*
+		 * This is a method that is similar to PHP http_build_query() function. It builds a 
+		 * GET request string of input variables set in 'data'.
+		 *
+		 * @param object [data] object to build request data string from
+		 * @return string
+		 */
 		var buildRequestData=function(data){
 			var variables=new Array();
 			for(var i in data){
@@ -949,10 +1035,14 @@ function WWW_Wrapper(address,language){
 			return variables.join('&');
 		}
 		
-		// This is a helper function for buildRequestData() method, it converts between 
-		// different ways data is represented in a GET request string.
-		// * key - Key
-		// * value - Value
+		/* 
+		 * This is a helper function for buildRequestData() method, it converts between 
+		 * different ways data is represented in a GET request string.
+		 * 
+		 * @param string [key] key value
+		 * @param mixed [value] variable value
+		 * @return string 
+		 */
 		var subRequestData=function(key,value){
 			var variables=new Array();
 			if(value!=null){
@@ -978,10 +1068,14 @@ function WWW_Wrapper(address,language){
 			}
 		};
 		
-		// This helper method converts certain characters into their suitable form that would 
-		// be accepted and same as in PHP. This is a modified version of encodeURIComponent() 
-		// function. 'data' is the string to be converted.
-		// * data - String to encode
+		/*
+		 * This helper method converts certain characters into their suitable form that would 
+		 * be accepted and same as in PHP. This is a modified version of encodeURIComponent() 
+		 * function. 'data' is the string to be converted.
+		 * 
+		 * @param string [data] string to encode
+		 * @return string
+		 */
 		var encodeValue=function(data){
 			data=encodeURIComponent(data);
 			data=data.replace('\'','%27');
@@ -993,9 +1087,13 @@ function WWW_Wrapper(address,language){
 			return data;
 		}
 	
-		// This is a JavaScript method that works similarly to PHP's ksort() function and 
-		// applies to JavaScript objects. 'object' is the object to be sorted.
-		// * object - Object for input
+		/*
+		 * This is a JavaScript method that works similarly to PHP's ksort() function and 
+		 * applies to JavaScript objects. 'object' is the object to be sorted.
+		 * 
+		 * @param object [object] object to sort by keys
+		 * @return object
+		 */
 		var ksort=function(object){
 			// Result will be gathered here
 			var keys=new Array();
@@ -1013,10 +1111,14 @@ function WWW_Wrapper(address,language){
 			return sorted;
 		}
 	
-		// This is a JavaScript equivalent of PHP's sha1() function. It calculates a hash 
-		// string from 'msg' string.
-		// Source: http://www.webtoolkit.info/javascript-sha1.html
-		// * msg - String to convert
+		/*
+		 * This is a JavaScript equivalent of PHP's sha1() function. It calculates a hash 
+		 * string from 'msg' string.
+		 * 
+		 * @author http://www.webtoolkit.info/javascript-sha1.html
+		 * @param string [msg] string to hash
+		 * @return string
+		 */
 		var sha1=function(msg){
 			function rotate_left(n,s) {
 				var t4 = ( n<<s ) | (n>>>(32-s));

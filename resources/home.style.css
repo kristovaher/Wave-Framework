@@ -1,12 +1,17 @@
 
-/* 
-Wave Framework
-View Stylesheet
-
-It is possible to load view specific stylesheet, this file is included among HTML resources 
-by WWW_controller_view if it is detected and found for the view it loads. This file is 
-loaded after other stylesheet files.
-
-Author and support: Kristo Vaher - kristo@waher.net
-License: This file can be copied, changed and re-published under another license without any restrictions
-*/
+/** 
+ * Wave Framework <http://www.waveframework.com>
+ * View Stylesheet
+ * 
+ * It is possible to load view specific stylesheet, this file is included among HTML resources 
+ * by WWW_controller_view if it is detected and found for the view it loads. This file is 
+ * loaded after other stylesheet files.
+ * 
+ * @package    View Controller
+ * @author     Kristo Vaher <kristo@waher.net>
+ * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @license    Unrestricted
+ * @tutorial   /doc/pages/guide_view.htm
+ * @since      1.0.0
+ * @version    3.1.3
+ */

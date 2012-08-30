@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_api.htm
  * @since      1.5.0
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 //INITIALIZATION

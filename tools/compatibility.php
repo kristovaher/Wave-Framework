@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.5.1
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 // This initializes tools and authentication

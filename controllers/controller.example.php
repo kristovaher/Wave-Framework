@@ -1,19 +1,19 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * MyProjectNameHere <http://www.example.com>
  * Example Controller
  *
  * It is recommended to extend View classes from WWW_Factory in order to 
  * provide various useful functions and API access for the view.
  *
  * @package    Factory
- * @author     Kristo Vaher <kristo@waher.net>
- * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @author     DeveloperNameHere <email@example.com>
+ * @copyright  Copyright (c) 2012, ProjectOwnerNameHere
  * @license    Unrestricted
  * @tutorial   /doc/pages/guide_mvc.htm
  * @since      1.0.0
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 class WWW_controller_example extends WWW_Factory {

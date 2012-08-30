@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * MyProjectNameHere <http://www.example.com>
  * 404 View
  * 
  * This view is called by WWW_controller_view if WWW_controller_url could not find a matching 
@@ -9,12 +9,12 @@
  * however this view is not used for missing files and other static resources.
  * 
  * @package    Factory
- * @author     Kristo Vaher <kristo@waher.net>
- * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @author     DeveloperNameHere <email@example.com>
+ * @copyright  Copyright (c) 2012, ProjectOwnerNameHere
  * @license    Unrestricted
  * @tutorial   /doc/pages/guide_mvc.htm
  * @since      1.0.0
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 class WWW_view_404 extends WWW_Factory {

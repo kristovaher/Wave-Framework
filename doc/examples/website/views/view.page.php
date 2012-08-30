@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Website Tutorial <http://www.waveframework.com>
  * Tutorial Page View
  *
  * It is recommended to extend View classes from WWW_Factory in order to 
@@ -13,7 +13,7 @@
  * @license    Unrestricted
  * @tutorial   /doc/pages/tutorial_website.htm
  * @since      1.0.0
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 class WWW_view_page extends WWW_Factory {

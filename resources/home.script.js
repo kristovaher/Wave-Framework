@@ -1,6 +1,6 @@
 
 /*
- * Wave Framework <http://www.waveframework.com>
+ * MyProjectNameHere <http://www.example.com>
  * View JavaScript
  *
  * It is possible to load view specific JavaScript, this file is included among HTML resources 
@@ -8,10 +8,10 @@
  * loaded after other JavaScript files.
  *
  * @package    View Controller
- * @author     Kristo Vaher <kristo@waher.net>
- * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @author     DeveloperNameHere <email@example.com>
+ * @copyright  Copyright (c) 2012, ProjectOwnerNameHere
  * @license    Unrestricted
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.1.3
+ * @version    3.1.4
  */

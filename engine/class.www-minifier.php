@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/minifier.htm
  * @since      1.7.0
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 class WWW_Minifier {

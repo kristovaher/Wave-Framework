@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 /*

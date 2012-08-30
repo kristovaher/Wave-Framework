@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/database.htm
  * @since      1.1.2
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 class WWW_Database {

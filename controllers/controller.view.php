@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 class WWW_controller_view extends WWW_Factory {

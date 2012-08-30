@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * MyProjectNameHere <http://www.example.com>
  * Home View
  * 
  * This view is loaded when WWW_controller_view finds root or home page as the view file. Name 
@@ -9,12 +9,12 @@
  * shows how to use translations.
  * 
  * @package    Factory
- * @author     Kristo Vaher <kristo@waher.net>
- * @copyright  Copyright (c) 2012, Kristo Vaher
+ * @author     DeveloperNameHere <email@example.com>
+ * @copyright  Copyright (c) 2012, ProjectOwnerNameHere
  * @license    Unrestricted
  * @tutorial   /doc/pages/guide_mvc.htm
  * @since      1.0.0
- * @version    3.1.3
+ * @version    3.1.4
  */
 
 class WWW_view_home extends WWW_Factory {

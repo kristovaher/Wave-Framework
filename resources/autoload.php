@@ -20,7 +20,7 @@
  * @license    Unrestricted
  * @tutorial   /doc/pages/guide_autoload.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    1.0.0
  */
 	
 ?>

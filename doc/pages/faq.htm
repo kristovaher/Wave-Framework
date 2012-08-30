@@ -31,14 +31,6 @@
 				<p>This also makes testing - the bane of web developers due to multi-layered nature of the web - far easier: you can test the API separately from the UI very easily.</p>
 
 				<p>Desktop programming has largely worked this way for many years, but web has not yet caught up. Today - when the ability to quickly create mobile views of web services and/or mobile applications is business critical - this has become more important than ever and Wave Framework keeps that in mind.</p>
-		
-			<h3>I uploaded the files, but when testing the page on my server, it throws an error or it does not display the Wave logo or the 'hello' message, what can I do?</h3>
-			
-				<p>This problem can occur for multiple reasons. First thing you can do is check if your server is compatible with Wave Framework. To do that you should attempt to run the Compatibility script in '/tools/compatibility.php'. This script asks for a HTTP username and password that are set in your Configuration in '/config.ini' file.</p>
-				
-				<p>If the Compatibility script works and shows no errors, then it is likely that the problem was in file upload. Some FTP upload programs and servers have a problem with certain new-lines in source code and will write the files incorrectly to the server. To fix this issue, then you should upload files in binary mode. In FileZilla, this mode is in 'Transfer -> Transfer Mode -> Binary'.</p>
-				
-				<p>If the Compatibility script did show errors, then you should try to fix them. For example, sometimes the server does not upload '.htaccess' files or there might be a problem in Apache RewriteEngine configuration. Make sure you did all the Installation setups correctly as well.</p>
 
 			<h3>What should I do before deploying the project live?</h3>
 			

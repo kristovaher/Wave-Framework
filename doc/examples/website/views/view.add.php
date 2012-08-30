@@ -13,7 +13,7 @@
  * @license    Unrestricted
  * @tutorial   /doc/pages/tutorial_website.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    1.0.0
  */
 
 class WWW_view_add extends WWW_Factory {

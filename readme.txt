@@ -58,32 +58,35 @@ FEATURES
  
 INSTALLATION
 ------------
-
- 1. Unpack the Wave Framework downloaded archive.
- 2. Configuration file in root directory /config.ini of the archive should be configured according to your needs. Read more about configuration from Wiki.
- 3. Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writable by PHP, for example with command chmod 0755 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 0755) or with any other FTP software. This is not required on Windows server.
- 4. Wave Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 6a and 6b, depending on your server.
- 5a. This only applies to Apache server: In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again.
- 5b. This only applies to Nginx server: For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.
- 6. Test if server is set up properly by making a request to /tools/compatibility.php script.
- 7. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
- 8. Important! Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged.
  
- 1. Unpack the Wave Framework downloaded archive.
- 2. Configuration file in root directory '/config.ini' of the archive should be configured according to your needs.
- 3. Upload the entire archive to your server and make filesystem folder '/filesystem/' and all of its subfolders writable by PHP, for example with command chmod 0755 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 0755) or with any other FTP software. This is not required on Windows server.
- 4. Wave Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 5a or 5b, depending on your server.
- 5a. Apache
-   * On most server setups the Apache-related settings in this list should already be enabled and everything should work, but in case you run into problems and you cannot edit Apache configuration yourself, then ask for assistance from your hosting provider.
-   * Make sure that you uploaded '/.htaccess' and '/tools/.htaccess' files to the server, as sometimes they may not be uploaded due to operating system thinking they are hidden.
-   * Apache also needs to support '.htaccess' directives from those files, so make sure that 'AllowOverride' setting is 'All' in Apache directory configuration. This is usually enabled by default on most servers.
-   * Since RewriteEngine is required for URL rewrites, your server needs to have the module loaded, which means that the line 'LoadModule rewrite_module modules/mod_rewrite.so' needs to be uncommented in Apache. This is usually enabled by default on most servers.
-   * In some hosting environments the line 'Options +FollowSymLinks ' may throw an error in '.htaccess', so if an error is thrown then I suggest commenting or removing that line and trying the compatibility script again.
- 5b. Nginx
-   * For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.
- 6. Test if server is set up properly by making a request to '/tools/compatibility.php' script.
- 7. Access the root file with a browser and if 'Hello Wave!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
- 8 Important! Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged.
+ 1. Unpack the downloaded archive of Wave Framework or go to the repository folder if you downloaded through Git or Mercurial.
+ 
+ 2. Configuration file '/config.ini' in root directory of the archive should be configured according to your needs. Configuration file has multiple comments about each setting, but they can be left undefined and unchanged at first, since the Framework is able to define defaults for most settings by itself.
+ 
+ 3. Upload the entire archive to your server and make filesystem folder '/filesystem/' and all of its subfolders writable by PHP with command 'chmod 0755' or giving rights using an FTP program like FileZilla (Right click on folder -> File Permissions -> Numeric value -> 0755). This is not required on Windows server (or Windows localhost) since Windows has folders writable by default.
+  * On some servers the FTP account is configured so that 0755 will not allow PHP to actually write to these folders if you set the rights over FTP, so you should either ask the administrator to change the account permissions or set the folder permissions to 0777 and see if that works when 0755 did not (this is less secure however, so you should only do it temporarily).
+  * Some servers modify the files uploaded through FTP in some way, often breaking line breaks and thus functionality of the scripts. If you encounter problems and there is no clear error message, then make sure that the uploaded files are correctly stored on the server. Upload should work correctly if you upload files in Binary mode (In FileZilla it is 'Transfer -> Transfer Type -> Binary').
+ 
+ 4. Wave Framework requires servers ability to redirect all requests to '/index.php' file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 5A or 5B, depending on your server.
+ 
+ 5A. Apache
+  * On most server setups the Apache-related settings in this list should already be enabled and everything should work, but in case you run into problems and you cannot edit Apache configuration yourself, then ask for assistance from your hosting provider.
+  * Make sure that you uploaded '/.htaccess' and '/tools/.htaccess' files to the server, as sometimes they may not be uploaded due to operating system thinking they are hidden.
+  * Apache also needs to support '.htaccess' directives from those files, so make sure that 'AllowOverride' setting is 'All' in Apache directory configuration. This is usually enabled by default on most servers.
+  * Since RewriteEngine is required for URL rewrites, your server needs to have the module loaded, which means that the line 'LoadModule rewrite_module modules/mod_rewrite.so' needs to be uncommented in Apache. This is usually enabled by default on most servers.
+  * On some hosting environments the line 'Options +FollowSymLinks' in '.htaccess' may throw an error, so if an error is thrown then I suggest commenting or removing that line and trying the compatibility script again.
+ 
+ 5B. Nginx
+  * For rewrites to work properly you need to place the configuration settings found in '/nginx.conf' file to your Nginx server configuration. This is more complicated than setting up redirects locally on Apache servers, since a lot of Nginx servers have very different configurations and just a single configuration file (Nginx has no '.htaccess' like functionality) and you need to implement your configuration inside that main configuration. If you know a little about Nginx server configuration, then it should not be a problem.
+ 
+ 6. Test if server is set up properly by making a request to '/tools/compatibility.php' script and fix any errors that Compatibility script might throw. Warnings can be ignored, but Wave Framework works at its best if it encounters no warnings in Compatibility script.
+ 
+ 7. Access the root file with a web browser. If 'Hello Wave' is shown together with a pretty logo, without any errors, then everything should be up and running! There is no setup script that needs to be run separately and you can start developing your application right away.
+  * If the page shows an error message, then make sure that the '/filesystem/' folders are writable and that the configuration steps above have been followed.
+  * Make sure that the files were uploaded correctly and that FTP did not convert line breaks to single line in uploaded files. If it did, then fix this by uploading files in Binary mode.
+  * You can also take a look at '/tools/debugger.php' script in case you encounter errors even if Compatibility script says that everything is alright with the server. If Debugger script does not show any warnings and your page still shows errors, then the error happens in core, such as version incompatibility, file permissions and more. Double check that you have followed the previous steps.
+ 
+ 8. Important! Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged as all downloaded archives have the same username and password at first.
  
 HELP AND DOCUMENTATION
 ----------------------

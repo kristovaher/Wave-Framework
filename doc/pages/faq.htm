@@ -14,9 +14,9 @@
 			
 			<h3>Why is Wave Framework called a 'micro-framework'? Do I have to do more work?</h3>
 			
-				<p>The ideology behind Wave Framework was to keep PHP development still plain and simple. The developer should not have to learn about a large number of libraries and architecture design methods before they can implement their project on the framework. Wave Framework is a helper for the developer as the developer can still write their native and comfortable PHP code as much as they want without having to change the way they write code too much. Wave Framework has only a few very simple requirements and recommendations for the developer in terms of architecture and Wave Framework already does most of the things for the developer - from caching to compressions to dynamic loading of objects - by default.</p>
+				<p>The ideology behind Wave Framework was to give developer al the features of a modern web service and website framework while keeping PHP development itself still plain and simple. Developer should not have to learn about a large number of libraries and architecture design methods before they can implement their project on the framework. Developer should still be able to write their native and comfortable PHP code as much as they want without having to change their workflow too much. Wave Framework has only a few very simple requirements and recommendations for the developer in terms of architecture and code in order to support features from caching to compressions to dynamic loading of objects and more.</p>
 				
-				<p>Wave Framework cannot be really compared against large scale frameworks that require a lot of configuration and planning and implement a deep filesystem logic. Wave Framework is intended primarily for projects that need to get up and running as fast as possible without compromises in the ability and potential functionality to do so. Wave Framework is used by a number of startups because of this capability.</p>
+				<p>Wave Framework cannot be really compared against large scale frameworks that require a lot of configuration and planning and going through countless books in order to get up and running. This framework is intended primarily for projects that need to get up and running as fast as possible without compromises in quality or functionalities to do so. This is also why Wave is gaining recognition among some startup projects.</p>
 				
 			<h3>Why is Wave Framework 'API-centric'? What does that mean?</h3>
 			
@@ -32,11 +32,13 @@
 
 				<p>Desktop programming has largely worked this way for many years, but web has not yet caught up. Today - when the ability to quickly create mobile views of web services and/or mobile applications is business critical - this has become more important than ever and Wave Framework keeps that in mind.</p>
 		
-			<h3>I uploaded the files, but when testing the page on my server, it throws an error or it does not display the Wave logo and the 'hello' message, what can I do?</h3>
+			<h3>I uploaded the files, but when testing the page on my server, it throws an error or it does not display the Wave logo or the 'hello' message, what can I do?</h3>
 			
 				<p>This problem can occur for multiple reasons. First thing you can do is check if your server is compatible with Wave Framework. To do that you should attempt to run the Compatibility script in '/tools/compatibility.php'. This script asks for a HTTP username and password that are set in your Configuration in '/config.ini' file.</p>
 				
 				<p>If the Compatibility script works and shows no errors, then it is likely that the problem was in file upload. Some FTP upload programs and servers have a problem with certain new-lines in source code and will write the files incorrectly to the server. To fix this issue, then you should upload files in binary mode. In FileZilla, this mode is in 'Transfer -> Transfer Mode -> Binary'.</p>
+				
+				<p>If the Compatibility script did show errors, then you should try to fix them. For example, sometimes the server does not upload '.htaccess' files or there might be a problem in Apache RewriteEngine configuration. Make sure you did all the Installation setups correctly as well.</p>
 
 			<h3>What should I do before deploying the project live?</h3>
 			

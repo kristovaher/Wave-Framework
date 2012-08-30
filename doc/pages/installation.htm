@@ -16,12 +16,24 @@
 
 				<ul>
 					<li><b>1</b> - Unpack the Wave Framework downloaded archive.</li>
-					<li><b>2</b> - Configuration file in root directory /config.ini of the archive should be configured according to your needs. Read more about configuration from Wiki.</li>
-					<li><b>3</b> - Upload the files to your server and make filesystem folder /filesystem/ and all of its subfolders writable by PHP, for example with command chmod 0755 or giving rights using FileZilla (Right click on folder -&gt; File Permissions -&gt; Numeric value -&gt; 0755) or with any other FTP software. This is not required on Windows server.</li>
-					<li><b>4</b> - Wave Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 6a and 6b, depending on your server.</li>
-					<li><b>5a</b> - This only applies to Apache server: In some hosting environments the line in /.htaccess and /tools/.htaccess 'Options +FollowSymLinks ' may throw an error, if it does then this line should be commented out and compatibility script tried again.</li>
-					<li><b>5b</b> - This only applies to Nginx server: For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.</li>
-					<li><b>6</b> - Test if server is set up properly by making a request to /tools/compatibility.php script.</li>
+					<li><b>2</b> - Configuration file in root directory '/config.ini' of the archive should be configured according to your needs.</li>
+					<li><b>3</b> - Upload the entire archive to your server and make filesystem folder '/filesystem/' and all of its subfolders writable by PHP, for example with command chmod 0755 or giving rights using FileZilla (Right click on folder -&gt; File Permissions -&gt; Numeric value -&gt; 0755) or with any other FTP software. This is not required on Windows server.</li>
+					<li><b>4</b> - Wave Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 5a or 5b, depending on your server.</li>
+					<li><b>5a - Apache</b>
+						<ul>
+							<li>On most server setups the Apache-related settings in this list should already be enabled and everything should work, but in case you run into problems and you cannot edit Apache configuration yourself, then ask for assistance from your hosting provider.</li>
+							<li>Make sure that you uploaded '/.htaccess' and '/tools/.htaccess' files to the server, as sometimes they may not be uploaded due to operating system thinking they are hidden.</li>
+							<li>Apache also needs to support '.htaccess' directives from those files, so make sure that 'AllowOverride' setting is 'All' in Apache directory configuration. This is usually enabled by default on most servers.</li>
+							<li>Since RewriteEngine is required for URL rewrites, your server needs to have the module loaded, which means that the line 'LoadModule rewrite_module modules/mod_rewrite.so' needs to be uncommented in Apache. This is usually enabled by default on most servers.</li>
+							<li>In some hosting environments the line 'Options +FollowSymLinks ' may throw an error in '.htaccess', so if an error is thrown then I suggest commenting or removing that line and trying the compatibility script again.</li>
+						</ul>
+					</li>
+					<li><b>5b - Nginx</b>
+						<ul>
+							<li>For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.</li>
+						</ul>
+					</li>
+					<li><b>6</b> - Test if server is set up properly by making a request to '/tools/compatibility.php' script.</li>
 					<li><b>7</b> -  Access the root file with a browser and if 'Hello Wave!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.</li>
 					<li><b>8</b> - <b>Important!</b> Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged.</li>
 				</ul>
@@ -32,7 +44,7 @@
 
 				<h3>Apache</h3>
 
-					<p>Apache and <b>mod_rewrite</b> (RewriteEngine) is required if you intend to use Index Gateway for website as well as default API Handler. Apache .htaccess file is included in the archive that should do everything server needs to make it work, if the mod_rewrite module is supported by Apache.</p>
+					<p>Apache and <b>mod_rewrite</b> (RewriteEngine) is required if you intend to use Index Gateway for website as well as default API Handler. Apache .htaccess file is included in the archive that should do everything server needs to make it work, if the mod_rewrite module is supported by Apache. Because RewriteEngine directives are loaded from local .htaccess files, then Apache also needs to support .htaccess files. If RewriteEngine has problems, then make sure that your Apache setting has 'AllowOverride' set to 'All' instead of 'None' in directory settings. RewriteEngine module is also required, so the 'LoadModule rewrite_module modules/mod_rewrite.so' line has to be included or uncommented from Apache configuration.</p>
 
 				<h3>Nginx</h3>
 

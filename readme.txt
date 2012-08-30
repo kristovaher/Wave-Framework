@@ -69,6 +69,22 @@ INSTALLATION
  7. Access the root file with a browser and if 'Hello WWW!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
  8. Important! Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged.
  
+ 1. Unpack the Wave Framework downloaded archive.
+ 2. Configuration file in root directory '/config.ini' of the archive should be configured according to your needs.
+ 3. Upload the entire archive to your server and make filesystem folder '/filesystem/' and all of its subfolders writable by PHP, for example with command chmod 0755 or giving rights using FileZilla (Right click on folder -> File Permissions -> Numeric value -> 0755) or with any other FTP software. This is not required on Windows server.
+ 4. Wave Framework requires servers ability to redirect all requests to /index.php file, thus Apache RewriteEngine or Nginx HttpRewriteModule has to be used. Look at points 5a or 5b, depending on your server.
+ 5a. Apache
+   * On most server setups the Apache-related settings in this list should already be enabled and everything should work, but in case you run into problems and you cannot edit Apache configuration yourself, then ask for assistance from your hosting provider.
+   * Make sure that you uploaded '/.htaccess' and '/tools/.htaccess' files to the server, as sometimes they may not be uploaded due to operating system thinking they are hidden.
+   * Apache also needs to support '.htaccess' directives from those files, so make sure that 'AllowOverride' setting is 'All' in Apache directory configuration. This is usually enabled by default on most servers.
+   * Since RewriteEngine is required for URL rewrites, your server needs to have the module loaded, which means that the line 'LoadModule rewrite_module modules/mod_rewrite.so' needs to be uncommented in Apache. This is usually enabled by default on most servers.
+   * In some hosting environments the line 'Options +FollowSymLinks ' may throw an error in '.htaccess', so if an error is thrown then I suggest commenting or removing that line and trying the compatibility script again.
+ 5b. Nginx
+   * For rewrites to work properly you need to place settings found in /nginx.conf file to your Nginx server configuration.
+ 6. Test if server is set up properly by making a request to '/tools/compatibility.php' script.
+ 7. Access the root file with a browser and if 'Hello Wave!' is shown without any errors, then everything should be up and running. There is no setup script that needs to be run and you can start developing your application right away.
+ 8 Important! Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged.
+ 
 HELP AND DOCUMENTATION
 ----------------------
 

@@ -107,7 +107,7 @@
 		if(isset($config['forbidden-extensions'])){
 			$config['forbidden-extensions']=explode(',',$config['forbidden-extensions']);
 		} else {
-			$config['forbidden-extensions']=array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini');
+			$config['forbidden-extensions']=array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini','empty');
 		}
 	
 		// Required timezone setting

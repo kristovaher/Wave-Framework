@@ -26,7 +26,7 @@
 				
 				<h3>www-command</h3>
 				
-					<p>This is a required setting for most API call made. This variable defines what Controller and what method is called by the API. Usually the value consists of two keywords, separated by '-' character. For example, if 'www-command' is set to 'example-get', then 'example' controller is called with method 'get'. This controller would be loaded from /controllers/controller.example.php, for example.</p>
+					<p>This is a required setting for most <a href="guide_api.htm">API</a> call made. This variable defines what Controller and what method is called by the API. Usually the value consists of two keywords, separated by '-' character. For example, if 'www-command' is set to 'example-get', then 'example' controller is called with method 'get'. This controller would be loaded from /controllers/controller.example.php, for example.</p>
 					
 					<p>If this value is set to 'www-create-session' then this calls a special functionality of API that creates a new session token for an API profile. This is covered more in detail in API Security documentation.</p>
 					
@@ -49,7 +49,7 @@
 					<p>These are the formats supported as the content type:</p>
 					
 					<ul>
-						<li><b>php</b> - This returns data as a PHP variable. This is useful only for internal API calls and is a default for internal API calls. When this is set as a 'www-return-type', then 'www-output' is automatically turned off as this variable cannot be printed out in most cases.</li>
+						<li><b>php</b> - This returns data as a PHP variable. This is useful only for internal <a href="guide_api.htm">API</a> calls and is a default for internal <a href="guide_api.htm">API</a> calls. When this is set as a 'www-return-type', then 'www-output' is automatically turned off as this variable cannot be printed out in most cases.</li>
 						<li><b>json</b> - This is the default value of 'www-return-type' when using the API through API wrappers. Internally the default value is 'php'. This makes the API return the data array as serialized in a JSON string.</li>
 						<li><b>binary</b> - This makes the API return either 1 or 0, based on the response from Controller. If the Controller returns a response code that API considers a success, then 1 will be returned. Binary return type is useful when you just wish to check if a command was successful or not.</li>
 						<li><b>xml</b> - This returns data in XML format.</li>
@@ -99,7 +99,7 @@
 					
 				<h3>www-state</h3>
 				
-					<p>This variable has nothing to do with State class of Wave Framework or the state object that API uses at the time of request. This is a security keyword, if this value is sent to API, then API also returns that same value in response. This can be used to validate if a response is for the same request that was made, or not. You can read more about this variable in API Security documentation.</p>
+					<p>This variable has nothing to do with <a href="state.htm">State</a> Class of Wave Framework or the state object that API uses at the time of request. This is a security keyword, if this value is sent to API, then API also returns that same value in response. This can be used to validate if a response is for the same request that was made, or not. You can read more about this variable in API Security documentation.</p>
 					
 				<h3>www-files</h3>
 				
@@ -107,7 +107,7 @@
 					
 				<h3>www-cache-timeout</h3>
 				
-					<p>This tells the API the amount of seconds that the user agent is accepting as the maximum age of cache. This means that if you send the value as 600 and API finds cache for that same API call with the same input within the last 600 seconds - or ten minutes - then it will return a result from cache instead of generating it again.</p>
+					<p>This tells the API the amount of seconds that the user agent is accepting as the maximum age of cache. This means that if you send the value as 600 and API finds cache for that same <a href="guide_api.htm">API</a> call with the same input within the last 600 seconds - or ten minutes - then it will return a result from cache instead of generating it again.</p>
 					
 					<p>This allows for a lot of flexibility as it is an on-demand cache-control that can be used to speed up requests or the same Controller in some parts of the system based on their importance.</p>
 					
@@ -115,13 +115,13 @@
 				
 					<p>This is the API profile name that should also be defined in /resources/api.profiles.ini file. This tells API what API profile (and thus what profile settings) the API will use when validating the API request.</p>
 					
-					<p>Note that internal API requests - such as those made from Controllers internally - never need API validations as in order to execute a Controller method, the parent call already has to be validated.</p>
+					<p>Note that internal <a href="guide_api.htm">API</a> requests - such as those made from Controllers internally - never need API validations as in order to execute a Controller method, the parent call already has to be validated.</p>
 					
 					<p>This value is, by default, that of public API profile that is defined in configuration.</p>
 					
 				<h3>www-timestamp</h3>
 				
-					<p>If the API profile requires a timestamp validation, then this UNIX timestamp value has to be sent to API when making a request. API will then validate whether the timestamp was in the accepted age before executing the API call. There is more information on this variable in API Security documentation.</p>
+					<p>If the API profile requires a timestamp validation, then this UNIX timestamp value has to be sent to API when making a request. API will then validate whether the timestamp was in the accepted age before executing the <a href="guide_api.htm">API</a> call. There is more information on this variable in API Security documentation.</p>
 					
 				<h3>www-hash</h3>
 				
@@ -157,7 +157,7 @@
 					
 				<h3>www-public-token</h3>
 				
-					<p>This is required if public API profile is used and the setting for 'api-public-token' in Configuration is set to 1. This means that it requires that a request token - used to protect against Cross Site Request Forgery - is set and is the same as the one stored in sessions. This is only required if you use sessions and store data in Wave Framework setUser() storage.</p>
+					<p>This is required if public API profile is used and the setting for 'api-public-token' in <a href="configuration.htm">Configuration</a> is set to 1. This means that it requires that a request token - used to protect against Cross Site Request Forgery - is set and is the same as the one stored in sessions. This is only required if you use sessions and store data in Wave Framework setUser() storage.</p>
 				
 			<h2>API Output - Flags and Values</h2>
 			
@@ -205,7 +205,7 @@
 				
 				<h3>www-set-header</h3>
 				
-					<p>This string or strings from this array will be set as headers in response from API call.</p>
+					<p>This string or strings from this array will be set as headers in response from <a href="guide_api.htm">API</a> call.</p>
 				
 				<h3>www-set-cookie</h3>
 				

@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.1.5
  */
 
 final class WWW_API {
@@ -288,9 +288,9 @@ final class WWW_API {
 				}
 				
 				// If session data is set
-				if(!empty($this->state->data['www-session-data'])){
-					$apiInputData['www-session']=$this->state->data['www-session-data'];
-					unset($apiInputData['www-session']['www-session-fingerprint']);
+				if(!empty($this->state->data['session-data'])){
+					$apiInputData['www-session']=$this->state->data['session-data'];
+					unset($apiInputData['www-session'][$this->state->data['session-fingerprint-key']]);
 				}
 				
 				// Sorting the input array
@@ -609,6 +609,11 @@ final class WWW_API {
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
 					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
+					
+					// If nothing is left in cookie container
+					if(empty($cacheValidator['www-cookie'])){
+						unset($cacheValidator['www-cookie']);
+					}
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);

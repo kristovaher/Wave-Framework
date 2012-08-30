@@ -18,11 +18,11 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>File Handler is used for returning a file from web server. It is loaded by Index Controller when a request is made to a file that has an extension that has not already been served by another Handler (such as Resource and Image handlers). File Handler is usually considered for returning documents, videos and audio from the web server. It also allows to return a file within a byte range, like in the case of file streams.</p>
+				<p>File Handler is used for returning a file from web server. It is loaded by Index Controller when a request is made to a file that has an extension that has not already been served by another Handler (such as Resource and <a href="handler_image.htm">Image Handler</a>). File Handler is usually considered for returning documents, videos and audio from the web server. It also allows to return a file within a byte range, like in the case of file streams.</p>
 			
 			<h2>Workflow</h2>
 			
-				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
 				
 				<p>File Handler analyzes the request string and determines what type of file is being requested. It also checks if byte range is requested from the response rather than the whole file.</p>
 				
@@ -34,7 +34,7 @@
 				
 				<p>Handler returns either the whole content or byte range of the content, if such was requested, to the user agent, if the file was found.</p>
 				
-				<p>File Handler also makes an entry in the log file about the request, if Logger is used.</p>
+				<p>File Handler also makes an entry in the log file about the request, if <a href="logger.htm">Logger</a> is used.</p>
 			
 	</body>
 </html>

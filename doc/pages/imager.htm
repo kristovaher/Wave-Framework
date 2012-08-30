@@ -18,9 +18,9 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Imager is a class that acts as a wrapper to PHP GD library and has a number of methods to resize images with different resize algorithms as well as apply filtering to images and deal with image conversions between different formats. It can load an image resource from server or a URL and either store the edited image in a filesystem or push it to output buffer.</p>
+				<p>Imager is a class that acts as a wrapper to PHP GD library and has a number of methods to resize images with different resize algorithms as well as apply filtering to images and deal with image conversions between different formats. It can load an image resource from server or a URL and either store the edited image in a <a href="filesystem.htm">Filesystem</a> or push it to output buffer.</p>
 			
-				<p>This class is used to handle basic image editing, mostly for file resizes and cropping. This is used by default by Index Gateway when a PNG or JPEG file is requested with specific parameters, but can also be used for other image editing in the system since it can be loaded independently and there is a wrapper method for Imager also in Factory class.</p>
+				<p>This class is used to handle basic image editing, mostly for file resizes and cropping. This is used by default by <a href="gateway.htm">Index Gateway</a> when a PNG or JPEG file is requested with specific parameters, but can also be used for other image editing in the system since it can be loaded independently and there is a wrapper method for Imager also in Factory class.</p>
 				
 				<p>Imager and on-demand image editing have multiple settings in the Wave Framework configuration file that can protect Imager methods to be used over HTTP requests.</p>
 				
@@ -54,7 +54,7 @@
 	</code>
 </pre>
 
-				<p>Imager class also includes a 'wrapper' of sorts, that can take a file, do multiple actions to it and then save the file again in target location all with a single function call. The parameters string is similar to what the parameter string would be when calling the picture file through Image Handler. For example, this takes source file and saves target file after applying resizing and and black-and-white filtering to the image:</p>
+				<p>Imager class also includes a 'wrapper' of sorts, that can take a file, do multiple actions to it and then save the file again in target location all with a single function call. The parameters string is similar to what the parameter string would be when calling the picture file through <a href="handler_image.htm">Image Handler</a>. For example, this takes source file and saves target file after applying resizing and and black-and-white filtering to the image:</p>
 				
 <pre>
 	<code>
@@ -88,7 +88,7 @@
 					
 				<h3>public function output($location=false,$quality=90,$format=false)</h3>
 				
-					<p>This method stores the image in filesystem in $location folder and filename. If $location is not set, then image is returned to output buffer. $quality is used for the compression quality (from 0-100) and $format is used to define what file format the picture is returned. $format can be 'jpg', 'png' or 'gif'.</p>
+					<p>This method stores the image in <a href="filesystem.htm">Filesystem</a> in $location folder and filename. If $location is not set, then image is returned to output buffer. $quality is used for the compression quality (from 0-100) and $format is used to define what file format the picture is returned. $format can be 'jpg', 'png' or 'gif'.</p>
 					
 				<h3>public function commands($source,$command,$target)</h3>
 				

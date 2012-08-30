@@ -18,7 +18,7 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>This is an optional class that is used to limit HTTP requests based on user agent, IP, server condition and other information. This class is loaded by Index Gateway. WWW_Limiter can be used to block IP's if they make too many requests per minute, block requests if server load is detected as too high, block the request if it comes from blacklist provided by the system, allow only whitelisted IP's to access, ask for HTTP authentication or force the user agent to use HTTPS. Note that some of this functionality can be achieved by Apache configuration and modules, but it is provided here for cases where the project developer might not have control over server configuration.</p>
+				<p>This is an optional class that is used to limit HTTP requests based on user agent, IP, server condition and other information. This class is loaded by <a href="gateway.htm">Index Gateway</a>. WWW_Limiter can be used to block IP's if they make too many requests per minute, block requests if server load is detected as too high, block the request if it comes from blacklist provided by the system, allow only whitelisted IP's to access, ask for HTTP authentication or force the user agent to use HTTPS. Note that some of this functionality can be achieved by Apache configuration and modules, but it is provided here for cases where the project developer might not have control over server configuration.</p>
 			
 				<p>Whether Wave Framework uses Limiter or not depends on /config.ini HTTP request limiter settings.</p>
 				
@@ -26,7 +26,7 @@
 				
 			<h2>Using Limiter class</h2>
 			
-				<p>To use Limiter class, it is recommended to load Limiter class and create a Limiter object as early as possible. This makes sure that the HTTP request limiter checks happen before actual code execution. Some Limiter functionality expects to be able to write to filesystem to keep track of certain HTTP requests, it is recommended to send this address as a parameter when creating the Limiter object.</p>
+				<p>To use Limiter class, it is recommended to load Limiter class and create a Limiter object as early as possible. This makes sure that the HTTP request limiter checks happen before actual code execution. Some Limiter functionality expects to be able to write to <a href="filesystem.htm">Filesystem</a> to keep track of certain HTTP requests, it is recommended to send this address as a parameter when creating the Limiter object.</p>
 				
 <pre>
 	<code>
@@ -35,7 +35,7 @@
 	</code>
 </pre>
 
-				<p>If you are also using a Logger (from WWW_Logger), then you can send Logger object to Limiter as well. This makes sure that when Limiter decides to quit the execution of the script it also writes the proper log entry. This means that the requests that were blocked by Limiter are still observable by examining log files. To send Logger object to Limiter, you can do the following:
+				<p>If you are also using a <a href="logger.htm">Logger</a>, then you can send <a href="logger.htm">Logger</a> object to Limiter as well. This makes sure that when Limiter decides to quit the execution of the script it also writes the proper log entry. This means that the requests that were blocked by Limiter are still observable by examining log files. To send <a href="logger.htm">Logger</a> object to Limiter, you can do the following:
 				
 <pre>
 	<code>
@@ -108,13 +108,13 @@
 					
 				<h3>public $logger=false</h3>
 				
-					<p>This holds the WWW_Logger object, if it is used. This makes it possible for Limiter to write proper log files through Logger in case requests are blocked.</p>
+					<p>This holds the <a href="logger.htm">Logger</a> object, if it is used. This makes it possible for Limiter to write proper log files through <a href="logger.htm">Logger</a> in case requests are blocked.</p>
 				
 			<h2>Limiter Class Methods</h2>
 				
 				<h3>public function __construct($logDir='./')</h3>
 				
-					<p>Construction method of Logger expects just one variable: $logDir, which is the folder where limiter stores files for specific limiter methods. This folder should be writable by PHP.</p>
+					<p>Construction method of <a href="logger.htm">Logger</a> expects just one variable: $logDir, which is the folder where limiter stores files for specific limiter methods. This folder should be writable by PHP.</p>
 				
 					<p>A constant __IP__ is also defined with remote address of the client making the request, if it has already not been defined. It is recommended to assign a true and secure IP address to __IP__ in case the request comes from behind a proxy.</p>
 				
@@ -122,7 +122,7 @@
 					
 				<h3>public function limitRequestCount($limit=400,$duration=3600)</h3>
 				
-					<p>This method will block requests from the request-making IP address for $duration amount of seconds, if the IP address makes more than $limit amount of requests per minute. It keeps track of the amount of requests by storing minimal log files in filesystem, in $logDir subfolder. Returns true if not limited, throws 403 error if limit exceeded.</p>
+					<p>This method will block requests from the request-making IP address for $duration amount of seconds, if the IP address makes more than $limit amount of requests per minute. It keeps track of the amount of requests by storing minimal log files in <a href="filesystem.htm">Filesystem</a>, in $logDir subfolder. Returns true if not limited, throws 403 error if limit exceeded.</p>
 					
 					<p>Returns true if not limited, throws 403 page if limit exceeded, throws error if log file cannot be created.</p>
 					

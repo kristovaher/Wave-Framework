@@ -20,9 +20,9 @@
 				
 			<h2>Users</h2>
 				
-				<p>Wave Framework holds user data in sessions. Technically you should build a database or load user data from some database with a Controller that you develop for your system. Wave Framework doesn't come with a user database and login systems from the get go.</p>
+				<p>Wave Framework holds user data in sessions. Technically you should build a local <a href="guide_database.htm">Database</a> or load user data from an external database with a Controller that you develop for your system. Wave Framework doesn't come with a user database and login systems from the get go and only has a session storage set up for supporting such systems.</p>
 				
-				<p>In your controller where you would authenticate the submitted username and password and fetch user data from database or filesystem, you can assign Wave Framework to store this data across HTTP requests with the following call:</p>
+				<p>In your controller where you would authenticate the submitted username and password and fetch user data from <a href="guide_database.htm">Database</a> or <a href="filesystem.htm">Filesystem</a>, you can assign Wave Framework to store this data across HTTP requests with the following call:</p>
 				
 <pre>
 	<code>
@@ -62,7 +62,7 @@
 					<li>For example, say that you have an infosystem where certain users can add new tasks, but other users cannot do this.</li>
 					<li>In your infosystem you decide to name this permission as 'add-tasks'.</li>
 					<li>You can then store this permission information with your users and assign it to sessions when the user logs in.</li>
-					<li>Whenever you generate a view or listen to an API call, you can check if this permission is currently active. This means you can both not show a button to add a task in the view, as well as actually protect the controller that adds views with the same system.</li>
+					<li>Whenever you generate a view or listen to an <a href="guide_api.htm">API</a> call, you can check if this permission is currently active. This means you can both not show a button to add a task in the view, as well as actually protect the controller that adds views with the same system.</li>
 				</ul>
 			
 				<p>Here is an example how to add an array of permissions to the current session:</p>

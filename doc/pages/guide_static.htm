@@ -14,9 +14,9 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Static files are all the files that are not served by Robots, Image, Sitemap or Resource Handlers. Static files are served usually through File Handler that is called by Index Gateway. If the HTTP request has a file extension that is not registered to Image Handler, Resource Handler and is not one of the forbidden file extensions (*.tmp, *.log, *.ht, *.htaccess, *.pem, *.crt, *.db, *.sql, *.version, *.conf, *.ini), then Wave Framework serves the file through file handler.</p>
+				<p>Static files are all the files that are not served by Robots, Image, Sitemap or <a href="handler_resource.htm">Resource Handlers</a>. Static files are served usually through <a href="handler_file.htm">File Handler</a> that is called by <a href="gateway.htm">Index Gateway</a>. If the HTTP request has a file extension that is not registered to <a href="handler_image.htm">Image Handler</a>, <a href="handler_resource.htm">Resource Handler</a> and is not one of the forbidden file extensions (*.tmp, *.log, *.ht, *.htaccess, *.pem, *.crt, *.db, *.sql, *.version, *.conf, *.ini), then Wave Framework serves the file through <a href="handler_file.htm">File Handler</a>.</p>
 				
-				<p>File Handler attempts to return the file to user agent with proper file headers based on information File Handler is able to detect about the file. It also supports returning only specific byte range, if request header asks for specific range and supports proper cache headers.</p>
+				<p><a href="handler_file.htm">File Handler</a> attempts to return the file to user agent with proper file headers based on information <a href="handler_file.htm">File Handler</a> is able to detect about the file. It also supports returning only specific byte range, if request header asks for specific range and supports proper cache headers.</p>
 				
 				<p>Usual request to a common file is like follows:</p>
 				
@@ -38,7 +38,7 @@
 			
 				<p>Sometimes it is necessary to also serve files directly to user agent without PHP and Wave Framework having anything to do with the file. This means that requests to those static files are not logged at all by Wave Framework.</p>
 				
-				<p>To make sure that a file, like JavaScript file or stylesheet or picture file, is served to user agent without Wave Framework being involved, then you should store these files in /resources/static/ or /filesystem/static/ subfolder. Every request to that subfolder will be ignored by Wave Framework entirely.</p>
+				<p>To make sure that a file, like JavaScript file or stylesheet or picture file, is served to user agent without Wave Framework being involved, then you should store these files in '/resources/static/' or '/filesystem/static/' subfolder. Every request to that subfolder will be ignored by Wave Framework entirely.</p>
 			
 	</body>
 </html>

@@ -52,7 +52,7 @@
 				
 				<ul>
 					<li>Generates meta title for the page based on system configuration, Sitemap settings and view itself.</li>
-					<li>Generates unified CSS and unified JavaScript links that utilize Wave Framework Resource Handler to load multiple resources with a single HTTP request. It is also possible to load view specific CSS and JavaScript. View Controller will load CSS and JavaScript files from /resources/ folder if their file format is [view].style.css or [view].script.js. This allows you to include specific functionality or CSS only on some views, instead of adding weight to the main JavaScript or stylesheet file.</li>
+					<li>Generates unified CSS and unified JavaScript links that utilize Wave Framework <a href="handler_resource.htm">Resource Handler</a> to load multiple resources with a single HTTP request. It is also possible to load view specific CSS and JavaScript. View Controller will load CSS and JavaScript files from /resources/ folder if their file format is [view].style.css or [view].script.js. This allows you to include specific functionality or CSS only on some views, instead of adding weight to the main JavaScript or stylesheet file.</li>
 					<li>Generates HTML header (by default following HTML5 standard) with all the meta information that is needed, together with base URL - which simplifies referencing resources in views - as well as Favicon file and all resources.</li>
 					<li>Loads the defined View method and renders the page.</li>
 				</ul>
@@ -68,8 +68,8 @@
 				<p>By default there are three views in /views/ folder:</p>
 				
 				<ul>
-					<li><b>home</b> - This is home view that is referred to by default in Configuration. This view is loaded whenever request is made to web page that does not have a URL defined.</li>
-					<li><b>404</b> - This is the view that is referred to by default in Configuration as the view that is used whenever URL Controller is unable to find a page.</li>
+					<li><b>home</b> - This is home view that is referred to by default in <a href="configuration.htm">Configuration</a>. This view is loaded whenever request is made to web page that does not have a URL defined.</li>
+					<li><b>404</b> - This is the view that is referred to by default in <a href="configuration.htm">Configuration</a> as the view that is used whenever <a href="guide_url.htm">URL Controller</a> is unable to find a page.</li>
 					<li><b>example</b> - This is an example page in Wave Framework that is there only for testing purposes, if you open this view then you can see various functionality as it is called in Wave Framework and can be used within views.</li>
 				</ul>
 				
@@ -81,7 +81,7 @@
 					<li><b>$this-&gt;getTranslations()</b> - This returns a key-value array of current language translations. Another language translations can be returned if you supply a variable with the language keyword to be loaded.</li>
 				</ul>
 				
-				<p>There are other useful methods too and every View has access to entire State, API and Database connections within the system, giving you an entirely free reign. It is also possible for views to load other views and create entire chain of views, which gives you flexibility to design a system in any and every way possible.</p>
+				<p>There are other useful methods too and every View has access to entire <a href="guide_state.htm">State</a>, <a href="guide_api.htm">API</a> and <a href="guide_database.htm">Database</a> connections within the system, giving you an entirely free reign. It is also possible for views to load other views and create entire chain of views, which gives you flexibility to design a system in any and every way possible.</p>
 				
 				<p>It is recommended to visit the example page, http://www.example.com/example/ with the default installation (just replace the domain name with yours), and see what the examples printed in that view display. All of this data can be used to build a website.</p>
 				

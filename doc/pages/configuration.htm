@@ -39,14 +39,14 @@
 				database-errors<br/>
 				database-persistent</b></p>
 			
-				<p>Wave Framework can connect to multiple database types, database-type values can be 'mysql', 'postgresql', 'sqlite', 'mssql' and 'oracle'. If database values are not set, then system won't attempt to connect to database. Persistent connections are allowed by using database-persistent flag, in which case same connection handle will be shared across requests from different user agents, but note that this flag is not recommended and can cause additional performance issues. It is also possible to set if database errors are written in developer tools debugging log with database-errors flag. It is not recommended to turn this setting off before deploying live.</p>
+				<p>Wave Framework can connect to multiple <a href="guide_database.htm">Database</a> types, database-type values can be 'mysql', 'postgresql', 'sqlite', 'mssql' and 'oracle'. If database values are not set, then system won't attempt to connect to database. Persistent connections are allowed by using database-persistent flag, in which case same connection handle will be shared across requests from different user agents, but note that this flag is not recommended and can cause additional performance issues.</p>
 				
 			<h2>Database</h2>
 			
 				<p><b>logger<br/>
 				logger-ip</b></p>
 				
-				<p>This turns on Index Gateway performance logging, which stores all information possible about every HTTP request. If this is set to '*' then all HTTP requests are logged, if it is set to 0, then no requests are logged. Value can also be a regular expression, in which case only requests that match the regular expression will be logged (you can use this to log only requests on a specific file, for example). Logging can also be tied to only specific IP address or addresses, if you set logger-ip to have an IP address or comma separated list of addresses.</p>
+				<p>This turns on <a href="gateway.htm">Index Gateway</a> performance logging, which stores all information possible about every HTTP request. If this is set to '*' then all HTTP requests are logged, if it is set to 0, then no requests are logged. Value can also be a regular expression, in which case only requests that match the regular expression will be logged (you can use this to log only requests on a specific file, for example). Logging can also be tied to only specific IP address or addresses, if you set logger-ip to have an IP address or comma separated list of addresses.</p>
 				
 			<h2>Server</h2>
 			
@@ -65,11 +65,11 @@
 				<p><b>user-root<br/>
 				static-root</b></p>
 				
-				<p>By default this folder is /filesystem/userdata/ and it is used for storing various user-specific files. This is detected automatically based on system-root configuration setting. Static root folder is the base root folder for static files and is situated in /filesystem/static/, similarly to 'user-root', except files uploaded there are never served by Wave Framework.</p>
+				<p>By default this folder is '/filesystem/userdata/' and it is used for storing various user-specific files. This is detected automatically based on system-root configuration setting. Static root folder is the base root folder for static files and is situated in '/filesystem/static/', similarly to 'user-root', except files uploaded there are never served by Wave Framework.</p>
 				
 				<p><b>database-root</b></p>
 				
-				<p>By default this folder is /filesystem/data/ and it is used for storing various filesystem-centric database files, such as for SQLite. If undefined, then this is automatically based on system-root configuration setting and it is not recommended to change this unless necessary.</p>
+				<p>By default this folder is '/filesystem/data/' and it is used for storing various filesystem-centric database files, such as for SQLite. If undefined, then this is automatically based on system-root configuration setting and it is not recommended to change this unless necessary.</p>
 				
 				<p><b>timezone</b></p>
 				
@@ -87,11 +87,11 @@
 
 				<p><b>image-extensions</b></p>
 				
-				<p>This is a comma-separated list of image file extensions that are routed through Image Handler. If image file extension is not listed here, then this will be served through File Handler instead - which is used to serve any file that has an extension, but no handler. If you add new extensions here, then it is recommended to also update Image Handler code at /engine/handler.image.php to support that new file extension. Default extensions are jpeg, jpg, png.</p>
+				<p>This is a comma-separated list of image file extensions that are routed through <a href="handler_image.htm">Image Handler</a>. If image file extension is not listed here, then this will be served through <a href="handler_file.htm">File Handler</a> instead - which is used to serve any file that has an extension, but no handler. If you add new extensions here, then it is recommended to also update <a href="handler_image.htm">Image Handler</a> code at /engine/handler.image.php to support that new file extension. Default extensions are jpeg, jpg, png.</p>
 
 				<p><b>resource-extensions</b></p>
 				
-				<p>This is a comma-separated list of static resource file extensions that are routed through Resource Handler. If static resource file extension is not listed here, then this will be served through File Handler instead - which is used to serve any file that has an extension, but no handler. Resource Handler can serve these files as combined on-demand. If you add new extensions here, then it is recommended to also update Image Handler code at /engine/handler.image.php to support that new file extension. Default extensions are css, js, txt, csv, xml, html, htm, rss, vcard.</p>
+				<p>This is a comma-separated list of static resource file extensions that are routed through <a href="handler_resource.htm">Resource Handler</a>. If static resource file extension is not listed here, then this will be served through <a href="handler_file.htm">File Handler</a> instead - which is used to serve any file that has an extension, but no handler. <a href="handler_resource.htm">Resource Handler</a> can serve these files as combined on-demand. If you add new extensions here, then it is recommended to also update <a href="handler_image.htm">Image Handler</a> code at /engine/handler.image.php to support that new file extension. Default extensions are css, js, txt, csv, xml, html, htm, rss, vcard.</p>
 
 				<p><b>forbidden-extensions</b></p>
 				
@@ -103,7 +103,7 @@
 				author<br/>
 				copyright</b></p>
 				
-				<p>These values are added to website meta information by the View Controller, if they are defined. Website title will include value of project-title, and author and copyright values are written into meta tags in HTML header. These values are all empty by default.</p>
+				<p>These values are added to website meta information by the <a href="guide_view.htm">View Controller</a>, if they are defined. Website title will include value of project-title, and author and copyright values are written into meta tags in HTML header. These values are all empty by default.</p>
 				
 				<p><b>languages</b></p>
 				
@@ -112,7 +112,7 @@
 				<p><b>home-view<br/>
 				404-view</b></p>
 				
-				<p>These settings are used when using Wave Framework to build a website and not just a web service. Home view defines what view from /view/ folder is loaded by View Controller. 404 view defines what view from /view/ folder is loaded when no other view is found. These views must exist in /view/ folder in format of view.{name}.php files. Default home view is always 'home' and 404 view is '404', if left undefined.</p>
+				<p>These settings are used when using Wave Framework to build a website and not just a web service. Home view defines what view from /view/ folder is loaded by <a href="guide_view.htm">View Controller</a>. 404 view defines what view from /view/ folder is loaded when no other view is found. These views must exist in /view/ folder in format of view.{name}.php files. Default home view is always 'home' and 404 view is '404', if left undefined.</p>
 				
 				<p><b>web-root</b></p>
 				
@@ -155,7 +155,7 @@
 				
 				<p><b>apc</b></p>
 				
-				<p>APC extension is not officially part of PHP, but if web server supports APC, then this can speed up caching and performance. If this setting is set to 1 and APC is supported on the server, then Wave Framework will use APC for caching rather than filesystem in some cases. This setting is set to 1 by default.</p>
+				<p>APC extension is not officially part of PHP, but if web server supports APC, then this can speed up caching and performance. If this setting is set to 1 and APC is supported on the server, then Wave Framework will use APC for caching rather than filesystem folders in some cases. This setting is set to 1 by default.</p>
 				
 			<h2>Dynamic Resources</h2>
 				
@@ -211,21 +211,21 @@
 				
 				<p><b>internal-logging</b></p>
 				
-				<p>It's possible to log specific messages in internal log by sending such a command from MVC objects of Wave Framework. This setting here acts as a filter to those messages. Every message is stored with a 'key' and in here you can set which keys are logged and which keys are ignored. Setting it to '*' will mean that everything will be logged. If a key has exclamation mark before it, then that key will be ignored. Wave Framework has two default internal log messages 'input-data' and 'output-data' which are ignored by default, but sometimes it is recommended to turn them on for debugging purposes. This internal log can be read from developer tools as /tools/log-reader.php?internal URL. This setting is not used by default and thus internal logging is disabled.</p>
+				<p>It's possible to log specific messages in internal log by sending such a command from <a href="guide_mvc.htm">MVC</a> objects of Wave Framework. This setting here acts as a filter to those messages. Every message is stored with a 'key' and in here you can set which keys are logged and which keys are ignored. Setting it to '*' will mean that everything will be logged. If a key has exclamation mark before it, then that key will be ignored. Wave Framework has two default internal log messages 'input-data' and 'output-data' which are ignored by default, but sometimes it is recommended to turn them on for debugging purposes. This internal log can be read from developer tools as /tools/log-reader.php?internal URL. This setting is not used by default and thus internal logging is disabled.</p>
 				
 				<p><b>api-logging</b></p>
 				
-				<p>It is possible to keep a simplified log of API requests that are sent to API Handler. This setting is a comma-separated list of API profiles that will be tracked or will not be tracked. This allows for keeping track of how actively this or that API Profile is used in the system and gives a good overview of what commands have been used the most and how frequently. Setting it to '*' will mean that every API Profile will be logged, except profiles listed with '!' in front of their name. The default setting, if used, will track all API profiles except the public profile.</p>
+				<p>It is possible to keep a simplified log of API requests that are sent to <a href="handler_api.htm">API Handler</a>. This setting is a comma-separated list of API profiles that will be tracked or will not be tracked. This allows for keeping track of how actively this or that API Profile is used in the system and gives a good overview of what commands have been used the most and how frequently. Setting it to '*' will mean that every API Profile will be logged, except profiles listed with '!' in front of their name. The default setting, if used, will track all API profiles except the public profile.</p>
 				
 			<h2>Sessions</h2>
 				
-				<p><b>session-user-key<br/>session-permissions-key</b></p>
+				<p><b>session-user-key<br/>session-permissions-key<br/>session-fingerprint-key</b></p>
 				
-				<p>Wave Framework has a basic user and permissions handling through sessions, which can be accessed through MVC objects. This sets the keys under which user data and permissions are stored. These values are set to 'www-user' and 'www-permissions' by default.</p>
+				<p>Wave Framework has a basic user and permissions handling through sessions as well as session fingerprinting, which can be accessed through <a href="guide_mvc.htm">MVC</a> objects. This sets the keys under which user data and permissions are stored in sessions. These values are set to 'www-user', 'www-permissions' and 'www-fingerprint' by default.</p>
 				
 				<p><b>session-lifetime</b></p>
 				
-				<p>This is, in seconds, the expected length of PHP sessions. This is only changed if server allows to change PHP setting of 'session.gc_maxlifetime' with ini_set() function and defaults to that same value, if left undefined in Configuration. Note that this does not necessarily mean that the session will last this amount of seconds, as PHP session garbage collection or cookie may become invalid before that. Session cookie duration is entirely independent from this value, but Wave Framework does regenerate session cookies, if it detects the session start time being beyond the value of this setting.</p>
+				<p>This is, in seconds, the expected length of PHP sessions. This is only changed if server allows to change PHP setting of 'session.gc_maxlifetime' with ini_set() function and defaults to that same value, if left undefined in <a href="configuration.htm">Configuration</a>. Note that this does not necessarily mean that the session will last this amount of seconds, as PHP session garbage collection or cookie may become invalid before that. Session cookie duration is entirely independent from this value, but Wave Framework does regenerate session cookies, if it detects the session start time being beyond the value of this setting.</p>
 				
 				<p><b>session-fingerprint</b></p>
 				
@@ -235,7 +235,7 @@
 				
 				<p><b>limiter</b></p>
 				
-				<p>This turns on HTTP request limiter if set to 1. This setting is a global flag, if this is not set to 1, then all other flags of this group are ignored. This is set to 0 by default.</p>
+				<p>This turns on HTTP request <a href="limiter.htm">Limiter</a> if set to 1. This setting is a global flag, if this is not set to 1, then all other flags of this group are ignored. This is set to 0 by default.</p>
 				
 				<p><b>http-authentication-limiter</b></p>
 				
@@ -259,7 +259,7 @@
 				
 				<p><b>load-limiter</b></p>
 				
-				<p>This setting sets the server load value that when met, will make Wave Framework temporarily block HTTP requests. If server load is too high, then subsequent requests can make problems worse, so this setting allows you to make such requests as short and quick as possible, which helps reduce the load on the server. This setting is undefined by default and this limiter is not used.</p>
+				<p>This setting sets the server load value that when met, will make Wave Framework temporarily block HTTP requests. If server load is too high, then subsequent requests can make problems worse, so this setting allows you to make such requests as short and quick as possible, which helps reduce the load on the server. This setting is undefined by default and this <a href="limiter.htm">Limiter</a> is not used.</p>
 
 	</body>
 </html>

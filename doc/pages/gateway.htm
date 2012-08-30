@@ -18,7 +18,7 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Index Gateway is an index/bootstrap file of Wave Framework that will serve almost every HTTP request made to the system built on Wave Framework. It analyzes the HTTP request, loads Logger and configuration as well as HTTP request Limiter, overwrites error handler of PHP and then executes the command through one of the request handlers that are stored in /engine/handler.[handler-type].php files.</p>
+				<p>Index Gateway is an index/bootstrap file of Wave Framework that will serve almost every HTTP request made to the system built on Wave Framework. It analyzes the HTTP request, loads <a href="logger.htm">Logger</a> and configuration as well as HTTP request <a href="limiter.htm">Limiter</a>, overwrites error handler of PHP and then executes the command through one of the request handlers that are stored in /engine/handler.[handler-type].php files.</p>
 				
 			<h2>Workflow</h2>
 			
@@ -32,21 +32,21 @@
 				
 				<p>Index Gateway also attempts to set the IP it assumes that the request is made from. It takes into account trusted proxies configuration and other request headers, in case proxies are used to make the request.</p>
 				
-				<p>It loads Logger, which is used to log HTTP requests and performance data related to those requests for later analysis.</p>
+				<p>It loads <a href="logger.htm">Logger</a>, which is used to log HTTP requests and performance data related to those requests for later analysis.</p>
 				
-				<p>It loads HTTP Request Limiter, which is used to limit specific HTTP requests, require HTTP authentication, check for IP white- and blacklists and more.</p>
+				<p>It loads HTTP Request <a href="limiter.htm">Limiter</a>, which is used to limit specific HTTP requests, require HTTP authentication, check for IP white- and blacklists and more.</p>
 				
 				<p>Index Gateway also entirely overwrites error handling of PHP. Errors are stored in a separate internal log and a critical error page is shown to user of the system only if a critical error actually occurs. Lesser errors and warnings are simply logged internally and can be viewed later with the Debugger tool. The entire backtrace of the error is logged, if error is encountered.</p>
 				
-				<p>Image Handler is loaded if the requested extension is for an image file. Resource Handler is loaded if JavaScript or CSS files are requested. Sitemap and Robots Handlers are loaded if robots.txt or sitemap.xml files are requested. These extensions can be set in configuration file.</p>
+				<p><a href="handler_image.htm">Image Handler</a> is loaded if the requested extension is for an image file. <a href="handler_resource.htm">Resource Handler</a> is loaded if JavaScript or CSS files are requested. <a href="handler_sitemap.htm">Sitemap</a> and <a href="handler_robots.htm">Robots Handlers</a> are loaded if robots.txt or sitemap.xml files are requested. These extensions can be set in configuration file.</p>
 				
 				<p>Index Gateway will also throw a 403 Forbidden error, if a file is requested that has an extension that is disallowed by configuration. These files include htaccess file, *.tmp files and more.</p>
 				
-				<p>API Handler is loaded whenever an *.api extension is requested.</p>
+				<p><a href="handler_api.htm">API Handler</a> is loaded whenever an *.api extension is requested.</p>
 				
-				<p>File Handler is loaded whenever the request includes a file extension that has not already been served by Resource, Image, Sitemap, Robots and API Handlers.</p>
+				<p><a href="handler_file.htm">File Handler</a> is loaded whenever the request includes a file extension that has not already been served by Resource, Image, Sitemap, Robots and <a href="handler_api.htm">API Handler</a>s.</p>
 				
-				<p>Every other request uses Data Handler.</p>
+				<p>Every other request uses <a href="handler_data.htm">Data Handler</a>.</p>
 				
 	</body>
 </html>

@@ -20,15 +20,15 @@
 			
 				<p>State class is one of the core classes of Wave Framework. State holds a lot of information about the server, configuration as well as current request. State class can be used separately from Wave Framework, but is generally not recommended, since it is tailored for use with Wave Framework.</p>
 				
-				<p>State object is also used by Wave Framework to load configuration - from /config.ini file - to State data variable, so that it can be used and accessed by Wave Framework MVC classes. By default State class has a number of data variables loaded by default, to make sure that State can work even when no configuration file is loaded.</p>
+				<p>State object is also used by Wave Framework to load configuration - from '/config.ini' file - to State data variable, so that it can be used and accessed by Wave Framework <a href="guide_mvc.htm">MVC</a> classes. By default State class has a number of data variables loaded by default, to make sure that State can work even when no configuration file is loaded.</p>
 				
-				<p>State carries additional functionality: it includes a state messenger as well as wrappers for creating and destroying sessions and cookies, returning translations and sitemap information and more. To learn more about specific functionality of State when used through MVC objects of Wave Framework, you should look into "State and Configuration" feature guide</p>
+				<p>State carries additional functionality: it includes a <a href="guide_messenger.htm">State Messenger</a> Class as well as wrappers for creating and destroying sessions and cookies, returning translations and sitemap information and more. To learn more about specific functionality of State when used through <a href="guide_mvc.htm">MVC</a> objects of Wave Framework, you should look into "State and <a href="configuration.htm">Configuration</a>" feature guide</p>
 				
-				<p>The rest of this document details the use of Logger class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
+				<p>The rest of this document details the use of <a href="logger.htm">Logger</a> class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
 				
 			<h2>Using State class</h2>
 			
-				<p>While it is unlikely that State class can be of use outside Wave Framework, below is an example of how to create a new State object. State object is created with a configuration array and some of these configuration keys can affect the functionality of PHP (State will attempt to change PHP settings accordingly).</p>
+				<p>While it is unlikely that State class can be of use outside Wave Framework, below is an example of how to create a new State object. State object is created with a <a href="configuration.htm">Configuration</a> array and some of these <a href="configuration.htm">Configuration</a> keys can affect the functionality of PHP (State will attempt to change PHP settings accordingly).</p>
 				
 <pre>
 	<code>
@@ -47,7 +47,7 @@
 	</code>
 </pre>
 				
-				<p>State defines it's own default data and then loads the $config on top of that data. Most of State data variables are directly related to data loaded from /config.ini file and it is recommended to read more about these settings from "Configuration" document.</p>
+				<p>State defines it's own default data and then loads the $config on top of that data. Most of State data variables are directly related to data loaded from /config.ini file and it is recommended to read more about these settings from <a href="configuration.htm">Configuration</a> documentation.</p>
 				
 				<p>To change a state value, you can do this:</p>
 				
@@ -82,7 +82,7 @@
 					
 					<ul>
 						<li><b>404-image-placeholder</b> - True or false flag for whether placeholder 404 image is used.</li>
-						<li><b>404-view</b> - View keyword that is loaded when URL controller cannot find a page.</li>
+						<li><b>404-view</b> - View keyword that is loaded when <a href="guide_url.htm">URL Controller</a> cannot find a page.</li>
 						<li><b>apc</b> - True or false flag for whether the system attempts to use APC PHP accelerator.</li>
 						<li><b>api-logging</b> - If this is set to false, then API logging is not used. Otherwise this should be an array of logging flags.</li>
 						<li><b>api-profile</b> - Currently used API profile, this is set by the API.</li>
@@ -92,7 +92,7 @@
 						<li><b>blacklist-limiter</b> - Comma-separated list of IP addresses that are blocked from making HTTP requests.</li>
 						<li><b>client-ip</b> - IP address of the client that makes the request, this is detected by the system and takes into account proxies.</li>
 						<li><b>client-user-agent</b> - Client user agent string that makes the request.</li>
-						<li><b>data-root</b> - Location of filesystem /data/ folder which is used to store filesystem database files.</li>
+						<li><b>data-root</b> - Location of <a href="filesystem.htm">Filesystem</a> '/data/' folder which is used to store filesystem database files.</li>
 						<li><b>database-errors</b> - True or false flag for whether database errors are logged.</li>
 						<li><b>database-host</b> - Database host name.</li>
 						<li><b>database-name</b> - Database name.</li>
@@ -136,30 +136,31 @@
 						<li><b>http-request-method</b> - Request method used for current HTTP request. Usually GET or POST, but also HEAD.</li>
 						<li><b>https-limiter</b> - True or false flag for whether HTTPS is required for requests.</li>
 						<li><b>https-mode</b> - True or false flag for whether current request uses HTTPS or not.</li>
-						<li><b>image-extensions</b> - Array of picture extensions that are served through Image Handler.</li>
+						<li><b>image-extensions</b> - Array of picture extensions that are served through <a href="handler_image.htm">Image Handler</a>.</li>
 						<li><b>image-robots</b> - Robots command string for pictures.</li>
-						<li><b>index-url-cache-timeout</b> - Cache lifetime for URL controller requests, for solving URL's.</li>
-						<li><b>index-view-cache-timeout</b> - Default cache lifetime for View controller requests.</li>
+						<li><b>index-url-cache-timeout</b> - Cache lifetime for <a href="guide_url.htm">URL Controller</a> requests, for solving URL's.</li>
+						<li><b>index-view-cache-timeout</b> - Default cache lifetime for <a href="guide_view.htm">View Controller</a> requests.</li>
 						<li><b>internal-logging</b> - If this is set to false, then internal logging is not used. Otherwise this should be an array of logging flags.</li>
-						<li><b>keys-root</b> - Filesystem location for keys file, used for certificates.</li>
+						<li><b>keys-root</b> - <a href="filesystem.htm">Filesystem</a> location for keys file, used for certificates.</li>
 						<li><b>language</b> - Currently detected language.</li>
 						<li><b>languages</b> - Array of language keywords used by the system.</li>
 						<li><b>limiter</b> - True or false flag for whether HTTP request limiter is used or not.</li>
 						<li><b>load-limiter</b> - True or false flag for whether server load limiter is used.</li>
 						<li><b>output-compression</b> - Currently used output compression mode.</li>
-						<li><b>project-title</b> - Project title that is used by View controller meta title.</li>
+						<li><b>project-title</b> - Project title that is used by <a href="guide_view.htm">View Controller</a> meta title.</li>
 						<li><b>request-id</b> - Unique HTTP request ID.</li>
 						<li><b>request-limiter</b> - True or false flag for whether HTTP request rate-limiter is used or not.</li>
 						<li><b>request-time</b> - Request timestamp.</li>
 						<li><b>request-uri</b> - Request URI.</li>
 						<li><b>resource-cache-timeout</b> - Lifetime of resource cache.</li>
-						<li><b>resource-extensions</b> - Array of extensions that will be loaded through Resource Handler.</li>
+						<li><b>resource-extensions</b> - Array of extensions that will be loaded through <a href="handler_resource.htm">Resource Handler</a>.</li>
 						<li><b>resource-robots</b> - Robots command string for resources.</li>
 						<li><b>robots</b> - Universal robots command string.</li>
 						<li><b>robots-cache-timeout</b> - Cache lifetime of robots.txt files.</li>
 						<li><b>server-ip</b> - Server IP address.</li>
 						<li><b>session-data</b> - This holds data from session storage or temporary data before it is stored in session storage.</li>
 						<li><b>session-fingerprint</b> - True or false flag for whether sessions are tied to IP and browser fingerprint.</li>
+						<li><b>session-fingerprint-key</b> - Key value that the fingerprint will be stored under in sessions.</li>
 						<li><b>session-id</b> - This holds the current session ID, if sessions are active.</li>
 						<li><b>session-lifetime</b> - Duration of seconds for how long sessions should last, defaults to server value of 'session.gc-maxlifetime'.</li>
 						<li><b>session-namespace</b> - Session namespace keyword.</li>
@@ -168,16 +169,16 @@
 						<li><b>sitemap</b> - Array of current language sitemap data.</li>
 						<li><b>sitemap-cache-timeout</b> - Cache lifetime of sitemap.xml files.</li>
 						<li><b>sitemap-raw</b> - Raw sitemap data in an array.</li>
-						<li><b>static-root</b> - Filesystem folder for static files.</li>
+						<li><b>static-root</b> - <a href="filesystem.htm">Filesystem</a> folder for static files.</li>
 						<li><b>system-root</b> - Root folder of the system.</li>
 						<li><b>timezone</b> - Currently used timezone.</li>
-						<li><b>tmp-root</b> - Filesystem folder for temporary files.</li>
+						<li><b>tmp-root</b> - <a href="filesystem.htm">Filesystem</a> folder for temporary files.</li>
 						<li><b>translations</b> - Array of translations of current language.</li>
 						<li><b>true-request</b> - True request URI.</li>
 						<li><b>trusted-proxies</b> - Array of trusted proxy IP addresses.</li>
 						<li><b>user-data</b> - Array of user data.</li>
 						<li><b>user-permissions</b> - Array of user permissions.</li>
-						<li><b>user-root</b> - Filesystem folder of user folder.</li>
+						<li><b>user-root</b> - <a href="filesystem.htm">Filesystem</a> folder of user folder.</li>
 						<li><b>view</b> - Currently used view.</li>
 						<li><b>web-root</b> - Web root URL node, in case system is not installed in root of the website.</li>
 						<li><b>whitelist-limiter</b> - Comma-separated list of IP addresses that are allowed to make HTTP requests.</li>
@@ -185,15 +186,15 @@
 			
 				<h3>public $databaseConnection=false</h3>
 					
-					<p>This should hold WWW_Database class and connection data, if used.</p>
+					<p>This should hold <a href="database.htm">Database</a> class and connection data, if used.</p>
 			
 				<h3>private $messenger=false</h3>
 				
-					<p>This holds the 'keyword' or 'passkey' of currently used State messenger.</p>
+					<p>This holds the 'keyword' or 'passkey' of currently used <a href="guide_messenger.htm">State Messenger</a> Class.</p>
 			
 				<h3>private $messengerData=array()</h3>
 				
-					<p>This holds state messenger data as an array.</p>
+					<p>This holds <a href="guide_messenger.htm">State Messenger</a> Class data as an array.</p>
 					
 			<h2>Logger Class Methods</h2>
 			
@@ -205,7 +206,7 @@
 				
 				<h3>final public function __destruct()</h3>
 				
-					<p>When State class is not used anymore, then state messenger data - if set - is written to filesystem based on the State messenger key. This method also calls the commit-session method, if it has not been called yet.</p>
+					<p>When State class is not used anymore, then <a href="guide_messenger.htm">State Messenger</a> Class data - if set - is written to <a href="filesystem.htm">Filesystem</a> based on the <a href="guide_messenger.htm">State Messenger</a> Class key. This method also calls the commit-session method, if it has not been called yet.</p>
 				
 				<h3>final public function getState($variable=false,$subvariable=false)</h3>
 				
@@ -229,27 +230,27 @@
 				
 				<h3>final public function getSitemapRaw($language=false,$keyword=false)</h3>
 				
-					<p>This method returns an array of currently active sitemap, or a sitemap for a language set with $language variable. If $keyword is also set, then it returns a specific sitemap node with that keyword from $language sitemap file. This method returns the original, non-modified sitemap that has not been parsed for use with URL controller.</p>
+					<p>This method returns an array of currently active sitemap, or a sitemap for a language set with $language variable. If $keyword is also set, then it returns a specific sitemap node with that keyword from $language sitemap file. This method returns the original, non-modified sitemap that has not been parsed for use with <a href="guide_url.htm">URL Controller</a>.</p>
 				
 				<h3>final public function getSitemap($language=false,$keyword=false)</h3>
 				
-					<p>This returns sitemap array that is modified for use with View controller and other parts of the system. It returns sitemap for current language or a language set with $language variable and can return a specific sitemap node based on $keyword.</p>
+					<p>This returns sitemap array that is modified for use with <a href="guide_view.htm">View Controller</a> and other parts of the system. It returns sitemap for current language or a language set with $language variable and can return a specific sitemap node based on $keyword.</p>
 				
 				<h3>final public function stateMessenger($address,$overwrite=false)</h3>
 				
-					<p>This method initializes State messenger by giving it an address and assigning the file that State messenger will be stored under. If the file already exists and $overwrite is not turned on, then it automatically loads contents of that file from filesystem.</p>
+					<p>This method initializes <a href="guide_messenger.htm">State Messenger</a> Class by giving it an address and assigning the file that <a href="guide_messenger.htm">State Messenger</a> Class will be stored under. If the file already exists and $overwrite is not turned on, then it automatically loads contents of that file from <a href="filesystem.htm">Filesystem</a>.</p>
 				
 				<h3>final public function setMessengerData($data,$value=false)</h3>
 				
-					<p>This writes data to State messenger. $data is the key and $value is the value of the key. $data can also be an array of keys and values, in which case multiple values are set at the same time.</p>
+					<p>This writes data to <a href="guide_messenger.htm">State Messenger</a> Class. $data is the key and $value is the value of the key. $data can also be an array of keys and values, in which case multiple values are set at the same time.</p>
 				
 				<h3>final public function unsetMessengerData($key=false)</h3>
 				
-					<p>This method removes key from State messenger based on value of $key. If $key is not set, then the entire State messenger data is cleared.</p>
+					<p>This method removes key from <a href="guide_messenger.htm">State Messenger</a> Class based on value of $key. If $key is not set, then the entire <a href="guide_messenger.htm">State Messenger</a> Class data is cleared.</p>
 				
 				<h3>final public function getMessengerData($address=false,$remove=true)</h3>
 				
-					<p>This method returns data from State messenger. It returns the entire State messenger data as an array based on $address keyword that is used as the fingerprint for data. If $remove is set, then State messenger data is removed from filesystem or State object after being called.</p>
+					<p>This method returns data from <a href="guide_messenger.htm">State Messenger</a> Class. It returns the entire <a href="guide_messenger.htm">State Messenger</a> Class data as an array based on $address keyword that is used as the fingerprint for data. If $remove is set, then <a href="guide_messenger.htm">State Messenger</a> Class data is removed from <a href="filesystem.htm">Filesystem</a> or State object after being called.</p>
 				
 				<h3>final public function setUser($data)</h3>
 				
@@ -293,7 +294,7 @@
 				
 				<h3>final public function destroySession()</h3>
 				
-					<p>This method clears the session variable, if it is populated for current session. Session and the cookie is actually destroyed by State __destruct() method.</p>
+					<p>This method clears the session variable, if it is populated for current session. Session and the cookie is actually destroyed by State '__destruct()' method.</p>
 				
 				<h3>final public function setSession($key=false,$value=false)</h3>
 				

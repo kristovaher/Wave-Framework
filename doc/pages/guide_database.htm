@@ -20,9 +20,9 @@
 				
 			<h2>Connecting to Database</h2>
 			
-				<p>There are two ways for Wave Framework to connect to database. The first is to set up Wave Framework to have a single database link that it will connect with through Wave Framework and the State itself.</p>
+				<p>There are two ways for Wave Framework to connect to database. The first is to set up Wave Framework to have a single database link that it will connect with through Wave Framework and the <a href="guide_state.htm">State</a> itself.</p>
 				
-				<p>To set up such a database connection, then you have to add database credentials (the host address, database name, username and password), in the Configuration of Wave Framework, which is stored in '/config.ini' file. These are the settings:</p>
+				<p>To set up such a database connection, then you have to add database credentials (the host address, database name, username and password), in the <a href="configuration.htm">Configuration</a> of Wave Framework, which is stored in '/config.ini' file. These are the settings:</p>
 				
 <pre>
 	<code>
@@ -60,7 +60,7 @@
 				
 			<h2>Database Requests</h2>
 			
-				<p>Wave Framework Database Class has three methods for making database requests and one method for returning the last inserted ID. The three methods serve a slightly different purpose. Wave Framework is built around PDO class, so it supports prepared statements, which means that the query string and variables should be sent separately. It is recommended to learn more about PDO in PHP official documentation, if you are not familiar with prepared statements.</p>
+				<p>Wave Framework <a href="guide_database.htm">Database</a> Class has three methods for making database requests and one method for returning the last inserted ID. The three methods serve a slightly different purpose. Wave Framework is built around PDO class, so it supports prepared statements, which means that the query string and variables should be sent separately. It is recommended to learn more about PDO in PHP official documentation, if you are not familiar with prepared statements.</p>
 				
 				<p>If you wish to return a single row from database, then you should use the dbSingle() database call. For example, if you wish to return user data from users table that has an ID of 17:</p>
 				
@@ -149,13 +149,13 @@
 	</code>
 </pre>
 
-				<p>The good thing about transactions is that these are not just buffered calls. Database works during transactions the same way it would otherwise, which means that if you add a new object within a transaction, you can also select it from database within the same transaction until you roll it back and it disappears again.</p>
+				<p>The good thing about transactions is that these are not just buffered calls. <a href="guide_database.htm">Database</a> works during transactions the same way it would otherwise, which means that if you add a new object within a transaction, you can also select it from database within the same transaction until you roll it back and it disappears again.</p>
 				
 				<p>Transactions are very useful in a modern database design that help to protect the system from database corruption that might result in broken scripts or processing that went wrong half way through and would otherwise require some manual work to restore.</p>
 			
 			<h2>Helpers and Debugging</h2>
 			
-				<p>There are a few more methods that can be used through the Database Class and wrapper in Wave Framework. These methods do not make an actual database request themselves, but can be used to deal with input or output from database or for debugging.</p>
+				<p>There are a few more methods that can be used through the <a href="guide_database.htm">Database</a> Class and wrapper in Wave Framework. These methods do not make an actual database request themselves, but can be used to deal with input or output from database or for debugging.</p>
 				
 				<h3>Input Filtering</h3>
 				
@@ -221,11 +221,11 @@
 	</code>
 </pre>
 
-					<p>Rather than just echo it out, it is actually recommended to insert that simulated query to your Internal Log. You can read more about Internal Logger in its own documentation page.</p>
+					<p>Rather than just echo it out, it is actually recommended to insert that simulated query to your Internal Log. You can read more about <a href="guide_logger.htm">Internal Logger</a> in its own documentation page.</p>
 					
 				<h3>Returning PDO Object</h3>
 				
-					<p>Sometimes it is necessary to use the PDO object itself separately from the Wave Framework and Factory class based MVC Objects. For this purpose you can always return the database object itself with the following call:</p>
+					<p>Sometimes it is necessary to use the PDO object itself separately from the Wave Framework and Factory class based <a href="guide_mvc.htm">MVC</a> Objects. For this purpose you can always return the database object itself with the following call:</p>
 					
 <pre>
 	<code>
@@ -233,7 +233,7 @@
 	</code>
 </pre>
 
-					<p>This returns an object similarly to dbNew() method, only difference is that the dbPDO() returns an object that is already set up - its configuration being based on Wave Framework Configuration.</p>
+					<p>This returns an object similarly to dbNew() method, only difference is that the dbPDO() returns an object that is already set up - its configuration being based on Wave Framework <a href="configuration.htm">Configuration</a>.</p>
 
 	</body>
 </html>

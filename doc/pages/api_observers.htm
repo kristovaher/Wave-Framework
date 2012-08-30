@@ -18,11 +18,11 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>API observers allow you to add simple observers to your web system that act like event listeners in your web system. These observers essentially wait for a specific API command - sent as 'www-command' - to be made, in which case these API observers execute a defined API method with the same input or output data that is sent to or returned from the API call.</p>
+				<p>API observers allow you to add simple observers to your web system that act like event listeners in your web system. These observers essentially wait for a specific API command - sent as 'www-command' - to be made, in which case these API observers execute a defined API method with the same input or output data that is sent to or returned from the <a href="guide_api.htm">API</a> call.</p>
 				
-				<p>It is possible to add both input and output observers, which means that the Observer is called either when the command is sent to API with the input to that command, or the Observer is called after the API call has executed and the data sent to it is the data from the result of the API call.</p>
+				<p>It is possible to add both input and output observers, which means that the Observer is called either when the command is sent to API with the input to that command, or the Observer is called after the <a href="guide_api.htm">API</a> call has executed and the data sent to it is the data from the result of the <a href="guide_api.htm">API</a> call.</p>
 				
-				<p>Main use of observers is to tie additional functionality to your system without having to touch controllers themselves. For example, you can add observers that check for 'user-login' API call to output and then, if the resulting array of that API call is successful, write a log entry to database. This effectively allows you to separate different controllers from one another, while still letting them affect one another.</p>
+				<p>Main use of observers is to tie additional functionality to your system without having to touch controllers themselves. For example, you can add observers that check for 'user-login' <a href="guide_api.htm">API</a> call to output and then, if the resulting array of that <a href="guide_api.htm">API</a> call is successful, write a log entry to <a href="guide_database.htm">Database</a>. This effectively allows you to separate different controllers from one another, while still letting them affect one another.</p>
 				
 				<p>It is not required to use observers in your web system, but it is one way of separating functionality of one controller from another in your web service.</p>
 				
@@ -39,35 +39,35 @@
 	</code>
 </pre>
 
-				<p>This means that if an API call is made with 'www-command' value of 'example-get', then before that call is executed, the entire input array is sent to 'observer-run' API call instead - after which the actual 'example-get' method is run.</p>
+				<p>This means that if an <a href="guide_api.htm">API</a> call is made with 'www-command' value of 'example-get', then before that call is executed, the entire input array is sent to 'observer-run' <a href="guide_api.htm">API</a> call instead - after which the actual 'example-get' method is run.</p>
 				
-				<p>Similar thing would happen with the result and output of the API call, if 'output' was defined instead. In fact, you can define both input and output in the API observer for the same call at the same time.</p>
+				<p>Similar thing would happen with the result and output of the <a href="guide_api.htm">API</a> call, if 'output' was defined instead. In fact, you can define both input and output in the API observer for the same call at the same time.</p>
 				
 				<p>There are a number of configuration settings that can be used with API Observers:</p>
 				
 				<h3>input</h3>
 				
-					<p>This is the API command that will be called if the API call, that is being observed, is made. The same input will be sent to that Observer command.</p>
+					<p>This is the API command that will be called if the <a href="guide_api.htm">API</a> call, that is being observed, is made. The same input will be sent to that Observer command.</p>
 					
 				<h3>input-buffer</h3>
 				
-					<p>This can be set to either 0 or 1, 0 being the default. If this is set, then API Observer accepts response from buffer if the same API call is made multiple times per same HTTP request. It can be useful to stop certain type of potential Observer spam.</p>
+					<p>This can be set to either 0 or 1, 0 being the default. If this is set, then API Observer accepts response from buffer if the same <a href="guide_api.htm">API</a> call is made multiple times per same HTTP request. It can be useful to stop certain type of potential Observer spam.</p>
 					
 				<h3>input-cache-timeout</h3>
 				
-					<p>This tells the Observer how old cache, in seconds, is being accepted by the Observer API call. This is set to 0 by default. If this is set to higher than 0, then a observers can also accept cache as a result of the call, which technically means that nothing happens with the Observer call since it is not actually run. It can be useful to stop certain type of potential Observer spam.</p>
+					<p>This tells the Observer how old cache, in seconds, is being accepted by the Observer <a href="guide_api.htm">API</a> call. This is set to 0 by default. If this is set to higher than 0, then a observers can also accept cache as a result of the call, which technically means that nothing happens with the Observer call since it is not actually run. It can be useful to stop certain type of potential Observer spam.</p>
 				
 				<h3>output</h3>
 				
-					<p>This is the API command that will be called if the API call, that is being observed, returns a result. The same output from the API call result will be sent to that Observer command.</p>
+					<p>This is the API command that will be called if the <a href="guide_api.htm">API</a> call, that is being observed, returns a result. The same output from the <a href="guide_api.htm">API</a> call result will be sent to that Observer command.</p>
 					
 				<h3>output-buffer</h3>
 				
-					<p>This can be set to either 0 or 1, 0 being the default. If this is set, then API Observer accepts response from buffer if the same API call is made multiple times per same HTTP request. It can be useful to stop certain type of potential Observer spam.</p>
+					<p>This can be set to either 0 or 1, 0 being the default. If this is set, then API Observer accepts response from buffer if the same <a href="guide_api.htm">API</a> call is made multiple times per same HTTP request. It can be useful to stop certain type of potential Observer spam.</p>
 					
 				<h3>output-cache-timeout</h3>
 				
-					<p>This tells the Observer how old cache, in seconds, is being accepted by the Observer API call. This is set to 0 by default. If this is set to higher than 0, then a observers can also accept cache as a result of the call, which technically means that nothing happens with the Observer call since it is not actually run. It can be useful to stop certain type of potential Observer spam.</p>
+					<p>This tells the Observer how old cache, in seconds, is being accepted by the Observer <a href="guide_api.htm">API</a> call. This is set to 0 by default. If this is set to higher than 0, then a observers can also accept cache as a result of the call, which technically means that nothing happens with the Observer call since it is not actually run. It can be useful to stop certain type of potential Observer spam.</p>
 			
 	</body>
 </html>

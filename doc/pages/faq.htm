@@ -20,9 +20,9 @@
 				
 			<h3>Why is Wave Framework 'API-centric'? What does that mean?</h3>
 			
-				<p>Web development has been slow to catch up with desktop programming over the years. Majority of web applications today get the whole MVC (Model-View-Controller pattern) wrong for the following reasons: views are tightly integrated and controllers often play a too multi-functional role in the entire system and are too tightly coupled with views. And a lot of web service API's (which allow you to connect different software systems with one another) within the last ten years or so have been developed as an additional plugin or an extension, rather than core part of the main functionality.</p>
+				<p>Web development has been slow to catch up with desktop programming over the years. Majority of web applications today get the whole <a href="guide_mvc.htm">MVC</a> (Model-View-Controller pattern) wrong for the following reasons: views are tightly integrated and controllers often play a too multi-functional role in the entire system and are too tightly coupled with views. And a lot of web service API's (which allow you to connect different software systems with one another) within the last ten years or so have been developed as an additional plugin or an extension, rather than core part of the main functionality.</p>
 
-				<p>Wave Framework takes a different approach and keeps API in the center of everything. This is because every web service (even a website) that is being developed can also be developed as an API first and this helps to iron out most of the MVC-from-desktop-to-web kinks. This means that the software layer can be developed independently from the User Interface and then joined at any point during the development seamlessly. You can work on just your models and controllers and develop your entire software to work through API and then implement the UI by creating hooks in the views to that API.</p>
+				<p>Wave Framework takes a different approach and keeps API in the center of everything. This is because every web service (even a website) that is being developed can also be developed as an API first and this helps to iron out most of the <a href="guide_mvc.htm">MVC</a>-from-desktop-to-web kinks. This means that the software layer can be developed independently from the User Interface and then joined at any point during the development seamlessly. You can work on just your models and controllers and develop your entire software to work through API and then implement the UI by creating hooks in the views to that API.</p>
 
 				<p>This means that your entire software should work without any User Interface at all and after your models and controllers have been built, then your entire web service should be 100% functional. For example: if you build a Twitter client, then you should have logins, tweet submits, tweet reading and so on. Your visual and UI design team could work independently at the same time, coming up with the user interface while you're working on the functionality. At some point these two parts can be joined and a UI can be implemented across the API as you start implementing the Views.</p>
 
@@ -37,9 +37,9 @@
 				<p>Wave Framework includes a number of functionality that is useful only for development and is not useful when the project is deployed live. In order to make sure that your project is as secure as possible when deployed live, you should do the following:</p>
 				
 				<ul>
-					<li>Remove '/tools/' folder from the server or restrict access to it entirely. Tools should be only used for debugging and by a developer or server administrator.</li>
+					<li>Remove '/tools/' folder from the server or restrict access to it entirely. <a href="guide_tools.htm">Developer Tools</a> should be only used for debugging and by a developer or server administrator.</li>
 					<li>Remove '/doc/' folder entirely. Documentation could potentially reveal what version of Wave Framework your server is using and if the framework is outdated, then it is better if that information is kept secret in case unpatched security vulnerabilities or bugs exist in the older version. Same applies to /doc/examples/ folder that might include compromising example scripts.</li>
-					<li>Make sure that you cannot access *.ini and *.tmp files from the server, like '/config.ini' file especially. By default Wave Framework blocks the access to *.ini and *.tmp files directly, but in case you have changed the default Configuration, then this will make sure that your authentication and configuration data is safe.</li>
+					<li>Make sure that you cannot access *.ini and *.tmp files from the server, like '/config.ini' file especially. By default Wave Framework blocks the access to *.ini and *.tmp files directly, but in case you have changed the default <a href="configuration.htm">Configuration</a>, then this will make sure that your authentication and configuration data is safe.</li>
 					<li>Remove '/readme.txt' from the server since it might carry hints about what version of Wave Framework is being used.</li>
 				</ul>
 				
@@ -55,7 +55,7 @@
 				
 				<h4>RESTful API demands that the action what the client requests is set in HTTP method, like GET, POST, PUT and DELETE.</h4>
 				
-					<p>Wave Framework does not implement this requirement for two reasons. First of all, if your API requires that a specific HTTP header is set for it to work, then you make it more difficult to implement the API in clients or software where it might be too difficult to make such a custom HTTP request. For example, a developer that builds a PHP system on a server that cannot use cURL but can use file_get_contents() over HTTP, would suddenly be unable to connect to your API. As a result, the API calls in Wave Framework are simply defined by a prefixed keyword of 'www-command' and the value of this can be for any model and any action, like 'users-get' or 'users-delete' while making the request over any HTTP method.</p>
+					<p>Wave Framework does not implement this requirement for two reasons. First of all, if your API requires that a specific HTTP header is set for it to work, then you make it more difficult to implement the API in clients or software where it might be too difficult to make such a custom HTTP request. For example, a developer that builds a PHP system on a server that cannot use cURL but can use file_get_contents() over HTTP, would suddenly be unable to connect to your API. As a result, the <a href="guide_api.htm">API</a> calls in Wave Framework are simply defined by a prefixed keyword of 'www-command' and the value of this can be for any model and any action, like 'users-get' or 'users-delete' while making the request over any HTTP method.</p>
 					
 					<p>Wave Framework makes the input data independent from the request method entirely. It merges all the data down into a single array much like $_REQUEST variable in PHP. The idea of this is that you should never make an API request that defines two variables with the same keyword, this would be a bad design. Since Wave Framework makes the method of sending the variables completely open, you can make POST requests, GET requests and more without having to worry about the API returning different type of result.</p>
 					
@@ -63,17 +63,17 @@
 					
 				<h4>RESTful API demands that the response content type preference is set in the request headers</h4>
 				
-					<p>This means that if you want a JSON response, then it has to be defined in the headers. If you want an XML response, then you have to define it in headers again. Similarly to the previous point, Wave Framework API use is not strictly tied to the HTTP headers, you can send the response data type preference as part of the variables sent to API directly. And there are different API handlers that can return different type of response by default.</p>
+					<p>This means that if you want a JSON response, then it has to be defined in the headers. If you want an XML response, then you have to define it in headers again. Similarly to the previous point, Wave Framework API use is not strictly tied to the HTTP headers, you can send the response data type preference as part of the variables sent to API directly. And there are different <a href="handler_api.htm">API Handlers</a> that can return different type of response by default.</p>
 				
 				<h4>RESTful API implements the URL as the method of finding what object and ID you are making a request for.</h4>
 				
-					<p>Wave Framework API works through a single file that is assigned for the API and the URL's are intended for web pages themselves. Since Wave Framework can include API calls that cannot be easily mapped directly to objects or various features, it made little to no sense to restrict the developer and make them design a system that fits this URL approach.</p>
+					<p>Wave Framework API works through a single file that is assigned for the API and the URL's are intended for web pages themselves. Since Wave Framework can include <a href="guide_api.htm">API</a> calls that cannot be easily mapped directly to objects or various features, it made little to no sense to restrict the developer and make them design a system that fits this URL approach.</p>
 					
 					<p>In Wave Framework, you define your model and controller in the value of 'www-command' and that's it.</p>
 					
 			<h3>I have problems with Internet Explorer 8 and JavaScript API Wrapper, JSON is not defined?</h3>
 			
-				<p>This can happen mainly because Internet Explorer 8 has triggered your website to work in compatibility mode of Internet Explorer 6/7 that does not support JSON object, thus throwing an error. Internet Explorer 8 often switches to compatibility mode internally (even without user intervention) when it has trouble finding what type of document is used - more specifically the doc-type of your HTML. Wave Framework View Controller has a HTML5 doc-type by default, which is not recognized by older Internet Explorer browsers, thus triggering compatibility mode.</p>
+				<p>This can happen mainly because Internet Explorer 8 has triggered your website to work in compatibility mode of Internet Explorer 6/7 that does not support JSON object, thus throwing an error. Internet Explorer 8 often switches to compatibility mode internally (even without user intervention) when it has trouble finding what type of document is used - more specifically the doc-type of your HTML. Wave Framework <a href="guide_view.htm">View Controller</a> has a HTML5 doc-type by default, which is not recognized by older Internet Explorer browsers, thus triggering compatibility mode.</p>
 				
 				<p>It is possible to overcome this with Internet Explorer 8 by adding the following line to your header:</p>
 				
@@ -85,7 +85,7 @@
 
 				<p>Wave Framework JavaScript API Wrapper can also fall back to jQuery, if it detects that jQuery is enabled. If jQuery is defined and JSON object is not available in the browser, then the Wrapper will parse the response with 'parseJSON()' method from jQuery automatically.</p>
 					
-			<h3>If I want to return RSS data through API handler, how would I format the data array?</h3>
+			<h3>If I want to return RSS data through API Handler, how would I format the data array?</h3>
 			
 				<p>Wave Framework has simple methods that allow you to convert data to XML (and thus RSS) format from an array. An example array for an RSS feed would be like this:</p>
 				

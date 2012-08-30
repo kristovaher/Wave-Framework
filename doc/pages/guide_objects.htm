@@ -24,7 +24,7 @@
 				
 			<h2>Loading Objects</h2>
 			
-				<p>Wave Framework groups classes in four: Models, Views, Controllers and Objects. You can read more about the purpose of each of those classes in MVC Pattern documentation page. But in order for these objects to be loaded dynamically, there are a couple of rules that have to be followed.</p>
+				<p>Wave Framework groups classes in four: Models, Views, Controllers and Objects. You can read more about the purpose of each of those classes in <a href="guide_mvc.htm">MVC</a> Pattern documentation page. But in order for these objects to be loaded dynamically, there are a couple of rules that have to be followed.</p>
 				
 				<h3>Models</h3>
 				
@@ -130,7 +130,7 @@
 					
 			<h2>Construction Methods</h2>
 			
-				<p>PHP has a magic method called '__construct()' that is called whenever an object is created. This can be used to load additional functionality to an object when it is created, like create some database connections or initialize configuration.</p>
+				<p>PHP has a magic method called '__construct()' that is called whenever an object is created. This can be used to load additional functionality to an object when it is created, like create some <a href="guide_database.htm">Database</a> connections or initialize configuration.</p>
 				
 				<p>In Wave Framework, if your object is created from a class that is extended from WWW_Factory, then you cannot define a '__construct()' method for that object as it is not possible to overwrite the method from WWW_Factory. Instead you should define '__initialize()' method instead, as Factory's own construction will also make a call for that method, if it is defined.</p>
 			

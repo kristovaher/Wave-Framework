@@ -16,8 +16,8 @@
 
 				<ul>
 					<li><b>1</b> - Unpack the downloaded archive of Wave Framework or go to the repository folder if you downloaded through Git or Mercurial.</li>
-					<li><b>2</b> - Configuration file '/config.ini' in root directory of the archive should be configured according to your needs. Configuration file has multiple comments about each setting, but they can be left undefined and unchanged at first, since the Framework is able to define defaults for most settings by itself.</li>
-					<li><b>3</b> - Upload the entire archive to your server and make filesystem folder '/filesystem/' and all of its subfolders writable by PHP with command 'chmod 0755' or giving rights using an FTP program like FileZilla (Right click on folder -&gt; File Permissions -&gt; Numeric value -&gt; 0755). This is not required on Windows server (or Windows localhost) since Windows has folders writable by default.
+					<li><b>2</b> - <a href="configuration.htm">Configuration</a> file '/config.ini' in root directory of the archive should be configured according to your needs. <a href="configuration.htm">Configuration</a> file has multiple comments about each setting, but they can be left undefined and unchanged at first, since the Framework is able to define defaults for most settings by itself.</li>
+					<li><b>3</b> - Upload the entire archive to your server and make <a href="filesystem.htm">Filesystem</a> folder '/filesystem/' and all of its subfolders writable by PHP with command 'chmod 0755' or giving rights using an FTP program like FileZilla (Right click on folder -&gt; File Permissions -&gt; Numeric value -&gt; 0755). This is not required on Windows server (or Windows localhost) since Windows has folders writable by default.
 						<ul>
 							<li>On some servers the FTP account is configured so that 0755 will not allow PHP to actually write to these folders if you set the rights over FTP, so you should either ask the administrator to change the account permissions or set the folder permissions to 0777 and see if that works when 0755 did not (this is less secure however, so you should only do it temporarily).</li>
 							<li>Some servers modify the files uploaded through FTP in some way, often breaking line breaks and thus functionality of the scripts. If you encounter problems and there is no clear error message, then make sure that the uploaded files are correctly stored on the server. Upload should work correctly if you upload files in Binary mode (In FileZilla it is 'Transfer -> Transfer Type -> Binary').</li>
@@ -27,7 +27,7 @@
 					<li><b>5A - Apache</b>
 						<ul>
 							<li>On most server setups the Apache-related settings in this list should already be enabled and everything should work, but in case you run into problems and you cannot edit Apache configuration yourself, then ask for assistance from your hosting provider.</li>
-							<li>Make sure that you uploaded '/.htaccess' and '/tools/.htaccess' files to the server, as sometimes they may not be uploaded due to operating system thinking they are hidden.</li>
+							<li>Make sure that you uploaded '/.htaccess' and '/tools/.htaccess' files to the server, as sometimes they may not be uploaded due to operating system thinking they are hidden. If possible, you should actually implement these rewrite directives from those files to your main Apache server configuration and remove the '.htaccess' files, since this can improve the performance, but if this is not possible then keeping the '.htaccess' files in your root folder is perfectly common practice.</li>
 							<li>Apache also needs to support '.htaccess' directives from those files, so make sure that 'AllowOverride' setting is 'All' in Apache directory configuration. This is usually enabled by default on most servers.</li>
 							<li>Since RewriteEngine is required for URL rewrites, your server needs to have the module loaded, which means that the line 'LoadModule rewrite_module modules/mod_rewrite.so' needs to be uncommented in Apache. This is usually enabled by default on most servers.</li>
 							<li>On some hosting environments the line 'Options +FollowSymLinks' in '.htaccess' may throw an error, so if an error is thrown then I suggest commenting or removing that line and trying the compatibility script again.</li>
@@ -44,17 +44,22 @@
 							<li>If the page shows an error message, then make sure that the '/filesystem/' folders are writable and that the configuration steps above have been followed.</li>
 							<li>Make sure that the files were uploaded correctly and that FTP did not convert line breaks to single line in uploaded files. If it did, then fix this by uploading files in Binary mode.</li>
 							<li>You can also take a look at '/tools/debugger.php' script in case you encounter errors even if Compatibility script says that everything is alright with the server. If Debugger script does not show any warnings and your page still shows errors, then the error happens in core, such as version incompatibility, file permissions and more. Double check that you have followed the previous steps.</li>
+							<li>If the text is shown, but the logo picture is seems to be not found, then the problem might be that you are using a proxy that attempts to load static files by itself and the requested file '/resources/images/160x160&amp;logo.png' does not actually exist. This is because that URL includes on-demand resize parameters that can only be used when file is loaded through Wave Framework itself. You can serve static files through a proxy, but in this case you cannot use the 'dynamic loading of resources' functionality of Wave Framework.</li>
 						</ul>
-					<li><b>8</b> - <b>Important!</b> Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged as all downloaded archives have the same username and password at first.</li>
+					<li><b>8</b> - <b>Important!</b> Make sure to change 'http-authentication-username' and 'http-authentication-password' settings in '/config.ini' file (line #36 and #37). These are used to authenticate access to developer tools in '/tools/' directory and it may pose a security risk if left unchanged as all downloaded archives have the same username and password at first.</li>
 				</ul>
+				
+				<h3>Where to next?</h3>
+				
+					<p>Wave Framework has multiple tutorials you can try out in order to learn how Wave Framework can be used to build various web services and websites. Even if you have not worked with API's and MVC-specific frameworks before, getting a good grip on such a development is not very difficult with Wave. Tutorials are available in the Tutorials section <a href="../index.htm">here</a>.</p>
 
 			<h2>Server Requirements</h2>
 
-				<p>Wave Framework requires a server that allows to route all requests to Index Gateway file (/index.php). Index Gateway does not work without URL rewriting. It is possible to use Wave Framework's API without Index Gateway, but in this case you need to develop your own gateway that does not require such HTTP request URL rewriting.</p>
+				<p>Wave Framework requires a server that allows to route all requests to <a href="gateway.htm">Index Gateway</a> file (/index.php). <a href="gateway.htm">Index Gateway</a> does not work without URL rewriting. It is possible to use Wave Framework's API without <a href="gateway.htm">Index Gateway</a>, but in this case you need to develop your own gateway that does not require such HTTP request URL rewriting.</p>
 
 				<h3>Apache</h3>
 
-					<p>Apache and <b>mod_rewrite</b> (RewriteEngine) is required if you intend to use Index Gateway for website as well as default API Handler. Apache .htaccess file is included in the archive that should do everything server needs to make it work, if the mod_rewrite module is supported by Apache. Because RewriteEngine directives are loaded from local .htaccess files, then Apache also needs to support .htaccess files. If RewriteEngine has problems, then make sure that your Apache setting has 'AllowOverride' set to 'All' instead of 'None' in directory settings. RewriteEngine module is also required, so the 'LoadModule rewrite_module modules/mod_rewrite.so' line has to be included or uncommented from Apache configuration.</p>
+					<p>Apache and <b>mod_rewrite</b> (RewriteEngine) is required if you intend to use <a href="gateway.htm">Index Gateway</a> for website as well as default <a href="handler_api.htm">API Handler</a>. Apache .htaccess file is included in the archive that should do everything server needs to make it work, if the mod_rewrite module is supported by Apache. Because RewriteEngine directives are loaded from local .htaccess files, then Apache also needs to support .htaccess files. If RewriteEngine has problems, then make sure that your Apache setting has 'AllowOverride' set to 'All' instead of 'None' in directory settings. RewriteEngine module is also required, so the 'LoadModule rewrite_module modules/mod_rewrite.so' line has to be included or uncommented from Apache configuration.</p>
 
 				<h3>Nginx</h3>
 
@@ -63,7 +68,7 @@
 				<h3>PHP</h3>
 
 					<p>PHP version 5.3.3 or newer is required.</p>
-					<p>Wave Framework also uses <b>Zlib</b> extension for compressed output, <b>PDO</b> extension for database connections, <b>GD Image Library</b> is used to dynamically resize images, <b>Mcrypt</b> is used for crypted input and output, <b>Fileinfo</b> extension for File Handler and <b>Zip</b> extension for automatic update scripts together with <b>FTP</b>, <b>APC</b> is used to improve the performance of PHP and caching, <b>SimpleXML</b> is used to support XML stream as API input, <b>cURL</b> is used for external requests, . These extensions come with PHP and should be enabled by default, but if they are not enabled then compatibility script will warn you about it and recommend what you should do.</p>
+					<p>Wave Framework also uses <b>Zlib</b> extension for compressed output, <b>PDO</b> extension for database connections, <b>GD Image Library</b> is used to dynamically resize images, <b>Mcrypt</b> is used for crypted input and output, <b>Fileinfo</b> extension for <a href="handler_file.htm">File Handler</a> and <b>Zip</b> extension for automatic update scripts together with <b>FTP</b>, <b>APC</b> is used to improve the performance of PHP and caching, <b>SimpleXML</b> is used to support XML stream as API input, <b>cURL</b> is used for external requests, . These extensions come with PHP and should be enabled by default, but if they are not enabled then compatibility script will warn you about it and recommend what you should do.</p>
 
 				<h3>Filesystem</h3>
 

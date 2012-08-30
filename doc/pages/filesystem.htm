@@ -16,7 +16,7 @@
 
 			<p><b>/controllers/</b></p>
 
-			<p>Includes all controllers used by the system. Controllers are built with the following standard, where controllers name is written in filename as controller.{name}.php, class itself is defined as WWW_controller_{name} and when this controller is called with API, the command is $API-&gt;command({name}-{method}), where method is a method of that class. When this controller is created through WWW_Factory (within one of the MVC objects), the command is $this-&gt;getController({name},{method},{data}), where method is a method of that class and {data} is input data to that method. If method and data are not defined, then object itself is returned instead of the function result.</p>
+			<p>Includes all controllers used by the system. Controllers are built with the following standard, where controllers name is written in filename as controller.{name}.php, class itself is defined as WWW_controller_{name} and when this controller is called with API, the command is $API-&gt;command({name}-{method}), where method is a method of that class. When this controller is created through WWW_Factory (within one of the <a href="guide_mvc.htm">MVC</a> objects), the command is $this-&gt;getController({name},{method},{data}), where method is a method of that class and {data} is input data to that method. If method and data are not defined, then object itself is returned instead of the function result.</p>
 
 			<p><b>/controllers/controller.example.php</b></p>
 
@@ -24,7 +24,7 @@
 
 			<p><b>/controllers/controller.url.php</b></p>
 
-			<p>This class is used by Index Gateway to solve current URL request. It uses the URL string of the request to calculate what view must be loaded and it uses an internal sitemap that it maps itself against, stored in /resources/{language-code}.sitemap.ini where language code is the language that WWW_controller_url detects is being used. This class also deals with things such as slashes at the end of URL's and whether first language of the sytem needs to have a URL node in the request string or not. It also redirects the user agent in case URL is incorrectly formatted. This class is optional and only needed if one intends to build a website with clean URL's with WWW framework.</p>
+			<p>This class is used by <a href="gateway.htm">Index Gateway</a> to solve current URL request. It uses the URL string of the request to calculate what view must be loaded and it uses an internal sitemap that it maps itself against, stored in /resources/{language-code}.sitemap.ini where language code is the language that WWW_controller_url detects is being used. This class also deals with things such as slashes at the end of URL's and whether first language of the sytem needs to have a URL node in the request string or not. It also redirects the user agent in case URL is incorrectly formatted. This class is optional and only needed if one intends to build a website with clean URL's with WWW framework.</p>
 
 			<p><b>/controllers/controller.view.php</b></p>
 
@@ -43,31 +43,31 @@
 
 			<p><b>/engine/</b></p>
 
-			<p>This folder includes all the core classes of Wave as well as all Index Gateway handlers. These files should not be modified unless deemed necessary, as they are part of core functionality of Wave Framework.</p>
+			<p>This folder includes all the core classes of Wave as well as all <a href="gateway.htm">Index Gateway</a> handlers. These files should not be modified unless deemed necessary, as they are part of core functionality of Wave Framework.</p>
 
 			<p><b>/engine/class.www-api.php</b></p>
 
-			<p>This is a class that is used for routing all of API commands through, it deals with validation and caching, calling the proper controller and returning data with right headers and the right format. API has encryption and input-output data validations, as well as some framework specific callbacks. There is usually just one instance of this object in Wave Framework and it can be used within MVC objects through Factory class.</p>
+			<p>This is a class that is used for routing all of API commands through, it deals with validation and caching, calling the proper controller and returning data with right headers and the right format. API has encryption and input-output data validations, as well as some framework specific callbacks. There is usually just one instance of this object in Wave Framework and it can be used within <a href="guide_mvc.htm">MVC</a> objects through Factory class.</p>
 
 			<p><b>/engine/class.www-database.php</b></p>
 
-			<p>Simple database class that acts as a wrapper to PDO. It is not required to use WWW_Database with Wave Framework at all, but should it be required, it is available. This class uses PDO database class to simplify some of the database commands. It includes functions for returning data from database as a single row or multiple rows as associative arrays as well as get information about last inserted ID and number of rows affected by last query.</p>
+			<p>Simple database class that acts as a wrapper to PDO. It is not required to use <a href="database.htm">Database</a> with Wave Framework at all, but should it be required, it is available. This class uses PDO database class to simplify some of the database commands. It includes functions for returning data from database as a single row or multiple rows as associative arrays as well as get information about last inserted ID and number of rows affected by last query.</p>
 
 			<p><b>/engine/class.www-factory.php</b></p>
 
-			<p>Factory class is required for loading MVC objects. Factory is used as a parent class for supporting the MVC components of the system, every MVC component is (usually) inherited from this class. Factory carries with itself wrappers for API and State functionality.</p>
+			<p>Factory class is required for loading <a href="guide_mvc.htm">MVC</a> objects. Factory is used as a parent class for supporting the <a href="guide_mvc.htm">MVC</a> components of the system, every <a href="guide_mvc.htm">MVC</a> component is (usually) inherited from this class. Factory carries with itself wrappers for <a href="guide_api.htm">API</a> and <a href="guide_state.htm">State</a> functionality.</p>
 
 			<p><b>/engine/class.www-imager.php</b></p>
 
-			<p>This class is used to handle basic image editing, mostly for file resizes and cropping. This is used by default by Index Gateway when a PNG or JPEG file is requested with specific parameters, but can also be used for other image editing in the system since it can be loaded independently.</p>
+			<p>This class is used to handle basic image editing, mostly for file resizes and cropping. This is used by default by <a href="gateway.htm">Index Gateway</a> when a PNG or JPEG file is requested with specific parameters, but can also be used for other image editing in the system since it can be loaded independently.</p>
 
 			<p><b>/engine/class.www-limiter.php</b></p>
 
-			<p>This is an optional class that is used to limit HTTP requests based on user agent, IP, server condition and other information. This class is loaded by Index Gateway. WWW_Limiter can be used to block IP's if they make too many requests per minute, block requests if server load is detected as too high, block the request if it comes from blacklist provided by the system, allow only whitelisted IP's to access, ask for HTTP authentication or force the user agent to use HTTPS. Note that some of this functionality can be achieved by Apache configuration and modules, but it is provided here for cases where the project developer might not have control over server configuration.</p>
+			<p>This is an optional class that is used to limit HTTP requests based on user agent, IP, server condition and other information. This class is loaded by <a href="gateway.htm">Index Gateway</a>. <a href="limiter.htm">Limiter</a> can be used to block IP's if they make too many requests per minute, block requests if server load is detected as too high, block the request if it comes from blacklist provided by the system, allow only whitelisted IP's to access, ask for HTTP authentication or force the user agent to use HTTPS. Note that some of this functionality can be achieved by Apache configuration and modules, but it is provided here for cases where the project developer might not have control over server configuration.</p>
 
 			<p><b>/engine/class.www-logger.php</b></p>
 
-			<p>This is an optional class that is used to log requests on system by Index Gateway. WWW_Logger is used to keep track of performance of requests made to Index Gateway files, it keeps track of how long the request took, what data it included, how high was the memory use, server load, CPU usage and so on. If this logger is used, then every single request is logged as serialized arrays in filesystem in /filesystem/log/ subfolders. It is a good idea to clean that folder every now and then. There is a separate log-reader.php script for reading those log files situated in /tools/ subfolder.</p>
+			<p>This is an optional class that is used to log requests on system by <a href="gateway.htm">Index Gateway</a>. <a href="logger.htm">Logger</a> is used to keep track of performance of requests made to <a href="gateway.htm">Index Gateway</a> files, it keeps track of how long the request took, what data it included, how high was the memory use, server load, CPU usage and so on. If this logger is used, then every single request is logged as serialized arrays in filesystem in '/filesystem/log/' subfolders. It is a good idea to clean that folder every now and then. There is a separate log-reader.php script for reading those log files situated in /tools/ subfolder.</p>
 
 			<p><b>/engine/class.www-minifier.php</b></p>
 
@@ -75,7 +75,7 @@
 
 			<p><b>/engine/class.www-state.php</b></p>
 
-			<p>State is always required by Wave Framework. It is used by API and some handlers. State is used to keep track of system state, configuration and its changes, such as relevant PHP settings. It allows changing these settings, and thus affecting API or PHP configuration. State also includes functionality for State Messenger, sessions, cookies, translations and sitemap data. State is assigned in API and is accessible in MVC objects through Factory wrapper methods. Multiple different states can be used by the same request, but usually just one is used per request. State is only kept for the duration of the request processing and is not stored beyond its use in the request.</p>
+			<p><a href="guide_state.htm">State</a> is always required by Wave Framework. It is used by API and some handlers. <a href="guide_state.htm">State</a> is used to keep track of system state, configuration and its changes, such as relevant PHP settings. It allows changing these settings, and thus affecting API or PHP configuration. <a href="guide_state.htm">State</a> also includes functionality for <a href="guide_messenger.htm">State Messenger</a> Class, sessions, cookies, translations and sitemap data. <a href="guide_state.htm">State</a> is assigned in API and is accessible in <a href="guide_mvc.htm">MVC</a> objects through Factory wrapper methods. Multiple different states can be used by the same request, but usually just one is used per request. <a href="guide_state.htm">State</a> is only kept for the duration of the request processing and is not stored beyond its use in the request.</p>
 
 			<p><b>/engine/class.www-wrapper.php</b></p>
 
@@ -87,23 +87,23 @@
 
 			<p><b>/engine/handler.api.php</b></p>
 
-			<p>Index Gateway API Handler takes all the input variables and sends an API command to WWW_API. This class handles caching (APC or filesystem based), buffering, API observers, callbacks, encryption, profile permissions and other API-specific functionality. API calls always return an array, which are then formatted based on requested data type, like JSON, XML, CSV or PHP's own internal variable. This is one of the core files of Wave Framework and should not be modified unless really needed.</p>
+			<p><a href="gateway.htm">Index Gateway</a> <a href="handler_api.htm">API Handler</a> takes all the input variables and sends an API command to WWW_API. This class handles caching (APC or filesystem based), buffering, API observers, callbacks, encryption, profile permissions and other API-specific functionality. <a href="guide_api.htm">API</a> calls always return an array, which are then formatted based on requested data type, like JSON, XML, CSV or PHP's own internal variable. This is one of the core files of Wave Framework and should not be modified unless really needed.</p>
 
 			<p><b>/engine/handler.data.php</b></p>
 
-			<p>Index Gateway data handler is in functionality similar to API Handler, except it uses API calls that cannot be controlled with direct request. It calls WWW_controller_url to solve a URL request and it calls WWW_controller_view to display data to the user agent relevant to the request. This handler is loaded when no other handler can be used to solve the user agent request.</p>
+			<p><a href="gateway.htm">Index Gateway</a> <a href="handler_data.htm">Data Handler</a> is in functionality similar to <a href="handler_api.htm">API Handler</a>, except it uses <a href="guide_api.htm">API</a> calls that cannot be controlled with direct request. It calls WWW_controller_url to solve a URL request and it calls WWW_controller_view to display data to the user agent relevant to the request. This handler is loaded when no other handler can be used to solve the user agent request.</p>
 
 			<p><b>/engine/handler.file.php</b></p>
 
-			<p>File Handler is used for every file that is accessed and is not already served by other handlers. This handler serves files such as PDF files or other files that are not usually considered 'web' formats. It also allows to return a file within byte range (which is useful for streams).</p>
+			<p><a href="handler_file.htm">File Handler</a> is used for every file that is accessed and is not already served by other handlers. This handler serves files such as PDF files or other files that are not usually considered 'web' formats. It also allows to return a file within byte range (which is useful for streams).</p>
 
 			<p><b>/engine/handler.image.php</b></p>
 
-			<p>Image Handler is loaded for returning image files. Image mode adds proper cache headers and also has options for dynamic image resizing and cropping through Imager class. Images run through this mode are files with extensions *.jpeg, *.jpg, *.png. This loads the Imager class that is used for basic image editing to return on-demand edited picture based on request.</p>
+			<p><a href="handler_image.htm">Image Handler</a> is loaded for returning image files. Image mode adds proper cache headers and also has options for dynamic image resizing and cropping through <a href="imager.htm">Imager</a> class. Images run through this mode are files with extensions *.jpeg, *.jpg, *.png. This loads the <a href="imager.htm">Imager</a> class that is used for basic image editing to return on-demand edited picture based on request.</p>
 
 			<p><b>/engine/handler.resource.php</b></p>
 
-			<p>Resource Handler is loaded for various resource files. This data is cached, compressed and in some cases minified before being sent to the user agent with Minifier class. The file extensions sent to Index Gateway in this handler are *.css, *.js, *.txt, *.csv, *.xml, *.html, *.ini, *.rss, *.vcard and *.htm. Resource Handler also allows to unify CSS and JS files as well as support overriding the base functionality in case developer uses multiple installations and wants to have tweaks per-install.</p>
+			<p><a href="handler_resource.htm">Resource Handler</a> is loaded for various resource files. This data is cached, compressed and in some cases minified before being sent to the user agent with Minifier class. The file extensions sent to <a href="gateway.htm">Index Gateway</a> in this handler are *.css, *.js, *.txt, *.csv, *.xml, *.html, *.ini, *.rss, *.vcard and *.htm. <a href="handler_resource.htm">Resource Handler</a> also allows to unify CSS and JS files as well as support overriding the base functionality in case developer uses multiple installations and wants to have tweaks per-install.</p>
 
 			<p><b>/engine/handler.robots.php</b></p>
 
@@ -133,11 +133,11 @@
 			/filesystem/updates/<br/>
 			/filesystem/userdata/</b></p>
 
-			<p>All of these folders must be writable by PHP for Wave Framework to properly function. Backups store system backups. Cache stores various caches for images, output and resource loading. Data is used to store databases like SQLite. Errors is used to store error logs. Keys is used to store various cryptography keys. Limiter is used to store HTTP request limiter data. Logs is used to store log data. Messenger is used to store State Messenger data. Sessions are used to store API session token data. Temp folder is used to store various data temporarily. Updates folder stores update archives that have been installed. Userdata can be used for whatever purpose. Cleaner script can be used to automatically clean all of those folders either individually, by defining folder name (like 'backups'), by defining 'maintenance' mode, which cleans only cache and temporary files or 'all', which clears all of the folders.</p>
+			<p>All of these folders must be writable by PHP for Wave Framework to properly function. Backups store system backups. Cache stores various caches for images, output and resource loading. Data is used to store databases like SQLite. Errors is used to store error logs. Keys is used to store various cryptography keys. <a href="limiter.htm">Limiter</a> is used to store HTTP request <a href="limiter.htm">Limiter</a> data. Logs is used to store log data. Messenger is used to store <a href="guide_messenger.htm">State Messenger</a> Class data. Sessions are used to store API session token data. Temp folder is used to store various data temporarily. Updates folder stores update archives that have been installed. Userdata can be used for whatever purpose. Cleaner script can be used to automatically clean all of those folders either individually, by defining folder name (like 'backups'), by defining 'maintenance' mode, which cleans only cache and temporary files or 'all', which clears all of the folders.</p>
 
 			<p><b>/models/</b></p>
 
-			<p>Includes all models used by the system. Models are built with the following standard, where model name is written in filename as model.{name}.php, class itself is defined as WWW_model_{name} and when this model is created through WWW_Factory (when within one of the MVC objects), the command is $this-&gt;getModel({name},{function},{data}), where function is a method of that class and {data} is input data to that method. If function and data are not defined, then object itself is returned instead of the function result.</p>
+			<p>Includes all models used by the system. Models are built with the following standard, where model name is written in filename as model.{name}.php, class itself is defined as WWW_model_{name} and when this model is created through WWW_Factory (when within one of the <a href="guide_mvc.htm">MVC</a> objects), the command is $this-&gt;getModel({name},{function},{data}), where function is a method of that class and {data} is input data to that method. If function and data are not defined, then object itself is returned instead of the function result.</p>
 
 			<p><b>/models/model.example.php</b></p>
 
@@ -152,7 +152,7 @@
 			/overrides/resources/images/<br/>
 			/overrides/views/</b></p>
 
-			<p>If there is a file stored in these folders when the system attempts to access a specific static resource file or load a MVC object, these folders are checked first. This is not useful for majority of cases, but it can be used to deploy same version of software for different servers and change some functionality on one server without affecting the update cycle (all core files can still be updated without overwriting certain custom features). Images subfolder is meant for storing your image resources for CSS. Classes subfolder is meant for PHP classes that are used in the project (these can also be autoloaded through MVC Factory).</p>
+			<p>If there is a file stored in these folders when the system attempts to access a specific static resource file or load a <a href="guide_mvc.htm">MVC</a> object, these folders are checked first. This is not useful for majority of cases, but it can be used to deploy same version of software for different servers and change some functionality on one server without affecting the update cycle (all core files can still be updated without overwriting certain custom features). Images subfolder is meant for storing your image resources for CSS. Classes subfolder is meant for PHP classes that are used in the project (these can also be autoloaded through Factory).</p>
 
 			<p><b>/resources/</b></p>
 
@@ -176,7 +176,7 @@
 
 			<p><b>/resources/autoload.php</b></p>
 
-			<p>By default, this file is empty as no libraries are used or loaded by Wave Framework. But if you wish to add system-wide functions, then this file can be used for that purpose as it is loaded by Index Gateway for all requests. Generally it is useful to not have a general library in a system, as it can make testing more difficult, but it can be useful at times. It is also possible to add other functionality to this file that is not necessarily a function definition. This will make sure that the Index Gateway and Handlers themselves are not touched during project development for the same purpose. This file is loaded only by API and Data Handlers and only after configuration and state has been loaded.</p>
+			<p>By default, this file is empty as no libraries are used or loaded by Wave Framework. But if you wish to add system-wide functions, then this file can be used for that purpose as it is loaded by <a href="gateway.htm">Index Gateway</a> for all requests. Generally it is useful to not have a general library in a system, as it can make testing more difficult, but it can be useful at times. It is also possible to add other functionality to this file that is not necessarily a function definition. This will make sure that the <a href="gateway.htm">Index Gateway</a> and Handlers themselves are not touched during project development for the same purpose. This file is loaded only by <a href="handler_api.htm">API</a> and <a href="handler_data.htm">Data Handlers</a> and only after configuration and state has been loaded.</p>
 
 			<p><b>/resources/{language-code}.sitemap.ini</b></p>
 
@@ -184,7 +184,7 @@
 
 			<p><b>/resources/{language-code}.translations.ini</b></p>
 
-			<p>This file stores system translations that can be used by view controller. Translation keyword is used across the system and its value is the translation that will be displayed.</p>
+			<p>This file stores system translations that can be used by <a href="guide_view.htm">View Controller</a>. Translation keyword is used across the system and its value is the translation that will be displayed.</p>
 
 			<p><b>/resources/jquery.js</b></p>
 
@@ -197,7 +197,7 @@
 			<p><b>/resources/script.js<br/>
 			/resources/{view}.script.js</b></p>
 
-			<p>This is general use JavaScript file. Main JavaScript functionality should go here and this file is loaded by default by View controller. It is possible to load view specific JavaScript, this file is included among HTML resources by WWW_controller_view if it is detected and found for the view it loads. This file is loaded after other JavaScript files.</p>
+			<p>This is general use JavaScript file. Main JavaScript functionality should go here and this file is loaded by default by <a href="guide_view.htm">View Controller</a>. It is possible to load view specific JavaScript, this file is included among HTML resources by WWW_controller_view if it is detected and found for the view it loads. This file is loaded after other JavaScript files.</p>
 
 			<p><b>/resources/style.css<br/>
 			/resources/{view}.style.css</b></p>
@@ -210,7 +210,7 @@
 
 			<p><b>/tools/</b></p>
 
-			<p>Tools is a folder meant only for maintenance and development purposes and for a developer. Most of the tools in this folder require HTTP authentication or a user due to sensitive nature of the tools. It is recommended to remove this folder entirely before deploying a project live, or limit access to it with an IP.</p>
+			<p>Tools is a folder meant only for maintenance and development purposes and for a developer. Most of the <a href="guide_tools.htm">Developer Tools</a> in this folder require HTTP authentication or a user due to sensitive nature of the tools. It is recommended to remove this folder entirely before deploying a project live, or limit access to it with an IP.</p>
 
 			<p><b>/tools/.htaccess</b></p>
 
@@ -231,7 +231,7 @@
 
 			<p><b>/tools/cleaner.php</b></p>
 
-			<p>This script is used to clear Wave Framework system generated filesystem. It should be used for debugging purposes during development or for maintenance once system is deployed. This script can be configured by running it with a GET variable. Possible values are 'maintenance' (clears only cache and temporary files), 'all' (clears everything), 'output' (clears output cache), 'images' (clears images cache), 'resources' (clears cache of JavaScript and CSS), 'custom' (clears custom cache), 'tags' (clears cache tags), 'messenger' (clears State Messenger data), 'errors' (clears debugging errors), 'limiter' (clears request data of user agent IP's), 'logs' (clears system logs), 'tokens' (clears API session tokens), 'tmp' (clears folder from everything that might be stored here), 'data' (clears the folder intended for database storage), 'backups' and 'updates' (clears folders that store backup and update archives) and 'userdata' (entirely custom storage folder). Please make sure to use 'all' carefully, since it might remove sensitive data. The script runs in 'maintenance' mode by default.</p>
+			<p>This script is used to clear Wave Framework system generated filesystem. It should be used for debugging purposes during development or for maintenance once system is deployed. This script can be configured by running it with a GET variable. Possible values are 'maintenance' (clears only cache and temporary files), 'all' (clears everything), 'output' (clears output cache), 'images' (clears images cache), 'resources' (clears cache of JavaScript and CSS), 'custom' (clears custom cache), 'tags' (clears cache tags), 'messenger' (clears <a href="guide_messenger.htm">State Messenger</a> data), 'errors' (clears debugging errors), 'limiter' (clears request data of user agent IP's), 'logs' (clears system logs), 'tokens' (clears API session tokens), 'tmp' (clears folder from everything that might be stored here), 'data' (clears the folder intended for database storage), 'backups' and 'updates' (clears folders that store backup and update archives) and 'userdata' (entirely custom storage folder). Please make sure to use 'all' carefully, since it might remove sensitive data. The script runs in 'maintenance' mode by default.</p>
 
 			<p><b>/tools/compatibility.php</b></p>
 
@@ -243,7 +243,7 @@
 			
 			<p><b>/tools/log-reader.php</b></p>
 
-			<p>This is a simple script that is used to read log files stored by WWW_Logger class. It loads a log file defined by specific timestamp formatted as Y-m-d-H. By default it displays information about all the requests that have happened in the current hour, but if GET variable 'log' is supplied in same timestamp format, then that log file data is returned instead.</p>
+			<p>This is a simple script that is used to read log files stored by <a href="logger.htm">Logger</a> class. It loads a log file defined by specific timestamp formatted as Y-m-d-H. By default it displays information about all the requests that have happened in the current hour, but if GET variable 'log' is supplied in same timestamp format, then that log file data is returned instead.</p>
 
 			<p><b>/tools/php-info.php</b></p>
 
@@ -271,7 +271,7 @@
 
 			<p><b>/views/</b></p>
 
-			<p>Includes all views used by the system. Views are built with the following standard, where view name is written in filename as view.{name}.php, class itself is defined as WWW_view_{name} and when this view is created through WWW_Factory (when within one of the MVC objects), the command is $this-&gt;getView({name},{function},{data}), where function is a method of that class and {data} is input data to that method. If function and data are not defined, then object itself is returned instead of the function result.</p>
+			<p>Includes all views used by the system. Views are built with the following standard, where view name is written in filename as view.{name}.php, class itself is defined as WWW_view_{name} and when this view is created through WWW_Factory (when within one of the <a href="guide_mvc.htm">MVC</a> objects), the command is $this-&gt;getView({name},{function},{data}), where function is a method of that class and {data} is input data to that method. If function and data are not defined, then object itself is returned instead of the function result.</p>
 
 			<p><b>/views/view.404.php</b></p>
 
@@ -283,7 +283,7 @@
 
 			<p><b>/views/view.home.php</b></p>
 
-			<p>This view is loaded when WWW_controller_view finds root or home page as the view file. Name of the 'home' view is defined as a default in WWW_State class. This home view example also shows how to use translations.</p>
+			<p>This view is loaded when WWW_controller_view finds root or home page as the view file. Name of the 'home' view is defined as a default in <a href="state.htm">State</a> Class. This home view example also shows how to use translations.</p>
 
 			<p><b>/.htaccess</b></p>
 
@@ -295,7 +295,7 @@
 
 			<p><b>/config.ini</b></p>
 
-			<p>All configuration settings in this file are loaded into State where certain variables can be set that change frameworks behavior. This configuration script is also used by scripts under /tools/ folder. Note that most settings in this file are commented out since system can function with default values. Uncomment and edit configuration only when wishing to change defaults.</p>
+			<p>All configuration settings in this file are loaded into <a href="guide_state.htm">State</a> where certain variables can be set that change frameworks behavior. This configuration script is also used by scripts under /tools/ folder. Note that most settings in this file are commented out since system can function with default values. Uncomment and edit configuration only when wishing to change defaults.</p>
 
 			<p><b>/favicon.ico</b></p>
 
@@ -303,7 +303,7 @@
 
 			<p><b>/index.php</b></p>
 
-			<p>Index Gateway is a file where majority of requests are forwarded by Apache and /.htaccess file. This file serves caches and compresses data, if supported, for both static files as well as regular views. It also displays errors for files not found or files that are forbidden to be accessed. Handlers for Index Gateway are stored in /engine/ subfolder.</p>
+			<p><a href="gateway.htm">Index Gateway</a> is a file where majority of requests are forwarded by Apache and '/.htaccess' file. This file serves caches and compresses data, if supported, for both static files as well as regular views. It also displays errors for files not found or files that are forbidden to be accessed. Handlers for <a href="gateway.htm">Index Gateway</a> are stored in '/engine/' subfolder.</p>
 
 			<p><b>/license.txt</b></p>
 

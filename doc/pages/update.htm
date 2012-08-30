@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Update Guide - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Update Guide</h1>
+			
+			<h3>Introduction</h3>
+			
+				<p>Wave Framework is being actively developed with new features being released every month, some smaller and some bigger. Development is always driven by what is best for the framework today, which means that at times there will be new features implemented or existing features changed enough that the software built on previous versions might break. While development of Wave Framework takes backwards compatibility into account as much as possible, sometimes it is necessary to break it.</p>
+				
+				<p>This document here gives a general overview about the notable changes that have been introduced and how to upgrade an older version to the latest version. Note the version numbers in the chapters of this document to make sure that you are using the version of Wave Framework that is discussed in the chapter. If your version is many notable updates older, then you have to go through multiple update chapters in a row. It is also important to mention that not all updates and tweaks are listed in this document, as this document focuses on features that might break software that is built on an older version.</p>
+				
+				<p>Wave Framework is currently in its 3rd major release, but version 3.0 is only the first tried and tested stable release of Wave Framework. Version 1.0 was technically Alpha and version 2.0 was Beta of Wave Framework and both are not supported anymore and are considered 'deprecated' versions. This document here covers the update paths for versions 3.1.5 and above. Future major versions of Wave Framework (such as 4.0 and above) will also be covered in this document.</p>
+				
+				<p>In order to update your Wave Framework you first have to know what is the current version that you are using. You can find this out by opening '/.version' file in a text editor. This file has two lines, one for 'www' and another for 'system'. The 'www' line states the version of Wave Framework. The second line for 'system' is meant for the developer to keep track of what version of their own software is built on Wave Framework. Both of these values can be used when updating software and making sure that good software does not break badly.</p>
+				
+			<h3>How Updates Affect Your Software</h3>
+				
+				<p>Your own software is built on top of Wave Framework and if you do not change Wave Framework's core files itself, then these are the only files and folders you should be 'working on' when developing a website or web service on top of Wave Framework:</p>
+				
+				<ul>
+					<li><b>/controllers/</b> - Your Controller classes are here, as well as default URL and View Controllers</li>
+					<li><b>/resources/</b> - Your JavaScript, CSS, Autoload scripts and images are in this folder</li>
+					<li><b>/models/</b> - Your Model classes are here</li>
+					<li><b>/views/</b> - Your View classes are here</li>
+					<li><b>/config.ini</b> - Your Configuration file</li>
+				</ul>
+				
+				<p>These folders and files are rarely - if ever - updated by Wave Framework. Even if these files are updated then it is unlikely that these changes break any of your software if you do not update these files. These folders and configuration file are considered as 'your software' and if Wave Framework version update or version history shows that these files are updated, then it is most likely a documentation update or some tweak to default View or URL Controllers.</p>
+				
+				<p>This means that when updating, you can safely ignore these folders from update archives and focus on actual core files that might need updating, namely the '/index.php' file and files from '/engine/' folder.</p>
+				
+			<h3>How to Update from X.X.X to X.X.X?</h3>
+			
+				<p>No update paths defined yet</p>
+					
+	</body>
+</html>

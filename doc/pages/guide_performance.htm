@@ -16,24 +16,24 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Performance testing your website or web service functionality is a crucial part of modern software development. Slow web service and website leaves an impression of cheap and sloppy coding and software. This is why Wave Framework comes with a couple of useful features that allows you to see how your web service is performing. First way to test your performance is to track your HTTP requests on your website and see how quickly the result was generated, how many database requests were made and how much memory the request took. Second way of testing is to time your various function calls and see how long this or that section of your code takes time.</p>
+				<p>Performance testing your website or web service functionality is a crucial part of modern software development. Slow web service and website leaves an impression of cheap and sloppy coding and software. This is why Wave Framework comes with a couple of useful features that allows you to see how your web service is performing. First way to test your performance is to track your HTTP requests on your website and see how quickly the result was generated, how many <a href="guide_database.htm">Database</a> requests were made and how much memory the request took. Second way of testing is to time your various function calls and see how long this or that section of your code takes time.</p>
 				
 			<h2>Tracking HTTP Requests</h2>
 			
-				<p>Wave Framework has an internal Logger for tracking HTTP requests. This setting is defined in system Configuration in /config.ini file. There are two settings in Logger configuration that affect what HTTP requests are logged by the Logger:</p>
+				<p>Wave Framework has an internal <a href="logger.htm">Logger</a> for tracking HTTP requests. This setting is defined in system <a href="configuration.htm">Configuration</a> in '/config.ini' file. There are two settings in <a href="logger.htm">Logger</a> configuration that affect what HTTP requests are logged by the <a href="logger.htm">Logger</a>:</p>
 				
 				<ul>
-					<li><b>logger</b> - If this setting is defined and is not false, then Logger will be used to log HTTP requests that are made to Wave Framework. This Logger tracks both web page requests as well as API calls. If the value of 'logger' is set to '*', then all requests are logged. This value can also be set as a regular expression which will be matched against the HTTP request URL and the request will be logged only if the URL matches the regular expression.</li>
+					<li><b>logger</b> - If this setting is defined and is not false, then <a href="logger.htm">Logger</a> will be used to log HTTP requests that are made to Wave Framework. This <a href="logger.htm">Logger</a> tracks both web page requests as well as <a href="guide_api.htm">API</a> calls. If the value of 'logger' is set to '*', then all requests are logged. This value can also be set as a regular expression which will be matched against the HTTP request URL and the request will be logged only if the URL matches the regular expression.</li>
 					<li><b>logger-ip</b> - This limits logger to work only when HTTP request is made from a specific IP address. It is also possible to define multiple IP addresses by assigning values to this configuration setting as a comma-separated-list.</li>
 				</ul>
 				
 				<p>If the HTTP request is logged because of the above configuration options, then Wave Framework will generate a log entry about the HTTP request. This log data can be viewed with Log Reader by making a request to the developer tool directly at /tools/log-reader.php and authenticating with HTTP username and password (these settings are also defined in configuration).</p>
 				
-				<p>The exact values that Logger stores about each request are listed in another documentation page, in 'Developer Tools' and the Log Reader section there.</p>
+				<p>The exact values that <a href="logger.htm">Logger</a> stores about each request are listed in another documentation page, in <a href="guide_tools.htm">Developer Tools</a> and the Log Reader section there.</p>
 				
 			<h2>Using Timer</h2>
 			
-				<p>It is possible to do microtime split testing on function calls and functionality of your controllers (even across controllers). This allows you to time any part of your code and see how much this or that part of your code takes to execute a specific function or database call.</p>
+				<p>It is possible to do microtime split testing on function calls and functionality of your controllers (even across controllers). This allows you to time any part of your code and see how much this or that part of your code takes to execute a specific function or <a href="guide_database.htm">Database</a> call.</p>
 				
 				<p>To start timing your code, at first you have to call this method that will be the starting - zero point - of your timing:</p>
 				

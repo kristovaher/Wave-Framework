@@ -18,11 +18,11 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Image Handler is used by Index Gateway to return all image files to the user agent HTTP requests. Handler adds proper cache headers as well as supports on-demand image-editing, where it is possible to load an image file with specific resize algorithms and even image filtering. It also checks for files from overrides folder, which can be returned instead of the actual file.</p>
+				<p>Image Handler is used by <a href="gateway.htm">Index Gateway</a> to return all image files to the user agent HTTP requests. Handler adds proper cache headers as well as supports on-demand image-editing, where it is possible to load an image file with specific resize algorithms and even image filtering. It also checks for files from overrides folder, which can be returned instead of the actual file.</p>
 			
 			<h2>Workflow</h2>
 			
-				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
 			
 				<p>Image Handler checks for the presence of the requested file and if the same file exists in overrides folder. If the file exists in overrides folder, then that file is used as source instead.</p>
 				
@@ -36,13 +36,13 @@
 				
 				<p>On-demand image editing parameters and their range is also checked against configuration parameters and limits, which can limit the options that can be set for image loading. This helps to protect the system against some malicious attacks.</p>
 				
-				<p>Image editing is done through Imager class and the result is also cached, so the same image does not have to be generated multiple times.</p>
+				<p>Image editing is done through <a href="imager.htm">Imager</a> class and the result is also cached, so the same image does not have to be generated multiple times.</p>
 				
 				<p>Image Handler returns proper cache, last-modified, expiring headers and more. It also adds robots directive headers based on configuration.</p>
 				
 				<p>Image content, in its original or edited form, is pushed to user agent with the proper headers.</p>
 				
-				<p>Image Handler also makes an entry in the log file about the request, if Logger is used.</p>
+				<p>Image Handler also makes an entry in the log file about the request, if <a href="logger.htm">Logger</a> is used.</p>
 			
 	</body>
 </html>

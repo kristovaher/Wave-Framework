@@ -71,7 +71,7 @@ INSTALLATION
  
  5A. Apache
   * On most server setups the Apache-related settings in this list should already be enabled and everything should work, but in case you run into problems and you cannot edit Apache configuration yourself, then ask for assistance from your hosting provider.
-  * Make sure that you uploaded '/.htaccess' and '/tools/.htaccess' files to the server, as sometimes they may not be uploaded due to operating system thinking they are hidden.
+  * Make sure that you uploaded '/.htaccess' and '/tools/.htaccess' files to the server, as sometimes they may not be uploaded due to operating system thinking they are hidden. If possible, you should actually implement these rewrite directives from those files to your main Apache server configuration and remove the '.htaccess' files, ince this can improve the performance, but if this is not possible then keeping the '.htaccess' files in your root folder is perfectly common practice.
   * Apache also needs to support '.htaccess' directives from those files, so make sure that 'AllowOverride' setting is 'All' in Apache directory configuration. This is usually enabled by default on most servers.
   * Since RewriteEngine is required for URL rewrites, your server needs to have the module loaded, which means that the line 'LoadModule rewrite_module modules/mod_rewrite.so' needs to be uncommented in Apache. This is usually enabled by default on most servers.
   * On some hosting environments the line 'Options +FollowSymLinks' in '.htaccess' may throw an error, so if an error is thrown then I suggest commenting or removing that line and trying the compatibility script again.
@@ -85,8 +85,9 @@ INSTALLATION
   * If the page shows an error message, then make sure that the '/filesystem/' folders are writable and that the configuration steps above have been followed.
   * Make sure that the files were uploaded correctly and that FTP did not convert line breaks to single line in uploaded files. If it did, then fix this by uploading files in Binary mode.
   * You can also take a look at '/tools/debugger.php' script in case you encounter errors even if Compatibility script says that everything is alright with the server. If Debugger script does not show any warnings and your page still shows errors, then the error happens in core, such as version incompatibility, file permissions and more. Double check that you have followed the previous steps.
+  * If the text is shown, but the logo picture is seems to be not found, then the problem might be that you are using a proxy that attempts to load static files by itself and the requested file '/resources/images/160x160&amp;logo.png' does not actually exist. This is because that URL includes on-demand resize parameters that can only be used when file is loaded through Wave Framework itself. You can serve static files through a proxy, but in this case you cannot use the 'dynamic loading of resources' functionality of Wave Framework.
  
- 8. Important! Make sure to change http-authentication-username and http-authentication-password lines in /config.ini file (line #29 and #30). These are used to authenticate access to developer tools in /tools/ directory and it may pose a security risk if left unchanged as all downloaded archives have the same username and password at first.
+ 8. Important! Make sure to change 'http-authentication-username' and 'http-authentication-password' settings in '/config.ini' file (line #36 and #37). These are used to authenticate access to developer tools in '/tools/' directory and it may pose a security risk if left unchanged as all downloaded archives have the same username and password at first.
  
 HELP AND DOCUMENTATION
 ----------------------

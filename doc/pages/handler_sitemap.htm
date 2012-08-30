@@ -22,17 +22,17 @@
 			
 			<h2>Workflow</h2>
 			
-				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
 				
 				<p>Sets the content type to XML, which is the common content type of sitemap.xml files.</p>
 				
 				<p>Returns the content of existing /sitemap.xml file, if such is present. Otherwise generates a new sitemap.xml content that is returned to user agent instead. Sitemap content will be generated from configuration - where languages are loaded - and then sitemap files from /resources/[language].sitemap.ini files. Sitemap will include all non-hidden and public page URL's. This generated sitemap.xml file is also cached.</p>
 				
-				<p>Handler also includes an optional database connection, which can be used if it is necessary at some point to load sitemap.xml from database instead.</p>
+				<p>Handler also includes an optional <a href="database.htm">Database</a> connection, which can be used if it is necessary at some point to load sitemap.xml from <a href="database.htm">Database</a> instead.</p>
 			
 				<p>Sitemap Handler returns content with appropriate HTTP response headers, including cache. It is possible to request the file without cache by requesting the file as 'nocache&amp;sitemap.xml'.</p>
 				
-				<p>Sitemap Handler also makes an entry in the log file about the request, if Logger is used.</p>
+				<p>Sitemap Handler also makes an entry in the log file about the request, if <a href="logger.htm">Logger</a> is used.</p>
 			
 	</body>
 </html>

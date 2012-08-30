@@ -20,7 +20,7 @@
 				
 			<h2>Configuring Internal Logger</h2>
 			
-				<p>Internal Logger can be used by the developer to log specific values within Models, Views and Controllers. But Internal Logger is also used by default by the API itself, as API will automatically - if Logger is turned on in configuration - add log entries about the input and output data of every single API call. API will use log keywords of 'input-data' and 'output-data' for API log entries.</p>
+				<p>Internal Logger can be used by the developer to log specific values within Models, Views and Controllers. But Internal Logger is also used by default by the API itself, as API will automatically - if Logger is turned on in configuration - add log entries about the input and output data of every single <a href="guide_api.htm">API</a> call. API will use log keywords of 'input-data' and 'output-data' for API log entries.</p>
 			
 				<p>For internal logging to work, you have to first enable and configure 'internal-logging' setting in configuration, which is stored in /config.ini file. This setting is a comma-separated list of keywords that are being logged by internal logger.</p>
 
@@ -28,7 +28,7 @@
 				
 				<ul>
 					<li>If '*' is one of the values in the comma-separated list, then all log entries are logged, except log entries with a key that are set to be ignored.</li>
-					<li>If '!' is set before a keyword in the comma-separated list, then log entries with that keyword will not be logged. By default it has '!input-data' and '!output-data' set, which means that by default the Internal Logger will suppress all the automatic input and output data log entries sent by API when API calls are made.</li>
+					<li>If '!' is set before a keyword in the comma-separated list, then log entries with that keyword will not be logged. By default it has '!input-data' and '!output-data' set, which means that by default the Internal Logger will suppress all the automatic input and output data log entries sent by API when <a href="guide_api.htm">API</a> calls are made.</li>
 					<li>If '*' is not set, then Internal Logger will log only the entries set in the 'internal-logging' configuration setting. If you add 'example' to that list and add a log entry with keyword 'example', then this is logged while another internal logging entry 'example2' will not be stored.</li>
 				</ul>
 				
@@ -50,7 +50,7 @@
 			
 			<h2>Reading Internal Log</h2>
 			
-				<p>Internal logs are read by one of the developer tools, the Log Reader. You need to make a HTTP request to script situated in '/tools/log-reader.php' and then select 'Internal Log as the mode in the bottom of the page, or simply go to '/tools/log.reader.php?internal' directly. This page requires HTTP authentication for access, username and password for this access are defined in Configuration file.</p>
+				<p>Internal logs are read by one of the developer tools, the Log Reader. You need to make a HTTP request to script situated in '/tools/log-reader.php' and then select 'Internal Log as the mode in the bottom of the page, or simply go to '/tools/log.reader.php?internal' directly. This page requires HTTP authentication for access, username and password for this access are defined in <a href="configuration.htm">Configuration</a> file.</p>
 				
 				<p>Log Reader also allows you to clear the log. It is a good idea to clear the log file every now and then so it would not become too large and unmaintainable.</p>
 			

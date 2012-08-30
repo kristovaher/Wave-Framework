@@ -18,7 +18,7 @@
 			
 				<p>This tutorial takes a look at how to build a web service. A web service is not a website - websites can include a web service but very often they do not. Modern websites and infosystems that wish to take advantage of multi-platform options and user-interface-independence benefit from building their systems on frameworks like Wave. Wave Framework can be used to build a web service which can then be utilized in multiple platforms, from simple websites to mobile operating systems like Android and iOS. API allows data to be returned from the built system in whatever way needed for the client. User interface can run independently and fetch data from the system or send data to it whenever needed.</p>
 				
-				<p>Though API-based architecture allows to keep user interface entirely separate from functionality of the system, Wave Framework does come with a View and URL controllers to build websites too. If you are interested in building websites then I suggest you complete this tutorial and then move on to next one: "Building a website with Wave Framework".</p>
+				<p>Though API-based architecture allows to keep user interface entirely separate from functionality of the system, Wave Framework does come with a View and <a href="guide_url.htm">URL Controllers</a> to build websites too. If you are interested in building websites then I suggest you complete this tutorial and then move on to next one: "Building a website with Wave Framework".</p>
 				
 				<p>Complete files of this tutorial are available in '/doc/examples/webservice/' subfolder in the archive. If you wish to test the example without writing the tutorial code yourself, then you should copy these files to root folder of your Wave Framework. Note that this will overwrite your default '/resources/api.profiles.ini' file and you may wish to make a backup of that file before doing so. This file contains information on API Profiles and allowed API commands.</p>
 		
@@ -28,29 +28,27 @@
 				
 				<p>In this tutorial we shall essentially build a web service API to fit those needs.</p>
 				
-				<p>All of those commands will be executed using native API that is part of Wave Framework and is loaded through Index Gateway as an API Handler. Index Gateway routes all API-specific HTTP requests to API Handler and executes the calls that I will write below in detail.</p>
+				<p>All of those commands will be executed using native API that is part of Wave Framework and is loaded through <a href="gateway.htm">Index Gateway</a> as an <a href="handler_api.htm">API Handler</a>. <a href="gateway.htm">Index Gateway</a> routes all API-specific HTTP requests to <a href="handler_api.htm">API Handler</a> and executes the calls that I will write below in detail.</p>
 				
 			<h2>Setup and Configuration</h2>
 			
 				<p><i>Please note that Wave Framework is recommended to be run on PHP 5.3+ and on Apache or Nginx web server.</i></p>
 				
-				<p>You should first download the latest version of Wave Framework, unpack the archive and then upload the files from the archive to your website. For the sake of this tutorial, let's say that I have uploaded the files to my website root folder, accessible through browser with http://www.example.com/ address.</p>
+				<p>You should first download the latest version of Wave Framework, unpack the archive and then upload the files from the archive to your website. It is recommended to follow <a href="installation.htm">Installation</a> guide to set up Wave Framework. For the sake of this tutorial, let's say that I have uploaded the files to my website root folder, accessible through browser with 'http://www.example.com/' address.</p>
 				
-				<p>You should also make filesystem folder (/filesystem/) and all of its subfolders writable by PHP, for example with command chmod 0755 or giving permissions using FileZilla (Right click on folder -&gt; File Permissions -&gt; Numeric value -&gt; 0755) or with any other FTP software.</p>
-				
-				<p>There is a compatibility script in /tools/compatibility.php that you should run (in our case, from http://www.example.com/tools/compatibility.php), that tells you if your current server setup might cause problems for Wave Framework. If compatibility script finds any serious problems, then Wave Framework might not work properly on your web server.</p>
+				<p>There is a compatibility script in '/tools/compatibility.php' that you should run (in our case, from 'http://www.example.com/tools/compatibility.php'), that tells you if your current server setup might cause problems for Wave Framework. If compatibility script finds any serious problems, then Wave Framework might not work properly on your web server.</p>
 				
 				<p>Once uploaded, go to the website with your browser. If no errors are shown and it simply says 'Hello Wave' with a nice shiny logo of Wave Framework, then installation has been successful.</p>
 				
 			<h2>Brief Introduction to MVC Pattern</h2>
 			
-				<p>Model-View-Controller architectural pattern, or simply MVC pattern, is a way of separating different parts of your software from one another based on their functionality. This pattern originates from Desktop software development and has been loosely translated over to web. MVC has been implemented in web in very many ways, which is why there are a lot of tutorials online about MVC that all implement it very differently. Wave Framework technically implements HMVC pattern (Hierarchical MVC) and to make sure that we are on the same page here, I will briefly go over how Wave Framework integrates this pattern.</p>
+				<p>Model-View-Controller architectural pattern, or simply <a href="guide_mvc.htm">MVC</a> pattern, is a way of separating different parts of your software from one another based on their functionality. This pattern originates from Desktop software development and has been loosely translated over to web. <a href="guide_mvc.htm">MVC</a> has been implemented in web in very many ways, which is why there are a lot of tutorials online about <a href="guide_mvc.htm">MVC</a> that all implement it very differently. Wave Framework technically implements H<a href="guide_mvc.htm">MVC</a> pattern (Hierarchical <a href="guide_mvc.htm">MVC</a>) and to make sure that we are on the same page here, I will briefly go over how Wave Framework integrates this pattern.</p>
 				
-				<p>In MVC pattern we have three parts: models, views and controllers. Hierarchical MVC means that any component of MVC can call another MVC component, but this is an aspect that this tutorial will not look into for now.</p>
+				<p>In <a href="guide_mvc.htm">MVC</a> pattern we have three parts: models, views and controllers. Hierarchical <a href="guide_mvc.htm">MVC</a> means that any component of <a href="guide_mvc.htm">MVC</a> can call another <a href="guide_mvc.htm">MVC</a> component, but this is an aspect that this tutorial will not look into for now.</p>
 				
 				<p><b>Models</b> are basically data objects - usually a representation of a row from database - with specific validation and logic. Variables of a model object should be (mostly) the same as they are in a database. Methods (functions) of a Model object are basically commands that save that data object in database, delete data object in database or return a number of data objects of that type from database. Main job of a model object is to basically be the layer between database and the rest of your system. If you add new data columns to your database (in this case movies database), then you would need to expand your Model object accordingly to take those new columns into account. Models are useful since you can always replace a logic of a model without affecting the rest of the system, as long as the methods and expected input and output remain the same.</p>
 				
-				<p><b>Controllers</b> are objects that translate 'commands' from the client (or user), do something in the system based on that command as well as input and then return new information back to the client. These commands can be anything: they can delete some file from the system, ping some URL or create a new Model object and return data from database. From the standpoint of Wave Framework, every action that user does is sent to a Controller with the data that user has entered. When building a website with Wave Framework, then the first Controller that is loaded is URL Controller that takes the URL user entered and finds out what page to show to the user. But in the scope of this tutorial, a Controller deals basically with our our API commands of adding a new movie or returning a list of movies to the user. Controllers have a strong relation to API in Wave Framework, as controller name and methods are essentially the API calls.</p>
+				<p><b>Controllers</b> are objects that translate 'commands' from the client (or user), do something in the system based on that command as well as input and then return new information back to the client. These commands can be anything: they can delete some file from the system, ping some URL or create a new Model object and return data from database. From the standpoint of Wave Framework, every action that user does is sent to a Controller with the data that user has entered. When building a website with Wave Framework, then the first Controller that is loaded is <a href="guide_url.htm">URL Controller</a> that takes the URL user entered and finds out what page to show to the user. But in the scope of this tutorial, a Controller deals basically with our our API commands of adding a new movie or returning a list of movies to the user. Controllers have a strong relation to API in Wave Framework, as controller name and methods are essentially the <a href="guide_api.htm">API</a> calls.</p>
 				
 				<p><b>Views</b> are an optional part of a web service. In fact, in this tutorial, we do not create any views at all. Traditionally a view is simply the HTML logic of a website and includes HTML logic. Back-end that returns views to user agent, such as web browser, can include just HTML or also a UI layer of JavaScript. In Wave Framework the scope of view is left open and it is possible to build different views on top of Wave Framework, from mobile to desktop. Second tutorial, How to Build a Simple Website With Wave Framework, deals with views and it is recommended to take a look at that if you are interested to expand the API further and implement it in a website.</p>
 				
@@ -62,11 +60,11 @@
 				
 				<p>This means that if I build a system where I store my movies and also store my music and then view a page where I list my movies, then no models or controllers of music will be loaded at all. This allows the system to be as efficient as possible and use as few resources as possible to get the job done without slowing the system down simply because it has a lot of classes defined.</p>
 				
-				<p>When writing MVC classes, then Wave Framework implements Factory method by loading new objects dynamically when calling getModel(), getView() and getController() methods within MVC classes. This will be covered within the tutorial, so you can see how to load a model when building controllers.</p>
+				<p>When writing <a href="guide_mvc.htm">MVC</a> classes, then Wave Framework implements Factory method by loading new objects dynamically when calling getModel(), getView() and getController() methods within <a href="guide_mvc.htm">MVC</a> classes. This will be covered within the tutorial, so you can see how to load a model when building controllers.</p>
 				
 			<h2>Building a Model</h2>
 			
-				<p>Model is basically an object that carries information about specific data entity that exists in your system. In this tutorial that data entity should hold information about a movie object - its parameters and methods that manipulate its parameters and read it from or store it in the database. In this tutorial we won't be using databases to keep things simple, so our model will simply write movie data to filesystem as a serialized array.</p>
+				<p>Model is basically an object that carries information about specific data entity that exists in your system. In this tutorial that data entity should hold information about a movie object - its parameters and methods that manipulate its parameters and read it from or store it in the database. In this tutorial we won't be using databases to keep things simple, so our model will simply write movie data to <a href="filesystem.htm">Filesystem</a> as a serialized array.</p>
 				
 				<p>Go to /models/ folder and create a new file called 'model.movie.php' and open it in your preferred text editor.</p>
 				
@@ -111,7 +109,7 @@
 	</code>
 </pre>
 
-				<p>Next I will create a function that allows me to store data in database. I will not be using an actual database for this example, instead data will be written to filesystem under /filesystem/data/ folder as a serialized array string, with a filename of movies.db. One of the calls used here is getState('data-root'), which returns a folder of /filesystem/data/ where filesystem specific files and folders can be stored safely. This function below implements this call to store the data as a file:</p>
+				<p>Next I will create a function that allows me to store data in database. I will not be using an actual database for this example, instead data will be written to <a href="filesystem.htm">Filesystem</a> under '/filesystem/data/' folder as a serialized array string, with a filename of movies.db. One of the calls used here is getState('data-root'), which returns a folder of '/filesystem/data/' where <a href="filesystem.htm">Filesystem</a> specific files and folders can be stored safely. This function below implements this call to store the data as a file:</p>
 				
 <pre>
 	<code>
@@ -286,7 +284,7 @@
 
 				<p>According to our initial plan we need to have four different API commands (essentially Controller methods) in our system. We need to add a movie to our list (1), delete a movie from our list (2), get information about a movie from our list (3) and get a list of all of our movies (4). This means that we need to create methods for each of those commands in our Controller file.</p>
 				
-				<p>The way Index Gateway - that is used to route all HTTP requests through - works so that all input data sent by the user agent (GET, POST and other variables) are all merged into a single input data array. This variable is the variable defined in our Controller methods as the $input and we can do with that data as we see fit. In our controller we expect data to be sent with similar variable names as they were in model files (such as our Model's $title is $input['title'] in Controller), but this is not necessary - it is simply a good practice.</p>
+				<p>The way <a href="gateway.htm">Index Gateway</a> - that is used to route all HTTP requests through - works so that all input data sent by the user agent (GET, POST and other variables) are all merged into a single input data array. This variable is the variable defined in our Controller methods as the $input and we can do with that data as we see fit. In our controller we expect data to be sent with similar variable names as they were in model files (such as our Model's $title is $input['title'] in Controller), but this is not necessary - it is simply a good practice.</p>
 				
 				<p>First we will create a method for adding a new movie to database. The $input variable will simply be the variable provided by API from all the input data user agent sends to API. This method dynamically creates a Model object through Factory based on class that we defined earlier by calling getModel() function with the name of our Model (in this case 'movie'). Then we can call the methods of that Model that we built earlier, such as setting the title with setTitle() or saving the movie with saveMovie().</p>
 				
@@ -426,9 +424,9 @@
 				
 			<h2>Executing API Commands Over HTTP</h2>
 			
-				<p>Now that we have basically created our web service, we can test if it works properly by testing it through Wave Framework's API. Wave Framework uses Index Gateway to route through all HTTP requests and when a file with the extension *.api is requested, then it attempts to send the request to API Handler, which is stored in /engine/handler.api.php if you are interested in how what user writes into URL bar is converted into data for API. But for the time being, you do not need to know more about specifics of handlers.</p>
+				<p>Now that we have basically created our web service, we can test if it works properly by testing it through Wave Framework's API. Wave Framework uses <a href="gateway.htm">Index Gateway</a> to route through all HTTP requests and when a file with the extension *.api is requested, then it attempts to send the request to <a href="handler_api.htm">API Handler</a>, which is stored in /engine/handler.api.php if you are interested in how what user writes into URL bar is converted into data for API. But for the time being, you do not need to know more about specifics of handlers.</p>
 
-				<p>What API Handler does is that it translates all the input data sent over HTTP (GET, POST, FILES and COOKIES) into a merged input array - as well as starts sessions, if session cookie is detected - and then executes a controller method based on the value of www-command that is sent to API.</p>
+				<p>What <a href="handler_api.htm">API Handler</a> does is that it translates all the input data sent over HTTP (GET, POST, FILES and COOKIES) into a merged input array - as well as starts sessions, if session cookie is detected - and then executes a controller method based on the value of www-command that is sent to API.</p>
 				
 				<p>For this project the plan was to return data in XML format. This means that we have to make a request to our API with specific API settings. This is done by requesting a filename 'xml.api' with a browser (or some other HTTP client) and supplying additional variables based on command. In the first example we're making a request to JSON API though, so we'll be using 'json.api' filename. You should be able to access your API with the following script:</p>
 				
@@ -578,7 +576,7 @@
 			
 				<p>I recommend you take a look at the API Documentation section of this documentation, which has multiple documentation pages about all the options that Wave Framework API offers. Some documentation pages under Feature Guides section are also useful for building API's.</p>
 				
-				<p>This tutorial is used as the basis for the next tutorial about how to build a simple website for our movie list. The same models and controllers are used as the base for the website tutorial. You can continue to those tutorials from the same code you developed in here.</p>
+				<p>This tutorial is used as the basis for the next tutorial about how to build a simple website for our movie list. The same models and controllers are used as the base for the <a href="tutorial_website.htm">Website Tutorial</a>. You can continue to those tutorials from the same code you developed in here.</p>
 
 			<h2>Congratulations!</h2>
 

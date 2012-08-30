@@ -14,13 +14,13 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Wave Framework allows loading of resource files, JavaScript and CSS stylesheets, with various additional on-demand options. The way this works is that all HTTP requests are redirected to Wave Framework Index Gateway which then loads resource handler for serving these resource files. By default the file extensions, that are served by resource handler, are: *.css, *.js, *.txt, *.csv, *.xml, *.html, *.htm, *.rss, *.vcard.</p>
+				<p>Wave Framework allows loading of resource files, JavaScript and CSS stylesheets, with various additional on-demand options. The way this works is that all HTTP requests are redirected to Wave Framework <a href="gateway.htm">Index Gateway</a> which then loads <a href="handler_resource.htm">Resource Handler</a> for serving these resource files. By default the file extensions, that are served by <a href="handler_resource.htm">Resource Handler</a>, are: *.css, *.js, *.txt, *.csv, *.xml, *.html, *.htm, *.rss, *.vcard.</p>
 				
-				<p>In order for dynamic loading of resources to work properly, URL rewriting must be supported by the server, otherwise Wave Framework resource handler will never get the request. If in doubt, you can check the /tools/compatibility.php script to see if URL rewriting is supported or not.</p>
+				<p>In order for dynamic loading of resources to work properly, URL rewriting must be supported by the server, otherwise Wave Framework <a href="handler_resource.htm">Resource Handler</a> will never get the request. If in doubt, you can check the /tools/compatibility.php script to see if URL rewriting is supported or not.</p>
 				
 			<h2>Making Requests to Resource Files</h2>
 
-				<p>Wave Framework resource handler will attempt to compress the file as well as return proper cache headers based on configuration settings in /config.ini file. Wave Framework builds internal cache and makes sure that the requested resource is returned to the requesting user agent as efficiently as possible.</p>
+				<p>Wave Framework <a href="handler_resource.htm">Resource Handler</a> will attempt to compress the file as well as return proper cache headers based on configuration settings in /config.ini file. Wave Framework builds internal cache and makes sure that the requested resource is returned to the requesting user agent as efficiently as possible.</p>
 			
 				<p>Common method for client to request a resource file such as JavaScript *.js or CSS stylesheet *.css is like this:</p>
 				

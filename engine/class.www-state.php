@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.1.5
  */
 
 class WWW_State	{
@@ -147,6 +147,7 @@ class WWW_State	{
 				'server-ip'=>$_SERVER['SERVER_ADDR'],
 				'session-data'=>array(),
 				'session-fingerprint'=>0,
+				'session-fingerprint-key'=>'www-fingerprint',
 				'session-id'=>false,
 				'session-lifetime'=>0,
 				'session-namespace'=>'WWW'.crc32(__ROOT__),
@@ -1058,10 +1059,10 @@ class WWW_State	{
 				}
 				// If session fingerprinting is used
 				if($this->data['session-fingerprint']){
-					if(!isset($this->data['session-data']['www-session-fingerprint'])){
+					if(!isset($this->data['session-data'][$this->data['session-fingerprint-key']])){
 						// Storing session fingerprint in sessions
-						$this->data['session-data']['www-session-fingerprint']=$this->data['fingerprint'];
-					} elseif($this->data['session-data']['www-session-fingerprint']!=$this->data['fingerprint']){
+						$this->data['session-data'][$this->data['session-fingerprint-key']]=$this->data['fingerprint'];
+					} elseif($this->data['session-data'][$this->data['session-fingerprint-key']]!=$this->data['fingerprint']){
 						// Regenerating the session ID
 						session_regenerate_id(false);
 						// Emptying the session array

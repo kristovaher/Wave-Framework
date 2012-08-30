@@ -22,17 +22,17 @@
 			
 			<h2>Workflow</h2>
 			
-				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
 				
 				<p>Sets the content type to plain text, which is the common content type of robots.txt files.</p>
 				
 				<p>Returns the content of existing /robots.txt file, if such is present. Otherwise generates a new robots.txt content that is returned to user agent instead. This generated robots.txt file is also cached.</p>
 				
-				<p>Handler also includes an optional database connection, which can be used if it is necessary at some point to load robots.txt from database instead.</p>
+				<p>Handler also includes an optional <a href="database.htm">Database</a> connection, which can be used if it is necessary at some point to load robots.txt from <a href="database.htm">Database</a> instead.</p>
 				
 				<p>Robots Handler returns content with appropriate HTTP response headers, including cache. It is possible to request the file without cache by requesting the file as 'nocache&amp;robots.txt'.</p>
 				
-				<p>Robots Handler also makes an entry in the log file about the request, if Logger is used.</p>
+				<p>Robots Handler also makes an entry in the log file about the request, if <a href="logger.htm">Logger</a> is used.</p>
 			
 	</body>
 </html>

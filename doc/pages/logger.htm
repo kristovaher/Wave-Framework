@@ -18,11 +18,11 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>This is an optional class that is used to log requests on system by Index Gateway. WWW_Logger is used to keep track of performance of requests made to Index Gateway files, it keeps track of how long the request took, what data it included, how high was the memory use, server load, CPU usage and so on. If this logger is used, then every single request is logged as serialized arrays in filesystem in /filesystem/log/ subfolders. It is a good idea to clean that folder every now and then. There is a separate log-reader.php script for reading those log files situated in /tools/ subfolder.</p>
+				<p>This is an optional class that is used to log requests on system by <a href="gateway.htm">Index Gateway</a>. Logger is used to keep track of performance of requests made to <a href="gateway.htm">Index Gateway</a> files, it keeps track of how long the request took, what data it included, how high was the memory use, server load, CPU usage and so on. If this logger is used, then every single request is logged as serialized arrays in <a href="filesystem.htm">Filesystem</a> in '/filesystem/log/' subfolders. It is a good idea to clean that folder every now and then. There is a separate log-reader.php script for reading those log files situated in '/tools/' subfolder.</p>
 			
-				<p>Logger is used by Index Gateway to keep track of requests made on the page and log the data in filesystem for later review. Whether Wave Framework uses Logger or not depends on /config.ini settings for HTTP request logging. It is possible to configure a regular expression that will be matched against request URL and only those matching URL requests will be logged by Logger through Index Gateway.</p>
+				<p>Logger is used by <a href="gateway.htm">Index Gateway</a> to keep track of requests made on the page and log the data in <a href="filesystem.htm">Filesystem</a> for later review. Whether Wave Framework uses Logger or not depends on /config.ini settings for HTTP request logging. It is possible to configure a regular expression that will be matched against request URL and only those matching URL requests will be logged by Logger through <a href="gateway.htm">Index Gateway</a>.</p>
 				
-				<p>Logger expects /filesystem/log/ folder to be writeable by PHP.</p>
+				<p>Logger expects '/filesystem/log/' folder to be writeable by PHP.</p>
 				
 				<p>The rest of this document details the use of Logger class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
 				
@@ -37,7 +37,7 @@
 	</code>
 </pre>
 
-				<p>Once logger is created then you can always send data to logger. Logger always writes specific data to log that is detailed further below in the document, but it is also possible to send custom data to Logger prior to Logger writing the log in filesystem. Custom data is sent to logger like this:</p>
+				<p>Once logger is created then you can always send data to logger. Logger always writes specific data to log that is detailed further below in the document, but it is also possible to send custom data to Logger prior to Logger writing the log in <a href="filesystem.htm">Filesystem</a>. Custom data is sent to logger like this:</p>
 				
 <pre>
 	<code>
@@ -50,7 +50,7 @@
 				
 				<p>The way Logger works is that it writes one actual entry per request with all the data that has been sent to it. So it is not a log of 'messages' as much as log of data and state at the end of the request. It carries a lot of hardcoded data about input variables and request times by default, together with custom data sent to logger.</p>
 				
-				<p>To write log file in filesystem, you can call the following method:</p>
+				<p>To write log file in <a href="filesystem.htm">Filesystem</a>, you can call the following method:</p>
 				
 <pre>
 	<code>

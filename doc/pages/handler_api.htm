@@ -18,27 +18,27 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>API Handler is loaded whenever a HTTP request is made to *.api extension. API Handler takes all the input from GET, POST, FILES; SESSION and COOKIE variables, loads Wave Framework API and sends all the input to the API and then returns the result to the user agent. By default the API Handler returns data in JSON format. It also loads Database class for additional functionality.</p>
+				<p>API Handler is loaded whenever a HTTP request is made to *.api extension. API Handler takes all the input from GET, POST, FILES; SESSION and COOKIE variables, loads Wave Framework API and sends all the input to the API and then returns the result to the user agent. By default the API Handler returns data in JSON format. It also loads <a href="database.htm">Database</a> class for additional functionality.</p>
 			
 			<h2>Workflow</h2>
 			
-				<p>This script can only be executed through Index Gateway and it throws a 403 Forbidden message if accessed directly.</p>
+				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
 				
-				<p>API Handler loads State class and creates a new State object with the current configuration array. Configuration is required by the API.</p>
+				<p>API Handler loads <a href="state.htm">State</a> Class and creates a new <a href="state.htm">State</a> object with the current configuration array. <a href="configuration.htm">Configuration</a> is required by the API.</p>
 				
-				<p>If database settings are set in configuration, then it also loads Database class and creates a new database object which is stored in State.</p>
+				<p>If database settings are set in configuration, then it also loads <a href="database.htm">Database</a> class and creates a new database object which is stored in <a href="state.htm">State</a>.</p>
 				
-				<p>API Handler also loads autoload script from either /overrides/resources/autoload.php or from /resources/autoload.php, this file can include function definitions or other PHP-related functionality. It is only recommended to store additional functionality in Autoload script if absolutely necessary, such as for functions that are used by every API call.</p>
+				<p>API Handler also loads autoload script from either '/overrides/resources/autoload.php' or from '/resources/autoload.php', this file can include function definitions or other PHP-related functionality. It is only recommended to store additional functionality in Autoload script if absolutely necessary, such as for functions that are used by every <a href="guide_api.htm">API</a> call.</p>
 				
-				<p>API Handler loads API class and creates a new API object with the current State.</p>
+				<p>API Handler loads <a href="api.htm">API</a> Class and creates a new API object with the current <a href="state.htm">State</a>.</p>
 				
 				<p>All input data from POST, GET, FILES and COOKIE arrays are merged into a single input array, which works similarly to $_REQUEST. Sessions are also started, if session cookie is detected. File and cookie input is stored with additional array keys of 'www-files' and 'www-cookie'. Session data is stored similarly in 'www-session', but this is assigned by API itself and not the handlers.</p>
 				
-				<p>If 'www-profile' is set in the input, then API call is made using that profile and API will validate API profile by using the API profiles in /resources/api.profiles.ini file.</p>
+				<p>If 'www-profile' is set in the input, then <a href="guide_api.htm">API</a> call is made using that profile and API will validate API profile by using the API profiles in /resources/api.profiles.ini file.</p>
 				
 				<p>API Handler sends a request to API. Wave Framework API object will validate the request, call all the required controllers, models and views and return data to user agent, if requested.</p>
 				
-				<p>API Handler also makes an entry in the log file about the request, if Logger is used.</p>
+				<p>API Handler also makes an entry in the log file about the request, if <a href="logger.htm">Logger</a> is used.</p>
 			
 	</body>
 </html>

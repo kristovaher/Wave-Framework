@@ -16,13 +16,13 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Wave Framework comes with an extensive caching framework that is entwined throughout the system and the API. While cache handling on HTTP page and API requests is one of the core features of Wave Framework, then this functionality is also available for MVC objects in one way or another.</p>
+				<p>Wave Framework comes with an extensive caching framework that is entwined throughout the system and the API. While cache handling on HTTP page and API requests is one of the core features of Wave Framework, then this functionality is also available for <a href="guide_mvc.htm">MVC</a> objects in one way or another.</p>
 				
 			<h2>Command Buffer</h2>
 			
-				<p>While not directly related to Wave Framework caching, the API also implements API command buffering. This means that the API tracks what API requests are made and with what input within a single HTTP request. Since API requests can be nested in Wave Framework, at times the same API call can be executed multiple times with the exact same input.</p>
+				<p>While not directly related to Wave Framework caching, the API also implements API command buffering. This means that the API tracks what API requests are made and with what input within a single HTTP request. Since API requests can be nested in Wave Framework, at times the same <a href="guide_api.htm">API</a> call can be executed multiple times with the exact same input.</p>
 				
-				<p>In order to lower the potential memory and processing power consumption with these repeated requests, API has an internal buffer that stores API call request results for every API call that is successfully made. This buffer is used only within the single HTTP request and is not transferred to subsequent requests. This helps the API to minimize the amount of processing it needs to do when the same API call is requested in multiple places (such as loading certain users account information) in multiple places in the same view within the same HTTP request.</p>
+				<p>In order to lower the potential memory and processing power consumption with these repeated requests, API has an internal buffer that stores <a href="guide_api.htm">API</a> call request results for every <a href="guide_api.htm">API</a> call that is successfully made. This buffer is used only within the single HTTP request and is not transferred to subsequent requests. This helps the API to minimize the amount of processing it needs to do when the same <a href="guide_api.htm">API</a> call is requested in multiple places (such as loading certain users account information) in multiple places in the same view within the same HTTP request.</p>
 				
 				<p>At times it is necessary to clear this buffer, in case you are certain that the buffer might have changed and that other calls are made that should return a different result, but do not because of the buffer. For those cases it is possible to clear the API buffer with the following call:</p>
 				
@@ -36,13 +36,13 @@
 				
 			<h2>Cache Functionality</h2>
 			
-				<p>Wave Framework has multiple methods that can be called from within the MVC objects. This includes methods for saving a custom keyword in cache, tagging cache or removing tagged cache. There's even a function that can return the result from the previously known cache of the current API call.</p>
+				<p>Wave Framework has multiple methods that can be called from within the <a href="guide_mvc.htm">MVC</a> objects. This includes methods for saving a custom keyword in cache, tagging cache or removing tagged cache. There's even a function that can return the result from the previously known cache of the current <a href="guide_api.htm">API</a> call.</p>
 				
-				<p>Wave Framework usually stores cache in filesystem in /filesystem/ folder which has to be writable, together with all of its subfolders, on the web server. But some cache can also be stored in APC, if APC is supported on the server. Wave Framework deals with this automatically, though you can turn off APC in Configuration even when the server supports it.</p>
+				<p>Wave Framework usually stores cache in <a href="filesystem.htm">Filesystem</a> in '/filesystem/' folder which has to be writable, together with all of its subfolders, on the web server. But some cache can also be stored in APC, if APC is supported on the server. Wave Framework deals with this automatically, though you can turn off APC in <a href="configuration.htm">Configuration</a> even when the server supports it.</p>
 				
 				<h3>Disabling Cache</h3>
 				
-					<p>In order to trust in cache and use it properly, you must also know how to disable it. Wave Framework cache system is technically out of the control of MVC objects and these objects have very minimal control over how they themselves are being cached. Sometimes though, it is necessary to make sure that the current execution is not cached, no matter what. This can be done with the following command:</p>
+					<p>In order to trust in cache and use it properly, you must also know how to disable it. Wave Framework cache system is technically out of the control of <a href="guide_mvc.htm">MVC</a> objects and these objects have very minimal control over how they themselves are being cached. Sometimes though, it is necessary to make sure that the current execution is not cached, no matter what. This can be done with the following command:</p>
 				
 <pre>
 	<code>
@@ -55,7 +55,7 @@
 
 					<p>This state is not final however, which is why it is always possible to re-enable caching, if requested, as shown in the above example.</p>
 				
-					<p>This cache-disabling also happens automatically whenever State Messenger is used, but you can read more about State Messenger in its own documentation page.</p>
+					<p>This cache-disabling also happens automatically whenever <a href="guide_messenger.htm">State Messenger</a> Class is used, but you can read more about <a href="guide_messenger.htm">State Messenger</a> Class in its own documentation page.</p>
 				
 				<h3>Basic Cache Methods</h3>
 				
@@ -72,7 +72,7 @@
 	</code>
 </pre>
 
-					<p>Cache variables that are set in cache are accessible by any other Controller and API call in the system as long as they are set. You can also see how 'old' a cache variable is with the following request:</p>
+					<p>Cache variables that are set in cache are accessible by any other Controller and <a href="guide_api.htm">API</a> call in the system as long as they are set. You can also see how 'old' a cache variable is with the following request:</p>
 				
 <pre>
 	<code>
@@ -110,13 +110,13 @@
 	</code>
 </pre>
 
-					<p>After this method is called, then every cache in the system that has been tagged with 'my-key' would be deleted. This includes not just cache that has been written with setCache() methods, but also internal API calls as well as API calls that have been made over HTTP.</p>
+					<p>After this method is called, then every cache in the system that has been tagged with 'my-key' would be deleted. This includes not just cache that has been written with setCache() methods, but also internal <a href="guide_api.htm">API</a> calls as well as <a href="guide_api.htm">API</a> calls that have been made over HTTP.</p>
 					
 					<p>On a website or in a web service that is well built, it will be technically possible to cache most of your website and serve from cache almost every time with every HTTP request, only generating the data again if the system detects a change. This type of system is only possible with a well structured cache-tagged caching.</p>
 
 				<h3>Accessing Previous Cache</h3>
 
-					<p>There is one more set of methods that is possible from within MVC Objects in Wave Framework that can be very useful at times. It is possible to refer to previous cache in Controllers. This means that if an API call is made and a Controller is loaded without cache being used, then this Controller can get both the timestamp and contents of cache of the previous time when the cache was there.</p>
+					<p>There is one more set of methods that is possible from within <a href="guide_mvc.htm">MVC</a> Objects in Wave Framework that can be very useful at times. It is possible to refer to previous cache in Controllers. This means that if an <a href="guide_api.htm">API</a> call is made and a Controller is loaded without cache being used, then this Controller can get both the timestamp and contents of cache of the previous time when the cache was there.</p>
 					
 					<p>While a little difficult to explain, this flow description might give a good real life example:</p>
 					
@@ -124,12 +124,12 @@
 						<li>Imagine that your web service has a Controller that makes an API request to Twitter API and gets the last tweet that had the hashtag of #waveframework. Twitter limits the amount of times you can make API requests every day, so this means that your website should cache this information and only make these requests infrequently.</li>
 						<li>In order to make this happen, you make the API requests in the Controller with a 'www-cache-timeout' of, for example, 600 seconds or ten minutes.</li>
 						<li>This system will work very well, until at some point, when you ping Twitter again to see if a new tweet is there, the Twitter API returns an empty array instead, since no one has used the hashtag for a few weeks. Even though you know that a tweet with that hashtag existed.</li>
-						<li>Usually you would have to build your own checks for cases such as this, or cache this previous tweet variable in database or filesystem somewhere.</li>
+						<li>Usually you would have to build your own checks for cases such as this, or cache this previous tweet variable in <a href="guide_database.htm">Database</a> or <a href="filesystem.htm">Filesystem</a> somewhere.</li>
 					</ul>
 					
 					<p>Wave Framework however allows you to actually refer to the contents and timestamp of your previous cache and you can do with this data whatever you want within the Controller. You can even make the Controller return the previous cache every single time, which technically means that the first generated cache would be permanent.</p>
 					
-					<p>This is how you can refer to the previous contents as well as the creation timestamp of the cache of the current API call:</p>
+					<p>This is how you can refer to the previous contents as well as the creation timestamp of the cache of the current <a href="guide_api.htm">API</a> call:</p>
 					
 <pre>
 	<code>

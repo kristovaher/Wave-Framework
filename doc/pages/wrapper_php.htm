@@ -39,7 +39,7 @@
 			
 				<p>It is recommended to go through all of the API Documentation sections before using the API Wrapper. This document here covers details only specific to API Wrapper and not the details about other API keywords themselves.</p>
 			
-				<p>PHP API Wrapper is stored as a file in /engine/class.www-wrapper.php, but it is not dependent on anything else in the filesystem and can be used independently. API Wrapper requires PHP 5.3.3 or newer due to using serialization of JSON encoding functions that detect numeric input.</p>
+				<p>PHP API Wrapper is stored as a file in '/engine/class.www-wrapper.php', but it is not dependent on anything else in the <a href="filesystem.htm">Filesystem</a> and can be used independently. API Wrapper requires PHP 5.3.3 or newer due to using serialization of JSON encoding functions that detect numeric input.</p>
 				
 				<p>When Wrapper object is created it requires just a single parameter: the HTTP address of the API. To create a Wrapper object you can do the following:</p>
 				
@@ -228,7 +228,7 @@
 			
 				<h3>private $inputFiles=array()</h3>
 				
-					<p>This array stores keys and values for files that will be sent to API. Key is the 'input file name' and value is the location of the file in filesystem.</p>
+					<p>This array stores keys and values for files that will be sent to API. Key is the 'input file name' and value is the location of the file in <a href="filesystem.htm">Filesystem</a>.</p>
 			
 				<h3>private $curlEnabled=false</h3>
 				
@@ -298,7 +298,7 @@
 			
 				<h3>public function setFile($file,$location=false)</h3>
 					
-					<p>This method sets files that will be uploaded with the API request. $file is the name of the file and $location is the address of the file in filesystem. Multiple files can be attached at once by sending $file as an array of filenames and locations. This method also checks if the file actually exists.</p>
+					<p>This method sets files that will be uploaded with the API request. $file is the name of the file and $location is the address of the file in <a href="filesystem.htm">Filesystem</a>. Multiple files can be attached at once by sending $file as an array of filenames and locations. This method also checks if the file actually exists.</p>
 			
 				<h3>public function clearInput($clearAuth=false)</h3>
 					

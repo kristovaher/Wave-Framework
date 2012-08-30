@@ -16,19 +16,19 @@
 			
 				<p>Wave is a PHP micro-framework that is built loosely following model-view-control architecture and factory method design pattern. It is made for web services, websites and info-systems and is built to support a native API (Application Programming Interface) architecture, caching and smart resource management. Wave is a compact framework that does not include bloated libraries and features and is developed keeping lightweight speed and optimizations in mind.</p>
 				
-				<p>This tutorial takes a look at how to build a simple website with Wave Framework. It is recommended that you first go through the Web Service Tutorial, since we will be using the same Models and Controllers here - albeit slightly modified - to build a website that relies on our API architecture.</p>
+				<p>This tutorial takes a look at how to build a simple website with Wave Framework. It is recommended that you first go through the <a href="tutorial_webservice.htm">Web Service Tutorial</a>, since we will be using the same Models and Controllers here - albeit slightly modified - to build a website that relies on our API architecture. If you do not wish to go through the <a href="tutorial_webservice.htm">Web Service Tutorial</a> first, then you should first set up Wave Framework following the <a href="installation.htm">Installation</a> guide and then upload the final example files from the <a href="tutorial_webservice.htm">Web Service Tutorial</a> folder '/doc/examples/webservice/' on top of your installation. It is however recommended to go through the first tutorial, since it teaches you some of the core features behind Wave Framework.</p>
 				
 				<p>This tutorial focuses only on building a website that works through URL's only. It does not do any asynchronous requests with JavaScript, which means that every view will be on a separate URL. This tutorial will give an overview about how to build your Sitemap, how to build your Views and implement functionality of Controllers and Models and tie it all together into one simple working website.</p>
 			
-				<p>Wave Framework comes with a View and URL controllers to build websites with. These two Controllers can be edited by you at any time - they are stored in '/controllers/' subfolder. You can read more about tweaking the URL and View Controllers in documentation about those Controllers as this tutorial will use the default URL and View Controllers.</p>
+				<p>Wave Framework comes with a View and <a href="guide_url.htm">URL Controllers</a> to build websites with. These two Controllers can be edited by you at any time - they are stored in '/controllers/' subfolder. You can read more about tweaking the URL and <a href="guide_view.htm">View Controllers</a> in documentation about those Controllers as this tutorial will use the default URL and <a href="guide_view.htm">View Controllers</a>.</p>
 				
 				<p>Complete files of this tutorial are available in '/doc/examples/website/' subfolder in the archive. If you wish to test the example without writing the tutorial code yourself, then you should copy these files to root folder of your Wave Framework. Note that this will overwrite your default '/resources/api.profiles.ini' as well as '/resources/en.sitemap.ini' and '/resources/style.css' files. You should make a backup of these files in case you have modified these files yourself for some reason.</p>
 				
 			<h2>Planning</h2>
 				
-				<p>The Web Service tutorial was about creating a simple Web Service that you can use to store information about your favorite DVD movies and then return information about those movies. In this tutorial we will be using that web service and build a website around it.</p>
+				<p>The <a href="tutorial_webservice.htm">Web Service Tutorial</a> was about creating a simple Web Service that you can use to store information about your favorite DVD movies and then return information about those movies. In this tutorial we will be using that web service and build a website around it.</p>
 			
-				<p>If you have already gone through the previous Web Service tutorial where you created the basic Controllers and Models for your web service, then you already have a good starting point for this tutorial, but if you did not go through the first tutorial or wish to start from the default example, then you can get the Controller and Model files of the previous tutorials finished example from '/doc/examples/webservice/' folder.</p>
+				<p>If you have already gone through the previous <a href="tutorial_webservice.htm">Web Service Tutorial</a> where you created the basic Controllers and Models for your web service, then you already have a good starting point for this tutorial, but if you did not go through the first tutorial or wish to start from the default example, then you can get the Controller and Model files of the previous tutorials finished example from '/doc/examples/webservice/' folder.</p>
 				
 				<p>This type of website will require different page views that will be shown under different URL's for the user agent or browser. Every View acts essentially as a template and each view stores its own view-logic based on what information is being requested and how. This would be the list of different Views we would need:</p>
 				
@@ -41,13 +41,13 @@
 				
 				<p>While our web service also allows to remove movies from the database, we will not be using that part of the service as part of this tutorial, since the mechanics of doing it are similar to adding a movie. If you want then you can develop this feature by yourself after this tutorial is finished.</p>
 				
-				<p>We will also not be needing a database for this service, just like we did not need a database in Web Service tutorial, as we will be storing movie data in filesystem as a serialized array. But of course you are free to update the Model file to make database requests for storing and querying movie information and refer to documentation about databases when doing so.</p>
+				<p>We will also not be needing a database for this service, just like we did not need a database in <a href="tutorial_webservice.htm">Web Service Tutorial</a>, as we will be storing movie data in <a href="filesystem.htm">Filesystem</a> as a serialized array. But of course you are free to update the Model file to make database requests for storing and querying movie information and refer to documentation about databases when doing so.</p>
 				
 			<h2>Configuration and Set-Up</h2>
 				
 				<p>The first thing that you need to do, when setting up Wave Framework for a website, is to think about the languages that you need to implement and then about the actual pages that your website will have. You can always later on expand the project by including additional languages and pages, but it is always a good to have some general idea when starting up.</p>
 				
-				<p>Languages are stored in your Configuration in '/config.ini' file. The Configuration option 'languages' is a comma-separated list of languages that Wave Framework will use in your system. The keywords and/or abbreviations in that value are used by Wave Framework to find files that are related to these languages: Sitemap and Translations files.  We will keep the Configuration setting at 'en' for this tutorial, which means that our system uses just one language and requires just these two files (both files already exist by default in the archive):</p>
+				<p>Languages are stored in your <a href="configuration.htm">Configuration</a> in '/config.ini' file. The <a href="configuration.htm">Configuration</a> option 'languages' is a comma-separated list of languages that Wave Framework will use in your system. The keywords and/or abbreviations in that value are used by Wave Framework to find files that are related to these languages: Sitemap and Translations files.  We will keep the <a href="configuration.htm">Configuration</a> setting at 'en' for this tutorial, which means that our system uses just one language and requires just these two files (both files already exist by default in the archive):</p>
 				
 				<ul>
 					<li><b>/resources/en.translations.ini</b> - File that contains translations and translation keywords</li>
@@ -85,11 +85,11 @@
 				
 					<p>Sitemap is the file that includes all the URL's that can be requested from the website without a '404 Not Found' message being returned to the user agent or browser. Wave Framework has a very detailed Sitemap system that gives you an almost unrestricted control over how URL's work and how they are interpreted.</p>
 					
-					<p>Note that Wave Framework Configuration has some settings that deal with URL handling as well. One of them is the 'enforce-first-language-url' setting. If this setitng is set to 1, then this means that if you go to Home page, like 'http://www.example.com/', then you would be redirected automatically to URL that includes the appended language keyword as a URL node. By default this would redirect to 'http://www.example.com/en/'. If you do not wish to use this behavior then you can turn this setting off (note that other languages would still have to use the language node in order to separate one language from another).</p>
+					<p>Note that Wave Framework <a href="configuration.htm">Configuration</a> has some settings that deal with URL handling as well. One of them is the 'enforce-first-language-url' setting. If this setitng is set to 1, then this means that if you go to Home page, like 'http://www.example.com/', then you would be redirected automatically to URL that includes the appended language keyword as a URL node. By default this would redirect to 'http://www.example.com/en/'. If you do not wish to use this behavior then you can turn this setting off (note that other languages would still have to use the language node in order to separate one language from another).</p>
 					
-					<p>The language node itself should never be stored in the Sitemap file. Before Wave Framework starts looking for a match from Sitemap file, it has already decided what language is being requested based on Configuration settings and the first URL node (if used). This means that the URL's, that are declared in the Sitemap file, should not have a language node as part of the URL string. This will be shown in the examples below as well.</p>
+					<p>The language node itself should never be stored in the Sitemap file. Before Wave Framework starts looking for a match from Sitemap file, it has already decided what language is being requested based on <a href="configuration.htm">Configuration</a> settings and the first URL node (if used). This means that the URL's, that are declared in the Sitemap file, should not have a language node as part of the URL string. This will be shown in the examples below as well.</p>
 					
-					<p>Wave Framework Configuration also has two Sitemap-related settings that are used in Wave Framework for situations when the URL is not set (which is considered the Home page) or when a match is not found (which would be the 404 Not Found page). By default the Home page will call a view named 'home' and 404 page will call a view named '404'. You can edit these values in Configuration: they are the 'home-view' and '404-view' settings.</p>
+					<p>Wave Framework <a href="configuration.htm">Configuration</a> also has two Sitemap-related settings that are used in Wave Framework for situations when the URL is not set (which is considered the Home page) or when a match is not found (which would be the 404 Not Found page). By default the Home page will call a view named 'home' and 404 page will call a view named '404'. You can edit these values in <a href="configuration.htm">Configuration</a>: they are the 'home-view' and '404-view' settings.</p>
 					
 					<p>404 View and Home View are stored in these two files by default:</p>
 				
@@ -113,11 +113,11 @@
 	</code>
 </pre>
 
-					<p>The keyword in the brackets is the URL where the page would be accessed. But this is technically not required for a Home View, since Home Views are automatically redirected by URL Controller to a URL that does not include a URL node. This means that when go to an address of 'http://www.example.com/en/home/' then the client browser would be redirected to 'http://www.example.com/en/', or 'http://www.example.com/' - latter example only when you have the 'enforce-first-language-url' setting set to 0 in Configuration.</p>
+					<p>The keyword in the brackets is the URL where the page would be accessed. But this is technically not required for a Home View, since Home Views are automatically redirected by <a href="guide_url.htm">URL Controller</a> to a URL that does not include a URL node. This means that when go to an address of 'http://www.example.com/en/home/' then the client browser would be redirected to 'http://www.example.com/en/', or 'http://www.example.com/' - latter example only when you have the 'enforce-first-language-url' setting set to 0 in <a href="configuration.htm">Configuration</a>.</p>
 					
-					<p>This Sitemap file includes a number of settings for our Home View too. The 'view' variable tells Wave Framework that if this URL is matched, then the View Controller should load the View named 'home'. This View would be loaded from '/views/view.home.php' file.</p>
+					<p>This Sitemap file includes a number of settings for our Home View too. The 'view' variable tells Wave Framework that if this URL is matched, then the <a href="guide_view.htm">View Controller</a> should load the View named 'home'. This View would be loaded from '/views/view.home.php' file.</p>
 					
-					<p>The 'meta-title' keyword tells View Controller what will be the title name for the view. This title is often shown on tabs or browser windows as a title for the page.</p>
+					<p>The 'meta-title' keyword tells <a href="guide_view.htm">View Controller</a> what will be the title name for the view. This title is often shown on tabs or browser windows as a title for the page.</p>
 					
 					<p>The 'cache-timeout' flag tells Wave Framework that this page can be entirely cached for 30 seconds, which means that if another request is made to the page with similar conditions within 30 seconds, then it will return a result from cache rather than generate it again. This setting is useful on pages that might take a long time to generate or cause website slowdowns during high web traffic.</p>
 					
@@ -157,7 +157,7 @@
 	</code>
 </pre>
 
-					<p>Compared to the previously defined URL's, these pages have URL's that include two URL nodes that are separated by a forward-slash. URL Controller will still match these URL's exactly the same way as before, which means that if the client makes a request for 'http://www.example.com/en/movies/list/' URL, then 'list' View will be returned. Same for URL for the 'add' View.</p>
+					<p>Compared to the previously defined URL's, these pages have URL's that include two URL nodes that are separated by a forward-slash. <a href="guide_url.htm">URL Controller</a> will still match these URL's exactly the same way as before, which means that if the client makes a request for 'http://www.example.com/en/movies/list/' URL, then 'list' View will be returned. Same for URL for the 'add' View.</p>
 					
 					<p>Last but not least, we need a URL which will be used when we are showing a page about a single movie. Movie page is different from other pages in one very notable way: you can have multiple movie pages but you can never really define all movies in your Sitemap file. This would be difficult to maintain and would quickly grow your Sitemap file too large to easily handle.</p>
 
@@ -174,7 +174,7 @@
 	meta-title="Movie information"
 	</code>
 </pre>
-					<p>This ':numeric:' URL keyword means that the second URL node must be numeric in order for this URL to be matched. In case the second URL node is not numeric, then a 404 page is shown to the user agent. Other dynamic URL options are also available, such as :alpha: and :alphanumeric: and you can read more about them in URL Controller documentation.</p>
+					<p>This ':numeric:' URL keyword means that the second URL node must be numeric in order for this URL to be matched. In case the second URL node is not numeric, then a 404 page is shown to the user agent. Other dynamic URL options are also available, such as :alpha: and :alphanumeric: and you can read more about them in <a href="guide_url.htm">URL Controller</a> documentation.</p>
 					
 					<p>This allows us to later use that dynamic URL as a value when generating the content for the View, such as for loading a movie with a specific ID. This will be shown later in the tutorial.</p>
 				
@@ -182,11 +182,11 @@
 				
 					<p>Websites also implement stylesheets and JavaScript. While this tutorial does not cover the topic of JavaScript integration and AJAX calls with Wave Framework, both of these topics are available and documented in other parts of the documentation extensively.</p>
 					
-					<p>The main CSS stylesheet and JavaScript files are stored in '/resources/style.css' '/resources/script.js' respectively. These files, together with jQuery, are loaded automatically by the default View Controller. If you wish to alter this behavior in any way, then you can edit the View Controller file in '/controllers/controller.view.php'.</p>
+					<p>The main CSS stylesheet and JavaScript files are stored in '/resources/style.css' '/resources/script.js' respectively. These files, together with jQuery, are loaded automatically by the default <a href="guide_view.htm">View Controller</a>. If you wish to alter this behavior in any way, then you can edit the <a href="guide_view.htm">View Controller</a> file in '/controllers/controller.view.php'.</p>
 					
-					<p>As an addition, Wave Framework also supports view-specific on-demand stylesheets and scripts. This means that if the View Controller is loading a view for 'home', for example, then it would also load the Stylesheet file from '/resources/home.style.css' and JavaScript from '/resources/home.script.js' if they are available. This is very useful since it allows you to not have to load all the JavaScript or CSS for all of the pages of your website. If one page requires to use JavaScript and CSS files that are very large, then there is no reason to load them for every other page of your website or infosystem.</p>
+					<p>As an addition, Wave Framework also supports view-specific on-demand stylesheets and scripts. This means that if the <a href="guide_view.htm">View Controller</a> is loading a view for 'home', for example, then it would also load the Stylesheet file from '/resources/home.style.css' and JavaScript from '/resources/home.script.js' if they are available. This is very useful since it allows you to not have to load all the JavaScript or CSS for all of the pages of your website. If one page requires to use JavaScript and CSS files that are very large, then there is no reason to load them for every other page of your website or infosystem.</p>
 					
-					<p>View Controller also does other things when loading resources, such as reducing the number of HTTP request by unifying or even minifying some script resources. You can read about these features in other parts of the documentation.</p>
+					<p><a href="guide_view.htm">View Controller</a> also does other things when loading resources, such as reducing the number of HTTP request by unifying or even minifying some script resources. You can read about these features in other parts of the documentation.</p>
 					
 					<p>In this tutorial, the only thing we will be doing is setting up the main CSS Stylesheet. Without much explanation - and only to make our tutorial website at least somewhat visually appealing - this is the stylesheet that will be used:</p>
 					
@@ -274,23 +274,23 @@
 						
 				<h2>Preparing for Views</h2>
 				
-					<p>Large part of website creation - once you have the Web Service functionality already - is about building Views. Wave Framework loads its Views through View Controller.</p>
+					<p>Large part of website creation - once you have the Web Service functionality already - is about building Views. Wave Framework loads its Views through <a href="guide_view.htm">View Controller</a>.</p>
 					
-					<p>View Controller behavior can be altered in any way you find suitable for your project. View Controller can load multiple View components from other Views and return the output to client browser, or it can render and return part of the HTML frame by itself. Default View Controller in Wave Framework renders the main HTML frame by itself, while loading the body content from a View file.</p>
+					<p><a href="guide_view.htm">View Controller</a> behavior can be altered in any way you find suitable for your project. <a href="guide_view.htm">View Controller</a> can load multiple View components from other Views and return the output to client browser, or it can render and return part of the HTML frame by itself. Default <a href="guide_view.htm">View Controller</a> in Wave Framework renders the main HTML frame by itself, while loading the body content from a View file.</p>
 					
-					<p>While it is recommended to edit View Controller when developing your own project - such as to load website header and footer through that directly - then in this tutorial we will not edit View Controller and instead add menu headers to all of our Views directly. This is because it is easier for you to handle every View as independently as possible in the beginning. This gives a better understanding about how to build views since you can focus on one View at the time.</p>
+					<p>While it is recommended to edit <a href="guide_view.htm">View Controller</a> when developing your own project - such as to load website header and footer through that directly - then in this tutorial we will not edit <a href="guide_view.htm">View Controller</a> and instead add menu headers to all of our Views directly. This is because it is easier for you to handle every View as independently as possible in the beginning. This gives a better understanding about how to build views since you can focus on one View at the time.</p>
 					
-					<p>Later on you can take out the duplicated code from the Views and implement it in View Controller or through other API calls, if you wish.</p>
+					<p>Later on you can take out the duplicated code from the Views and implement it in <a href="guide_view.htm">View Controller</a> or through other <a href="guide_api.htm">API</a> calls, if you wish.</p>
 					
 				<h2>Home View</h2>
 				
-					<p>The first View that we will build is the Home View, which is loaded whenever the URL Controller detects that the entered URL should be for the Home page. This is most commonly when no URL - other than website root - is entered or only the language node - like http://www.example.com/en/ - is entered.</p>
+					<p>The first View that we will build is the Home View, which is loaded whenever the <a href="guide_url.htm">URL Controller</a> detects that the entered URL should be for the Home page. This is most commonly when no URL - other than website root - is entered or only the language node - like http://www.example.com/en/ - is entered.</p>
 				
 					<p>The first step should be to create the file for the View. First create a file in '/views/' subfolder and name it 'view.home.php'. This file will contain the View class declaration. View filenames - just like Model and Controller filenames - have to be standardized in the way they are written in order for Wave Framework to be able to load them dynamically.</p>
 					
-					<p>View filenames should always be in 'view.[name].php' format and their class name in 'WWW_view_[name]' format. The 'name' section there is the same name that is referenced in Configuration of 'home-view' and '404-view' values, as well as the 'view' setting in Sitemap declarations.</p>
+					<p>View filenames should always be in 'view.[name].php' format and their class name in 'WWW_view_[name]' format. The 'name' section there is the same name that is referenced in <a href="configuration.htm">Configuration</a> of 'home-view' and '404-view' values, as well as the 'view' setting in Sitemap declarations.</p>
 					
-					<p>It is recommended for the View to be extended from WWW_Factory class and named as 'WWW_view_home'. When rendering the View, the View Controller loads 'render()' method by default from the View with the input data sent to the server, so you should define 'render()' method in the class as well. It is actually possible to define a different method to be loaded, based on Sitemap configuration, but 'render()' is always the default. There are no parameters that are required for the View class.</p>
+					<p>It is recommended for the View to be extended from WWW_Factory class and named as 'WWW_view_home'. When rendering the View, the <a href="guide_view.htm">View Controller</a> loads 'render()' method by default from the View with the input data sent to the server, so you should define 'render()' method in the class as well. It is actually possible to define a different method to be loaded, based on Sitemap configuration, but 'render()' is always the default. There are no parameters that are required for the View class.</p>
 					
 					<p>This is a base frame for the home View class, declared according to previous description:</p>
 						
@@ -311,7 +311,7 @@
 
 					<p>Inside this 'render()' method you should build your HTML Frame. For this tutorial, we will keep the HTML frame as simple as possible, so it will just consist of a header that contains menu links and a body that shows the content.</p>
 					
-					<p>The header will be the same for all of our Views and will be duplicated. It is recommended to either store the header in a different View and load it through View Controller, or declare it in View Controller directly, in order to reduce code-duplication. But in this tutorial we will duplicate the header for all of our Views for simplicity</p>
+					<p>The header will be the same for all of our Views and will be duplicated. It is recommended to either store the header in a different View and load it through <a href="guide_view.htm">View Controller</a>, or declare it in <a href="guide_view.htm">View Controller</a> directly, in order to reduce code-duplication. But in this tutorial we will duplicate the header for all of our Views for simplicity</p>
 
 					<p>So, to start things up, we would be using a HTML body like the one below. Place this HTML to your 'render()' method call, but outside the PHP tags, like this:</p>
 
@@ -336,7 +336,7 @@
 
 					<p>If you now upload your edited files and make a request to the root page of your website, then you should see a beige-colored HTML as your new website. If some of the files, such as CSS stylesheet, is in the cache from previous requests that you might have made, then you should refresh your browser again with CTRL+F5 or by clearing cache and loading the page once more.</p>
 					
-					<p>It is also recommended to make a request to '/tools/debugger.php' script every now and then to see if your system is throwing any PHP errors or warnings at any point. This is also the file you should refer to whenever your application throws that critical error message, since this Debugger script gives detailed information about what went wrong. Wave Framework automatically suppresses PHP errors from the User Interface directly in order to make sure no sensitive information about the software is ever shown to the client directly. Note that the Debugger requires an HTTP authentication with the username and password that are stored in your systems Configuration file.</p>
+					<p>It is also recommended to make a request to '/tools/debugger.php' script every now and then to see if your system is throwing any PHP errors or warnings at any point. This is also the file you should refer to whenever your application throws that critical error message, since this Debugger script gives detailed information about what went wrong. Wave Framework automatically suppresses PHP errors from the User Interface directly in order to make sure no sensitive information about the software is ever shown to the client directly. Note that the Debugger requires an HTTP authentication with the username and password that are stored in your systems <a href="configuration.htm">Configuration</a> file.</p>
 					
 					<p>The HTML frame given above is not really suitable for our website and is merely a starting point. At the moment it does not have the working links that we would expect, nor does it have the content from our Translations files or the movies from our movie database.</p>
 					
@@ -488,7 +488,7 @@
 					
 					<p>We are loading our page content from translations file, but it could just as easily be loaded from a database or from some content management system or even over API from some other system. In this tutorial, the page content is stored in Translations file for example purposes.</p>
 					
-					<p>In order to learn what 'subview' is currently being used we have to request the currently known View data from our system State. Wave Frameworks State stores information about the entire current system, environment and its Configuration (you can read more about State in other parts of the documentation). You can make the following call to get the information about the currently loaded View:</p>
+					<p>In order to learn what 'subview' is currently being used we have to request the currently known View data from our system <a href="guide_state.htm">State</a>. Wave Frameworks <a href="guide_state.htm">State</a> stores information about the entire current system, environment and its <a href="configuration.htm">Configuration</a>. You can make the following call to get the information about the currently loaded View:</p>
 						
 <pre>
 	<code>
@@ -533,7 +533,7 @@
 					
 					<p>We will make a copy of 'view.home.php' and rename it to 'view.add.php' in order to use the Home View as a template for this new View. Also rename the class name to 'WWW_view_home', similarly to how we did in the previous sections.</p>
 
-					<p>The reason we make copies of the Home View is because it is the most basic of Views in our system. While it would be useful to actually define the header menu elsewhere, such as in View Controller directly or loaded through View Controller, for the purpose of the tutorial it is better to handle each View as a self-contained and functioning page.</p>
+					<p>The reason we make copies of the Home View is because it is the most basic of Views in our system. While it would be useful to actually define the header menu elsewhere, such as in <a href="guide_view.htm">View Controller</a> directly or loaded through <a href="guide_view.htm">View Controller</a>, for the purpose of the tutorial it is better to handle each View as a self-contained and functioning page.</p>
 					
 					<p>You should replace the body content with a simple HTML form that also calls some of our translation values. We will generate just two fields: one for the movie title and another for the year that movie was released. Like this:</p>
 						
@@ -565,9 +565,9 @@
 					
 					<p>There is also a technical reason why you should never submit data from a form to a View: if you submit data to a View and then click the Back button in your browser, then browsers will throw the 'Re-submit POST' warning to the user. This can be quite an annoyance for the usability of the system and can even cause some data to be submitted unintentionally to the system twice.</p>
 					
-					<p>In order to not run into this Back button problem, as well as to keep the View itself clean from functionality logic of our system, we should make sure that the data is submitted to our API directly. Since we named our form values exactly the same as the values that we use in our Web Service - which was covered in detail in the Web Service tutorial - then we can make the client browser submit the data exactly the same way as we manually submitted it in the previous tutorial.</p>
+					<p>In order to not run into this Back button problem, as well as to keep the View itself clean from functionality logic of our system, we should make sure that the data is submitted to our API directly. Since we named our form values exactly the same as the values that we use in our Web Service - which was covered in detail in the <a href="tutorial_webservice.htm">Web Service Tutorial</a> - then we can make the client browser submit the data exactly the same way as we manually submitted it in the previous tutorial.</p>
 					
-					<p>Movie adding page is the first View that incorporates the Controllers and Models that were developed in the previous tutorial about the Web Service. If you did not do that tutorial, then you should copy the example files from the Web Service tutorial - namely files from '/models/' and '/controllers/' folders as well as '/resources/api.profiles.ini' file - to your current files.</p>
+					<p>Movie adding page is the first View that incorporates the Controllers and Models that were developed in the previous tutorial about the Web Service. If you did not do that tutorial, then you should copy the example files from the <a href="tutorial_webservice.htm">Web Service Tutorial</a> - namely files from '/models/' and '/controllers/' folders as well as '/resources/api.profiles.ini' file - to your current files.</p>
 					
 					<p>We will be editing these files slightly in this tutorial in order to add additional functionality that we need.</p>
 					
@@ -589,7 +589,7 @@
 	</code>
 </pre>
 
-					<p>If you did the Web Service tutorial, then the above message will seem quite familiar to you.</p>
+					<p>If you did the <a href="tutorial_webservice.htm">Web Service Tutorial</a>, then the above message will seem quite familiar to you.</p>
 					
 					<p>Because we made a request to JSON API file (filename 'json.api') then Wave Framework returned the data to us as a JSON string. We will be changing this later on, but you can always use JSON API (or XML API as 'xml.api') for debugging and see what the response is when you submit data from your forms. We will change this API URL in the Part II of this section later on.</p>
 					
@@ -603,9 +603,9 @@
 					
 					<p>Now we can start implementing the functionality in the View that loads the list of movies and then generates a list table, with links, for the movies in our database. These links would later on redirect to movie information pages where we show information about only a single movie at the time.</p>
 					
-					<p>While it would be possible to load the Controller dynamically from within the View and get the list of movies this way, it is better for this tutorial to show an example of how to use the API internally. Internal API calls are very similar to HTTP API calls, except that Internal API calls never have to be authenticated with API Profile and internal calls also return a PHP variable by default, so you do not have to unserialize JSON.</p>
+					<p>While it would be possible to load the Controller dynamically from within the View and get the list of movies this way, it is better for this tutorial to show an example of how to use the API internally. internal <a href="guide_api.htm">API</a> calls are very similar to HTTP <a href="guide_api.htm">API</a> calls, except that internal <a href="guide_api.htm">API</a> calls never have to be authenticated with API Profile and internal calls also return a PHP variable by default, so you do not have to unserialize JSON.</p>
 					
-					<p>In our previous tutorial we built a Web Service that had an API command 'movies-all' that returned the list of all of our movies from database. We can now incorporate this API call in our View generation directly and replace the default content from the Home view with the following code:</p>
+					<p>In our previous tutorial we built a Web Service that had an API command 'movies-all' that returned the list of all of our movies from database. We can now incorporate this <a href="guide_api.htm">API</a> call in our View generation directly and replace the default content from the Home view with the following code:</p>
 						
 <pre>
 	<code>
@@ -622,7 +622,7 @@
 	</code>
 </pre>
 
-					<p>Note that the $movies['error'] is simply the way we returned the result from our API in the Web Service tutorial. You can use whatever returned keys in the array to check if your API call was successful or not. Wave Framework actually also has helper arrays for this purpose, which are recommended over a custom solution like this, but we will stick to the returned 'error' key for now for the sake of keeping things simpler in this tutorial.</p>
+					<p>Note that the $movies['error'] is simply the way we returned the result from our API in the <a href="tutorial_webservice.htm">Web Service Tutorial</a>. You can use whatever returned keys in the array to check if your <a href="guide_api.htm">API</a> call was successful or not. Wave Framework actually also has helper arrays for this purpose, which are recommended over a custom solution like this, but we will stick to the returned 'error' key for now for the sake of keeping things simpler in this tutorial.</p>
 					
 					<p>After you have added the code above, then you should test your page by uploading the files and clicking on the movie list link and seeing if you get a 'Found!' response on your List page or not. You should get a 'Found!' message on the page, since we added a movie through the API in the previous section.</p>
 					
@@ -659,9 +659,9 @@
 					
 					<p>Movie View is the only View that was declared in our Sitemap file with the permission to use dynamic URL nodes. This means that we will be able to use the dynamic part of the URL and use it for loading a movie with that ID from our database.</p>
 					
-					<p>We will be loading data to our View similarly to how we loaded it for the list View: through an API call. This time we will be making a 'movies-get' request to the API that also requires a variable 'id'. This 'id' variable defines what movie ID we are requesting.</p>
+					<p>We will be loading data to our View similarly to how we loaded it for the list View: through an <a href="guide_api.htm">API</a> call. This time we will be making a 'movies-get' request to the API that also requires a variable 'id'. This 'id' variable defines what movie ID we are requesting.</p>
 
-					<p>In Wave Framework, when making internal API calls, the second variable sent to the 'api()' method is an array of all variables that are used as an input to the API call. For example, to make a request to movie that has an ID of 1, then you would make the following request:</p>
+					<p>In Wave Framework, when making internal <a href="guide_api.htm">API</a> calls, the second variable sent to the 'api()' method is an array of all variables that are used as an input to the <a href="guide_api.htm">API</a> call. For example, to make a request to movie that has an ID of 1, then you would make the following request:</p>
 						
 <pre>
 	<code>
@@ -669,7 +669,7 @@
 	</code>
 </pre>
 
-					<p>We want to use the dynamic URL as the ID for our API call. We can fetch this data from the State for the currently loaded View with our 'getState()' call that we already used in the previous sections. This 'dynamic-url' key in that $view variable actually stores an array instead of one single string, since it is possible to have more than one dynamic URL node at the same time.</p>
+					<p>We want to use the dynamic URL as the ID for our <a href="guide_api.htm">API</a> call. We can fetch this data from the <a href="guide_state.htm">State</a> for the currently loaded View with our 'getState()' call that we already used in the previous sections. This 'dynamic-url' key in that $view variable actually stores an array instead of one single string, since it is possible to have more than one dynamic URL node at the same time.</p>
 					
 					<p>To make our system load the information about the specific movie we have listed, then we have to get the first key in that 'dynamic-url' array. You should replace the current page content with the following:</p>
 						
@@ -740,7 +740,7 @@
 					
 					<p>This alone is not enough however. We also need to change our Controller a little to notify Wave Framework about these redirects and actually set these headers. Wave Framework API has certain callback keywords that can be used to set headers as respone, such as ones that are required for redirecting the client. You can also use the 'setHeader()' method for this in the Controller, but if you use 'setHeader()' method then this will not be shown in the actual output array in the response and sometimes it is useful to see the redirect links in the output array as well.</p>
 
-					<p>Before we add a new feature to our Controller, let's take a look at our current movie-adding Controller method for 'add()', the way we built it in Web Service tutorial:</p>
+					<p>Before we add a new feature to our Controller, let's take a look at our current movie-adding Controller method for 'add()', the way we built it in <a href="tutorial_webservice.htm">Web Service Tutorial</a>:</p>
 						
 <pre>
 	<code>
@@ -793,7 +793,7 @@
 					
 					<p>In this tutorial we will be dealing with errors the 'old school' way. This means that we will simply return a GET variable to the redirected pages and detect their presence in the Views when generating the page.</p>
 
-					<p>This is not the best way of doing such a functionality. Wave Framework actually includes a State Messenger, as well as session and cookie managers, which can be used for these situations. But to keep this tutorial as simple as possible, then the 'old school' is the quickest and easiest way to accomplish this.</p>
+					<p>This is not the best way of doing such a functionality. Wave Framework actually includes a <a href="guide_messenger.htm">State Messenger</a> Class, as well as session and cookie managers, which can be used for these situations. But to keep this tutorial as simple as possible, then the 'old school' is the quickest and easiest way to accomplish this.</p>
 					
 					<p>We will be changing our 'success-url' and 'failure-url' by appending GET variables to both. These are the variables that we then check for in the Views. Modify your hidden form fields to the following:</p>
 					
@@ -832,7 +832,7 @@
 					
 			<h2>Where to Next?</h2>
 			
-				<p>If you already did not do this after the first Web Service tutorial, then I recommend you take a look at the API Documentation section of this documentation, which has multiple documentation pages about all of the options that Wave Framework API offers.</p>
+				<p>If you already did not do this after the first <a href="tutorial_webservice.htm">Web Service Tutorial</a>, then I recommend you take a look at the API Documentation section of this documentation, which has multiple documentation pages about all of the options that Wave Framework API offers.</p>
 				
 				<p>This documentation also has a section called Feature Guides, which mostly focuses on features that you would use when building a website. These cover a broad range of topics from caching to encryptions, user sessions, cookies and more. Feature Guides should teach you more or less everything of importance about Wave Framework and its features.</p>
 				

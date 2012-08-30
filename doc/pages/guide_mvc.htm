@@ -14,9 +14,9 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Wave Framework is loosely based on Hierarchical Model-View-Controller architecture principle that separates three logical components of software. A Model is a data representation object, usually for something like a row object from a database. A View is a component that is rendered for User Interface. And Controller is the object that receives input, validates input and executes other aspects of software within the system.</p>
+				<p>Wave Framework is loosely based on Hierarchical Model-View-Controller architecture principle that separates three logical components of software. A Model is a data representation object, usually for something like a row object from a <a href="guide_database.htm">Database</a>. A View is a component that is rendered for User Interface. And Controller is the object that receives input, validates input and executes other aspects of software within the system.</p>
 				
-				<p>MVC is hierarchical in Wave Framework, which means that every object can load other objects. It is possible for a view to load another Controller or Model or vice versa, or an entire API call itself. There is more information on this in Creating Objects documentation.</p>
+				<p>MVC is hierarchical in Wave Framework, which means that every object can load other objects. It is possible for a view to load another Controller or Model or vice versa, or an entire <a href="guide_api.htm">API</a> call itself. There is more information on this in Creating Objects documentation.</p>
 				
 				<p>Wave Framework comes with an example Model, View and Controller that are stored in '/models/', '/views/' and '/controllers/' subfolders.</p>
 				
@@ -24,11 +24,11 @@
 				
 			<h2>Models</h2>
 			
-				<p>Models are used as data-representation layer in the system. In most cases, a model would be an object representation of database row and would include methods for editing that information, saving and updating it, deleting it and so on.</p>
+				<p>Models are used as data-representation layer in the system. In most cases, a model would be an object representation of <a href="guide_database.htm">Database</a> row and would include methods for editing that information, saving and updating it, deleting it and so on.</p>
 				
-				<p>The main purpose of a model is to make the data object in infosystem independent from what actual method is used for storing that data. For example, if you used MySQL at first and now wish to use another database format or simply store an object in filesystem, then all you have to do is replace the model that is being used and called in your system. As long as the methods and input-output remain the same, then the system will continue working without problems.</p>
+				<p>The main purpose of a model is to make the data object in infosystem independent from what actual method is used for storing that data. For example, if you used MySQL at first and now wish to use another <a href="guide_database.htm">Database</a> format or simply store an object in <a href="filesystem.htm">Filesystem</a>, then all you have to do is replace the model that is being used and called in your system. As long as the methods and input-output remain the same, then the system will continue working without problems.</p>
 				
-				<p>Parameters of a model are usually representations of database column names and it is recommended to make the model methods work in input and output through an array, so that the models methods return an array if you fetch data.</p>
+				<p>Parameters of a model are usually representations of <a href="guide_database.htm">Database</a> column names and it is recommended to make the model methods work in input and output through an array, so that the models methods return an array if you fetch data.</p>
 				
 				<p>Here is an example model:</p>
 				
@@ -75,7 +75,7 @@
 	</code>
 </pre>
 
-				<p>This example would have, in database, just an ID and name that would be loaded from database. In load() method you would have the functions that load from database. In get() method you would have functionality that returns an array representation of current Models data. In save() method you would write current information to database.</p>
+				<p>This example would have, in <a href="guide_database.htm">Database</a>, just an ID and name that would be loaded from <a href="guide_database.htm">Database</a>. In load() method you would have the functions that load from <a href="guide_database.htm">Database</a>. In get() method you would have functionality that returns an array representation of current Models data. In save() method you would write current information to <a href="guide_database.htm">Database</a>.</p>
 				
 				<p>You can name your model methods whatever you want, since your own designed system actually calls these methods. The only thing that Wave Framework forbids is the use of __construct() method in a class that is extended from WWW_Factory class. For this you can use __initialize() method that is called by Factory when object is created.</p>
 			
@@ -87,7 +87,7 @@
 				
 				<p>Wave Framework does not use a separate templating system and templating language, since PHP itself is a natural templating language in many ways. While it is not recommended to write logic in your views, you can do so. Wave Framework does not restrict your abilities when using the language.</p>
 				
-				<p>It is also possible to make API calls, load other views and more within views. This allows you to create nested views and generate any kind of web pages you can think of.</p>
+				<p>It is also possible to make <a href="guide_api.htm">API</a> calls, load other views and more within views. This allows you to create nested views and generate any kind of web pages you can think of.</p>
 				
 				<p>Here is an example view:</p>
 
@@ -113,17 +113,17 @@
 	</code>
 </pre>
 				
-				<p>You can name your View methods whatever you want, but Wave Frameworks core View Controller assumes 'render()' as the method by default. A different method can be called if a different method is set in Sitemap file.</p>
+				<p>You can name your View methods whatever you want, but Wave Frameworks core <a href="guide_view.htm">View Controller</a> assumes 'render()' as the method by default. A different method can be called if a different method is set in Sitemap file.</p>
 
 				<p>The only thing that Wave Framework forbids is the use of __construct() method in a class that is extended from WWW_Factory class. For this you can use __initialize() method that is called by Factory when object is created.</p>
 			
-				<p>Views should be stored in '/views/' subfolder, with a filename of 'view.[name].php' and class name of 'WWW_view_[name]'. This same view name should be defined in the Sitemap in /resources/[language].sitemap.ini file, so that the default View Controller could load a View for a requested URL.</p>
+				<p>Views should be stored in '/views/' subfolder, with a filename of 'view.[name].php' and class name of 'WWW_view_[name]'. This same view name should be defined in the Sitemap in /resources/[language].sitemap.ini file, so that the default <a href="guide_view.htm">View Controller</a> could load a View for a requested URL.</p>
 			
 			<h2>Controllers</h2>
 			
-				<p>Controllers are the objects in Wave Framework that are the first objects called by API. Any API call - the ones done over HTTP as well as internal calls - load a controller first and foremost and execute a method in that controller.</p>
+				<p>Controllers are the objects in Wave Framework that are the first objects called by API. Any <a href="guide_api.htm">API</a> call - the ones done over HTTP as well as internal calls - load a controller first and foremost and execute a method in that controller.</p>
 				
-				<p>Public methods of Controllers act as API calls, where the 'www-command' value would essentially be [controller]-[method]. Private methods cannot be called through API.</p>
+				<p>Public methods of Controllers act as <a href="guide_api.htm">API</a> calls, where the 'www-command' value would essentially be [controller]-[method]. Private methods cannot be called through API.</p>
 				
 				<p>Controllers would be used for mainly validating input and then returning output to the client or function that called the API and thus the controller. Controllers can be used for anything: user logins, getting tweets from Twitter API, validating or converting input data and more.</p>
 				

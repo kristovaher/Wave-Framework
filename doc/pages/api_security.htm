@@ -20,7 +20,7 @@
 			
 				<p>Wave Framework comes with an extensive set of tools for securing your API. Wave Framework has one public API profile as well as configuration options for private API profiles with secret keys, session tokens, timestamp and input hash validations. It also supports encryption of data that is sent as well as received as a response.</p>
 				
-				<p>Wave Framework API can be used either over HTTP, from within Wave Framework Controllers and MVC Objects, or directly in PHP. This document here details the use of Wave Framework API over PHP and outside the scope of HTTP requests and MVC Objects of Wave Framework. As a result, it shows all the details of how Wave Framework API expects API calls when dealing with secure requests.</p>
+				<p>Wave Framework API can be used either over HTTP, from within Wave Framework Controllers and <a href="guide_mvc.htm">MVC</a> Objects, or directly in PHP. This document here details the use of Wave Framework API over PHP and outside the scope of HTTP requests and <a href="guide_mvc.htm">MVC</a> Objects of Wave Framework. As a result, it shows all the details of how Wave Framework API expects <a href="guide_api.htm">API</a> calls when dealing with secure requests.</p>
 				
 				<p>When it comes to API validation, these are the most common methods how a developer might wish to build their API profiles and authentications:</p>
 				
@@ -30,15 +30,15 @@
 					<li>The less secure API authentication method is similar to how majority of web service API's are built these days. You create a session token using API profile name and secret key and then submit this session token with every API request after that. This is a less secure method, but is faster and easier to build and maintain.</li>
 				</ul>
 				
-				<p>Details and information shown in this document is utilized thoroughly within Wave Framework itself. Index Gateway uses API Handler, that calls methods similarly to this document here and you can take a look at API Handler at /engine/handler.api.php to see it actually in use. Some of the things, such as hash validations, are also done in another core file of the framework: PHP API Wrapper in /engine/class.www-wrapper.php deals with some of the same validations as shown in this document, though Wrapper makes requests over HTTP and not directly as shown here.</p>
+				<p>Details and information shown in this document is utilized thoroughly within Wave Framework itself. <a href="gateway.htm">Index Gateway</a> uses <a href="handler_api.htm">API Handler</a>, that calls methods similarly to this document here and you can take a look at <a href="handler_api.htm">API Handler</a> at '/engine/handler.api.php' to see it actually in use. Some of the things, such as hash validations, are also done in another core file of the framework: PHP API Wrapper in /engine/class.www-wrapper.php deals with some of the same validations as shown in this document, though Wrapper makes requests over HTTP and not directly as shown here.</p>
 				
 				<p>The examples here, especially in relation to what API flags to send and what values to send, apply to all ways how API can be communicated with, regardless of whether the request is made on the same server or over HTTP. If you are reading this document and want to make HTTP requests that are validated the same way, then the examples shown here can easily be converted to HTTP requests since the variables and rules are exactly the same.</p>
 				
-				<p>It is also recommended to perhaps make yourself somewhat familiar with the documentation about the API Class and State Class of Wave Framework. Both of which are detailed in other documentation pages.</p>
+				<p>It is also recommended to perhaps make yourself somewhat familiar with the documentation about the <a href="api.htm">API</a> Class and <a href="state.htm">State</a> Class of Wave Framework. Both of which are detailed in other documentation pages.</p>
 
 			<h2>API Profiles</h2>
 			
-				<p>API Profiles of Wave Framework are stored in /resources/api.profiles.ini file. This file stores an array of API profile names and their secret keys and other configuration options. When API is called with an API profile that is from this list and is not set as public in framework Configuration, then this API profile has to be authenticated with either a secret key or a session token. Every API profile is a group in this file, it's name written in brackets, followed by various settings for the API profile.</p>
+				<p>API Profiles of Wave Framework are stored in /resources/api.profiles.ini file. This file stores an array of API profile names and their secret keys and other configuration options. When API is called with an API profile that is from this list and is not set as public in framework <a href="configuration.htm">Configuration</a>, then this API profile has to be authenticated with either a secret key or a session token. Every API profile is a group in this file, it's name written in brackets, followed by various settings for the API profile.</p>
 				
 				<p>One API profile in the API Profiles file is considered public and is set by 'api-public-profile' configuration setting in /config.ini file. If this is not set in configuration, then 'public' is the assumed name for a public API profile.</p>
 				
@@ -59,7 +59,7 @@
 					<li><b>hash-validation</b> - This setting is set to 1 by default. If this is set to 1, then hash-based validation is used, which means that a 'www-hash' value has to be generated from input data together with secret key or session token and sent with the request. Server will compare this value to its own calculated value and if it finds a difference, then the request is considered as failed.</li>
 				</ul>
 				
-				<p>You can define as many API profiles as you need in this file, or you can also generate this file yourself from database or through other methods.</p>
+				<p>You can define as many API profiles as you need in this file, or you can also generate this file yourself from <a href="guide_database.htm">Database</a> or through other methods.</p>
 				
 			<h2>Basic Request from PHP</h2>
 			
@@ -124,9 +124,9 @@
 				<p>WWW_API->command() method accepts three other parameters after the input array. The first parameter sent to command() method is the input array, but the other three - in sequence - are:</p>
 				
 				<ul>
-					<li><b>$useBuffer</b> - If this is set to true, then API is allowed to use buffer, which means that if multiple of the same API calls with the same input are made within a single HTTP request, then these results are returned from buffer rather than generated and executed fully each time. This setting is false by default.</li>
-					<li><b>$apiValidation</b> - It is also possible to suppress API validation entirely if the request is made in localhost by setting this value as false. In most cases, PHP code itself should already be validated so in some circumstances it may be needed to use an API call that would otherwise require a validation, but cannot be validated or if validation is considered too slow. If this is turned off, then API will not use any kind of validation, regardless of validation settings sent to it. This setting is true by default.</li>
-					<li><b>$useLogger</b> - This tells API that it can use a Logger (based on WWW_Logger class). If this is set to true and Logger is used by State, then API will also attempt to write into Wave Framework system log. This is false by default.</li>
+					<li><b>$useBuffer</b> - If this is set to true, then API is allowed to use buffer, which means that if multiple of the same <a href="guide_api.htm">API</a> calls with the same input are made within a single HTTP request, then these results are returned from buffer rather than generated and executed fully each time. This setting is false by default.</li>
+					<li><b>$apiValidation</b> - It is also possible to suppress API validation entirely if the request is made in localhost by setting this value as false. In most cases, PHP code itself should already be validated so in some circumstances it may be needed to use an <a href="guide_api.htm">API</a> call that would otherwise require a validation, but cannot be validated or if validation is considered too slow. If this is turned off, then API will not use any kind of validation, regardless of validation settings sent to it. This setting is true by default.</li>
+					<li><b>$useLogger</b> - This tells API that it can use a <a href="logger.htm">Logger</a>. If this is set to true and <a href="logger.htm">Logger</a> is used by <a href="guide_state.htm">State</a>, then <a href="guide_api.htm">API</a> will also attempt to write into Wave Framework system log. This is false by default.</li>
 				</ul>
 
 			<h2>Useful PHP Functions</h2>
@@ -175,13 +175,13 @@
 					<li>Server A makes a 'www-create-session' (as a value for 'www-command') call to server B, together with the 'www-profile' name that was created for server A. Another variable, 'www-hash', is also sent with the request. Value of 'www-hash' is a serialized input that is salted with secret key of the API profile and is hashed with SHA-1.</li>
 					<li>Server B validates the hash and if everything seems alright, it returns 'www-token' to server A that Server A can use to generate hashes with in subsequent requests.</li>
 					<li>Server A makes other API requests with other 'www-command' values and other input data. 'www-hash' for those values is generated by using the previously returned 'www-token' as the hash salt for SHA-1.</li>
-					<li>If server B validates the input and compares the 'www-hash' values, then server B allows the API call to go through.</li>
+					<li>If server B validates the input and compares the 'www-hash' values, then server B allows the <a href="guide_api.htm">API</a> call to go through.</li>
 					<li><i>It is also possible to request server B to return a 'www-hash' of their own as part of the response. If 'www-return-hash' is sent with the value 1, then server B will also build a validation hash as a response and server A can validate this response the same way server A did.</i></li>
 				</ul>
 				
-				<p>Main purpose of hash based validation is to prevent middle-man tampering of the input and response data. Since a hash validation string is generated from all the data and the token or secret key is only known to the two servers, then the middle man - who might listen in and edit the data that is transmitted prior to it arriving in the destination - cannot edit the data without the two servers learning about it. If the hash validation fails, then API will not accept the API call since it considers it insecure.</p>
+				<p>Main purpose of hash based validation is to prevent middle-man tampering of the input and response data. Since a hash validation string is generated from all the data and the token or secret key is only known to the two servers, then the middle man - who might listen in and edit the data that is transmitted prior to it arriving in the destination - cannot edit the data without the two servers learning about it. If the hash validation fails, then API will not accept the <a href="guide_api.htm">API</a> call since it considers it insecure.</p>
 				
-				<p>Quite often the hash validation fails also because it might be generated incorrectly. If SHA-1 hash validation - that will be shown in examples below - is not possible on your server, then you can also use a less secure method for validating API calls that is detailed in the next section.</p>
+				<p>Quite often the hash validation fails also because it might be generated incorrectly. If SHA-1 hash validation - that will be shown in examples below - is not possible on your server, then you can also use a less secure method for validating <a href="guide_api.htm">API</a> calls that is detailed in the next section.</p>
 				
 				<h3>Generating a Session Token</h3>
 				
@@ -214,7 +214,7 @@
 	</code>
 </pre>
 
-					<p>This error means that we did not generate 'www-hash' and submit it with the API call as an input data. To create a proper validation hash, we need to serialize the entire input data array and generate a SHA-1 hash of it by salting it with our secret key.</p>
+					<p>This error means that we did not generate 'www-hash' and submit it with the <a href="guide_api.htm">API</a> call as an input data. To create a proper validation hash, we need to serialize the entire input data array and generate a SHA-1 hash of it by salting it with our secret key.</p>
 					
 					<p>There are two functions that were given above, in section 'Useful PHP Functions', that can be used for generating this validation hash that Wave Framework accepts. The basic idea of Wave Framework input validation is that the entire input array will be recursively sorted based on key values and then serialized with http_build_query() function. Secret key (when creating a session token) is appended to this serialized array and the whole array is then hashed with SHA-1.</p>
 					
@@ -252,7 +252,7 @@
 				
 				<h3>Making a Request With the Token</h3>
 				
-					<p>Now that we have the token, we can change the input data to make a request to 'example-get' API call and use the newly generated token together with our secret key. When generating 'www-hash' with a token, the order of variables that are sent to SHA-1 is always serialized string, then the session token and then the secret key:</p>
+					<p>Now that we have the token, we can change the input data to make a request to 'example-get' <a href="guide_api.htm">API</a> call and use the newly generated token together with our secret key. When generating 'www-hash' with a token, the order of variables that are sent to SHA-1 is always serialized string, then the session token and then the secret key:</p>
 				
 <pre>
 	<code>
@@ -306,7 +306,7 @@
 					<li>Server A makes a 'www-create-session' (as a value for 'www-command') call to server B, together with the 'www-profile' name that was created for server A and the 'www-secret-key' value that is set to secret key of that API profile.</li>
 					<li>Server B validates the secret key and if everything seems alright, it returns 'www-token' to server A that Server A can then use to send as part of subsequent requests.</li>
 					<li>Server A makes other API requests with other 'www-command' values and other input data and provides the session token as 'www-token' as part of the request input data.</li>
-					<li>If server B finds the 'www-token' value to be correct, then the API call is validated and executed, with the response returned to server A.</li>
+					<li>If server B finds the 'www-token' value to be correct, then the <a href="guide_api.htm">API</a> call is validated and executed, with the response returned to server A.</li>
 				</ul>
 				
 				<p>In order to make API Profile not use the default hash based validation, 'hash-validation' flag has to be turned off for the API profile in /resources/api.profiles.ini file. For example, this would be a good API profile for testing this type of validation:</p>
@@ -360,7 +360,7 @@
 				
 				<h3>Making a Request With the Token</h3>
 				
-					<p>Now that we have the token, we can change the input data to make a request to 'example-get' API call and use our newly generated token as part of the request. The secret key should not be sent in next request as it minimizes the risk of secret key becoming compromised. Let's make the input data accordingly and send the data to API:</p>
+					<p>Now that we have the token, we can change the input data to make a request to 'example-get' <a href="guide_api.htm">API</a> call and use our newly generated token as part of the request. The secret key should not be sent in next request as it minimizes the risk of secret key becoming compromised. Let's make the input data accordingly and send the data to API:</p>
 					
 <pre>
 	<code>
@@ -405,13 +405,13 @@
 				
 				<h3>www-timestamp</h3>
 				
-					<p>This variable is required to be sent as part of the API request input data, if the API profile has 'timestamp-timeout' setting used and not 0. This value should be the UNIX timestamp at the time of making a request. Wave Framework API will check if this timestamp is within valid range (based on API Profile 'timestamp-timeout' setting) and if it is, then API call is made, otherwise it will return an error.</p>
+					<p>This variable is required to be sent as part of the API request input data, if the API profile has 'timestamp-timeout' setting used and not 0. This value should be the UNIX timestamp at the time of making a request. Wave Framework API will check if this timestamp is within valid range (based on API Profile 'timestamp-timeout' setting) and if it is, then <a href="guide_api.htm">API</a> call is made, otherwise it will return an error.</p>
 					
-					<p>This type of timestamp check can protect against replay attacks where the same API call is sent to the server repeatedly, possibly revealing sensitive information.</p>
+					<p>This type of timestamp check can protect against replay attacks where the same <a href="guide_api.htm">API</a> call is sent to the server repeatedly, possibly revealing sensitive information.</p>
 				
 				<h3>www-return-timestamp</h3>
 				
-					<p>If this is set to 1 in the request, then this requests that the Wave Framework API also returns a UNIX timestamp at the time of API call. This can then be checked by the request-making client to validate that the response came within acceptable timeframe.</p>
+					<p>If this is set to 1 in the request, then this requests that the Wave Framework API also returns a UNIX timestamp at the time of <a href="guide_api.htm">API</a> call. This can then be checked by the request-making client to validate that the response came within acceptable timeframe.</p>
 				
 				<h3>www-return-hash</h3>
 				

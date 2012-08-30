@@ -16,17 +16,17 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>Wave Framework is built around the internal API. Every MVC Object built on Wave Framework can make API calls, which means that most web services and websites could incorporate nested API calls across the system.</p>
+				<p>Wave Framework is built around the internal API. Every <a href="guide_mvc.htm">MVC</a> Object built on Wave Framework can make API calls, which means that most web services and websites could incorporate nested API calls across the system.</p>
 				
-				<p>API is used internally first to see what page the client is requesting as well as for loading a view, if a page is requested. Requests to HTTP API are handled by API Handler as well. And then there are internal API calls, where the objects and methods that have been called by Wave Framework through Handlers can make their own API calls.</p>
+				<p>API is used internally first to see what page the client is requesting as well as for loading a view, if a page is requested. Requests to HTTP API are handled by <a href="handler_api.htm">API Handler</a> as well. And then there are internal API calls, where the objects and methods that have been called by Wave Framework through Handlers can make their own API calls.</p>
 				
 				<p>This document here doesn't cover the HTTP API use, nor does it go into detail about all the options and configuration flags of the API. It is recommended to consult with the API Documentation section that gives extensive insight about all the features within the API</p>
 				
 			<h2>Internal API Calls</h2>
 			
-				<p>While a lot of functionality can be built within Wave Framework Models, Views and Controllers by loading other MVC objects dynamically through the getModel(), getView() and getController() methods that are detailed in Creating Objects documentation, quite often it is useful to just make an API call to the system.</p>
+				<p>While a lot of functionality can be built within Wave Framework Models, Views and Controllers by loading other <a href="guide_mvc.htm">MVC</a> objects dynamically through the getModel(), getView() and getController() methods that are detailed in Creating Objects documentation, quite often it is useful to just make an API call to the system.</p>
 				
-				<p>Making API requests internally allows you to call any functionality across your system that is already built in there. For example, if you have an API call where you load a list of your users, then you can call that API request anywhere. This is like calling a master function, except one that is dynamically loaded and takes into account the environment and current system State.</p>
+				<p>Making API requests internally allows you to call any functionality across your system that is already built in there. For example, if you have an API call where you load a list of your users, then you can call that API request anywhere. This is like calling a master function, except one that is dynamically loaded and takes into account the environment and current system <a href="guide_state.htm">State</a>.</p>
 				
 				<p>API requests are similar in rule to how they would be when making such a request over HTTP. You need to always provide just one thing: the command name. This command name (that in HTTP API would be defined with 'www-command' variable) is used to find what controller and what method you are requesting. Here is a simple example of making an internal API call:</p>
 				
@@ -46,7 +46,7 @@
 	</code>
 </pre>
 				
-				<p>Another notable things about when using an internal API is that you do not have to use any API profiles for internal API calls. Internal API calls are considered to be validated already, since in order for the controller to even run, the call already has to be validated so double validation is not ever needed. All API calls are available for MVC Objects in Wave Framework internally.</p>
+				<p>Another notable things about when using an internal API is that you do not have to use any API profiles for internal API calls. Internal API calls are considered to be validated already, since in order for the controller to even run, the call already has to be validated so double validation is not ever needed. All API calls are available for <a href="guide_mvc.htm">MVC</a> Objects in Wave Framework internally.</p>
 			
 				<p>Wave Framework also has an internal API buffer for calls, which means that when Wave Framework detects that you are making the same API call with the exact same input within the same HTTP request, then it returns data automatically from a buffer. This speeds up script execution if you reuse some API calls in multiple locations.</p>
 				
@@ -62,7 +62,7 @@
 
 			<h2>Checking the Result of an API Call</h2>
 			
-				<p>If your controllers are built by taking into account the standardized response arrays that includes www-response-code value in the array - topic which is covered in MVC Guide documentation - then there is a simple helper function that you can use to check if the API call was successful or not. This method simply returns false if the response error code below 500 was sent as response and it returns 'true' if response code of 500 or later was the response.</p>
+				<p>If your controllers are built by taking into account the standardized response arrays that includes www-response-code value in the array - topic which is covered in <a href="guide_mvc.htm">MVC</a> documentation - then there is a simple helper function that you can use to check if the API call was successful or not. This method simply returns false if the response error code below 500 was sent as response and it returns 'true' if response code of 500 or later was the response.</p>
 				
 				<p>The idea behind this is that while your API and Controllers can be very complicated in functionality, quite often you simply need to know if your API call was successful or not. For example, you can use this to test if your user was successfully logged in or if adding something to your database worked or not.</p>
 				
@@ -100,7 +100,7 @@
 			
 				<p>Wave Framework also comes with an API Wrapper for both PHP and JavaScript, which other web servers can use to communicate with Wave Framework even when these systems themselves do not use Wave Framework. These classes are independent and standalone.</p>
 				
-				<p>But it is also possible to dynamically load a PHP API Wrapper from within MVC Objects, which means that you can make your Wave Framework system send HTTP requests to another system that uses Wave Framework API.</p>
+				<p>But it is also possible to dynamically load a PHP API Wrapper from within <a href="guide_mvc.htm">MVC</a> Objects, which means that you can make your Wave Framework system send HTTP requests to another system that uses Wave Framework API.</p>
 				
 				<p>Factory essentially allows you to create a new API Wrapper object. You only have to provide the HTTP address of the API when creating the object, like this:</p>
 				

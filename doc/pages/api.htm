@@ -14,7 +14,7 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>API class is one of the core classes of Wave Framework. Every command and function in Wave Framework is executed through API object. API class implements State class - which stores configuration - and executes any and all functionality that is built within Wave Framework. It is not recommended to modify this class, in fact this class is defined as final. Methods of this class take user input, load MVC objects and execute their methods and return data in the appropriate format.</p>
+				<p>API class is one of the core classes of Wave Framework. Every command and function in Wave Framework is executed through API object. API class implements <a href="state.htm">State</a> Class - which stores configuration - and executes any and all functionality that is built within Wave Framework. It is not recommended to modify this class, in fact this class is defined as final. Methods of this class take user input, load <a href="guide_mvc.htm">MVC</a> objects and execute their methods and return data in the appropriate format.</p>
 				
 				<p>API class executes methods of both public API calls and private authenticated API profiles.</p>
 				
@@ -22,7 +22,7 @@
 				
 			<h2>Using API class</h2>
 			
-				<p>API class is an internal Wave Framework class and should not be used outside the context of Wave Framework. API and Data Handlers use the API in the following way, for example:</p>
+				<p>API class is an internal Wave Framework class and should not be used outside the context of Wave Framework. API and <a href="handler_data.htm">Data Handlers</a> use the API in the following way, for example:</p>
 				
 <pre>
 	<code>
@@ -51,7 +51,7 @@
 	</code>
 </pre>
 
-				<p>You can take a look at the API Handler code to see how additional data is configured about API class.</p>
+				<p>You can take a look at the <a href="handler_api.htm">API Handler</a> code to see how additional data is configured about API class.</p>
 
 			<h2>API Class Parameters</h2>
 
@@ -69,7 +69,7 @@
 					
 				<h3>public $apiLoggerData=array()</h3>
 				
-					<p>This is an array that stores data that will be logged by Logger object, if Logger is used in the system. Content length and other data is stored for logging purposes in this array.</p>
+					<p>This is an array that stores data that will be logged by <a href="logger.htm">Logger</a> object, if <a href="logger.htm">Logger</a> is used in the system. Content length and other data is stored for logging purposes in this array.</p>
 					
 				<h3>private $splitTimes=array()</h3>
 				
@@ -77,11 +77,11 @@
 					
 				<h3>public $state=false</h3>
 				
-					<p>This variable stores the initialized State object that carries a lot of configuration and environment data and functionality.</p>
+					<p>This variable stores the initialized <a href="state.htm">State</a> object that carries a lot of configuration and environment data and functionality.</p>
 					
 				<h3>public $apc=false</h3>
 				
-					<p>This variable defines whether APC is available in the server environment. If this variable is true, then some caching methods will utilize APC instead of filesystem.</p>
+					<p>This variable defines whether APC is available in the server environment. If this variable is true, then some caching methods will utilize APC instead of <a href="filesystem.htm">Filesystem</a>.</p>
 					
 				<h3>public $callIndex=0</h3>
 				
@@ -97,25 +97,25 @@
 					
 				<h3>private $internalLogging=false</h3>
 				
-					<p>This holds configuration value from State and turns on internal logging, if configuration has internal logging enabled. If this remains false, then internal log entries will not be stored.</p>
+					<p>This holds configuration value from <a href="state.htm">State</a> and turns on internal logging, if configuration has internal logging enabled. If this remains false, then internal log entries will not be stored.</p>
 					
 				<h3>private $internalLog=array()</h3>
 				
-					<p>This is an array that stores all the internal log entries that will be written to filesystem once API class has finished dealing with the request.</p>
+					<p>This is an array that stores all the internal log entries that will be written to <a href="filesystem.htm">Filesystem</a> once API class has finished dealing with the request.</p>
 					
 			<h2>API Class Methods</h2>
 			
 				<h3>final public function __construct($state=false,$apiProfiles=false)</h3>
 				
-					<p>API object construction accepts State object in $state and array data of API profiles as $apiProfiles. If State is not defined, then API class attempts to automatically create a new State object, thus API class is highly dependent on State class being present. API object construction also loads Factory class, if it is not defined and tests if server supports APC or not. If API profiles are not submitted to API during construction, then API will attempt to load API profiles from the *.ini file. Same applies to observers.</p>
+					<p>API object construction accepts <a href="guide_state.htm">State</a> object in $state and array data of API profiles as $apiProfiles. If <a href="guide_state.htm">State</a> is not defined, then API class attempts to automatically create a new <a href="guide_state.htm">State</a> object, thus API class is highly dependent on <a href="state.htm">State</a> Class being present. API object construction also loads Factory class, if it is not defined and tests if server supports APC or not. If API profiles are not submitted to API during construction, then API will attempt to load API profiles from the *.ini file. Same applies to observers.</p>
 					
 				<h3>final public function __destruct()</h3>
 					
-					<p>Once API object is not used anymore, the object attempts to write internal log to filesystem if internal log is used and has any log data to store.</p>
+					<p>Once API object is not used anymore, the object attempts to write internal log to <a href="filesystem.htm">Filesystem</a> if internal log is used and has any log data to store.</p>
 					
 				<h3>final public function command($apiInputData=array(),$useBuffer=false,$apiValidation=true,$useLogger=false)</h3>
 					
-					<p>This is one of the two core methods of API class. It accepts input data from $apiInputData which is an array of keys and values. Some keys are API dependent flags with the wave prefix of 'www-'. $useBuffer setting defines if buffer can be used, which means that if the same exact input has already been sent within the same HTTP request, then it returns data from buffer rather than going through the process again. $apiValidation is a flag that sets whether API profiles are validated or not, this setting is turned off for internal API calls that have already been validated. $useLogger is a flag that tells API that Logger class is used by the system. This method validates the API call, loads MVC objects and executes their methods and sends the result to output() function.</p>
+					<p>This is one of the two core methods of API class. It accepts input data from $apiInputData which is an array of keys and values. Some keys are API dependent flags with the wave prefix of 'www-'. $useBuffer setting defines if buffer can be used, which means that if the same exact input has already been sent within the same HTTP request, then it returns data from buffer rather than going through the process again. $apiValidation is a flag that sets whether API profiles are validated or not, this setting is turned off for internal API calls that have already been validated. $useLogger is a flag that tells API that <a href="logger.htm">Logger</a> class is used by the system. This method validates the API call, loads <a href="guide_mvc.htm">MVC</a> objects and executes their methods and sends the result to output() function.</p>
 					
 					<p>This is the step by step list of what command() method does:</p>
 					

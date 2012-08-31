@@ -104,6 +104,10 @@
 				
 					<p>This method will tell Wave Framework API not to cache current <a href="guide_api.htm">API</a> call, no matter what. This means that while current <a href="guide_api.htm">API</a> call may be loaded from cache, but in case the cache does not exist the result will not be written to cache.</p>
 					
+				<h3>final protected function getReturnType()</h3>
+				
+					<p>This returns the www-return-type of currently known <a href="guide_api.htm">API</a> request. This can be used to modify the request response based on what data is requested, if this is needed.</p>
+					
 				<h3>final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$persistentConnection=false)</h3>
 				
 					<p>This method can be used to dynamically create a new database connection object from <a href="database.htm">Database</a> class. $type is the database type, $host, $database, $username, $password are database connection credentials. And $showErrors defines whether errors should be thrown if encountered and $persistentConnection sets whether connection should be reused, if such already exists.</p>

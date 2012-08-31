@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.1.4
+ * @version    3.1.6
  */
 
 class WWW_Wrapper {
@@ -44,7 +44,7 @@ class WWW_Wrapper {
 		'apiProfile'=>false,
 		'apiSecretKey'=>false,
 		'apiToken'=>false,
-		'apiPublicToken':false,
+		'apiPublicToken'=>false,
 		'apiHashValidation'=>true,
 		'apiStateKey'=>false,
 		'returnHash'=>false,
@@ -117,7 +117,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.0.0 (PHP)';
+	private $userAgent='WaveFramework/3.1.6 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -255,6 +255,7 @@ class WWW_Wrapper {
 		 * in $location or in general. Warning, this method technically removes the contents 
 		 * of any writable file if set in $location. If $location is not set, then it attempts 
 		 * to use the previously defined cookie container.
+		 *
 		 * @param string [$location] location of cookies file, if this is not set then uses current one
 		 * @return boolean
 		 */
@@ -273,6 +274,17 @@ class WWW_Wrapper {
 			} else {
 				return false;
 			}
+		}
+		
+		/**
+		 * This method returns currently used token, if one exists. This can be stored for 
+		 * subsequent requests with Wrapper (or manually over HTTP).
+		 *
+		 * @return string or false if token does not exist
+		 */
+		public function getToken(){
+			// Returning from the state array
+			return $this->apiState['apiToken'];
 		}
 		
 	// INPUT

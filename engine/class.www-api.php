@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.1.5
+ * @version    3.1.6
  */
 
 final class WWW_API {
@@ -85,6 +85,12 @@ final class WWW_API {
 	 * API call to cache and which not.
 	 */
 	public $noCache=array();
+	
+	/**
+	 * This holds the return type information of API calls. This can be later fetched by controllers 
+	 * to see what type of data is being requested from the API.
+	 */
+	public $returnTypes=array();
 	
 	/**
 	 * This holds configuration value from State and turns on internal logging, if configuration 
@@ -267,6 +273,9 @@ final class WWW_API {
 					'token-directory'=>false,
 					'token-timeout'=>false
 				);
+				
+				// Setting the return type to cache index
+				$this->returnTypes[$apiState['call-index']]=$apiState['return-type'];
 				
 				// Turning output off if the HTTP HEAD request is made
 				if($this->state->data['http-request-method']=='HEAD'){
@@ -554,7 +563,7 @@ final class WWW_API {
 								}
 							}
 							// Token for API access is generated simply from current profile name and request time
-							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time'].$this->state->data['server-addr'].$this->state->data['request-id'].microtime().rand(1,1000000));
+							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time'].$this->state->data['server-ip'].$this->state->data['request-id'].microtime().rand(1,1000000));
 							// Session token file is created and token itself is returned to the user agent as a successful request
 							if(file_put_contents($apiState['token-directory'].$apiState['token-file'],$apiState['token'])){
 								// Token is returned to user agent together with current token timeout setting

@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.1.4
+ * @version    3.1.6
  */
 
 /*
@@ -106,7 +106,7 @@ function WWW_Wrapper(address,language){
 	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
 	 * defined for future purpose.
 	 */
-	var userAgent='WWWFramework/3.0.0 (JavaScript)';
+	var userAgent='WWWFramework/3.1.6 (JavaScript)';
 	
 	/*
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -154,6 +154,17 @@ function WWW_Wrapper(address,language){
 		this.clearLog=function(){
 			log=new Array();
 			return true;
+		}
+		
+		/*
+		 * This method returns currently used token, if one exists. This can be stored for 
+		 * subsequent requests with Wrapper (or manually over HTTP).
+		 *
+		 * @return string or false if token does not exist
+		 */
+		this.getToken=function(){
+			// Returning from the state
+			return apiState.apiToken;
 		}
 		
 	// INPUT

@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.1.6
  */
 
 class WWW_Factory {
@@ -125,6 +125,17 @@ class WWW_Factory {
 		 */
 		final protected function clearBuffer(){
 			return $this->WWW_API->clearBuffer();
+		}
+		
+		/**
+		 * This returns the www-return-type of currently known API request. This can be used to 
+		 * modify the request response based on what data is requested, if this is needed.
+		 *
+		 * @return string
+		 */
+		final protected function getReturnType(){
+			// This is returned from API
+			return $this->WWW_API->returnTypes[$this->WWW_API_callIndex];
 		}
 	
 	// STATE DATA SET AND GET

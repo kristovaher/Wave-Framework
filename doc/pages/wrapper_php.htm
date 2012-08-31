@@ -196,6 +196,14 @@
 				
 				<p>If returned result is 'false', then the request has failed. You should then look at the log, which details the reason for failure. Last error message is stored as $www-&gt;errorMessage and $www-responseCode. What each error code means, take a look at Response Codes documentation.</p>
 				
+				<p>Also it is possible to get information about your currently used session token. If you have generated a token with Wrapper and you do not know what the token itself is, then you can get the currently active token with getToken() request, like this:</p>
+			
+<pre>
+	<code>
+	var token=WWW.getToken();
+	</code>
+</pre>
+				
 			<h2>PHP API Wrapper Class Parameters</h2>
 			
 				<h3>private $apiAddress</h3>
@@ -281,6 +289,10 @@
 				<h3>public function clearCookieContainer($location=false)</h3>
 					
 					<p>This method will clear and delete all cookies stored in cookie container defined in $location or in general. Warning, this method technically removes the contents of any writable file if set in $location. If $location is not set, then it attempts to use the previously defined cookie container.</p>
+			
+				<h3>public function getToken()</h3>
+					
+					<p>This method returns currently used token, if one exists. This can be stored for subsequent requests with Wrapper (or manually over HTTP).</p>
 			
 				<h3>public function setInput($input,$value=false)</h3>
 					

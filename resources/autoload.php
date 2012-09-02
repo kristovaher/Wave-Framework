@@ -20,7 +20,17 @@
  * @license    Unrestricted
  * @tutorial   /doc/pages/guide_autoload.htm
  * @since      1.0.0
- * @version    1.0.0
+ * @version    3.1.7
  */
+ 
+ 
+ /**
+  * You can access some of the core variables and defined objects here. This includes State 
+  * object from $state variable, that includes all configuration and some session/cookie 
+  * related functionality. You can also use $databaseConnection object, which is defined if 
+  * database settings are set in Configuration. Thus you can make database requests in this 
+  * Autoload script. It is recommended that you read more in Autoload documentation.
+  *
+  */
 	
 ?>

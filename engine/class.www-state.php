@@ -1148,7 +1148,9 @@ class WWW_State	{
 		final public function getSession($key=false){
 			// Making sure that sessions have been started
 			if(!$this->data['session-id']){
-				$this->startSession();
+				// Differently from session setting, this returns false if sessions are not started
+				// THis is because Data and API Handlers automatically start sessions
+				return false;
 			}
 			// Multiple keys can be returned
 			if(is_array($key)){

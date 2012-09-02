@@ -426,7 +426,7 @@ class WWW_controller_url extends WWW_Factory {
 						// Updating user session data from database (good if it has changed)
 						// $this->setUser($userData);
 						// Setting user permissions based on most recent information from database
-						// $this->setpermissions(explode(',',$userData['permissions']));
+						// $this->setPermissions(explode(',',$userData['permissions']));
 						// Testing if permissions are included
 						// if(!empty($data['permissions']) && !$this->checkPermissions($data['permissions'])){
 							// $failed=true;
@@ -441,7 +441,7 @@ class WWW_controller_url extends WWW_Factory {
 				// if($failed){
 					// $siteMapReference=$this->getSitemap();
 					// Success array is used since technically URL solving has been a 'success'
-					// return $this->resultTrue('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
+					// return $this->resultFalse('Authentication required',array('www-temporary-redirect'=>$siteMapReference['login']['url']));
 				// }
 				
 			// }

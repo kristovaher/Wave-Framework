@@ -22,7 +22,7 @@
 				
 			<h2>Using Autoload Script</h2>
 				
-				<p>It is not recommended to edit <a href="gateway.htm">Index Gateway</a> file at '/index.php' or handler files in '/engine/' subfolder for that purpose. Editing those files should be the last resort. These files however load a script that is situated in '/resources/autoload.php' file. As a result, everything that is defined in that Autoload script will be included with every HTTP request that is made to Wave Framework.</p>
+				<p>It is not recommended to edit <a href="gateway.htm">Index Gateway</a> file at '/index.php' or handler files in '/engine/' subfolder when you wish to include libraries or run additional global methods before Wave Framework API is loaded. Editing Index Gateway and Handler files should be the last resort. Data and API Handlers however load a script that is situated in '/resources/autoload.php' file. As a result, everything that is defined in that Autoload script will be included with every HTTP request that is made to Wave Framework.</p>
 				
 				<p>For example, if you wish to include a method in your system that is accessible everywhere for checking whether your server environment is 64bit or 32bit, then you can add this to your autoload script:</p>
 				
@@ -40,9 +40,28 @@
 	</code>
 </pre>
 
-				<p>If this is defined in Autoload script, then this function is now available for all <a href="guide_mvc.htm">MVC</a> objects in the system and can be integrated as part of the web service or website.</p>
+				<p>If this is defined in Autoload script, then this function is now available for all <a href="guide_mvc.htm">MVC</a> objects in the system and can be integrated as part of the web service or website. Everything that is implemented in Autoload will be loaded with every PHP request, so make sure that you only include things that do have to be there with majority of your requests and functionality.</p>
 				
-				<p>By default the Autoload script is entirely empty and nothing is loaded automatically by Wave Framework.</p>
+				<p>By default the Autoload script is entirely empty and nothing is loaded from it by Wave Framework.</p>
+				
+			<h2>Usable Variables and Objects</h2>
+			
+				<p>Autoload is loaded procedurally by Data and API Handlers of Wave Framework. This means that you have access to some of the core aspects of Wave Framework even before API itself is loaded. This also means that you can use the data that is stored by these variables in your Autoload functions, classes or more.</p>
+				
+				<p>This also means that you should be careful not to rewrite some of these variables, since they may affect the execution of Wave Framework itself. These are the variables that are available by the time Autoload is executed:</p>
+				
+				<ul>
+					<li><b>$state</b> - This holds the <a href="state.htm">WWW_State</a> object and has access to the entire <a href="guide_state.htm">State</a> functionality, from Configuration to sessions and more.</li>
+					<li><b>$databaseConnection</b> - This exists only if configuration has <a href="guide_database.htm">State</a> settings set. This holds the <a href="database.htm">WWW_Database</a> object and can be used to make database requests.</li>
+					<li><b>$microTime</b> - This stores the microtime from the moment script started executing. It is used by Logger to calculate script execution time.</li>
+					<li><b>$resourceAddress, $resourceInfo, $resourceFolder, $resourceFile, $resourceExtension</b> - These are temporary variables that Index Gateway uses to find out what Handler to use. These can be safely overwritten, if needed, by Autoload.</li>
+					<li><b>$config</b> - This is the configuration array. Note that it is better to load configuration variables from $state object instead, since State object also adds defaults and does the suitable formatting.</li>
+					<li><b>$logger</b> - Only defined if Logger is used, this carries WWW_Logger object.</li>
+					<li><b>$limiter</b> - Only defined if Limiter is used, this carries WWW_Limiter object. This is not used by the time Handlers are loaded, thus can be safely overwritten in Autoload.</li>
+					<li><b>$apiHandler</b> - Only defined for API Handler, this is the keyword of API handler that is being requested ('json' for json.api, 'xml' for xml.api and so on). This can be safely overwritten by the time Autoload is called.</li>
+				</ul>
+				
+				<p>It is not recommended to modify most of the variables above, but they can be useful especially if you need to make additional database calls or access configuration.</p>
 			
 	</body>
 </html>

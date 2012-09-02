@@ -218,6 +218,10 @@
 				<p>It is possible to keep a simplified log of API requests that are sent to <a href="handler_api.htm">API Handler</a>. This setting is a comma-separated list of API profiles that will be tracked or will not be tracked. This allows for keeping track of how actively this or that API Profile is used in the system and gives a good overview of what commands have been used the most and how frequently. Setting it to '*' will mean that every API Profile will be logged, except profiles listed with '!' in front of their name. The default setting, if used, will track all API profiles except the public profile.</p>
 				
 			<h2>Sessions</h2>
+			
+				<p><b>session-namespace</b></p>
+				
+				<p>This setting is the namespace/cookie value used for sessions. For example this value is the cookie name for sessions. If this setting is not set in configuration, then Wave Framework generates this value by creating a numeric hash from the root directory address on the server. It is not necessary to change this value unless your system runs on multiple servers with different system root addresses at the same time and you need to carry the sessions across.</p>
 				
 				<p><b>session-user-key<br/>session-permissions-key<br/>session-fingerprint-key</b></p>
 				

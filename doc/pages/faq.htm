@@ -111,5 +111,11 @@
 	</code>
 </pre>
 					
+			<h3>How Can I Implement My Own Session Handler?</h3>
+			
+				<p>Wave Framework uses PHP's own session handling to manipulate with user sessions and detect if sessions are used and what data is stored in $_SESSION. But sometimes it is important to use your own session handling, especially if sessions are stored on another server or through another system.</p>
+				
+				<p>While there is no way to specify how Wave Framework handles sessions directly, it is possible in PHP to rewrite session handling functions that PHP natively uses (the same ones that Wave Framework implements). PHP function that defines all the functions used for session handling is the session_set_save_handler(). You can get more information about this function from PHP's own documentation. You should define the sessions you need in in the <a href="guide_autoload.htm">Autoload</a> script in '/resources/autoload.php' file. Read more about <a href="guide_autoload.htm">Autoload</a> script in its own documentation.</p>
+					
 	</body>
 </html>

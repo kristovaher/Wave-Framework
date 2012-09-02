@@ -2,7 +2,7 @@
 
 /**
  * Wave Framework <http://www.waveframework.com>
- * URL Controller
+ * View Controller
  *
  * Wave Framework comes with a View Controller and a translations system that is used to build 
  * a website on Wave Framework. This View Controller is entirely optional and can be removed 

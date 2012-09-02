@@ -2,7 +2,7 @@
 
 /**
  * MyProjectNameHere <http://www.example.com>
- * Example View
+ * View Class
  *
  * It is recommended to extend View classes from WWW_Factory in order to 
  * provide various useful functions and API access for the view.

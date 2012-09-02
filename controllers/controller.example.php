@@ -2,10 +2,10 @@
 
 /**
  * MyProjectNameHere <http://www.example.com>
- * Example Controller
+ * Controller Class
  *
- * It is recommended to extend View classes from WWW_Factory in order to 
- * provide various useful functions and API access for the view.
+ * It is recommended to extend Controller classes from WWW_Factory in order to 
+ * provide various useful functions and API access for the Controller.
  *
  * @package    Factory
  * @author     DeveloperNameHere <email@example.com>

@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.1.8
  */
 
 // This initializes tools and authentication
@@ -107,7 +107,7 @@ if(isset($_GET['internal'])){
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title><?=(isset($_GET['internal']))?'Internal Log':(isset($_GET['api']))?'API Log':'Log Reader'?></title>
+		<title><?=(isset($_GET['internal']))?'Internal Log':((isset($_GET['api']))?'API Log':'Log Reader')?></title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width"/> 
 		<link type="text/css" href="style.css" rel="stylesheet" media="all"/>

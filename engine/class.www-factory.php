@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.1.6
+ * @version    3.1.8
  */
 
 class WWW_Factory {
@@ -768,8 +768,8 @@ class WWW_Factory {
 		 * @param mixed [$data] data entered in log
 		 * @return boolean
 		 */
-		final protected function internalLogEntry($key,$data=false){
-			return $this->WWW_API->internalLogEntry($key,$data);
+		final protected function logEntry($key,$data=false){
+			return $this->WWW_API->logEntry($key,$data);
 		}
 		
 		/**
@@ -810,7 +810,7 @@ class WWW_Factory {
 		 * @param mixed [$value] value, if data is a key
 		 * @return boolean
 		 */
-		final protected function setStateMessengerData($key,$value=false){
+		final protected function setMessengerData($key,$value=false){
 			// Attempting to get the result
 			$result=$this->WWW_API->state->setMessengerData($key,$value);
 			if($result){
@@ -829,7 +829,7 @@ class WWW_Factory {
 		 * @param string [$key] key that will be removed, if set to false then removes the entire data
 		 * @return boolean
 		 */
-		final protected function unsetStateMessengerData($key=false){
+		final protected function unsetMessengerData($key=false){
 			return $this->WWW_API->state->unsetMessengerData($key);
 		}
 		
@@ -843,7 +843,7 @@ class WWW_Factory {
 		 * @param boolean [$remove] true or false flag whether to delete the request data after returning it
 		 * $return mixed or false if failed
 		 */
-		final protected function getStateMessengerData($address=false,$remove=true){
+		final protected function getMessengerData($address=false,$remove=true){
 			// Attempting to get the result
 			$result=$this->WWW_API->state->getMessengerData($address,$remove);
 			if($result){

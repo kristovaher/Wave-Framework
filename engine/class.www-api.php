@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.1.6
+ * @version    3.1.8
  */
 
 final class WWW_API {
@@ -239,7 +239,7 @@ final class WWW_API {
 		
 			// If internal logging is enabled
 			if($this->internalLogging){
-				$this->internalLogEntry('input-data',$apiInputData);
+				$this->logEntry('input-data',$apiInputData);
 			}
 		
 			// DEFAULT VALUES, COMMAND AND BUFFER CHECK
@@ -822,7 +822,7 @@ final class WWW_API {
 				
 			// If internal logging is enabled
 			if($this->internalLogging){
-				$this->internalLogEntry('output-data',$apiResult);
+				$this->logEntry('output-data',$apiResult);
 			}
 			
 			// This filters the result through various PHP and header specific commands
@@ -1703,7 +1703,7 @@ final class WWW_API {
 		 * @param mixed [$data] data entered in log
 		 * @return boolean
 		 */
-		final public function internalLogEntry($key,$data=false){
+		final public function logEntry($key,$data=false){
 			// Only applies if internal logging is turned on
 			if($this->internalLogging && ((in_array('*',$this->internalLogging) && !in_array('!'.$key,$this->internalLogging)) || in_array($key,$this->internalLogging))){
 				// Preparing a log entry object
@@ -1733,9 +1733,9 @@ final class WWW_API {
 		final public function splitTime($key='api'){
 			// Checking if split time exists
 			if(isset($this->splitTimes[$key])){
-				$this->internalLogEntry('splitTime for ['.$key.']','Seconds since last call: '.number_format((microtime(true)-$this->splitTimes[$key]),6));
+				$this->logEntry('splitTime for ['.$key.']','Seconds since last call: '.number_format((microtime(true)-$this->splitTimes[$key]),6));
 			} else {
-				$this->internalLogEntry('splitTime for ['.$key.']','Seconds since last call: 0.000000 seconds');
+				$this->logEntry('splitTime for ['.$key.']','Seconds since last call: 0.000000 seconds');
 			}
 			// Setting new microtime
 			$this->splitTimes[$key]=microtime(true);

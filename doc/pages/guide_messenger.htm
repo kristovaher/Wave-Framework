@@ -51,9 +51,9 @@
 <pre>
 	<code>
 	// Sending a key 'name' with a value to State Messenger
-	$this->stateMessengerData('name','Thomas Moore');
+	$this->setMessengerData('name','Thomas Moore');
 	// array can also be sent that has multiple keys and values
-	$this->stateMessengerData(array('name'=>'Thomas Moore','nickname'=>'Tommy'));
+	$this->setMessengerData(array('name'=>'Thomas Moore','nickname'=>'Tommy'));
 	</code>
 </pre>
 
@@ -65,11 +65,11 @@
 <pre>
 	<code>
 	// This returns data with address 'my-shared-data' and removes it from filesystem (default behavior)
-	$messengerData=$this->getStateMessengerData('my-shared-data');
+	$messengerData=$this->getMessengerData('my-shared-data');
 	// This returns data with address 'my-shared-data' and keeps it after use
-	$messengerData=$this->getStateMessengerData('my-shared-data',false);
+	$messengerData=$this->getMessengerData('my-shared-data',false);
 	// This returns state messenger data from current message container (current request session)
-	$messengerData=$this->getStateMessengerData();
+	$messengerData=$this->getMessengerData();
 	</code>
 </pre>
 

@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_data.htm
  * @since      1.5.0
- * @version    3.1.4
+ * @version    3.1.8
  */
 
 // INITIALIZATION
@@ -62,6 +62,12 @@
 	// API is used to process all requests and it handles caching and API validations
 	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-api.php');
 	$api=new WWW_API($state);
+	
+	// Testing if namespace cookie has been set, if it has then checking for session variables
+	if(isset($_COOKIE[$state->data['session-namespace']])){
+		// Starting sessions
+		$state->startSession();
+	}
 
 	// This uses current request URI to find out which view should be loaded, by default it uses the request set by State
 	// API check is turned off, since index.php is considered a public gateway
@@ -93,11 +99,6 @@
 		}
 		if(!empty($_COOKIE)){ 
 			$inputData['www-cookie']=$_COOKIE;
-			// Testing if namespace cookie has been set, if it has then checking for session variables
-			if(isset($_COOKIE[$state->data['session-namespace']])){
-				// Starting sessions
-				$state->startSession();
-			}
 		}
 
 		// If index view cache is not configured, it is turned of by default

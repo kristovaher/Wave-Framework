@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.1.8
  */
 
 // This initializes tools and authentication
@@ -32,8 +32,10 @@ if(empty($_GET)){
 	$errorLogs=scandir('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR);
 	// If it found error messages of any kind
 	if(count($errorLogs)>2){
-		header('Location: debugger.php?error='.$errorLogs[2]);
-		die();
+		if($errorLogs[2]!='.empty'){
+			header('Location: debugger.php?error='.$errorLogs[2]);
+			die();
+		}
 	}
 } elseif(isset($_GET['error'],$_GET['done'])){
 	// If error is considered to be 'fixed' then it will be removed, if it exists

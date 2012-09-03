@@ -38,9 +38,12 @@
 				
 				<p>This means that when updating, you can safely ignore these folders from update archives and focus on actual core files that might need updating, namely the '/index.php' file and files from '/engine/' folder. Core files of Wave Framework also have version information listed in their file headers as of 3.1.4 and you can refer to this header information to know if your file needs to be updated or not, when comparing it against the latest release.</p>
 				
-			<h3>How to Update from X.X.X to X.X.X?</h3>
+			<h3>How to Update from 3.1.7 to 3.1.8</h3>
 			
-				<p>No update paths defined yet</p>
+				<ul>
+					<li>MVC Factory method internalLogEntry() is now simply logEntry(). If you use this function, then make sure to replace those method calls.</li>
+					<li>MVC Factory method setStateMessengerData() is now simply setMessengerData(). If you use this function, then make sure to replace those method calls.</li>
+				</ul>
 					
 	</body>
 </html>

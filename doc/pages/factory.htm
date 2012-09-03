@@ -132,13 +132,13 @@
 				
 				<h3>final protected function stateMessenger($address,$overwrite=false)</h3>
 			
-				<h3>final protected function setStateMessengerData($key,$value=false)</h3>
+				<h3>final protected function setMessengerData($key,$value=false)</h3>
 				
 					<p>This method stores data $value under key of $key. It also turns off caching of the current <a href="guide_api.htm">API</a> call as a result, since <a href="guide_messenger.htm">State Messenger</a> Class is outside the scope of caching.</p>
 			
-				<h3>final protected function unsetStateMessengerData($key=false)</h3>
+				<h3>final protected function unsetMessengerData($key=false)</h3>
 			
-				<h3>final protected function getStateMessengerData($address=false,$remove=true)</h3>
+				<h3>final protected function getMessengerData($address=false,$remove=true)</h3>
 				
 					<p>This method returns data from <a href="guide_messenger.htm">State Messenger</a> Class with an address of $address. If $remove is set - as it is by default - then <a href="guide_messenger.htm">State Messenger</a> Class of this $address is also deleted and cannot be accessed again.</p>
 					
@@ -206,7 +206,7 @@
 			
 				<h3>final protected function decryptData($data,$key,$secretKey=false)</h3>
 			
-				<h3>final protected function internalLogEntry($key,$data=false)</h3>
+				<h3>final protected function logEntry($key,$data=false)</h3>
 			
 				<h3>final protected function splitTime($key='api')</h3>
 			

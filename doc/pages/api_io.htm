@@ -105,6 +105,10 @@
 				
 					<p>This is an array of uploaded files, this is by default populated by $_FILES array and should not be sent by API request directly.</p>
 					
+				<h3>www-data</h3>
+				
+					<p>This usually carries input stream data, if sent. This is used only when submitting contents in POST as input stream.</p>
+					
 				<h3>www-cache-timeout</h3>
 				
 					<p>This tells the API the amount of seconds that the user agent is accepting as the maximum age of cache. This means that if you send the value as 600 and API finds cache for that same <a href="guide_api.htm">API</a> call with the same input within the last 600 seconds - or ten minutes - then it will return a result from cache instead of generating it again.</p>

@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.1.7
+ * @version    3.1.9
  */
 
 class WWW_State	{
@@ -276,23 +276,23 @@ class WWW_State	{
 			$this->data['fingerprint']=md5($fingerprint);
 			
 		// JSON OR XML BASED INPUT
-			
-			// For custom content types, when data is sent as an XML or JSON string
-			if(!in_array($this->data['http-content-type'],array('','application/x-www-form-urlencoded','multipart/form-data'))){
+		
+			// PHP Input data is ignored for input if form submit is done
+			if(!in_array($this->data['http-content-type'],array(false,'','application/x-www-form-urlencoded','multipart/form-data'))){
 			
 				// Gather sent input
 				$phpInput=file_get_contents('php://input');
 				
-				// Testing if actual XML or JSON data was submitted at all
-				if($phpInput && $phpInput!=''){
-					
+				// For custom content types, when data is sent as an XML or JSON string
+				if($phpInput!=''){
+						
 					// Parsing method depends on content type header
 					if($this->data['http-content-type']=='application/json'){
 					
 						// JSON string is converted to associative array
 						$this->data['http-input']=json_decode($phpInput,true);
 						
-					} elseif(extension_loaded('SimpleXML') && ($this->data['http-content-type']=='application/xml' || $this->data['http-content-type']=='text/xml')){
+					} elseif(extension_loaded('SimpleXML') && ($this->data['http-content-type']=='application/xml')){
 					
 						// This is not supported in earlier versions of LibXML
 						if(defined('LIBXML_PARSEHUGE')){
@@ -306,11 +306,19 @@ class WWW_State	{
 							$this->data['http-input']=json_decode(json_encode($tmp),true);
 						}
 						
+					} else {
+					
+						// Storing the entire stream directly
+						$this->data['http-input']=$phpInput;
+						
 					}
 					
-				}
-				
-			} elseif(isset($_FILES['www-xml']) || isset($_REQUEST['www-xml'])){
+				} 
+			
+			}
+			
+			// If special input file is set as XML
+			if(isset($_FILES['www-xml']) || isset($_REQUEST['www-xml'])){
 			
 				// If this is a file upload or not
 				if(isset($_FILES['www-xml'])){
@@ -338,7 +346,10 @@ class WWW_State	{
 					$this->data['http-input']=json_decode(json_encode($tmp),true);
 				}
 			
-			} elseif(isset($_FILES['www-json']) || isset($_REQUEST['www-json'])){
+			} 
+			
+			// If special input file is set as JSON
+			if(isset($_FILES['www-json']) || isset($_REQUEST['www-json'])){
 			
 				if(isset($_FILES['www-json'])){
 					// JSON string is converted to associative array
@@ -348,7 +359,6 @@ class WWW_State	{
 					$this->data['http-input']=json_decode($_REQUEST['www-json'],true);
 				}
 			
-				
 			}
 		
 	}
@@ -504,6 +514,8 @@ class WWW_State	{
 					setcookie($this->data['session-namespace'],'',1,$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
 					// Destroy sessions
 					session_destroy();
+					// Unsetting session ID
+					$this->data['session-id']=false;
 				} else {
 					// Storing session data actually in session storage
 					$_SESSION[$this->data['session-namespace']]=$this->data['session-data'];

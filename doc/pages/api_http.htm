@@ -186,7 +186,7 @@
 		CURLOPT_POSTFIELDS=&gt;$input,
 		CURLOPT_URL=&gt;'http://www.example.com/json.api',
 		CURLOPT_HEADER=&gt;false,
-		CURLOPT_HTTPHEADER=&gt;array('Content-Type: application/xml','Content-Length: '.strlen($XML))
+		CURLOPT_HTTPHEADER=&gt;array('Content-Type: application/xml','Content-Length: '.strlen($XML)),
 		CURLOPT_RETURNTRANSFER=&gt;true
 	);
 
@@ -204,9 +204,17 @@
 	</code>
 </pre>
 
-					<p>Same applies to JSON data, you would have to encode an array as JSON string and send this instead of the XML shown above. If sending JSON then you should also change the content type of the request to that of JSON, since Wave Framework uses that to detect what the user agent is trying to do.</p>
+					<p>Same applies to JSON data, you would have to encode an array as JSON string and send this instead of the XML shown above. If sending JSON then you should also change the content type of the request to that of JSON, since Wave Framework uses that to detect what the user agent is trying to do. Content type has to be set whenever a request like this is made.</p>
 					
 					<p>It is also possible to accomplish the same thing by sending a file or a string over POST that has a name 'www-xml' or 'www-json'. Wave Framework API will interpret these two files or strings the exact same way. You can also send 'www-xml' or 'www-json' as strings, in which case every other sent value will be overwritten by values of that string (except cookies).</p>	
+			
+				<h3>Sending An Input Stream</h3>
+				
+					<p>You can also submit just a chunk of data to the API directly, similarly to how JSON and XML input was submitted in the previous step. For example, you can make it so that you upload contents of an image to the API directly rather than as a file upload. You need to add the image contents directly to the request (like you did with the above JSON and XML contents) and also change the content-type of the request to something else (like that of an image).</p>
+					
+					<p>Wave Framework uses the request content type as means to find out what type of request was made and if it includes input streams that it cannot get from query string or other variables.</p>
+					
+					<p>After the request is made, then the controllers can access the contents of the request from 'www-data' input key.</p>
 			
 	</body>
 </html>

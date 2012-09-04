@@ -306,6 +306,7 @@
 					<ul>
 						<li><b>@input</b> - A key in input array.</li>
 						<li><b>@output</b> - A key in output array.</li>
+						<li><b>@response</b> - A response code returned from the controller.</li>
 					</ul>
 					
 					<p>Here is a simple example documented Controller method:</p>
@@ -316,16 +317,19 @@
 	 * This adds two numbers together.
 	 *
 	 * @param array [$input] input data array
-	 * @input [a] first variable
-	 * @input [b] second variable
+	 * @input [a]* first variable
+	 * @input [b]* second variable
 	 * @return array
 	 * @output [result] result of the function
+	 * @response [512] response code description
 	 */
-	public function example($a,$b){
-		return array('result'=>$a+$b);
+	public function example($input){
+		return array('www-response-code'=>512,'result'=>$input['a']+$input['b']);
 	}
 	</code>
 </pre>
+
+					<p>Also note that if something is always required, then you should write an 'aterisk' after the input data, such as in the above example the 'a' and 'b' keys. The same aterisk should be used for output as well, for exampel to define keys that you know your Controller always returns, but this is not required.</p>
 
 					<p>As a result, the documentation will be detailed also in API Info tool. Though you can write your documentation in any way you wish (and it would be shown in API Info as well), it is recommended to stay consistent with documentation so that it is understood by most developers who happen to look into your code or work with it.</p>
 

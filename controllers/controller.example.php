@@ -29,6 +29,7 @@ class WWW_controller_example extends WWW_Factory {
 	 * @input [key] This key is one of the accepted input values
 	 * @return array
 	 * @output [key] This is an output value that might exist in the output array
+	 * @response [500] Data returned
 	 */
 	public function get($input){
 		// New objects can be created through Factory easily
@@ -38,7 +39,7 @@ class WWW_controller_example extends WWW_Factory {
 		// Getting the data from the model
 		$data=$example->get();
 		// Returning the result of controller call
-		return $this->resultTrue('Data returned!',$data);
+		return $this->resultTrue('Data returned',$data);
 	}
 	
 }

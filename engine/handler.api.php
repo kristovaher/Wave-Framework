@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_api.htm
  * @since      1.5.0
- * @version    3.1.4
+ * @version    3.1.9
  */
 
 //INITIALIZATION
@@ -60,27 +60,26 @@
 	// All the data sent by the user agent is stored in this variable
 	$inputData=array();
 
-	// If data was sent through other means, such as a JSON or XML string
-	if(is_array($state->data['http-input']) && !empty($state->data['http-input'])){
-	
-		// http-input is data string, converted to array, that is sent as a stream (as XML or JSON)
-		$inputData=$state->data['http-input'];
-		
-	} else {
-	
-		// All the data sent by user agent is added here and merged into one array
-		if(!empty($_POST)){ 
-			$inputData+=$_POST; 
+	// If additional data was sent as part of input stream
+	if($state->data['http-input']){
+		// If state has converted the stream to array (if it was in XML or JSON format)
+		if(is_array($state->data['http-input']) && !empty($state->data['http-input'])){
+			$inputData=$state->data['http-input'];
+		} else {
+			$inputData['www-data']=$state->data['http-input'];
 		}
-		if(!empty($_GET)){ 
-			$inputData+=$_GET; 
-		}
-		if(!empty($_FILES)){ 
-			$inputData['www-files']=$_FILES;
-		}
-	
 	}
 	
+	// All the data sent by user agent is added here and merged into one array
+	if(!empty($_POST)){ 
+		$inputData+=$_POST; 
+	}
+	if(!empty($_GET)){ 
+		$inputData+=$_GET; 
+	}
+	if(!empty($_FILES)){ 
+		$inputData['www-files']=$_FILES;
+	}
 	if(!empty($_COOKIE)){ 
 		$inputData['www-cookie']=$_COOKIE;
 		// Testing if namespace cookie has been set, if it has then checking for session variables

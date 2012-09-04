@@ -1,18 +1,17 @@
 
 /**
 * Wave Framework <http://www.waveframework.com>
-* Developer Tools Stylesheet
+* Documentation Stylesheet
 * 
-* It is possible to load view specific stylesheet, this file is included among HTML resources 
-* by WWW_controller_view if it is detected and found for the view it loads. This file is 
-* loaded after other stylesheet files.
+* This is a generic stylesheet used for documentation and various developer 
+* tools. This same CSS is both in /tools/ and /doc/ directories.
 * 
-* @package    View Controller
+* @package    Documentation
 * @author     Kristo Vaher <kristo@waher.net>
 * @copyright  Copyright (c) 2012, Kristo Vaher
 * @license    GNU Lesser General Public License Version 3
 * @since      2.2.5
-* @version    3.1.4
+* @version    3.1.9
 */
 
 html,body {
@@ -77,9 +76,12 @@ a:hover {
 	color:#d4860c;
 }
 
-p { 
+p,ul { 
 	margin:2px;
 	padding:2px 6px; 
+}
+li {
+	margin-left:25px;
 }
 
 .bold { 
@@ -106,6 +108,10 @@ p {
 
 .highlight { 
 	background-color:#b2bcca;
+}
+
+.lighthighlight { 
+	background-color:#c4ccd8;
 }
 
 .border { 

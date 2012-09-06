@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.1.8
+ * @version    3.2.0
  */
 
 final class WWW_API {
@@ -64,6 +64,18 @@ final class WWW_API {
 	 * is true, then some caching methods will utilize APC instead of filesystem.
 	 */
 	public $apc=false;
+	
+	/**
+	 * This variable defines whether Memcache is available in the server environment. If this 
+	 * variable is true, then some caching methods will utilize Memcache instead of filesystem.
+	 */
+	public $memcache=false;
+	
+	/**
+	 * This variable holds database cache, since this connection can be different from the main 
+	 * database connection used by the system, while still using the same class for the requests.
+	 */
+	public $databaseCache=false;
 	
 	/**
 	 * This is a counter that stores the depth of API calls. Since API calls can execute other 
@@ -114,8 +126,8 @@ final class WWW_API {
 	 * construction, then API will attempt to load API profiles from the *.ini file. Same 
 	 * applies to observers.
 	 *
-	 * @param object [$state] WWW_State object
-	 * @param array [$apiProfiles] array of API profile data
+	 * @param object $state WWW_State object
+	 * @param array $apiProfiles array of API profile data
 	 * @return object
 	 */
 	final public function __construct($state=false,$apiProfiles=false){
@@ -144,6 +156,49 @@ final class WWW_API {
 		// If APC is enabled
 		if(extension_loaded('apc') && function_exists('ini_get') && ini_get('apc.enabled')==1 && $this->state->data['apc']==1){
 			$this->apc=true;
+		}
+		
+		// If Memcache is enabled
+		if(extension_loaded('memcache') && $this->state->data['memcache']){
+			// New memcache element
+			$this->memcache=new Memcache;
+			// Connecting to memcache
+			if(!$this->memcache->connect($this->state->data['memcache-host'],$this->state->data['memcache-port'])){
+				trigger_error('Memcache connection failed, reverting to other caching methods',E_USER_WARNING);
+				$this->memcache=false;
+			}
+		} elseif($this->state->data['cache-database']){
+			
+			// If cache database settings are not set, then loading configuration from main database settings
+			if(!$this->state->data['cache-database-name']){ $this->state->data['cache-database-name']=$this->state->data['database-name']; }
+			if(!$this->state->data['cache-database-type']){ $this->state->data['cache-database-type']=$this->state->data['database-type']; }
+			if(!$this->state->data['cache-database-host']){ $this->state->data['cache-database-host']=$this->state->data['database-host']; }
+			if(!$this->state->data['cache-database-username']){ $this->state->data['cache-database-username']=$this->state->data['database-username']; }
+			if(!$this->state->data['cache-database-password']){ $this->state->data['cache-database-password']=$this->state->data['database-password']; }
+			if(!$this->state->data['cache-database-errors']){ $this->state->data['cache-database-errors']=$this->state->data['database-errors']; }
+			if(!$this->state->data['cache-database-persistent']){ $this->state->data['cache-database-persistent']=$this->state->data['database-persistent']; }
+		
+			// Checking if database configuration is valid
+			if(isset($this->state->data['cache-database-name'],$this->state->data['cache-database-type'],$this->state->data['cache-database-host'],$this->state->data['cache-database-username'],$this->state->data['cache-database-password'])){
+			
+				// If database object is already used by State and it is exactly the same as the one assigned for caching, then that same link will be used
+				if($this->state->databaseConnection && $this->state->data['cache-database-host']==$this->state->data['database-host'] && $this->state->data['cache-database-username']==$this->state->data['database-username'] && $this->state->data['cache-database-password']==$this->state->data['database-password'] && $this->state->data['cache-database-name']==$this->state->data['database-name']){
+					// State file has the correct cache if the Configuration options were loaded
+					$this->databaseCache=$this->state->databaseConnection;
+				} else {
+					// If the class has not been defined yet
+					if(!class_exists('WWW_Database')){
+						require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
+					}
+					// This object will be used for caching functions later on
+					$this->databaseCache=new WWW_Database($this->state->data['cache-database-type'],$this->state->data['cache-database-host'],$this->state->data['cache-database-name'],$this->state->data['cache-database-username'],$this->state->data['cache-database-password'],((isset($this->state->data['cache-database-errors']))?$this->state->data['cache-database-errors']:false),((isset($this->state->data['cache-database-persistent']))?$this->state->data['cache-database-persistent']:false));
+				}
+			
+			} else {
+				// Some of the settings were incorrect or missing, so database caching won't be used
+				trigger_error('Database caching configuration incorrect, reverting to other caching methods',E_USER_WARNING);
+			}
+			
 		}
 		
 		// System attempts to load API keys from the default location if they were not defined
@@ -202,13 +257,19 @@ final class WWW_API {
 
 	/**
 	 * Once API object is not used anymore, the object attempts to write internal log to 
-	 * filesystem if internal log is used and has any log data to store.
+	 * filesystem if internal log is used and has any log data to store. It also closes
+	 * Memcache connection if such is used.
 	 *
 	 * @return null
 	 */
 	final public function __destruct(){
+		// Storing internal logging data
 		if($this->internalLogging && !empty($this->internalLog)){
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log',json_encode($this->internalLog)."\n",FILE_APPEND);
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.tmp',json_encode($this->internalLog)."\n",FILE_APPEND);
+		}
+		// Closing Memcache connection
+		if($this->memcache){
+			$this->memcache->close();
 		}
 	}
 	
@@ -226,10 +287,10 @@ final class WWW_API {
 		 * is used by the system. This method validates the API call, loads MVC objects and 
 		 * executes their methods and sends the result to output() function.
 		 * 
-		 * @param array [$apiInputData] array of input data
-		 * @param boolean [$useBuffer] whether API calls are buffered per request
-		 * @param boolean [$apiValidation] if API uses profile validation or not
-		 * @param boolean [$useLogger] whether logger array is updated during execution
+		 * @param array $apiInputData array of input data
+		 * @param boolean $useBuffer whether API calls are buffered per request
+		 * @param boolean $apiValidation if API uses profile validation or not
+		 * @param boolean $useLogger whether logger array is updated during execution
 		 * @return array/string depending on API request input data
 		 */
 		final public function command($apiInputData=array(),$useBuffer=false,$apiValidation=true,$useLogger=false){
@@ -813,9 +874,9 @@ final class WWW_API {
 		 * also defined when the method is called. It returns the data as a PHP array, XML 
 		 * string, INI string or any other format and with or without HTTP response headers.
 		 * 
-		 * @param array [$apiResult] result of the API call
-		 * @param array [$apiState] various settings at the time of API request
-		 * @param boolean [$useLogger] whether logger is used
+		 * @param array $apiResult result of the API call
+		 * @param array $apiState various settings at the time of API request
+		 * @param boolean $useLogger whether logger is used
 		 * @return array/string depending on API request
 		 */
 		final private function output($apiResult,$apiState,$useLogger=true){
@@ -1127,8 +1188,8 @@ final class WWW_API {
 		 * output() method that makes the call to apiCallbacks(). This method is private 
 		 * and cannot be used outside the class.
 		 * 
-		 * @param array [$data] result data array
-		 * @param boolean [$useLogger] whether logger is used
+		 * @param array $data result data array
+		 * @param boolean $useLogger whether logger is used
 		 * @return boolean
 		 */
 		final private function apiCallbacks($data,$useLogger){
@@ -1237,8 +1298,8 @@ final class WWW_API {
 		 * If $type is set to 'rss' then RSS formatting is used, otherwise a regular XML is 
 		 * returned. This is an internal method used by output() call.
 		 *
-		 * @param array [$apiResult] array data returned from API call
-		 * @param string [$type] If set to 'rss', then transforms to RSS tags, else as XML
+		 * @param array $apiResult array data returned from API call
+		 * @param string $type If set to 'rss', then transforms to RSS tags, else as XML
 		 * @return string
 		 */
 		final private function toXML($apiResult,$type=false){
@@ -1264,7 +1325,7 @@ final class WWW_API {
 		 * This is a helper method for toXML() method and is used to build an XML node. This 
 		 * method is private and is not used elsewhere.
 		 *
-		 * @param array [$data] data array to convert
+		 * @param array $data data array to convert
 		 * @return string
 		 */
 		final private function toXMLnode($data){
@@ -1316,7 +1377,7 @@ final class WWW_API {
 		 * It uses tabs as a column separator and separates values by commas, if sub-arrays 
 		 * are used. $apiResult is the data sent by output() method.
 		 *
-		 * @param array [$apiResult] data returned from API call
+		 * @param array $apiResult data returned from API call
 		 * @return string 
 		 */
 		final private function toCSV($apiResult){
@@ -1372,7 +1433,7 @@ final class WWW_API {
 		 * was a success or not. It considers response code namespace 5XX as a successful 
 		 * call and considers everything else a failure.
 		 *
-		 * @param array [$apiResult] data returned from API call
+		 * @param array $apiResult data returned from API call
 		 * @return boolean as integer representation
 		 */
 		final private function toBinary($apiResult){
@@ -1388,7 +1449,7 @@ final class WWW_API {
 		 * This attempts to convert the data array of $apiResult to INI format. It handles 
 		 * also subarrays and other possible conditions in the array.
 		 *
-		 * @param array [$apiResult] data returned from API call
+		 * @param array $apiResult data returned from API call
 		 * @return string
 		 */
 		final private function toINI($apiResult){
@@ -1452,9 +1513,9 @@ final class WWW_API {
 		 * a key and a secret key (if set). If only $key is set, then ECB mode is used for 
 		 * Rijndael encryption.
 		 *
-		 * @param string [$data] data to be encrypted
-		 * @param string [$key] key used for encryption
-		 * @param string [$secretKey] used for calculating initialization vector (IV)
+		 * @param string $data data to be encrypted
+		 * @param string $key key used for encryption
+		 * @param string $secretKey used for calculating initialization vector (IV)
 		 * @return string
 		 */
 		final public function encryptData($data,$key,$secretKey=false){
@@ -1469,9 +1530,9 @@ final class WWW_API {
 		 * This will decrypt Rijndael encoded data string, set with $data. $key and $secretKey 
 		 * should be the same that they were when the data was encrypted.
 		 *
-		 * @param string [$data] data to be decrypted
-		 * @param string [$key] key used for decryption
-		 * @param string [$secretKey] used for calculating initialization vector (IV)
+		 * @param string $data data to be decrypted
+		 * @param string $key key used for decryption
+		 * @param string $secretKey used for calculating initialization vector (IV)
 		 * @return string
 		 */
 		final public function decryptData($data,$key,$secretKey=false){
@@ -1489,7 +1550,7 @@ final class WWW_API {
 		 * $tags variable can both be a string or an array of keywords. Every cache related 
 		 * to those keywords will be removed.
 		 *
-		 * @param string/array [$tags] an array or comma separated list of tags that the cache was stored under
+		 * @param string|array $tags an array or comma separated list of tags that the cache was stored under
 		 * @return boolean
 		 */
 		final public function unsetTaggedCache($tags){
@@ -1532,7 +1593,7 @@ final class WWW_API {
 		 * exists. This allows you to always load cache from system in case a new response cannot 
 		 * be generated. It returns cache with the key $key.
 		 *
-		 * @param string [$key] current API call index
+		 * @param string $key current API call index
 		 * @return mixed depending if cache is found, false if failed
 		 */
 		final public function getExistingCache($key){
@@ -1548,7 +1609,7 @@ final class WWW_API {
 		 * timestamp of the time when that cache was written. It returns cache timestamp with 
 		 * the key $key.
 		 *
-		 * @param string [$key] current API call index
+		 * @param string $key current API call index
 		 * @return integer or false, if timestamp does not exist
 		 */
 		final public function getExistingCacheTime($key){
@@ -1564,13 +1625,13 @@ final class WWW_API {
 		 * giving it a value of $value. Cache tagging can also be used with custom tag by 
 		 * sending a keyword with $tags or an array of keywords.
 		 * 
-		 * @param string [$keyAddress] unique cache URL, name or key
+		 * @param string $keyAddress unique cache URL, name or key
 		 * @value mixed [$value] variable value to be stored
-		 * @param boolean [$custom] whether cache is stored in custom cache folder
-         * @param array/string [$tags] tags array or comma-separated list of tags to attach to cache
+		 * @param boolean $custom whether cache is stored in custom cache folder
+         * @param array|string $tags tags array or comma-separated list of tags to attach to cache
 		 * @return boolean
 		 */
-		final public function setCache($keyAddress,$value,$custom=false,$tags=false){
+		final public function setCache($keyAddress,$value,$tags=false,$custom=false){
 			// User cache does not have an address
 			if($custom){
 				// User cache location
@@ -1587,55 +1648,91 @@ final class WWW_API {
 					}
 				}
 			}
-			// Testing for APC presence
-			if($this->apc){
+			// Storing variable to cache
+			if($this->memcache){
+				// Storing the variable in Memcache
+				if(!$this->memcache->set($this->state->data['session-namespace'].$keyAddress,$value)){
+					trigger_error('Cannot store file cache in Memcache',E_USER_ERROR);
+				}
+				// Memcache requires additional field to store the timestamp of cache
+				$this->memcache->set($this->state->data['session-namespace'].$keyAddress.'-time',$this->state->data['request-time']);
+			} elseif($this->apc){
 				// Storing the value in APC storage
 				if(!apc_store($keyAddress,$value)){
-					trigger_error('Cannot store file cache in APC at '.$keyAddress,E_USER_ERROR);
+					trigger_error('Cannot store file cache in APC',E_USER_ERROR);
 				}
 				// APC requires additional field to store the timestamp of cache
-				apc_store($keyAddress.'-time',time());
+				apc_store($keyAddress.'-time',$this->state->data['request-time']);
 			} else {
-				// Attempting to write cache in filesystem
-				if(!file_put_contents($keyAddress,serialize($value))){
-					trigger_error('Cannot store file cache at '.$keyAddress,E_USER_ERROR);
+				// Cache can be stored in database or in filesystem
+				if($this->databaseCache){
+					// Input data must be serialized
+					$value=serialize($value);
+					// Attempting to write cache in database
+					if(!$this->databaseCache->dbCommand('
+						INSERT INTO '.$this->state->data['cache-database-table-name'].' SET '.$this->state->data['cache-database-address-column'].'=?, '.$this->state->data['cache-database-timestamp-column'].'=?, '.$this->state->data['cache-database-data-column'].'=? ON DUPLICATE KEY UPDATE '.$this->state->data['cache-database-data-column'].'=?, '.$this->state->data['cache-database-timestamp-column'].'=?;',array(md5($this->state->data['session-namespace'].$keyAddress),$this->state->data['request-time'],$value,$value,$this->state->data['request-time']))){
+						trigger_error('Cannot store file cache in database',E_USER_ERROR);
+					}
+				} else {
+					// Attempting to write cache in filesystem
+					if(!file_put_contents($keyAddress,serialize($value))){
+						trigger_error('Cannot store file cache at '.$keyAddress,E_USER_ERROR);
+					}
 				}
 			}
 			return true;
 		}
 		
 		/**
-		 * This method fetches data from cache based on cache keyword $keyAddress, if cache exists. 
-		 * This should be the same keyword that was used in setCache() method, when storing cache.
+		 * This method fetches data from cache based on cache keyword $key, if cache exists. 
+		 * This should be the same keyword that was used in setCache() method, when storing 
+		 * cache. $limit sets the timestamp after which cache won't be accepted anymore and 
+		 * $custom sets if the cache has been called by MVC Objects or not.
 		 *
-		 * @param string [$keyAddress] unique cache URL, name or key
-		 * @param boolean [$custom] whether cache is stored in custom cache folder
+		 * @param string $keyAddress unique cache URL, name or key
+		 * @param integer $limit this is timestamp after which cache won't result an accepted value
+		 * @param boolean $custom whether cache is stored in custom cache folder
 		 * @return mixed or false if cache is not found
 		 */
-		final public function getCache($keyAddress,$custom=false){
+		final public function getCache($keyAddress,$limit=false,$custom=false){
 			// User cache does not have an address
 			if($custom){
 				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
 			}
-			// Testing for APC presence
-			if($this->apc){
+			// If limit is used
+			if($limit && ($this->state->data['request-time']-$limit)>$this->cacheTime($keyAddress)){
+				return false;
+			}
+			// Accessing cache
+			if($this->memcache){
+				return $this->memcache->get($this->state->data['session-namespace'].$keyAddress);
+			} elseif($this->apc){
 				return apc_fetch($keyAddress);
 			} else {
-				// Testing if file exists
-				if(file_exists($keyAddress)){
-					return unserialize(file_get_contents($keyAddress));
+				// Cache can be stored in database or in filesystem
+				if($this->databaseCache){
+					// Attempting to load cache from database
+					$result=$this->databaseCache->dbSingle('SELECT '.$this->state->data['cache-database-data-column'].' FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-namespace'].$keyAddress)));
+					if($result){
+						return unserialize($result[$this->state->data['cache-database-data-column']]);
+					}
 				} else {
-					return false;
+					// Testing if file exists
+					if(file_exists($keyAddress)){
+						return unserialize(file_get_contents($keyAddress));
+					}
 				}
 			}
+			// Cache was not found
+			return false;
 		}
 		
 		/**
 		 * This function returns the timestamp of when the cache of keyword $keyAddress, was created, 
 		 * if such a cache exists.
 		 *
-		 * @param string [$keyAddress] unique cache URL, name or key
-		 * @param boolean [$custom] whether cache is stored in custom cache folder
+		 * @param string $keyAddress unique cache URL, name or key
+		 * @param boolean $custom whether cache is stored in custom cache folder
 		 * @return integer or false if cache is not found
 		 */
 		final public function cacheTime($keyAddress,$custom=false){
@@ -1643,28 +1740,37 @@ final class WWW_API {
 			if($custom){
 				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
 			}
-			// Testing for APC presence
-			if($this->apc){
+			// Accessing cache
+			if($this->memcache){
+				return $this->memcache->get($this->state->data['session-namespace'].$keyAddress.'-time');
+			} elseif($this->apc){
 				if(apc_exists(array($keyAddress,$keyAddress.'-time'))){
 					return apc_fetch($keyAddress.'-time');
-				} else {
-					return false;
 				}
 			} else {
-				// Testing if cache file exists
-				if(file_exists($keyAddress)){
-					return filemtime($keyAddress);
+				// Cache can be stored in database or in filesystem
+				if($this->databaseCache){
+					// Attempting to load cache from database
+					$result=$this->databaseCache->dbSingle('SELECT '.$this->state->data['cache-database-timestamp-column'].' FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-namespace'].$keyAddress)));
+					if($result){
+						return $result[$this->state->data['cache-database-timestamp-column']];
+					}
 				} else {
-					return false;
+					// Testing if cache file exists
+					if(file_exists($keyAddress)){
+						return filemtime($keyAddress);
+					}
 				}
 			}
+			// Cache was not found
+			return false;
 		}
 		
 		/**
 		 * This method removes cache that was stored with the keyword $keyAddress, if such a cache exists.
 		 *
-		 * @param string [$keyAddress] unique cache URL, name or key
-		 * @param boolean [$custom] whether cache is stored in custom cache folder
+		 * @param string $keyAddress unique cache URL, name or key
+		 * @param boolean $custom whether cache is stored in custom cache folder
 		 * @return boolean
 		 */
 		final public function unsetCache($keyAddress,$custom=false){
@@ -1672,24 +1778,34 @@ final class WWW_API {
 			if($custom){
 				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
 			}
-			// Testing for APC presence
-			if($this->apc){
+			// Accessing cache
+			if($this->memcache){
+				$this->memcache->delete($this->state->data['session-namespace'].$keyAddress);
+				$this->memcache->delete($this->state->data['session-namespace'].$keyAddress.'-time');
+				return true;
+			} elseif($this->apc){
 				// Testing if key exists
 				if(apc_exists($keyAddress)){
 					apc_delete($keyAddress);
 					apc_delete($keyAddress.'-time');
 					return true;
-				} else {
-					return false;
 				}
 			} else {
-				// Testing if cache file exists
-				if(file_exists($keyAddress)){
-					return unlink($keyAddress);
+				// Cache can be stored in database or in filesystem
+				if($this->databaseCache){
+					// Attempting to write cache in database
+					if($this->databaseCache->dbCommand('DELETE FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-namespace'].$keyAddress)))){
+						return true;
+					}
 				} else {
-					return false;
+					// Testing if cache file exists
+					if(file_exists($keyAddress)){
+						return unlink($keyAddress);
+					}
 				}
 			}
+			// Deleting cache has failed
+			return false;
 		}
 	
 	// INTERNAL LOGGING
@@ -1699,8 +1815,8 @@ final class WWW_API {
 		 * a $key and entry itself should be the $data. $key is needed to easily find the 
 		 * log entry later on.
 		 *
-		 * @param string [$key] descriptive key that the log entry will be stored under
-		 * @param mixed [$data] data entered in log
+		 * @param string $key descriptive key that the log entry will be stored under
+		 * @param mixed $data data entered in log
 		 * @return boolean
 		 */
 		final public function logEntry($key,$data=false){
@@ -1727,7 +1843,7 @@ final class WWW_API {
 		 * created with the amount of microseconds that have passed since the last time this 
 		 * method was called with this $key.
 		 *
-		 * @param string [$key] identifier for splitTime group
+		 * @param string $key identifier for splitTime group
 		 * @return float 
 		 */
 		final public function splitTime($key='api'){
@@ -1749,7 +1865,7 @@ final class WWW_API {
 		 * This helper method is used to sort an array (and sub-arrays) based on keys. It 
 		 * essentially applies ksort() method recursively to an array.
 		 *
-		 * @param array [$data] array to be sorted
+		 * @param array $data array to be sorted
 		 * @return array
 		 */
 		final private function ksortArray($data){

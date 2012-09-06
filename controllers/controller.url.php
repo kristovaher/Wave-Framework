@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_url.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 class WWW_controller_url extends WWW_Factory {
@@ -24,7 +24,7 @@ class WWW_controller_url extends WWW_Factory {
 	 * This method is called by Data Handler to find the View that is being requested based 
 	 * on the URL that (usually) comes from the user agent request URL.
 	 *
-	 * @param array [$input] input data sent to controller
+	 * @param array $input input data sent to controller
 	 * @input [url] This is URL to be solved
 	 * @return array through returnViewData method
 	 * @output [controller] controller to use for View
@@ -214,7 +214,7 @@ class WWW_controller_url extends WWW_Factory {
 									} else {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
-										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && intval($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && iintval($urlNodes[$matchKey])>$parameters[1])){
+										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && intval($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && intval($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];
@@ -354,7 +354,7 @@ class WWW_controller_url extends WWW_Factory {
 	/**
 	 * This function formats and returns View data for View Controller
 	 *
-	 * @param array [$data] data from Sitemap
+	 * @param array $data data from Sitemap
 	 * @return array
 	 */
 	private function returnViewData($data){

@@ -18,7 +18,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/logger.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 class WWW_Logger {
@@ -49,8 +49,8 @@ class WWW_Logger {
 	 * execution time of the script. This microtime should be the microtime from the very start 
 	 * of the script, if it is not defined then Logger defines it by itself.
 	 *
-	 * @param string [$logDir] location of directory to store log files at
-	 * @param float [$microTime] starting microtime
+	 * @param string $logDir location of directory to store log files at
+	 * @param float $microTime starting microtime
 	 * @return object
 	 */
 	public function __construct($logDir='./',$microTime=false){
@@ -83,7 +83,7 @@ class WWW_Logger {
 	 * multiple keys and values in the same method, if $key is an array of keys and values, instead 
 	 * of a string.
 	 *
-	 * @param string/array [$key] single key or array of log keys and values
+	 * @param string|array $key single key or array of log keys and values
 	 * @return boolean
 	 */
 	public function setCustomLogData($key,$value=true){
@@ -163,11 +163,6 @@ class WWW_Logger {
 				$logData['files']=$_FILES;
 			}
 			
-			// SESSION variables submitted by user agent
-			if(!empty($_SESSION)){ 
-				$logData['session']=$_SESSION;
-			}
-			
 			// COOKIE variables submitted by user agent
 			if(!empty($_COOKIE)){ 
 				$logData['cookie']=$_COOKIE;
@@ -215,7 +210,7 @@ class WWW_Logger {
 			}
 			
 			// Appending the log data at the end of log file or creating it if it does not exist
-			if(!file_put_contents($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.log',json_encode($logData)."\n",FILE_APPEND)){
+			if(!file_put_contents($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp',json_encode($logData)."\n",FILE_APPEND)){
 				trigger_error('Cannot write log file',E_USER_ERROR);
 			}
 		

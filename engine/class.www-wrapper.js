@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.1.6
+ * @version    3.2.0
  */
 
 /*
@@ -26,8 +26,8 @@
  * the system that API makes a connection with and is used whenever language-specific results 
  * are returned from API.
  * 
- * @param string [address] API address, default value is current domain presumed API address
- * @param string [language] language keyword, default value is current document language
+ * @param string $address API address, default value is current domain presumed API address
+ * @param string $language language keyword, default value is current document language
  * @return object
  */
 function WWW_Wrapper(address,language){
@@ -106,7 +106,7 @@ function WWW_Wrapper(address,language){
 	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
 	 * defined for future purpose.
 	 */
-	var userAgent='WWWFramework/3.1.6 (JavaScript)';
+	var userAgent='WWWFramework/3.2.0 (JavaScript)';
 	
 	/*
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -131,7 +131,7 @@ function WWW_Wrapper(address,language){
 		 * value of 'implode' is used as a character to implode the log with. Otherwise the log 
 		 * is returned as an array.
 		 *
-		 * @param string [implode] String to implode the log entries with
+		 * @param string $implode String to implode the log entries with
 		 * @return array or string, depending on implode setting
 		 */
 		this.returnLog=function(implode){
@@ -176,8 +176,8 @@ function WWW_Wrapper(address,language){
 		 * private inputSetter() function that checks the input value for any internal flags 
 		 * that might not actually be sent as an input to the API.
 		 *
-		 * @param string/object [input] input data keyword or an object of input data
-		 * @param string [value] input value
+		 * @param string/object $input input data keyword or an object of input data
+		 * @param string $value input value
 		 * @return boolean
 		 */
 		this.setInput=function(input,value){
@@ -202,8 +202,8 @@ function WWW_Wrapper(address,language){
 		 * that may entirely be API Wrapper specific. This method also creates a log entry 
 		 * for any value that is changed or set.
 		 * 
-		 * @param string [input] input data key
-		 * @param string [value] value to be set
+		 * @param string $input input data key
+		 * @param string $value value to be set
 		 * @return boolean
 		 */
 		var inputSetter=function(input,value){
@@ -272,8 +272,8 @@ function WWW_Wrapper(address,language){
 					break;
 				case 'www-public-token':
 					apiState.apiPublicToken=value;
-					if($value){
-						log.push('API public token set to: '+$value);
+					if(value){
+						log.push('API public token set to: '+value);
 					} else {
 						log.push('API public token unset');
 					}
@@ -361,7 +361,7 @@ function WWW_Wrapper(address,language){
 		 * be used for uploading files with JavaScript API Wrapper or making it easy to send 
 		 * large form-based requests to API over AJAX.
 		 * 
-		 * @param string [formId] form ID value
+		 * @param string $formId form ID value
 		 * @return boolean
 		 */
 		this.setForm=function(formId){
@@ -389,7 +389,7 @@ function WWW_Wrapper(address,language){
 		/*
 		 * This function simply deletes current input values
 		 *
-		 * @param boolean [clearAuth] whether to also reset authentication and state data
+		 * @param boolean $clearAuth whether to also reset authentication and state data
 		 * @return boolean
 		 */
 		this.clearInput=function(clearAuth){
@@ -431,8 +431,8 @@ function WWW_Wrapper(address,language){
 		 * send input variables directly with a single call by supplying the 'variable' array. 
 		 * Form ID can also be sent with the request directly.
 		 *
-		 * @param object [variables] object of keys and values to use as input data
-		 * @param string [formId] form ID value
+		 * @param object $variables object of keys and values to use as input data
+		 * @param string $formId form ID value
 		 * @return object/void returns object on only non-async requests
 		 */
 		this.sendRequest=function(variables,formId){
@@ -445,7 +445,7 @@ function WWW_Wrapper(address,language){
 			// In case variables have been sent with a single request
 			if(variables!=null && typeof(variables)=='object'){
 				for(var key in variables){
-					// Settin variable throuhg input setter
+					// Setting variable through input setter
 					this.setInput(key,variables[key]);
 				}
 			}
@@ -578,9 +578,6 @@ function WWW_Wrapper(address,language){
 			}
 			
 			// MAKING A REQUEST
-			
-				// Building the request URL
-				var requestURL=apiAddress;
 				
 				// Command is made slightly differently depending on whether files are to be uploaded or not
 				if(thisApiState.apiSubmitFormId==false){
@@ -596,7 +593,7 @@ function WWW_Wrapper(address,language){
 				
 					// POST request is made if the URL is longer than 2048 bytes (2KB).
 					// While servers can easily handle 8KB of data, servers are recommended to be vary if the GET request is longer than 2KB
-					if((requestURL+'?'+requestData)>getLimit){
+					if((apiAddress+'?'+requestData)>getLimit){
 						// Log entries
 						log.push('More than '+getLimit+' bytes would be sent, POST request will be used');
 						// Request header and method for POST
@@ -608,7 +605,7 @@ function WWW_Wrapper(address,language){
 					if(thisApiState.asynchronous){
 						
 						// Log entry
-						log.push('Making '+method+' request to URL: '+requestURL);
+						log.push('Making '+method+' request to URL: '+apiAddress);
 						
 						// AJAX states
 						XMLHttp.onreadystatechange=function(){
@@ -629,24 +626,24 @@ function WWW_Wrapper(address,language){
 						
 						// Sending the request
 						if(method=='POST'){
-							XMLHttp.open(method,requestURL,true);
+							XMLHttp.open(method,apiAddress,true);
 							XMLHttp.send(requestData);
 						} else {
-							XMLHttp.open(method,requestURL+'?'+requestData,true);
+							XMLHttp.open(method,apiAddress+'?'+requestData,true);
 							XMLHttp.send(null);
 						}
 						
 					} else {
 					
 						// Log entry
-						log.push('Making '+method+' request to URL: '+requestURL);
+						log.push('Making '+method+' request to URL: '+apiAddress);
 						
 						// Sending the request
 						if(method=='POST'){
-							XMLHttp.open(method,requestURL,false);
+							XMLHttp.open(method,apiAddress,false);
 							XMLHttp.send(requestData);
 						} else {
-							XMLHttp.open(method,requestURL+'?'+requestData,false);
+							XMLHttp.open(method,apiAddress+'?'+requestData,false);
 							XMLHttp.send(null);
 						}
 						
@@ -777,9 +774,9 @@ function WWW_Wrapper(address,language){
 		 * 'thisInputData' is the original input sent to the request and 'thisApiState' is 
 		 * the API Wrapper state at the time of the request.
 		 *
-		 * @param string [resultData] result string from response
-		 * @param object [thisInputData] data that was sent as input
-		 * @param object [thisApiState] api state for this request
+		 * @param string $resultData result string from response
+		 * @param object $thisInputData data that was sent as input
+		 * @param object $thisApiState api state for this request
 		 * @return object/string response data from request depending on settings
 		 */
 		var parseResult=function(resultData,thisInputData,thisApiState){
@@ -935,10 +932,10 @@ function WWW_Wrapper(address,language){
 		/*
 		 * This method is simply meant for returning a result if there was an error in the sent request
 		 *
-		 * @param object [thisInputData] input data sent to the request
-		 * @param string [thisResponseCode] response code value
-		 * @param string [thisErrorMessage] returned error message text
-		 * @param string/function [thisErrorCallback] anonymous function or function name to be called
+		 * @param object $thisInputData input data sent to the request
+		 * @param string $thisResponseCode response code value
+		 * @param string $thisErrorMessage returned error message text
+		 * @param string/function $thisErrorCallback anonymous function or function name to be called
 		 * @return boolean/mixed depending on whether callback function is called or not
 		 */
 		var errorHandler=function(thisInputData,thisResponseCode,thisErrorMessage,thisErrorCallback){
@@ -975,7 +972,7 @@ function WWW_Wrapper(address,language){
 		 * This helper method is used to clone one JavaScript object to another 'object' is 
 		 * the JavaScript object to be converted.
 		 *
-		 * @param object [object] object to be cloned
+		 * @param object $object object to be cloned
 		 * @return object
 		 */
 		var clone=function(object){
@@ -995,8 +992,8 @@ function WWW_Wrapper(address,language){
 		 * with SHA-1 and a salt string set in 'postFix'. This is used for all API requests 
 		 * where input has to be validated.
 		 * 
-		 * @param object [validationData] data to be used for hash generation
-		 * @param string [postFix] will be appended prior to hash being generated
+		 * @param object $validationData data to be used for hash generation
+		 * @param string $postFix will be appended prior to hash being generated
 		 * @return string
 		 */
 		var validationHash=function(validationData,postFix){
@@ -1011,7 +1008,7 @@ function WWW_Wrapper(address,language){
 		 * recursively. It applies ksort() to main method as well as to all sub-arrays. 'data' 
 		 * is the array or object to be sorted.
 		 *
-		 * @param object/mixed [data] variable to be sorted
+		 * @param object/mixed $data variable to be sorted
 		 * @return mixed
 		 */
 		var ksortArray=function(data){
@@ -1031,7 +1028,7 @@ function WWW_Wrapper(address,language){
 		 * This is a method that is similar to PHP http_build_query() function. It builds a 
 		 * GET request string of input variables set in 'data'.
 		 *
-		 * @param object [data] object to build request data string from
+		 * @param object $data object to build request data string from
 		 * @return string
 		 */
 		var buildRequestData=function(data){
@@ -1050,8 +1047,8 @@ function WWW_Wrapper(address,language){
 		 * This is a helper function for buildRequestData() method, it converts between 
 		 * different ways data is represented in a GET request string.
 		 * 
-		 * @param string [key] key value
-		 * @param mixed [value] variable value
+		 * @param string $key key value
+		 * @param mixed $value variable value
 		 * @return string 
 		 */
 		var subRequestData=function(key,value){
@@ -1084,7 +1081,7 @@ function WWW_Wrapper(address,language){
 		 * be accepted and same as in PHP. This is a modified version of encodeURIComponent() 
 		 * function. 'data' is the string to be converted.
 		 * 
-		 * @param string [data] string to encode
+		 * @param string $data string to encode
 		 * @return string
 		 */
 		var encodeValue=function(data){
@@ -1102,7 +1099,7 @@ function WWW_Wrapper(address,language){
 		 * This is a JavaScript method that works similarly to PHP's ksort() function and 
 		 * applies to JavaScript objects. 'object' is the object to be sorted.
 		 * 
-		 * @param object [object] object to sort by keys
+		 * @param object $object object to sort by keys
 		 * @return object
 		 */
 		var ksort=function(object){
@@ -1127,7 +1124,7 @@ function WWW_Wrapper(address,language){
 		 * string from 'msg' string.
 		 * 
 		 * @author http://www.webtoolkit.info/javascript-sha1.html
-		 * @param string [msg] string to hash
+		 * @param string $msg string to hash
 		 * @return string
 		 */
 		var sha1=function(msg){

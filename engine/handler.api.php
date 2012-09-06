@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_api.htm
  * @since      1.5.0
- * @version    3.1.9
+ * @version    3.2.0
  */
 
 //INITIALIZATION
@@ -30,8 +30,11 @@
 	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-state.php');
 	$state=new WWW_State($config);
 	
-// DATABASE
+// DATABASE AND SESSIONS
 
+	// This holds link to database
+	$databaseConnection=false;
+	
 	// Connecting to database, if configuration is set
 	if(isset($config['database-name'],$config['database-type'],$config['database-host'],$config['database-username'],$config['database-password'])){
 		// Including the required class and creating the object
@@ -41,7 +44,12 @@
 		$state->databaseConnection=$databaseConnection;
 	}
 	
-// AUTOLOAD FUNCTIONALITY
+	// Loading sessions class
+	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-sessions.php');
+	// Loading sessions class with the session namespace
+	$state->sessionHandler=new WWW_Sessions($state->data['session-name'],$state->data['session-lifetime'],$databaseConnection);
+	
+// AUTOLOAD AND SESSIONS FUNCTIONALITY
 
 	// This functions file is not required, but can be used for system wide functions
 	// If you want to include additional libraries, do so here
@@ -82,11 +90,6 @@
 	}
 	if(!empty($_COOKIE)){ 
 		$inputData['www-cookie']=$_COOKIE;
-		// Testing if namespace cookie has been set, if it has then checking for session variables
-		if(isset($_COOKIE[$state->data['session-namespace']])){
-			// Starting sessions
-			$state->startSession();
-		}
 	}
 	
 // SENDING COMMAND TO API
@@ -105,12 +108,12 @@
 	
 	// API Logging
 	if(isset($config['api-logging']) && $config['api-logging']!=false && isset($inputData['www-command']) && ((in_array('*',$config['api-logging']) && !in_array('!'.$state->data['api-profile'],$config['api-logging'])) || in_array($state->data['api-profile'],$config['api-logging']))){
-		file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log',$state->data['request-time']."\t".$state->data['api-profile']."\t".$inputData['www-command']."\n",FILE_APPEND);
+		file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.tmp',$state->data['request-time']."\t".$state->data['api-profile']."\t".$inputData['www-command']."\n",FILE_APPEND);
 	}
 
 	// Logger notifications
 	if(isset($logger)){
-		$logger->setCustomLogData(array('category'=>'API['.$apiHandler.']','api-profile'=>$state->data['api-profile'],'database-query-count'=>((isset($databaseConnection))?$databaseConnection->queryCounter:0))+$api->apiLoggerData);
+		$logger->setCustomLogData(array('category'=>'API['.$apiHandler.']','api-profile'=>$state->data['api-profile'],'database-query-count'=>(($databaseConnection)?$databaseConnection->queryCounter:0))+$api->apiLoggerData);
 		$logger->writeLog();
 	}
 

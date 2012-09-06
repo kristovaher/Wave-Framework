@@ -83,6 +83,14 @@
 				
 					<p>This variable defines whether APC is available in the server environment. If this variable is true, then some caching methods will utilize APC instead of <a href="filesystem.htm">Filesystem</a>.</p>
 					
+				<h3>public $memcache=false</h3>
+				
+					<p>This variable defines whether Memcache is available in the server environment. If this variable is true, then some caching methods will utilize Memcache instead of <a href="filesystem.htm">Filesystem</a>.</p>
+					
+				<h3>public $databaseCache=false</h3>
+				
+					<p>This variable holds database cache, since this connection can be different from the main <a href="database.htm">Database</a> connection used by the system, while still using the same class for the requests.</p>
+					
 				<h3>public $callIndex=0</h3>
 				
 					<p>This is a counter that stores the depth of API calls. Since API calls can execute other API calls, this variable is used to determine some caching and buffer related data when specific API call is references by API class.</p>
@@ -115,7 +123,7 @@
 					
 				<h3>final public function __destruct()</h3>
 					
-					<p>Once API object is not used anymore, the object attempts to write internal log to <a href="filesystem.htm">Filesystem</a> if internal log is used and has any log data to store.</p>
+					<p>Once API object is not used anymore, the object attempts to write internal log to <a href="filesystem.htm">Filesystem</a> if internal log is used and has any log data to store. It also closes Memcache connection if such is used.</p>
 					
 				<h3>final public function command($apiInputData=array(),$useBuffer=false,$apiValidation=true,$useLogger=false)</h3>
 					
@@ -218,13 +226,13 @@
 					
 					<p>If cache exists for currently executed API call, then this method returns the UNIX timestamp of the time when that cache was written. It returns cache timestamp with the key $key.</p>
 					
-				<h3>final public function setCache($keyAddress,$value,$custom=false,$tags=false)</h3>
+				<h3>final public function setCache($keyAddress,$value,$tags=false,$custom=false)</h3>
 					
 					<p>This method can be used to store cache for whatever needs by storing $key and giving it a value of $value. Cache tagging can also be used with custom tag by sending a keyword with $tags or an array of keywords.</p>
 					
-				<h3>final public function getCache($keyAddress,$custom=false)</h3>
+				<h3>final public function getCache($keyAddress,$limit=false,$custom=false)</h3>
 					
-					<p>This method fetches data from cache based on cache keyword $key, if cache exists. This should be the same keyword that was used in setCache() method, when storing cache.</p>
+					<p>This method fetches data from cache based on cache keyword $key, if cache exists. This should be the same keyword that was used in setCache() method, when storing cache. $limit sets the timestamp after which cache won't be accepted anymore and $custom sets if the cache has been called by MVC Objects or not.</p>
 					
 				<h3>final public function cacheTime($keyAddress,$custom=false)</h3>
 					

@@ -30,7 +30,7 @@ class WWW_model_movie extends WWW_Factory {
 	/**
 	 * This function simply sets the title of the movie
 	 *
-	 * @param string [$title] movie title
+	 * @param string $title movie title
 	 * @return boolean
 	 */
 	public function setTitle($title){
@@ -41,7 +41,7 @@ class WWW_model_movie extends WWW_Factory {
 	/**
 	 * This function simply sets the year of the movie
 	 *
-	 * @param string [$year] movie year
+	 * @param string $year movie year
 	 * @return boolean
 	 */
 	public function setYear($year){
@@ -55,7 +55,7 @@ class WWW_model_movie extends WWW_Factory {
 	 * This example uses simple serialized database in filesystem, but it 
 	 * could load data from MySQL or other databases
 	 * 
-	 * @param string [$id] movie ID
+	 * @param string $id movie ID
 	 * @return array if success, boolean if fails
 	 */
 	public function loadMovie($id=0){
@@ -163,7 +163,7 @@ class WWW_model_movie extends WWW_Factory {
 	 * This example uses simple serialized database in filesystem, but it 
 	 * could load data from MySQL or other databases
 	 * 
-	 * @param string [$id] movie ID
+	 * @param string $id movie ID
 	 * @return boolean
 	 */
 	public function deleteMovie($id=0){

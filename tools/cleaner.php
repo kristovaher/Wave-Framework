@@ -23,7 +23,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.4.9
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 // This initializes tools and authentication
@@ -97,6 +97,12 @@ header('Content-Type: text/html;charset=utf-8');
 		// Clears cache tags
 		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['tags'])){
 			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR;
+			$log=array_merge($log,dirCleaner($directory,$cutoff));
+		}
+
+		// Clears user sessions
+		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['sessions'])){
+			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR;
 			$log=array_merge($log,dirCleaner($directory,$cutoff));
 		}
 
@@ -183,12 +189,13 @@ header('Content-Type: text/html;charset=utf-8');
 		}
 		
 		echo '<h2>Modes</h2>';
-		echo '<p><a href="cleaner.php?maintenance&cutoff='.$cutoff.'">Maintenance</a> - Removes all cache and temporary files</p>';
+		echo '<p><a href="cleaner.php?maintenance&cutoff='.$cutoff.'">Maintenance</a> - Removes all cache, logs, cookie sessions and temporary files</p>';
 		echo '<p><a href="cleaner.php?output&cutoff='.$cutoff.'">Output</a> - API and web cache</p>';
 		echo '<p><a href="cleaner.php?images&cutoff='.$cutoff.'">Images</a> - On-demand images cache</p>';
 		echo '<p><a href="cleaner.php?resources&cutoff='.$cutoff.'">Resources</a> - Static resources cache</p>';
 		echo '<p><a href="cleaner.php?custom&cutoff='.$cutoff.'">Custom</a> - API created cache</p>';
 		echo '<p><a href="cleaner.php?tags&cutoff='.$cutoff.'">Cache Tags</a> - Cache tag indexes</p>';
+		echo '<p><a href="cleaner.php?sessions&cutoff='.$cutoff.'">Sessions</a> - User session storage</p>';
 		echo '<p><a href="cleaner.php?messenger&cutoff='.$cutoff.'">State Messenger</a> - State Messenger database</p>';
 		echo '<p><a href="cleaner.php?errors&cutoff='.$cutoff.'">Errors</a> - Debugging errors</p>';
 		echo '<p><a href="cleaner.php?logs&cutoff='.$cutoff.'">Logs</a> - Request logs</p>';

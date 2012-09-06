@@ -25,7 +25,7 @@ class WWW_controller_example extends WWW_Factory {
 	 * and private methods remain hidden. This method would be accessible over API 
 	 * with 'www-command=example-get' call.
 	 *
-	 * @param array [$input] input data sent to controller
+	 * @param array $input input data sent to controller
 	 * @input [key] This key is one of the accepted input values
 	 * @return array
 	 * @output [key] This is an output value that might exist in the output array

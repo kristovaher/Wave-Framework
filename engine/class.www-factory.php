@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.1.8
+ * @version    3.2.0
  */
 
 class WWW_Factory {
@@ -40,8 +40,8 @@ class WWW_Factory {
 	 * __initialize() method, if such a method is set in the class that is extended from 
 	 * Factory, as it is not allowed to overwrite __construct class itself.
 	 * 
-	 * @param object [$api] WWW_API object
-	 * @param integer [$callIndex] current level of depth in the API call
+	 * @param object $api WWW_API object
+	 * @param integer $callIndex current level of depth in the API call
 	 * @return object
 	 */
 	final public function __construct($api=false,$callIndex=0){
@@ -68,9 +68,9 @@ class WWW_Factory {
 		 * same exact input variables, then it returns the result from buffer directly rather 
 		 * than execute it again.
 		 *
-		 * @param string [$command] command string to be processed, just like the one accepted by WWW_API object
-		 * @param array [$inputData] key and value pairs of input data
-		 * @param boolean [$useBuffer] this tells API to use buffer (returns data from memory for same calls)
+		 * @param string $command command string to be processed, just like the one accepted by WWW_API object
+		 * @param array $inputData key and value pairs of input data
+		 * @param boolean $useBuffer this tells API to use buffer (returns data from memory for same calls)
 		 * @return array/string based on request
 		 */
 		final protected function api($command,$inputData=array(),$useBuffer=true){
@@ -98,7 +98,7 @@ class WWW_Factory {
 		 * HTTP. $address is the API address URL that Wave Framework connects with. This method 
 		 * returns a new API Wrapper object.
 		 *
-		 * @param string [$address] address of the API file
+		 * @param string $address address of the API file
 		 * @return object or false if failed
 		 */
 		final protected function apiConnection($address){
@@ -147,8 +147,8 @@ class WWW_Factory {
 		 * If the returned array is an array as well, then setting $subvariable can set the 
 		 * sub-key of that array and return that instead.
 		 *
-		 * @param string [$variable] data array key to be returned
-		 * @param string [$subVariable] if returned element is an array itself, this returns the value of that key
+		 * @param string $variable data array key to be returned
+		 * @param string $subVariable if returned element is an array itself, this returns the value of that key
 		 * @return mixed
 		 */
 		final protected function getState($variable=false,$subVariable=false){
@@ -161,8 +161,8 @@ class WWW_Factory {
 		 * once. This method uses stateChanged() for variables that carry additional 
 		 * functionality, such as setting timezone.
 		 *
-		 * @param string/array [$variable] data key to be set or an array of keys and values
-		 * @param mixed [$value] value of the new data
+		 * @param string|array $variable data key to be set or an array of keys and values
+		 * @param mixed $value value of the new data
 		 * @return boolean
 		 */
 		final protected function setState($variable,$value=true){
@@ -174,8 +174,8 @@ class WWW_Factory {
 		 * with $language variable. If $keyword is also set, then it returns a specific translation 
 		 * with that keyword from $language translations.
 		 *
-		 * @param string [$language] language keyword, if this is not set then returns current language translations
-		 * @param string [$keyword] if only single keyword needs to be returned
+		 * @param string $language language keyword, if this is not set then returns current language translations
+		 * @param string $keyword if only single keyword needs to be returned
 		 * @return array, string or false if failed
 		 */
 		final protected function getTranslations($language=false,$keyword=false){
@@ -187,8 +187,8 @@ class WWW_Factory {
 		 * parts of the system. It returns sitemap for current language or a language set with 
 		 * $language variable and can return a specific sitemap node based on $keyword.
 		 *
-		 * @param string [$language] language keyword, if this is not set then returns current language sitemap
-		 * @param string [$keyword] if only a single URL node needs to be returned
+		 * @param string $language language keyword, if this is not set then returns current language sitemap
+		 * @param string $keyword if only a single URL node needs to be returned
 		 * @return array or false if failed
 		 */
 		final protected function getSitemap($language=false,$keyword=false){
@@ -201,8 +201,8 @@ class WWW_Factory {
 		 * sitemap node with that keyword from $language sitemap file. This method returns the 
 		 * original, non-modified sitemap that has not been parsed for use with URL controller.
 		 *
-		 * @param string [$language] language keyword, if this is not set then returns current language sitemap
-		 * @param string [$keyword] if only a single URL node needs to be returned
+		 * @param string $language language keyword, if this is not set then returns current language sitemap
+		 * @param string $keyword if only a single URL node needs to be returned
 		 * @return array or false if failed
 		 */
 		final protected function getSitemapRaw($language=false,$keyword=false){
@@ -219,9 +219,9 @@ class WWW_Factory {
 		 * method instead of the model object itself. If $methodData is also set, then this is 
 		 * the input variable sent to $methodName.
 		 *
-		 * @param string [$model] name of the model
-		 * @param string [$methodName] name of the method called once the object is loaded
-		 * @param string [$methodData] input variable for the method that is called
+		 * @param string $model name of the model
+		 * @param string $methodName name of the method called once the object is loaded
+		 * @param string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
 		final protected function getModel($model,$methodName=false,$methodData=array()){
@@ -272,9 +272,9 @@ class WWW_Factory {
 		 * return result of that method instead of the controller object itself. If $methodData 
 		 * is also set, then this is the input variable sent to $methodName.
 		 *
-		 * @param string [$controller] name of the controller
-		 * @param string [$methodName] name of the method called once the object is loaded
-		 * @param string [$methodData] input variable for the method that is called
+		 * @param string $controller name of the controller
+		 * @param string $methodName name of the method called once the object is loaded
+		 * @param string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
 		final protected function getController($controller,$methodName=false,$methodData=array()){
@@ -325,9 +325,9 @@ class WWW_Factory {
 		 * method instead of the view object itself. If $methodData is also set, then this is 
 		 * the input variable sent to $methodName.
 		 *
-		 * @param string [$view] name of the view
-		 * @param string [$methodName] name of the method called once the object is loaded
-		 * @param string [$methodData] input variable for the method that is called
+		 * @param string $view name of the view
+		 * @param string $methodName name of the method called once the object is loaded
+		 * @param string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
 		final protected function getView($view,$methodName=false,$methodData=array()){
@@ -378,9 +378,9 @@ class WWW_Factory {
 		 * call that method and return result of that method instead of the view object itself. If 
 		 * $methodData is also set, then this is the input variable sent to $methodName.
 		 *
-		 * @param string [$className] name of the class
-		 * @param string [$methodName] name of the method called once the object is loaded
-		 * @param string [$methodData] input variable for the method that is called
+		 * @param string $className name of the class
+		 * @param string $methodName name of the method called once the object is loaded
+		 * @param string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
 		final protected function getObject($className,$methodName=false,$methodData=array()){
@@ -429,7 +429,7 @@ class WWW_Factory {
 		 * This method loads Imager class that is used for image editing. If $source is set, then 
 		 * it also automatically assigns a source image file for that imager.
 		 *
-		 * @param string [$source] filesystem location of the image to be loaded
+		 * @param string $source filesystem location of the image to be loaded
 		 * @return object
 		 */
 		final protected function getImager($source=false){
@@ -458,9 +458,9 @@ class WWW_Factory {
 		 * be the destination address for the file. If $target is missing then result is pushed to 
 		 * output buffer.
 		 *
-		 * @param string [$source] source file location
-		 * @param string [$command] series of commands that will be applied to the image
-		 * @param string [$target] target file location
+		 * @param string $source source file location
+		 * @param string $command series of commands that will be applied to the image
+		 * @param string $target target file location
 		 * @return boolean
 		 */
 		final protected function applyImager($source,$command,$target=false){
@@ -484,8 +484,8 @@ class WWW_Factory {
 		 * xml, html, js or css). This method returns modified string that is minified by 
 		 * Minifier class.
 		 *
-		 * @param string [$data] string to be minified
-		 * @param string [$type] type of minification, either 'xml', 'html', 'js' or 'css'
+		 * @param string $data string to be minified
+		 * @param string $type type of minification, either 'xml', 'html', 'js' or 'css'
 		 * @return string
 		 */
 		final protected function applyMinifier($data,$type){
@@ -527,9 +527,9 @@ class WWW_Factory {
 		 * part of the result and $responseCode should be an response code in 3XX namespace, 
 		 * which is used for errors in Wave Framework.
 		 *
-		 * @param string [$message] message to be returned
-		 * @param array [$customData] additional data returned
-		 * @param integer [$responseCode] response code number
+		 * @param string $message message to be returned
+		 * @param array $customData additional data returned
+		 * @param integer $responseCode response code number
 		 * @return array
 		 */
 		final protected function resultError($message='Error',$customData=false,$responseCode=300){
@@ -549,9 +549,9 @@ class WWW_Factory {
 		 * of the result and $responseCode should be a response code in 4XX namespace, which 
 		 * is used for false results in Wave Framework.
 		 *
-		 * @param string [$message] message to be returned
-		 * @param array [$customData] additional data returned
-		 * @param integer [$responseCode] response code number
+		 * @param string $message message to be returned
+		 * @param array $customData additional data returned
+		 * @param integer $responseCode response code number
 		 * @return array
 		 */
 		final protected function resultFalse($message='OK',$customData=false,$responseCode=400){
@@ -570,9 +570,9 @@ class WWW_Factory {
 		 * returned as part of the result and $responseCode should be an response code in 
 		 * 5XX namespace, which is used for successful results in Wave Framework.
 		 *
-		 * @param string [$message] message to be returned
-		 * @param array [$customData] additional data returned
-		 * @param integer [$responseCode] response code number
+		 * @param string $message message to be returned
+		 * @param array $customData additional data returned
+		 * @param integer $responseCode response code number
 		 * @return array
 		 */
 		final protected function resultTrue($message='OK',$customData=false,$responseCode=500){
@@ -588,7 +588,7 @@ class WWW_Factory {
 		 * API call was successful or not. It essentially checks for response codes in the array.
 		 * $data is the result data array that is checked.
 		 *
-		 * @param array/mixed [$data] result data array that is checked
+		 * @param array|mixed $data result data array that is checked
 		 * @return boolean or mixed if non-standard array
 		 */
 		final protected function checkTrueFalse($data){
@@ -614,7 +614,7 @@ class WWW_Factory {
 		 * API call had an error. It essentially checks for response codes in the array.
 		 * $data is the result data array that is checked.
 		 *
-		 * @param array/mixed [$data] result data array that is checked
+		 * @param array|mixed $data result data array that is checked
 		 * @return boolean
 		 */
 		final protected function checkError($data){
@@ -639,7 +639,7 @@ class WWW_Factory {
 		 * what. This means that while current API call may be loaded from cache, but in case 
 		 * the cache does not exist the result will not be written to cache.
 		 *
-		 * @param boolean [$state] true or false flag for whether cache is disabled or not
+		 * @param boolean $state true or false flag for whether cache is disabled or not
 		 * @return boolean
 		 */
 		final protected function disableCache($state=true){
@@ -653,7 +653,7 @@ class WWW_Factory {
 		 * $tags variable can both be a string or an array of keywords. Every cache related 
 		 * to those keywords will be removed.
 		 *
-		 * @param string/array [$tags] an array or comma separated list of tags that the cache was stored under
+		 * @param string|array $tags an array or comma separated list of tags that the cache was stored under
 		 * @return boolean
 		 */
 		final protected function unsetTaggedCache($tags){
@@ -687,31 +687,32 @@ class WWW_Factory {
 		 * giving it a value of $value. Cache tagging can also be used with custom tag by 
 		 * sending a keyword with $tags or an array of keywords.
 		 * 
-		 * @param string [$keyAddress] unique cache URL, name or key
+		 * @param string $keyAddress unique cache URL, name or key
 		 * @value mixed [$value] variable value to be stored
-         * @param array/string [$tags] tags array or comma-separated list of tags to attach to cache
+         * @param array|string $tags tags array or comma-separated list of tags to attach to cache
 		 * @return boolean
 		 */
 		final protected function setCache($key,$value,$tags=false){
-			return $this->WWW_API->setCache($key,$value,true,$tags);
+			return $this->WWW_API->setCache($key,$value,$tags,true);
 		}
 		
 		/**
 		 * This method fetches data from cache based on cache keyword $keyAddress, if cache exists. 
 		 * This should be the same keyword that was used in setCache() method, when storing cache.
 		 *
-		 * @param string [$keyAddress] unique cache URL, name or key
+		 * @param string $keyAddress unique cache URL, name or key
+		 * @param integer $limit this is timestamp after which cache won't result an accepted value
 		 * @return mixed or false if cache is not found
 		 */
-		final protected function getCache($key){
-			return $this->WWW_API->getCache($key,true);
+		final protected function getCache($key,$limit=false){
+			return $this->WWW_API->getCache($key,$limit,true);
 		}
 		
 		/**
 		 * This function returns the timestamp of when the cache of keyword $keyAddress, was created, 
 		 * if such a cache exists.
 		 *
-		 * @param string [$keyAddress] unique cache URL, name or key
+		 * @param string $keyAddress unique cache URL, name or key
 		 * @return integer or false if cache is not found
 		 */
 		final protected function cacheTime($key){
@@ -721,7 +722,7 @@ class WWW_Factory {
 		/**
 		 * This method removes cache that was stored with the keyword $keyAddress, if such a cache exists.
 		 *
-		 * @param string [$keyAddress] unique cache URL, name or key
+		 * @param string $keyAddress unique cache URL, name or key
 		 * @return boolean
 		 */
 		final protected function unsetCache($key){
@@ -735,9 +736,9 @@ class WWW_Factory {
 		 * a key and a secret key (if set). If only $key is set, then ECB mode is used for 
 		 * Rijndael encryption.
 		 *
-		 * @param string [$data] data to be encrypted
-		 * @param string [$key] key used for encryption
-		 * @param string [$secretKey] used for calculating initialization vector (IV)
+		 * @param string $data data to be encrypted
+		 * @param string $key key used for encryption
+		 * @param string $secretKey used for calculating initialization vector (IV)
 		 * @return string
 		 */
 		final protected function encryptData($data,$key,$secretKey=false){
@@ -748,9 +749,9 @@ class WWW_Factory {
 		 * This will decrypt Rijndael encoded data string, set with $data. $key and $secretKey 
 		 * should be the same that they were when the data was encrypted.
 		 *
-		 * @param string [$data] data to be decrypted
-		 * @param string [$key] key used for decryption
-		 * @param string [$secretKey] used for calculating initialization vector (IV)
+		 * @param string $data data to be decrypted
+		 * @param string $key key used for decryption
+		 * @param string $secretKey used for calculating initialization vector (IV)
 		 * @return string
 		 */
 		final protected function decryptData($data,$key,$secretKey=false){
@@ -764,8 +765,8 @@ class WWW_Factory {
 		 * a $key and entry itself should be the $data. $key is needed to easily find the 
 		 * log entry later on.
 		 *
-		 * @param string [$key] descriptive key that the log entry will be stored under
-		 * @param mixed [$data] data entered in log
+		 * @param string $key descriptive key that the log entry will be stored under
+		 * @param mixed $data data entered in log
 		 * @return boolean
 		 */
 		final protected function logEntry($key,$data=false){
@@ -779,7 +780,7 @@ class WWW_Factory {
 		 * created with the amount of microseconds that have passed since the last time this 
 		 * method was called with this $key.
 		 *
-		 * @param string [$key] identifier for splitTime group
+		 * @param string $key identifier for splitTime group
 		 * @return float 
 		 */
 		final protected function splitTime($key='api'){
@@ -793,8 +794,8 @@ class WWW_Factory {
 		 * that State messenger will be stored under. If the file already exists and $overwrite is 
 		 * not turned on, then it automatically loads contents of that file from filesystem.
 		 *
-		 * @param string [$address] key that messenger data will be saved under
-		 * @param boolean [$overwrite] if this is set then existing state messenger file will be overwritten
+		 * @param string $address key that messenger data will be saved under
+		 * @param boolean $overwrite if this is set then existing state messenger file will be overwritten
 		 * @return boolean
 		 */
 		final protected function stateMessenger($address,$overwrite=false){
@@ -806,8 +807,8 @@ class WWW_Factory {
 		 * key. $data can also be an array of keys and values, in which case multiple values are 
 		 * set at the same time.
 		 *
-		 * @param array/string [$key] key or data array
-		 * @param mixed [$value] value, if data is a key
+		 * @param array|string $key key or data array
+		 * @param mixed $value value, if data is a key
 		 * @return boolean
 		 */
 		final protected function setMessengerData($key,$value=false){
@@ -826,7 +827,7 @@ class WWW_Factory {
 		 * This method removes key from State messenger based on value of $key. If $key is not 
 		 * set, then the entire State messenger data is cleared.
 		 *
-		 * @param string [$key] key that will be removed, if set to false then removes the entire data
+		 * @param string $key key that will be removed, if set to false then removes the entire data
 		 * @return boolean
 		 */
 		final protected function unsetMessengerData($key=false){
@@ -839,9 +840,9 @@ class WWW_Factory {
 		 * If $remove is set, then State messenger data is removed from filesystem or State 
 		 * object after being called.
 		 *
-		 * @param string [$address] messenger address
-		 * @param boolean [$remove] true or false flag whether to delete the request data after returning it
-		 * $return mixed or false if failed
+		 * @param string $address messenger address
+		 * @param boolean $remove true or false flag whether to delete the request data after returning it
+		 * @return mixed or false if failed
 		 */
 		final protected function getMessengerData($address=false,$remove=true){
 			// Attempting to get the result
@@ -858,47 +859,23 @@ class WWW_Factory {
 	// SESSION AND COOKIE WRAPPERS
 	
 		/**
-		 * This method starts sessions. This is called automatically if sessions are accessed 
-		 * but sessions have not yet been started. $lifetime is the lifetime of the cookie in 
-		 * seconds. $secure flag is for session cookie to be secure and $httpOnly will mean 
-		 * that cookie is for HTTP only and cannot be accessed with scripts.
+		 * This method notifies the session handler that the session data should be
+		 * stored under a new ID.
 		 *
-		 * @param integer [$lifetime] cookie lifetime in seconds
-		 * @param boolean [$secure] if secure cookie is used
-		 * @param boolean [$httpOnly] if cookie is HTTP only
-		 * @return booleam
+		 * @param boolean $regenerate to regenerate or not
+		 * @param boolean $deleteOld deletes the previous one, if set to true
+		 * @return boolean
 		 */
-		final protected function startSession($lifetime=0,$secure=false,$httpOnly=true){
-			return $this->WWW_API->state->startSession($lifetime,$secure,$httpOnly);
+		final protected function regenerateSession($regenerate=true,$deleteOld=true){
+			return $this->WWW_API->state->regenerateSession($regenerate,$deleteOld);
 		}
 	
 		/**
-		 * This method regenerates ongoing session with a new ID. $deleteOld, if set, 
-		 * deletes the previous session.
-		 *
-		 * @param boolean [$deleteOld] deletes the previous one, if set to true
-		 * @return boolean
-		 */
-		final protected function regenerateSession($deleteOld=true){
-			return $this->WWW_API->state->regenerateSession($deleteOld);
-		}
-		
-		/**
-		 * This method clears the session variable, if it is populated for current session.
-		 * Session and the cookie is actually destroyed by State __destruct() method.
-		 *
-		 * @return boolean
-		 */
-		final protected function destroySession(){
-			return $this->WWW_API->state->destroySession();
-		}
-	
-		/**
-		 * This method sets a session variable $key with a value $value. If $key is an array of 
+		 * This method sets a session variable $key with a $value. If $key is an array of 
 		 * keys and values, then multiple session variables are set at once.
 		 *
-		 * @param array/string [$key] key of the variable or an array of keys and values
-		 * @param mixed [$value] value to be set
+		 * @param array|string $key key of the variable or an array of keys and values
+		 * @param mixed $value value to be set
 		 * @return boolean
 		 */
 		final protected function setSession($key,$value){
@@ -910,10 +887,10 @@ class WWW_Factory {
 		 * it can return multiple variables from session at once. If $key is not set, then entire 
 		 * session array is returned.
 		 *
-		 * @param string/array [$key] key to return or an array of keys
+		 * @param string|array $key key to return or an array of keys
 		 * @return mixed
 		 */
-		final protected function getSession($key){
+		final protected function getSession($key=false){
 			return $this->WWW_API->state->getSession($key);
 		}
 		
@@ -922,7 +899,7 @@ class WWW_Factory {
 		 * multiple variables can be unset at once. If $key is not set at all, then this simply 
 		 * destroys the entire session.
 		 *
-		 * @param string/array [$key] key of the value to be unset, or an array of keys
+		 * @param string|array $key key of the value to be unset, or an array of keys
 		 * @return boolean
 		 */
 		final protected function unsetSession($key=false){
@@ -933,9 +910,9 @@ class WWW_Factory {
 		 * This method sets a cookie with $key and a $value. $configuration is an array of 
 		 * cookie parameters that can be set.
 		 *
-		 * @param string/array [$key] key of the variable, or an array of keys and values
-		 * @param string/array [$value] value to be set, can also be an array
-		 * @param array [$configuration] cookie configuration options
+		 * @param string|array $key key of the variable, or an array of keys and values
+		 * @param string|array $value value to be set, can also be an array
+		 * @param array $configuration cookie configuration options
 		 * @return boolean
 		 */
 		final protected function setCookie($key,$value,$configuration=array()){
@@ -946,7 +923,7 @@ class WWW_Factory {
 		 * This method returns a cookie value with the set $key. $key can also be an array of 
 		 * keys, in which case multiple cookie values are returned in an array.
 		 *
-		 * @param string [$key] key of the value to be returned, can be an array
+		 * @param string $key key of the value to be returned, can be an array
 		 * @return mixed
 		 */
 		final protected function getCookie($key){
@@ -957,7 +934,7 @@ class WWW_Factory {
 		 * This method unsets a cookie with the set key of $key. If $key is an array, then 
 		 * it can remove multiple cookies at once.
 		 *
-		 * @param string/array [$key] key of the value to be unset or an array of keys
+		 * @param string|array $key key of the value to be unset or an array of keys
 		 * @return boolean
 		 */
 		final protected function unsetCookie($key){
@@ -970,7 +947,7 @@ class WWW_Factory {
 		 * This method sets user data array in session. This is a simple helper function used 
 		 * for holding user-specific data for a web service. $data is an array of user data.
 		 *
-		 * @param array [$data] data array set to user
+		 * @param array $data data array set to user
 		 * @return boolean
 		 */
 		final public function setUser($data){
@@ -981,7 +958,7 @@ class WWW_Factory {
 		 * This either returns the entire user data array or just a specific $key of user data 
 		 * from the session.
 		 *
-		 * @param string [$key] element returned from user data, if not set then returns the entire user data
+		 * @param string $key element returned from user data, if not set then returns the entire user data
 		 * @return mixed
 		 */
 		final public function getUser($key=false){
@@ -1004,7 +981,7 @@ class WWW_Factory {
 		 * permissions session. Method returns true, if $permissions exist in the permissions 
 		 * session array.
 		 *
-		 * @param string/array [$permissions] comma-separated string or an array that is checked against permissions array
+		 * @param string|array $permissions comma-separated string or an array that is checked against permissions array
 		 * @return boolean
 		 */
 		final protected function checkPermissions($permissions){
@@ -1024,7 +1001,7 @@ class WWW_Factory {
 		 * This method sets an array of $permissions or a comma-separated string of permissions 
 		 * for the current user permissions session.
 		 *
-		 * @param array/string [$permissions] an array or a string of permissions
+		 * @param array|string $permissions an array or a string of permissions
 		 * @return boolean
 		 */
 		final protected function setPermissions($permissions){
@@ -1048,7 +1025,7 @@ class WWW_Factory {
 		 * should be regenerated if it already exists, this invalidates forms when Back button is 
 		 * used after submitting data, but is more secure.
 		 *
-		 * @param boolean [$regenerate] if public token should be regenerated
+		 * @param boolean $regenerate if public token should be regenerated
 		 * @return string or boolean if no user session active
 		 */
 		final public function getPublicToken($regenerate=false){
@@ -1064,13 +1041,13 @@ class WWW_Factory {
 		 * be thrown if encountered and $persistentConnection sets whether connection should be 
 		 * reused, if such already exists.
 		 *
-		 * @param string [$type] database type
-		 * @param string [$host] database host
-		 * @param string [$database] database name
-		 * @param string [$username] database username
-		 * @param string [$password] database password
-		 * @param boolean [$showErrors] whether to show errors
-		 * @param boolean [$persistentConnection] whether connection is assigned to be permanent
+		 * @param string $type database type
+		 * @param string $host database host
+		 * @param string $database database name
+		 * @param string $username database username
+		 * @param string $password database password
+		 * @param boolean $showErrors whether to show errors
+		 * @param boolean $persistentConnection whether connection is assigned to be permanent
 		 * @return object
 		 */
 		final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$persistentConnection=false){
@@ -1091,8 +1068,8 @@ class WWW_Factory {
 		 * method returns the first row of the matching result, or it returns false, if the query 
 		 * failed. This method is mostly meant for SELECT queries that return a single row.
 		 *
-		 * @param string [$queryString] query string, a statement to prepare with PDO
-		 * @param array [$variables] array of variables to use in prepared statement
+		 * @param string $queryString query string, a statement to prepare with PDO
+		 * @param array $variables array of variables to use in prepared statement
 		 * @return array or false if failed
 		 */
 		final protected function dbSingle($query,$variables=array()){
@@ -1107,8 +1084,8 @@ class WWW_Factory {
 		 * returns false, if the query failed. This method is mostly meant for SELECT queries 
 		 * that return multiple rows.
 		 *
-		 * @param string [$query] query string, a statement to prepare with PDO
-		 * @param array [$variables] array of variables to use in prepared statement
+		 * @param string $query query string, a statement to prepare with PDO
+		 * @param array $variables array of variables to use in prepared statement
 		 * @return array or false if failed
 		 */
 		final protected function dbMultiple($query,$variables=array()){
@@ -1123,8 +1100,8 @@ class WWW_Factory {
 		 * the query was successful or not. This method is mostly meant for INSERT, UPDATE and 
 		 * DELETE type of queries.
 		 *
-		 * @param string [$query] query string, a statement to prepare with PDO
-		 * @param array [$variables] array of variables to use in prepared statement
+		 * @param string $query query string, a statement to prepare with PDO
+		 * @param array $variables array of variables to use in prepared statement
 		 * @return boolean or integer of affected rows
 		 */
 		final protected function dbCommand($query,$variables=array()){
@@ -1186,9 +1163,9 @@ class WWW_Factory {
 		 * escapes the value to be suitable when used inside a LIKE match. If $stripQuotes is set, 
 		 * then the value will also strip any quotes, if they happen to be added to the value.
 		 *
-		 * @param string [$value] input value
-		 * @param string [$type] Mmthod of quoting, either 'escape', 'integer', 'alpha', 'field' or 'like'
-		 * @param boolean [$stripQuotes] whether the resulting quotes will be stripped from the string, if they get set
+		 * @param string $value input value
+		 * @param string $type Method of quoting, either 'escape', 'integer', 'alpha', 'field' or 'like'
+		 * @param boolean $stripQuotes whether the resulting quotes will be stripped from the string, if they get set
 		 * @return string
 		 */
 		final protected function dbQuote($value,$type='escape',$stripQuotes=false){
@@ -1201,9 +1178,9 @@ class WWW_Factory {
 		 * all $key values from that array into a new, separate array. If $unique is set, then it 
 		 * only returns unique keys.
 		 *
-		 * @param array [$array] array to filter from
-		 * @param string [$key] key to return
-		 * @param boolean [$unique] if returned array should only have only unique values
+		 * @param array $array array to filter from
+		 * @param string $key key to return
+		 * @param boolean $unique if returned array should only have only unique values
 		 * @return array or mixed if source is not an array
 		 */
 		final public function dbArray($array,$key,$unique=false){
@@ -1216,8 +1193,8 @@ class WWW_Factory {
 		 * variables, like the ones sent to dbSingle(), dbMultiple() and dbCommand() requests. 
 		 * It returns a prepared query string.
 		 *
-		 * @param string [$query] query string
-		 * @param string [$variables] values sent to PDO
+		 * @param string $query query string
+		 * @param string $variables values sent to PDO
 		 * @return string
 		 */
 		final public function dbDebug($query,$variables=array()){
@@ -1240,8 +1217,8 @@ class WWW_Factory {
 		 * to the client, when headers are sent. $header is the header string to add and $replace 
 		 * is a true/false setting for whether previously sent header like this is replaced or not.
 		 *
-		 * @param string/array [$header] header string to add or an array of header strings
-		 * @param boolean [$replace] whether the header should be replaced, if previously set
+		 * @param string|array $header header string to add or an array of header strings
+		 * @param boolean $replace whether the header should be replaced, if previously set
 		 * @return boolean
 		 */
 		final public function setHeader($header,$replace=true){
@@ -1252,7 +1229,7 @@ class WWW_Factory {
 		 * This method adds a header to the array of headers to be removed before data is pushed 
 		 * to the client, when headers are sent. $header is the header string to remove.
 		 *
-		 * @param string/array [$header] header string to add or an array of header strings
+		 * @param string|array $header header string to add or an array of header strings
 		 * @return boolean
 		 */
 		final public function unsetHeader($header){
@@ -1266,7 +1243,7 @@ class WWW_Factory {
 		 * what terminal is available on the system, if any, and then execute the call and 
 		 * return the results of the call.
 		 *
-		 * @param string [$command] command to be executed
+		 * @param string $command command to be executed
 		 * return mixed
 		 */
 		final protected function terminal($command){

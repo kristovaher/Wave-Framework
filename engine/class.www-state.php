@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.1.9
+ * @version    3.2.0
  */
 
 class WWW_State	{
@@ -33,6 +33,24 @@ class WWW_State	{
 	 * Database connection is stored in this variable, if set
 	 */
 	public $databaseConnection=false;
+	
+	/**
+	 * This holds the session handler for session management. This is a
+	 * WWW_Sessions class from /resources/sessions.php file.
+     */	 
+	public $sessionHandler=false;
+	
+	/**
+	 * This is an internal variable that State uses to check if it has already validated sessions 
+	 * or not.
+	 */
+	private $sessionStarted=false;
+	
+	/**
+	 * This carries the session data that was active at the moment sessions were created. It is
+	 * used to compare later on if sessions need to be commited or not.
+	 */
+	private $originalSessionData=array();
 	
 	/**
 	 * This holds the 'keyword' or 'passkey' of currently used State messenger.
@@ -50,7 +68,7 @@ class WWW_State	{
 	 * variables. Fingerprint string is also created during construction as well as input data 
 	 * loaded from XML or JSON strings, if sent with POST directly.
 	 *
-	 * @param array [$config] configuration array
+	 * @param array $config configuration array
 	 * @return object
 	 */
 	final public function __construct($config=array()){
@@ -70,13 +88,25 @@ class WWW_State	{
 			$this->data=array(
 				'404-image-placeholder'=>true,
 				'404-view'=>'404',
-				'apc'=>1,
+				'apc'=>0,
 				'api-logging'=>false,
 				'api-profile'=>'public',
 				'api-public-profile'=>'public',
 				'api-public-token'=>false,
 				'base-url'=>false,
 				'blacklist-limiter'=>false,
+				'cache-database'=>false,
+				'cache-database-address-column'=>'address',
+				'cache-database-data-column'=>'data',
+				'cache-database-errors'=>true,
+				'cache-database-host'=>'localhost',
+				'cache-database-name'=>'',
+				'cache-database-password'=>'',
+				'cache-database-persistent'=>false,
+				'cache-database-table-name'=>'cache',
+				'cache-database-timestamp-column'=>'timestamp',
+				'cache-database-type'=>false,
+				'cache-database-username'=>'',
 				'client-ip'=>__IP__,
 				'client-user-agent'=>((isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:''),
 				'data-root'=>false,
@@ -99,8 +129,8 @@ class WWW_State	{
 				'enforce-first-language-url'=>true,
 				'enforce-url-end-slash'=>true,
 				'file-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
-				'fingerprint'=>'',
-				'forbidden-extensions'=>array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini'),
+				'fingerprint'=>false,
+				'forbidden-extensions'=>array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini','empty'),
 				'headers-set'=>array(),
 				'headers-unset'=>array(),
 				'home-view'=>'home',
@@ -133,6 +163,10 @@ class WWW_State	{
 				'languages'=>array('en'),
 				'limiter'=>false,
 				'load-limiter'=>false,
+				'memcache'=>false,
+				'memcache-host'=>'localhost',
+				'memcache-port'=>11211,
+				'memory-limit'=>false,
 				'output-compression'=>'deflate',
 				'project-title'=>'',
 				'request-id'=>((isset($_SERVER['UNIQUE_ID']))?$_SERVER['UNIQUE_ID']:''),
@@ -146,26 +180,34 @@ class WWW_State	{
 				'robots-cache-timeout'=>14400,
 				'server-ip'=>$_SERVER['SERVER_ADDR'],
 				'session-data'=>array(),
-				'session-fingerprint'=>0,
+				'session-domain'=>false,
+				'session-fingerprint'=>array(),
 				'session-fingerprint-key'=>'www-fingerprint',
+				'session-http-only'=>true,
 				'session-id'=>false,
 				'session-lifetime'=>0,
-				'session-namespace'=>'WWW'.crc32(__ROOT__),
+				'session-name'=>'WWW'.crc32(__ROOT__),
+				'session-path'=>false,
 				'session-permissions-key'=>'www-permissions',
+				'session-regenerate'=>0,
+				'session-secure'=>false,
+				'session-timestamp-key'=>'www-timestamp',
 				'session-user-key'=>'www-user',
 				'sitemap'=>array(),
 				'sitemap-cache-timeout'=>14400,
 				'sitemap-raw'=>array(),
 				'static-root'=>false,
 				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
+				'time-limit'=>false,
 				'timezone'=>false,
 				'tmp-root'=>false,
 				'translations'=>array(),
 				'true-request'=>false,
-				'trusted-proxies'=>array(),
+				'trusted-proxies'=>array('*'),
 				'user-data'=>false,
 				'user-permissions'=>false,
 				'user-root'=>false,
+				'verbose-errors'=>false,
 				'view'=>array(),
 				'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 				'whitelist-limiter'=>false
@@ -183,6 +225,16 @@ class WWW_State	{
 			// Removing full stop from the beginning of both directory URL's
 			if($this->data['web-root'][0]=='.'){
 				$this->data['web-root'][0]='';
+			}
+			
+			// If default session cookie domain is not set
+			if(!$this->data['session-domain']){
+				$this->data['session-domain']=$this->data['http-host'];
+			}
+			
+			// If default session cookie path is not set
+			if(!$this->data['session-path']){
+				$this->data['session-path']=$this->data['web-root'];
 			}
 			
 			// Finding base URL
@@ -263,17 +315,26 @@ class WWW_State	{
 		// FINGERPRINTING
 		
 			// Fingerprint is created based on data sent by user agent, this can be useful for light detection without cookies
-			$fingerprint=$this->data['client-ip'];
-			$fingerprint.=$this->data['client-user-agent'];
-			$fingerprint.=(isset($_SERVER['HTTP_ACCEPT']))?$_SERVER['HTTP_ACCEPT']:'';
-			$fingerprint.=(isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))?$_SERVER['HTTP_ACCEPT_LANGUAGE']:'';
-			$fingerprint.=(isset($_SERVER['HTTP_ACCEPT_ENCODING']))?$_SERVER['HTTP_ACCEPT_ENCODING']:'';
-			$fingerprint.=(isset($_SERVER['HTTP_ACCEPT_CHARSET']))?$_SERVER['HTTP_ACCEPT_CHARSET']:'';
-			$fingerprint.=(isset($_SERVER['HTTP_KEEP_ALIVE']))?$_SERVER['HTTP_KEEP_ALIVE']:'';
-			$fingerprint.=(isset($_SERVER['HTTP_CONNECTION']))?$_SERVER['HTTP_CONNECTION']:'';
-			
-			// Fingerprint is hashed with MD5
-			$this->data['fingerprint']=md5($fingerprint);
+			$fingerprint='';
+			// If IP is set for session fingerprinting
+			if(in_array('ip',$this->data['session-fingerprint'])){
+				$fingerprint.=$this->data['client-ip'];
+			}
+			// If browser is used for session fingerprinting
+			if(in_array('browser',$this->data['session-fingerprint'])){
+				$fingerprint.=$this->data['client-user-agent'];
+				$fingerprint.=(isset($_SERVER['HTTP_ACCEPT']))?$_SERVER['HTTP_ACCEPT']:'';
+				$fingerprint.=(isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))?$_SERVER['HTTP_ACCEPT_LANGUAGE']:'';
+				$fingerprint.=(isset($_SERVER['HTTP_ACCEPT_ENCODING']))?$_SERVER['HTTP_ACCEPT_ENCODING']:'';
+				$fingerprint.=(isset($_SERVER['HTTP_ACCEPT_CHARSET']))?$_SERVER['HTTP_ACCEPT_CHARSET']:'';
+				$fingerprint.=(isset($_SERVER['HTTP_KEEP_ALIVE']))?$_SERVER['HTTP_KEEP_ALIVE']:'';
+				$fingerprint.=(isset($_SERVER['HTTP_CONNECTION']))?$_SERVER['HTTP_CONNECTION']:'';
+			}
+			// If fingerprint is not an empty string then it overwrites the State value
+			if($fingerprint!=''){
+				// Fingerprint is hashed with MD5 using session name for salt
+				$this->data['fingerprint']=md5($this->data['session-name'].$fingerprint);
+			}
 			
 		// JSON OR XML BASED INPUT
 		
@@ -400,8 +461,8 @@ class WWW_State	{
 		 * If the returned array is an array as well, then setting $subvariable can set the 
 		 * sub-key of that array and return that instead.
 		 *
-		 * @param string [$variable] data array key to be returned
-		 * @param string [$subVariable] if returned element is an array itself, this returns the value of that key
+		 * @param string $variable data array key to be returned
+		 * @param string $subVariable if returned element is an array itself, this returns the value of that key
 		 * @return mixed
 		 */
 		final public function getState($variable=false,$subVariable=false){
@@ -434,8 +495,8 @@ class WWW_State	{
 		 * once. This method uses stateChanged() for variables that carry additional 
 		 * functionality, such as setting timezone.
 		 *
-		 * @param string/array [$variable] data key to be set or an array of keys and values
-		 * @param mixed [$value] value of the new data
+		 * @param string|array $variable data key to be set or an array of keys and values
+		 * @param mixed $value value of the new data
 		 * @return boolean
 		 */
 		final public function setState($variable,$value=true){
@@ -462,8 +523,8 @@ class WWW_State	{
 		 * compression is set, but not supported by user agent that is making the request, 
 		 * then output supression is turned off.
 		 *
-		 * @param string [$variable] variable name that is changed
-		 * @param mixed [$value] new value of the variable
+		 * @param string $variable variable name that is changed
+		 * @param mixed $value new value of the variable
 		 * @return boolean
 		 */
 		final private function stateChanged($variable,$value=true){
@@ -477,10 +538,21 @@ class WWW_State	{
 					// Attempting to set default timezone
 					date_default_timezone_set($value);
 					break;
-				case 'session-lifetime':
-					if($value!=0){
-						if(function_exists('ini_set') && ini_set('session.gc_maxlifetime',$value)){
+				case 'memory-limit':
+					if($value){
+						if(function_exists('ini_set') && ini_set('memory_limit',$value)){
 							$this->data[$variable]=$value;
+						} else {
+							trigger_error('Cannot set memory limit to '.$value,E_USER_WARNING);
+						}
+					}
+					break;
+				case 'time-limit':
+					if($value){
+						if(set_time_limit($value)){
+							$this->data[$variable]=$value;
+						} else {
+							trigger_error('Cannot set time limit to '.$value,E_USER_WARNING);
 						}
 					}
 					break;
@@ -505,22 +577,18 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function commitHeaders(){
-			// Removes sessions and session cookies, if not used anymore
-			if($this->data['session-id']){
-				if(empty($this->data['session-data']) || (count($this->data['session-data'])==1 && isset($this->data['session-data']['www-session-start']))){
-					// Getting cookie parameters
-					$cookieParams=session_get_cookie_params();
-					// Unsetting cookie
-					setcookie($this->data['session-namespace'],'',1,$cookieParams['path'],$cookieParams['domain'],$cookieParams['secure'],$cookieParams['httponly']);
-					// Destroy sessions
-					session_destroy();
-					// Unsetting session ID
-					$this->data['session-id']=false;
-				} else {
-					// Storing session data actually in session storage
-					$_SESSION[$this->data['session-namespace']]=$this->data['session-data'];
-					session_write_close();
-				}
+			// Checking if there are more data in sessions than just internal keys
+			$sessionSize=count($this->data['session-data']);
+			if(empty($this->data['session-data']) || ($sessionSize==1 && isset($this->data['session-data'][$this->data['session-timestamp-key']])) || ($sessionSize==1 && isset($this->data['session-data'][$this->data['session-fingerprint-key']])) || ($sessionSize==2 && isset($this->data['session-data'][$this->data['session-timestamp-key']]) && isset($this->data['session-data'][$this->data['session-fingerprint-key']]))){
+				// This will make the session handler destroy the session
+				$this->data['session-data']=array();
+			}
+			// If session data has changed in any way or session is assigned to be regenerated
+			if($this->sessionHandler->regenerateId || $this->originalSessionData!=$this->data['session-data']){
+				// Sending State session data to session handler
+				$this->sessionHandler->sessionData=$this->data['session-data'];
+				// Closing sessions
+				$this->sessionHandler->sessionCommit();
 			}
 			// Commiting headers
 			if(!empty($this->data['headers-set'])){
@@ -533,10 +601,8 @@ class WWW_State	{
 					header_remove($header);
 				}
 			}
-			
 			// Headers have been commited
 			return true;
-			
 		}
 		
 	// SITEMAP AND TRANSLATIONS
@@ -546,8 +612,8 @@ class WWW_State	{
 		 * with $language variable. If $keyword is also set, then it returns a specific translation 
 		 * with that keyword from $language translations.
 		 *
-		 * @param string [$language] language keyword, if this is not set then returns current language translations
-		 * @param string [$keyword] if only single keyword needs to be returned
+		 * @param string $language language keyword, if this is not set then returns current language translations
+		 * @param string $keyword if only single keyword needs to be returned
 		 * @return array, string or false if failed
 		 */
 		final public function getTranslations($language=false,$keyword=false){
@@ -602,8 +668,8 @@ class WWW_State	{
 		 * sitemap node with that keyword from $language sitemap file. This method returns the 
 		 * original, non-modified sitemap that has not been parsed for use with URL controller.
 		 *
-		 * @param string [$language] language keyword, if this is not set then returns current language sitemap
-		 * @param string [$keyword] if only a single URL node needs to be returned
+		 * @param string $language language keyword, if this is not set then returns current language sitemap
+		 * @param string $keyword if only a single URL node needs to be returned
 		 * @return array or false if failed
 		 */
 		final public function getSitemapRaw($language=false,$keyword=false){
@@ -659,8 +725,8 @@ class WWW_State	{
 		 * parts of the system. It returns sitemap for current language or a language set with 
 		 * $language variable and can return a specific sitemap node based on $keyword.
 		 *
-		 * @param string [$language] language keyword, if this is not set then returns current language sitemap
-		 * @param string [$keyword] if only a single URL node needs to be returned
+		 * @param string $language language keyword, if this is not set then returns current language sitemap
+		 * @param string $keyword if only a single URL node needs to be returned
 		 * @return array or false if failed
 		 */
 		final public function getSitemap($language=false,$keyword=false){
@@ -740,8 +806,8 @@ class WWW_State	{
 		 * that State messenger will be stored under. If the file already exists and $overwrite is 
 		 * not turned on, then it automatically loads contents of that file from filesystem.
 		 *
-		 * @param string [$address] key that messenger data will be saved under
-		 * @param boolean [$overwrite] if this is set then existing state messenger file will be overwritten
+		 * @param string $address key that messenger data will be saved under
+		 * @param boolean $overwrite if this is set then existing state messenger file will be overwritten
 		 * @return boolean
 		 */
 		final public function stateMessenger($address,$overwrite=false){
@@ -760,8 +826,8 @@ class WWW_State	{
 		 * key. $data can also be an array of keys and values, in which case multiple values are 
 		 * set at the same time.
 		 *
-		 * @param array/string [$data] key or data array
-		 * @param mixed [$value] value, if data is a key
+		 * @param array|string $data key or data array
+		 * @param mixed $value value, if data is a key
 		 * @return boolean
 		 */
 		final public function setMessengerData($data,$value=false){
@@ -787,7 +853,7 @@ class WWW_State	{
 		 * This method removes key from State messenger based on value of $key. If $key is not 
 		 * set, then the entire State messenger data is cleared.
 		 *
-		 * @param string [$key] key that will be removed, if set to false then removes the entire data
+		 * @param string $key key that will be removed, if set to false then removes the entire data
 		 * @return boolean
 		 */
 		final public function unsetMessengerData($key=false){
@@ -813,9 +879,9 @@ class WWW_State	{
 		 * If $remove is set, then State messenger data is removed from filesystem or State 
 		 * object after being called.
 		 *
-		 * @param string [$address] messenger address
-		 * @param boolean [$remove] true or false flag whether to delete the request data after returning it
-		 * $return mixed or false if failed
+		 * @param string $address messenger address
+		 * @param boolean $remove true or false flag whether to delete the request data after returning it
+		 * @return mixed or false if failed
 		 */
 		final public function getMessengerData($address=false,$remove=true){
 			// If messenger address is set
@@ -859,7 +925,7 @@ class WWW_State	{
 		 * This method sets user data array in session. This is a simple helper function used 
 		 * for holding user-specific data for a web service. $data is an array of user data.
 		 *
-		 * @param array [$data] data array set to user
+		 * @param array $data data array set to user
 		 * @return boolean
 		 */
 		final public function setUser($data){
@@ -874,7 +940,7 @@ class WWW_State	{
 		 * This either returns the entire user data array or just a specific $key of user data 
 		 * from the session.
 		 *
-		 * @param string [$key] element returned from user data, if not set then returns the entire user data
+		 * @param string $key element returned from user data, if not set then returns the entire user data
 		 * @return mixed
 		 */
 		final public function getUser($key=false){
@@ -917,7 +983,7 @@ class WWW_State	{
 		 * This method sets an array of $permissions or a comma-separated string of permissions 
 		 * for the current user permissions session.
 		 *
-		 * @param array/string [$permissions] an array or a string of permissions
+		 * @param array|string $permissions an array or a string of permissions
 		 * @return boolean
 		 */
 		final public function setPermissions($permissions){
@@ -951,7 +1017,7 @@ class WWW_State	{
 		 * permissions session. Method returns true, if $permissions exist in the permissions 
 		 * session array.
 		 *
-		 * @param string/array [$permissions] comma-separated string or an array that is checked against permissions array
+		 * @param string|array $permissions comma-separated string or an array that is checked against permissions array
 		 * @return boolean
 		 */
 		final public function checkPermissions($permissions){
@@ -973,8 +1039,8 @@ class WWW_State	{
 					if(!in_array($p,$this->data['user-permissions'])){
 						return false;
 					}
-					return true;
 				}
+                return true;
 			} else {
 				return true;
 			}
@@ -1001,7 +1067,7 @@ class WWW_State	{
 		 * should be regenerated if it already exists, this invalidates forms when Back button is 
 		 * used after submitting data, but is more secure.
 		 *
-		 * @param boolean [$regenerate] if public token should be regenerated
+		 * @param boolean $regenerate if public token should be regenerated
 		 * @return string or boolean if no user session active
 		 */
 		final public function getPublicToken($regenerate=false){
@@ -1025,112 +1091,97 @@ class WWW_State	{
 	// SESSION AND COOKIES
 	
 		/**
-		 * This method starts sessions. This is called automatically if sessions are accessed 
-		 * but sessions have not yet been started. $lifetime is the lifetime of the cookie in 
-		 * seconds. $secure flag is for session cookie to be secure and $httpOnly will mean 
-		 * that cookie is for HTTP only and cannot be accessed with scripts.
-		 *
-		 * @param integer [$lifetime] cookie lifetime in seconds
-		 * @param boolean [$secure] if secure cookie is used
-		 * @param boolean [$httpOnly] if cookie is HTTP only
-		 * @return booleam
-		 */
-		final public function startSession($lifetime=0,$secure=false,$httpOnly=true){
-			// Sessions cannot be started if the headers have already been sent to the user agent
-			if(headers_sent()){
-				return false;
-			}
-			// Making sure that sessions have not already been started
-			if(!session_id()){
-				// Defining session name
-				session_name($this->data['session-namespace']);
-				// If lifetime has been set for a cookie in the browser
-				// Setting session cookie parameters
-				session_set_cookie_params($lifetime,$this->data['web-root'],$this->data['http-host'],$secure,$httpOnly);
-				// Starting sessions
-				session_start();
-				// Populating the session variable
-				if(isset($_SESSION[$this->data['session-namespace']])){
-					$this->data['session-data']=$_SESSION[$this->data['session-namespace']];
-				}
-				// If session lifetime value is not set
-				if($this->data['session-lifetime']==0 && function_exists('ini_get')){
-					$this->data['session-lifetime']=ini_get('session.gc-maxlifetime');
-				}
-				// This can regenerate the session ID, if enough time has passed
-				if($this->data['session-lifetime']){
-					if(!isset($this->data['session-data']['www-session-start'])){
-						// Storing a session creation time in sessions
-						$this->data['session-data']['www-session-start']=$this->data['request-time'];
-					} elseif($this->data['request-time']>($this->data['session-data']['www-session-start']+$this->data['session-lifetime'])){
-						// Regenerating the session ID
-						session_regenerate_id(true);
-						// Storing a session creation time in sessions
-						$this->data['session-data']['www-session-start']=$this->data['request-time'];
-					}
-				}
-				// If session fingerprinting is used
-				if($this->data['session-fingerprint']){
-					if(!isset($this->data['session-data'][$this->data['session-fingerprint-key']])){
-						// Storing session fingerprint in sessions
-						$this->data['session-data'][$this->data['session-fingerprint-key']]=$this->data['fingerprint'];
-					} elseif($this->data['session-data'][$this->data['session-fingerprint-key']]!=$this->data['fingerprint']){
-						// Regenerating the session ID
-						session_regenerate_id(false);
-						// Emptying the session array
-						$this->data['session-data']=array();
-					}
-				}
-				// Assigning session ID to be easily accessible from State
-				$this->data['session-id']=session_id();
-			}
-			return true;
-		}
-		
-		/**
-		 * This method regenerates ongoing session with a new ID. $deleteOld, if set, 
-		 * deletes the previous session.
-		 *
-		 * @param boolean [$deleteOld] deletes the previous one, if set to true
-		 * @return boolean
-		 */
-		final public function regenerateSession($deleteOld=true){
-			// Making sure that sessions have been started
-			if(!$this->data['session-id']){
-				$this->startSession();
-			}
-			// Regenerating session id
-			session_regenerate_id($deleteOld);
-			return true;
-		}
-		
-		/**
-		 * This method clears the session variable, if it is populated for current session.
-		 * Session and the cookie is actually destroyed by State __destruct() method.
+		 * This method validates current session data and checks for lifetime as well as 
+		 * session fingerprint. It notifies session handler if any changes have to be made.
 		 *
 		 * @return boolean
 		 */
-		final public function destroySession(){
+		final public function startSession(){
+		
+			// Starting sessions if session ID does not exist
+			if(!$this->sessionHandler->sessionId){
+				// Opening sessions and initializing session data
+				$this->sessionHandler->sessionOpen($this->data['session-name']);
+			}
+			
+			// Setting session cookie variables from Configuration
+			$this->sessionHandler->sessionCookie(array(
+				'lifetime'=>$this->data['session-lifetime'],
+				'path'=>$this->data['session-path'],
+				'domain'=>$this->data['session-domain'],
+				'secure'=>$this->data['session-secure'],
+				'http-only'=>$this->data['session-http-only']
+			));
+			
+			// Getting sessions data
+			$this->data['session-data']=$this->sessionHandler->sessionData;
+			
+			// Storing original session data for later comparison
+			$this->originalSessionData=$this->data['session-data'];
+			
+			// This can regenerate the session ID, if enough time has passed
+			if($this->data['session-regenerate']){
+				if(!isset($this->data['session-data'][$this->data['session-timestamp-key']])){
+					// Storing a session creation time in sessions
+					$this->data['session-data'][$this->data['session-timestamp-key']]=$this->data['request-time'];
+				} elseif($this->data['request-time']>($this->data['session-data'][$this->data['session-timestamp-key']]+$this->data['session-regenerate'])){
+					// Regenerating the session ID
+					$this->sessionHandler->regenerateId=true;
+					$this->sessionHandler->regenerateRemoveOld=true;
+					// Storing a session creation time in sessions
+					$this->data['session-data'][$this->data['session-timestamp-key']]=$this->data['request-time'];
+				}
+			}
+			
+			// If session fingerprinting is used
+			if($this->data['session-fingerprint'] && $this->data['fingerprint']){
+				if(!isset($this->data['session-data'][$this->data['session-fingerprint-key']])){
+					// Storing session fingerprint in sessions
+					$this->data['session-data'][$this->data['session-fingerprint-key']]=$this->data['fingerprint'];
+				} elseif($this->data['session-data'][$this->data['session-fingerprint-key']]!=$this->data['fingerprint']){
+					// Regenerating the session ID
+					$this->sessionHandler->regenerateId=true;
+					$this->sessionHandler->regenerateRemoveOld=false;
+					// Emptying the session array
+					$this->data['session-data']=array();
+				}
+			}
+			
+			// Session validation complete
+			$this->sessionStarted=true;
+			return true;
+			
+		}
+		
+		/**
+		 * This method notifies the session handler that the session data should be
+		 * stored under a new ID.
+		 *
+		 * @param boolean $regenerate to regenerate or not
+		 * @param boolean $deleteOld deletes the previous one, if set to true
+		 * @return boolean
+		 */
+		final public function regenerateSession($regenerate=true,$deleteOld=true){
 			// Making sure that sessions have been started
-			if(!$this->data['session-id']){
+			if(!$this->sessionStarted){
 				$this->startSession();
 			}
-			// Emptying the session array
-			$this->data['session-data']=array();
+			$this->sessionHandler->regenerateId=$regenerate;
+			$this->sessionHandler->regenerateRemoveOld=$deleteOld;
 			return true;
 		}
 		
 		/**
-		 * This method sets a session variable $key with a value $value. If $key is an array of 
+		 * This method sets a session variable $key with a $value. If $key is an array of 
 		 * keys and values, then multiple session variables are set at once.
 		 *
-		 * @param array/string [$key] key of the variable or an array of keys and values
-		 * @param mixed [$value] value to be set
+		 * @param array|string $key key of the variable or an array of keys and values
+		 * @param mixed $value value to be set
 		 * @return boolean
 		 */
 		final public function setSession($key=false,$value=false){
 			// Making sure that sessions have been started
-			if(!$this->data['session-id']){
+			if(!$this->sessionStarted){
 				$this->startSession();
 			}
 			// Multiple values can be set if key is an array
@@ -1143,8 +1194,7 @@ class WWW_State	{
 				// Setting value based on key
 				$this->data['session-data'][$key]=$value;
 			} else {
-				// If key is false, then replacing the entire session variable
-				$this->data['session-data']=$value;
+				return false;
 			}
 			return true;
 		}
@@ -1154,15 +1204,13 @@ class WWW_State	{
 		 * it can return multiple variables from session at once. If $key is not set, then entire 
 		 * session array is returned.
 		 *
-		 * @param string/array [$key] key to return or an array of keys
+		 * @param string|array $key key to return or an array of keys
 		 * @return mixed
 		 */
 		final public function getSession($key=false){
 			// Making sure that sessions have been started
-			if(!$this->data['session-id']){
-				// Differently from session setting, this returns false if sessions are not started
-				// THis is because Data and API Handlers automatically start sessions
-				return false;
+			if(!$this->sessionStarted){
+				$this->startSession();
 			}
 			// Multiple keys can be returned
 			if(is_array($key)){
@@ -1187,11 +1235,7 @@ class WWW_State	{
 				}
 			} else {
 				// Return entire session data, if key was not set
-				if(isset($this->data['session-data'])){
-					return $this->data['session-data'];
-				} else {
-					return false;
-				}
+				return $this->data['session-data'];
 			}
 		}
 		
@@ -1200,46 +1244,27 @@ class WWW_State	{
 		 * multiple variables can be unset at once. If $key is not set at all, then this simply 
 		 * destroys the entire session.
 		 *
-		 * @param string/array [$key] key of the value to be unset, or an array of keys
+		 * @param string|array $key key of the value to be unset, or an array of keys
 		 * @return boolean
 		 */
 		final public function unsetSession($key=false){
 			// Making sure that sessions have been started
-			if(!$this->data['session-id']){
+			if(!$this->sessionStarted){
 				$this->startSession();
 			}
 			// Can unset multiple values
 			if(is_array($key)){
 				foreach($key as $value){
-					if(isset($this->data['session-data'][$value])){
-						unset($this->data['session-data'][$value]);
-					}
-				}
-				//If session array is empty
-				if(empty($this->data['session-data']) || (count($this->data['session-data'])==1 && isset($this->data['session-data']['www-session-start']))){
-					// Destroying the session
-					$this->destroySession();
+					unset($this->data['session-data'][$value]);
 				}
 			} elseif($key){
-				// If key is set
-				if(isset($this->data['session-data'][$key])){
-					unset($this->data['session-data'][$key]);
-					//If session array is empty
-					if(empty($this->data['session-data']) || (count($this->data['session-data'])==1 && isset($this->data['session-data']['www-session-start']))){
-						// Destroying the session
-						$this->destroySession();
-					}
-				} else {
-					//If session array is empty
-					if(empty($this->data['session-data']) || (count($this->data['session-data'])==1 && isset($this->data['session-data']['www-session-start']))){
-						// Destroying the session
-						$this->destroySession();
-					}
-					return false;
-				}
+				unset($this->data['session-data'][$key]);
 			} else {
-				// Destroying the session
-				$this->destroySession();
+				// Entire session data is unset
+				$this->data['session-data']=array();
+				// Session cookie will be regenerated if new data is stored
+				$this->sessionHandler->regenerateId=true;
+				$this->sessionHandler->regenerateRemoveOld=true;
 			}
 			return true;
 		}
@@ -1248,9 +1273,9 @@ class WWW_State	{
 		 * This method sets a cookie with $key and a $value. $configuration is an array of 
 		 * cookie parameters that can be set.
 		 *
-		 * @param string/array [$key] key of the variable, or an array of keys and values
-		 * @param string/array [$value] value to be set, can also be an array
-		 * @param array [$configuration] cookie configuration options
+		 * @param string|array $key key of the variable, or an array of keys and values
+		 * @param string|array $value value to be set, can also be an array
+		 * @param array $configuration cookie configuration options
 		 * @return boolean
 		 */
 		final public function setCookie($key,$value,$configuration=array()){
@@ -1316,7 +1341,7 @@ class WWW_State	{
 		 * This method returns a cookie value with the set $key. $key can also be an array of 
 		 * keys, in which case multiple cookie values are returned in an array.
 		 *
-		 * @param string [$key] key of the value to be returned, can be an array
+		 * @param string $key key of the value to be returned, can be an array
 		 * @return mixed
 		 */
 		final public function getCookie($key){
@@ -1346,7 +1371,7 @@ class WWW_State	{
 		 * This method unsets a cookie with the set key of $key. If $key is an array, then 
 		 * it can remove multiple cookies at once.
 		 *
-		 * @param string/array [$key] key of the value to be unset or an array of keys
+		 * @param string|array $key key of the value to be unset or an array of keys
 		 * @return boolean
 		 */
 		final public function unsetCookie($key){
@@ -1376,8 +1401,8 @@ class WWW_State	{
 		 * to the client, when headers are sent. $header is the header string to add and $replace 
 		 * is a true/false setting for whether previously sent header like this is replaced or not.
 		 *
-		 * @param string/array [$header] header string to add or an array of header strings
-		 * @param boolean [$replace] whether the header should be replaced, if previously set
+		 * @param string|array $header header string to add or an array of header strings
+		 * @param boolean $replace whether the header should be replaced, if previously set
 		 * @return boolean
 		 */
 		final public function setHeader($header,$replace=true){
@@ -1402,7 +1427,7 @@ class WWW_State	{
 		 * This method adds a header to the array of headers to be removed before data is pushed 
 		 * to the client, when headers are sent. $header is the header string to remove.
 		 *
-		 * @param string/array [$header] header string to add or an array of header strings
+		 * @param string|array $header header string to add or an array of header strings
 		 * @return boolean
 		 */
 		final public function unsetHeader($header){
@@ -1430,15 +1455,15 @@ class WWW_State	{
 		 * what terminal is available on the system, if any, and then execute the call and 
 		 * return the results of the call.
 		 *
-		 * @param string [$command] command to be executed
-		 * return mixed
+		 * @param string $command command to be executed
+		 * @return mixed
 		 */
 		final public function terminal($command){
 		
 			// Status variable
 			$status=1;
 		
-			// Checking all possibleterminal functions
+			// Checking all possible terminal functions
 			if(function_exists('system')){
 				ob_start();
 				system($command,$status);

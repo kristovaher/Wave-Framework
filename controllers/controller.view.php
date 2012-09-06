@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 class WWW_controller_view extends WWW_Factory {
@@ -24,7 +24,7 @@ class WWW_controller_view extends WWW_Factory {
 	 * This method is called by Data Handler to render View contents based on values from 
 	 * URL Controller.
 	 *
-	 * @param array [$input] input data sent to controller
+	 * @param array $input input data sent to controller
 	 * @input mixed input data from URL Controller output
 	 * @return null
 	 */
@@ -149,5 +149,5 @@ class WWW_controller_view extends WWW_Factory {
 	}
 	
 }
-	
+
 ?>

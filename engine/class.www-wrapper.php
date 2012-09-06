@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.1.6
+ * @version    3.2.0
  */
 
 class WWW_Wrapper {
@@ -117,7 +117,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.1.6 (PHP)';
+	private $userAgent='WaveFramework/3.2.0 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -139,8 +139,8 @@ class WWW_Wrapper {
 	 * the system that API makes a connection with and is used whenever language-specific results 
 	 * are returned from API.
 	 * 
-	 * @param string [$address] API address, default value is current domain presumed API address
-	 * @param string [$language] language keyword, default value is current document language
+	 * @param string $address API address, default value is current domain presumed API address
+	 * @param string $language language keyword, default value is current document language
 	 * @return object
 	 */
 	public function __construct($address=false,$language=false){
@@ -182,7 +182,7 @@ class WWW_Wrapper {
 		}
 		
 		// Log entry
-		$this->log[]='Wave API Wrapper object created with API address: '.$apiAddress;
+		$this->log[]='Wave API Wrapper object created with API address: '.$address;
 		
 	}
 	
@@ -193,7 +193,8 @@ class WWW_Wrapper {
 		 * value of $implode is used as a character to implode the log with. Otherwise the 
 		 * log is returned as an array.
 		 * 
-		 * @param string [$implode] string to implode the log with
+		 * @param string $implode string to implode the log with
+         * @return array/string depending if imploded
 		 */
 		public function returnLog($implode=false){
 			$this->log[]='Returning log';
@@ -222,7 +223,7 @@ class WWW_Wrapper {
 		 * then cookies are not used at all. $location is the file that is used for cookie 
 		 * container, it is automatically created if the file does not exist.
 		 *
-		 * @param string [$location] cookie container file location in filesystem
+		 * @param string $location cookie container file location in filesystem
 		 * @return boolean
 		 */
 		public function setCookieContainer($location=false){
@@ -256,7 +257,7 @@ class WWW_Wrapper {
 		 * of any writable file if set in $location. If $location is not set, then it attempts 
 		 * to use the previously defined cookie container.
 		 *
-		 * @param string [$location] location of cookies file, if this is not set then uses current one
+		 * @param string $location location of cookies file, if this is not set then uses current one
 		 * @return boolean
 		 */
 		public function clearCookieContainer($location=false){
@@ -296,8 +297,8 @@ class WWW_Wrapper {
 		 * calls private inputSetter() function that checks the input value for any internal 
 		 * flags that might not actually be sent as an input to the API.
 		 * 
-		 * @param string/array [$input] key of the input data, or an array of keys and values
-		 * @param string [$value] value of the input data
+		 * @param string|array $input key of the input data, or an array of keys and values
+		 * @param string $value value of the input data
 		 * @return boolean
 		 */
 		public function setInput($input,$value=false){
@@ -320,8 +321,8 @@ class WWW_Wrapper {
 		 * that may entirely be API Wrapper specific. This method also creates a log entry 
 		 * for any value that is changed or set.
 		 * 
-		 * @param string [$input] input data key
-		 * @param string [$value] input data value
+		 * @param string $input input data key
+		 * @param string $value input data value
 		 * @return boolean
 		 */
 		private function inputSetter($input,$value){
@@ -477,7 +478,7 @@ class WWW_Wrapper {
 		 * request. $input is the keyword and $value is the value. $input can also be an array 
 		 * of keys and values.
 		 *
-		 * @param string/array [$input] input data key or an array of keys and values
+		 * @param string|array $input input data key or an array of keys and values
 		 * @value string [$value] input data value
 		 * @return boolean
 		 */
@@ -503,8 +504,8 @@ class WWW_Wrapper {
 		 * can be attached at once by sending $file as an array of filenames and locations. This 
 		 * method also checks if the file actually exists.
 		 *
-		 * @param string/array [$file] file keyword or an array of keywords and file locations
-		 * @param string [$file] file location in filesystem
+		 * @param string|array $file file keyword or an array of keywords and file locations
+		 * @param string $file file location in filesystem
 		 * @return boolean/error depending on whether file exists or not
 		 */
 		public function setFile($file,$location=false){
@@ -536,7 +537,7 @@ class WWW_Wrapper {
 		 * $clearAuth set to false. To entirely reset the state of API $clearAuth should be 
 		 * set to true and this will reset everything except the log file.
 		 * 
-		 * @param boolean [$clearAuth] whether to also reset authentication and state data
+		 * @param boolean $clearAuth whether to also reset authentication and state data
 		 * @return boolean
 		 */
 		public function clearInput($clearAuth=false){
@@ -580,9 +581,9 @@ class WWW_Wrapper {
 		 * variables directly with a single call by supplying $variables, $fileVariables and 
 		 * $cryptedVariables arrays.
 		 * 
-		 * @param array [$variables] array of input variables
-		 * @param array [$fileVariables] array of filenames and locations to upload
-		 * @param array [$cryptedVariables] array of input data to be encrypted
+		 * @param array $variables array of input variables
+		 * @param array $fileVariables array of filenames and locations to upload
+		 * @param array $cryptedVariables array of input data to be encrypted
 		 * @return array/string depending on what is requested
 		 */
 		public function sendRequest($variables=false,$fileVariables=false,$cryptedVariables=false){
@@ -1162,8 +1163,8 @@ class WWW_Wrapper {
 		 * with SHA-1 and a salt string set in $postFix. This is used for all API requests where 
 		 * input has to be validated.
 		 *
-		 * @param array [$validationData] array to build a hash from
-		 * @param string [$postFix] string that is used to salt the hash
+		 * @param array $validationData array to build a hash from
+		 * @param string $postFix string that is used to salt the hash
 		 * @return string
 		 */
 		private function validationHash($validationData,$postFix){
@@ -1178,7 +1179,7 @@ class WWW_Wrapper {
 		 * recursively. It applies ksort() to main method as well as to all sub-arrays. $data 
 		 * is the array to be sorted.
 		 * 
-		 * @param array/mixed [$data] variable to be sorted
+		 * @param array|mixed $data variable to be sorted
 		 * @return array/mixed
 		 */
 		private function ksortArray($data){
@@ -1200,10 +1201,10 @@ class WWW_Wrapper {
 		 * This method is simply meant for returning a result if there was an error in the 
 		 * sent request.
 		 * 
-		 * @param array [$inputData] data that was sent as input
-		 * @param string [$responseCode] response code of the error
-		 * @param string [$errorMessage] verbose error message
-		 * @param string/function [$errorCallback] anonymous function or function name to call
+		 * @param array $inputData data that was sent as input
+		 * @param string $responseCode response code of the error
+		 * @param string $errorMessage verbose error message
+		 * @param string|function $errorCallback anonymous function or function name to call
 		 * @return boolean/mixed depending on if callback function was used
 		 */
 		private function errorHandler($inputData,$responseCode,$errorMessage,$errorCallback){

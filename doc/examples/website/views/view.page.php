@@ -25,7 +25,7 @@ class WWW_view_page extends WWW_Factory {
 	 * result from output buffer, if the API call echoes/prints any output. 
 	 * It is recommended for View methods not to return any variable data.
 	 *
-	 * @param array [$input] input array from View Controller
+	 * @param array $input input array from View Controller
 	 * @return null
 	 */
 	public function render($input){

@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_data.htm
  * @since      1.5.0
- * @version    3.1.8
+ * @version    3.2.0
  */
 
 // INITIALIZATION
@@ -36,8 +36,11 @@
 	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-state.php');
 	$state=new WWW_State($config);
 	
-// DATABASE
+// DATABASE AND SESSIONS
 
+	// This holds link to database
+	$databaseConnection=false;
+	
 	// Connecting to database, if configuration is set
 	if(isset($config['database-name'],$config['database-type'],$config['database-host'],$config['database-username'],$config['database-password'])){
 		// Including the required class and creating the object
@@ -47,7 +50,12 @@
 		$state->databaseConnection=$databaseConnection;
 	}
 	
-// AUTOLOAD FUNCTIONALITY
+	// Loading sessions class
+	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-sessions.php');
+	// Loading sessions class with the session namespace
+	$state->sessionHandler=new WWW_Sessions($state->data['session-name'],$state->data['session-lifetime'],$databaseConnection);
+	
+// AUTOLOAD AND SESSIONS FUNCTIONALITY
 
 	// This functions file is not required, but can be used for system wide functions
 	// If you want to include additional libraries, do so here
@@ -62,12 +70,6 @@
 	// API is used to process all requests and it handles caching and API validations
 	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-api.php');
 	$api=new WWW_API($state);
-	
-	// Testing if namespace cookie has been set, if it has then checking for session variables
-	if(isset($_COOKIE[$state->data['session-namespace']])){
-		// Starting sessions
-		$state->startSession();
-	}
 
 	// This uses current request URI to find out which view should be loaded, by default it uses the request set by State
 	// API check is turned off, since index.php is considered a public gateway
@@ -117,7 +119,7 @@
 
 	// API gathers its own log data internally and it is given to Logger to be logged
 	if(isset($logger)){
-		$logger->setCustomLogData(array('category'=>'data','database-query-counter'=>((isset($databaseConnection))?$databaseConnection->queryCounter:0))+$api->apiLoggerData);
+		$logger->setCustomLogData(array('category'=>'data','database-query-counter'=>(($databaseConnection)?$databaseConnection->queryCounter:0))+$api->apiLoggerData);
 		$logger->writeLog();
 	}
 

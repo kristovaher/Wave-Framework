@@ -40,7 +40,7 @@ class WWW_Limiter {
 	 * Construction method of Logger expects just one variable: $logDir, which is the folder where 
 	 * limiter stores files for specific limiter methods. This folder should be writable by PHP.
 	 *
-	 * @param string [$logDir] location of directory to store log files at
+	 * @param string $logDir location of directory to store log files at
 	 * @return object
 	 */
 	public function __construct($logDir='./'){
@@ -67,8 +67,8 @@ class WWW_Limiter {
 	 * keeps track of the amount of requests by storing minimal log files in filesystem, in 
 	 * $logDir subfolder. Returns true if not limited, throws 403 error if limit exceeded.
 	 *
-	 * @param integer [$limit] amount of requests that cannot be exceeded per minute
-	 * @param integer [$duration] duration of how long the IP will be blocked if limit is exceeded
+	 * @param integer $limit amount of requests that cannot be exceeded per minute
+	 * @param integer $duration duration of how long the IP will be blocked if limit is exceeded
 	 * @return boolean or exit if limiter hit
 	 */
 	public function limitRequestCount($limit=400,$duration=3600){
@@ -174,7 +174,7 @@ class WWW_Limiter {
 	 * This method will block HTTP requests if server load is more than $limit. It throws 
 	 * 503 Service Unavailable message should that happen.
 	 *
-	 * @param integer [$limit] server load that, if exceeded, causes the user agents request to be blocked
+	 * @param integer $limit server load that, if exceeded, causes the user agents request to be blocked
 	 * @return boolean or exit if limiter hit
 	 */
 	public function limitServerLoad($limit=80){
@@ -213,7 +213,7 @@ class WWW_Limiter {
 	 * This method only allows HTTP requests from a comma-separated list of IP addresses 
 	 * sent with $whitelist. For every other IP address it throws a 403 Forbidden error.
 	 *
-	 * @param string [$whiteList] comma-separated list of whitelisted IP addresses
+	 * @param string $whiteList comma-separated list of whitelisted IP addresses
 	 * @return boolean or exit if limiter hit
 	 */
 	public function limitWhitelisted($whiteList=''){
@@ -247,7 +247,7 @@ class WWW_Limiter {
 	 * This method blocks IP addresses sent with $blackList as a comma-separated list. If HTTP 
 	 * request has an IP defined in that list, then Limiter throws a 403 Forbidden error.
 	 *
-	 * @param string [$blackList] comma-separated list of blacklisted IP addresses
+	 * @param string $blackList comma-separated list of blacklisted IP addresses
 	 * @return boolean or exit if limiter hit
 	 */
 	public function limitBlacklisted($blackList=''){
@@ -283,9 +283,9 @@ class WWW_Limiter {
 	 * possible to provide a comma-separated list of IP addresses in $ip that allow this 
 	 * type of authentication for additional security.
 	 *
-	 * @param string [$username] correct username for the request
-	 * @param string [$password] correct password for the request
-	 * @param string [$ip] comma separated list of allowed IP addresses
+	 * @param string $username correct username for the request
+	 * @param string $password correct password for the request
+	 * @param string $ip comma separated list of allowed IP addresses
 	 * @return boolean or exit if limiter hit
 	 */
 	public function limitUnauthorized($username,$password,$ip='*'){
@@ -327,7 +327,7 @@ class WWW_Limiter {
 	 * a request, or redirects the request to HTTPS. If $autoRedirect is set to true, then HTTP 
 	 * requests are automatically redirected.
 	 *
-	 * @param boolean [$autoRedirect] if this is set to true, then system redirects user agent to HTTPS
+	 * @param boolean $autoRedirect if this is set to true, then system redirects user agent to HTTPS
 	 * @return boolean or exit if limiter hit
 	 */
 	public function limitNonSecureRequests($autoRedirect=true){

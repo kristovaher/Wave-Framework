@@ -67,6 +67,8 @@
 	$this->setCache('my-key','my-cached-value');
 	// This returns that value from cache
 	$myCachedValue=$this->getCache('my-key');
+	// This does the same as above, but accepts only cache that is less than 60 seconds old
+	$myCachedValue=$this->getCache('my-key',60);
 	// This unsets that cache key from cache
 	$this->unsetCache('my-key');
 	</code>
@@ -141,6 +143,45 @@
 </pre>
 
 					<p>These methods allow you to fine-tune details of your cache and architecture in general in order to build a more optimized and efficient software.</p>
+				
+			<h2>Cache Storage</h2>
 			
+				<p>Wave Framework includes four different ways how cache can be stored on the server: filesystem cache, database cache, APC and Memcache. Caching is an important part of Wave Framework and is one of the better ways to improve the performance of your website.</p>
+		
+				<p>You can define what type of caching you are using in your Configuration file. If APC, Memcache and Database cache options are not used, then Wave Framework uses Filesystem cache by default (thus it is not possible to turn off caching entirely). While you can set all caching options in Configuration file, then caching is used in the order of priority. Memcache is the fastest option in most cases, thus if this is used then other settings are ignored. Second is APC, then Database cache and then filesystem cache.</p>
+				
+				<p>Please note that in most cases the filesystem cache is faster than database cache. Database cache is only provided as an option in case caching storage needs to be shared across servers.</p>
+					
+				<h3>Filesystem Cache</h3>
+				
+					<p>Filesystem cache is used by default in Wave Framework. Filesystem stores its cache in '/filesystem/cache/' folder and its subfolders. Filesystem cache does not require additional configuration, the only thing that is needed is that the '/filesystem/' folders need to be writable by PHP.</p>
+				
+				<h3>Database Cache</h3>
+				
+					<p>Database cache is an alternative caching options for Wave Framework if APC and Memcache are not supported. Database cache allows to store cache in a database table. This database caching table should be in the same database that is defined in Configuration file.</p>
+					
+					<p>To use database caching then you should turn on the 'cache-database' setting in Configuration and also define the connection settings. If connection settings are not set, then the main configuration settings are used for the connection.</p>
+					
+					<p>Database caching assumes a single table with three columns that it uses for cache, here is the recommended database structure (with the default table name 'cache' and their columns):</p>
+					
+					<ul>
+						<li><b>cache</b> - This is the default table name</li>
+						<li><b>address</b> - This should be a VARCHAR(32) and cache addresses are stored here. This column should act as primary key.</li>
+						<li><b>timestamp</b> - This should be INT column that stores Unix timestamps of the time when cache was created.</li>
+						<li><b>data</b> - This stores cache data itself. This should be as long as needed (the maximum cache you expect to be stored). This should generally be LONGTEXT or LONGBLOB (recommended) type just to be safe.</li>
+					</ul>
+				
+				<h3>APC</h3>
+				
+					<p>APC caching has two benefits for any PHP system. APC allows to cache 'compiled' PHP scripts, thus giving an average performance speed increase of up to 80%. But APC also includes a simple storage of variables to cache. If 'apc' setting is set to 1 in Coniguration, then APC will be used as the storage engine for Data Handler and API Handler cache files.</p>
+					
+					<p>Note that this type of caching stores two keys in APC, one for data and another for timestamp.</p>
+				
+				<h3>Memcache</h3>
+				
+					<p>Memcache can strongly improve caching of a web service or a website. This is the recommended caching solution for most high traffic websites, but since PHP does not support it by default and it requires a separate server or service to be run, it is not an option on most hosting services (especially on shared hosting).</p>
+					
+					<p>You can turn on Memcache by setting the value 'memcache' in Configuration file to 1. Note that this type of caching stores two keys in Memcache, one for data and another for timestamp.</p>
+						
 	</body>
 </html>

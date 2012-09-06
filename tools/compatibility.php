@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.5.1
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 // This initializes tools and authentication
@@ -185,6 +185,13 @@ header('Content-Type: text/html;charset=utf-8');
 				$log[]='<span class="bold orange">WARNING</span>: FTP PHP extension is not supported, this is required by automatic update script, this warning can be ignored if update script is not used';
 			}
 			
+		// FTP
+			if(extension_loaded('memcache')){
+				$log[]='<span class="bold">SUCCESS</span>: Memcache is supported';
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: Memcache is not supported, this can be ignored if you do not intend to support memcache as a caching layer';
+			}
+			
 		// GD LIBRARY
 			if(extension_loaded('gd')){
 				$log[]='<span class="bold">SUCCESS</span>: GD Graphics Library is supported';
@@ -304,6 +311,15 @@ header('Content-Type: text/html;charset=utf-8');
 				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.'test.tmp');
 			} else {
 				$log[]='<span class="bold orange">WARNING</span>: /filesystem/messenger/ is not writable, this warning can be ignored if state messenger is not used';
+			}
+			
+			// FILESYSTEM SESSIONS
+			// User session cookies
+			if(file_put_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.'test.tmp','1')){
+				$log[]='<span class="bold">SUCCESS</span>: /filesystem/sessions/ is writable';
+				unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.'test.tmp');
+			} else {
+				$log[]='<span class="bold orange">WARNING</span>: /filesystem/sessions/ is not writable, user session storage is unavailable and session storage will not work, if used';
 			}
 			
 			// FILESYSTEM KEYS

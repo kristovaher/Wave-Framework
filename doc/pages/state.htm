@@ -90,6 +90,18 @@
 						<li><b>api-public-token</b> - If this is set to 1, then a public API token is required to be sent with all web forms.</li>
 						<li><b>base-url</b> - Base URL that is used for HTML views and resource locations.</li>
 						<li><b>blacklist-limiter</b> - Comma-separated list of IP addresses that are blocked from making HTTP requests.</li>
+						<li><b>cache-database</b> - Cache database configuration that consists of cache table, cache address, timestamp and data column names.</li>
+						<li><b>cache-database-address-column</b> - Database cache address/index column.</li>
+						<li><b>cache-database-data-column</b> - Column in database cache table that stores cache.</li>
+						<li><b>cache-database-errors</b> - True or false setting whether cache database calls register errors.</li>
+						<li><b>cache-database-host</b> - Cache database host address.</li>
+						<li><b>cache-database-name</b> - Cache database name.</li>
+						<li><b>cache-database-password</b> - Cache database user password.</li>
+						<li><b>cache-database-persistent</b> - If database cache connection is persistent.</li>
+						<li><b>cache-database-table-name</b> - Cache database table name.</li>
+						<li><b>cache-database-timestamp-column</b> - Cache database timestamp column that stores timestamps of cache entries.</li>
+						<li><b>cache-database-type</b> - The database type of cache connection, either mysql, sqlite, mssql, oracle, postgresql.</li>
+						<li><b>cache-database-username</b> - Cache database username.</li>
 						<li><b>client-ip</b> - IP address of the client that makes the request, this is detected by the system and takes into account proxies.</li>
 						<li><b>client-user-agent</b> - Client user agent string that makes the request.</li>
 						<li><b>data-root</b> - Location of <a href="filesystem.htm">Filesystem</a> '/data/' folder which is used to store filesystem database files.</li>
@@ -112,7 +124,7 @@
 						<li><b>enforce-first-language-url</b> - True or false flag for whether language node is required as part of the request URL.</li>
 						<li><b>enforce-url-end-slash</b> - True or false flag for whether end URL slash is required as part of the request URL.</li>
 						<li><b>file-robots</b> - Robots command string for file downloads.</li>
-						<li><b>fingerprint</b> - Fingerprint string about the user agent that made the request.</li>
+						<li><b>fingerprint</b> - Fingerprint string about the user agent that made the request, only used if session fingerprinting is used.</li>
 						<li><b>forbidden-extensions</b> - Array of file extensions that cannot be requested over HTTP.</li>
 						<li><b>headers-set</b> - This is the list of headers to be set. Value assigns whether it should replace previously set header like that or not.</li>
 						<li><b>headers-unset</b> - This is the list of headers that should be moved.</li>
@@ -145,7 +157,12 @@
 						<li><b>language</b> - Currently detected language.</li>
 						<li><b>languages</b> - Array of language keywords used by the system.</li>
 						<li><b>limiter</b> - True or false flag for whether HTTP request limiter is used or not.</li>
+						<li><b>memcache</b> - Memcache configuration, if it is used.</li>
 						<li><b>load-limiter</b> - True or false flag for whether server load limiter is used.</li>
+						<li><b>memcache</b> - True or false setting whether Memcache is used.</li>
+						<li><b>memcache-host</b> - Memcache server address.</li>
+						<li><b>memcache-port</b> - Memcache port number.</li>
+						<li><b>memory-limit</b> - This is the current memory limit as it is defined in Configuration, if set.</li>
 						<li><b>output-compression</b> - Currently used output compression mode.</li>
 						<li><b>project-title</b> - Project title that is used by <a href="guide_view.htm">View Controller</a> meta title.</li>
 						<li><b>request-id</b> - Unique HTTP request ID.</li>
@@ -159,18 +176,25 @@
 						<li><b>robots-cache-timeout</b> - Cache lifetime of robots.txt files.</li>
 						<li><b>server-ip</b> - Server IP address.</li>
 						<li><b>session-data</b> - This holds data from session storage or temporary data before it is stored in session storage.</li>
+						<li><b>session-domain</b> - Session cookie domain.</li>
 						<li><b>session-fingerprint</b> - True or false flag for whether sessions are tied to IP and browser fingerprint.</li>
 						<li><b>session-fingerprint-key</b> - Key value that the fingerprint will be stored under in sessions.</li>
+						<li><b>session-http-only</b> - Whether session cookie is HTTP-only or not.</li>
 						<li><b>session-id</b> - This holds the current session ID, if sessions are active.</li>
 						<li><b>session-lifetime</b> - Duration of seconds for how long sessions should last, defaults to server value of 'session.gc-maxlifetime'.</li>
-						<li><b>session-namespace</b> - Session namespace keyword.</li>
+						<li><b>session-name</b> - Session name keyword.</li>
+						<li><b>session-path</b> - Session cookie path.</li>
 						<li><b>session-permissions-key</b> - Keyword that is used for storing permissions.</li>
+						<li><b>session-regenerate</b> - The amount of seconds after which session ID is regenerated automatically.</li>
+						<li><b>session-secure</b> - Whether session cookie is only usable over HTTPS.</li>
+						<li><b>session-timestamp-key</b> - Keyword in sessions that stores session timestamp.</li>
 						<li><b>session-user-key</b> - Keyword that is used for storing user account data.</li>
 						<li><b>sitemap</b> - Array of current language sitemap data.</li>
 						<li><b>sitemap-cache-timeout</b> - Cache lifetime of sitemap.xml files.</li>
 						<li><b>sitemap-raw</b> - Raw sitemap data in an array.</li>
 						<li><b>static-root</b> - <a href="filesystem.htm">Filesystem</a> folder for static files.</li>
 						<li><b>system-root</b> - Root folder of the system.</li>
+						<li><b>time-limit</b> - This is the current time limit as it is defined in Configuration, if set.</li>
 						<li><b>timezone</b> - Currently used timezone.</li>
 						<li><b>tmp-root</b> - <a href="filesystem.htm">Filesystem</a> folder for temporary files.</li>
 						<li><b>translations</b> - Array of translations of current language.</li>
@@ -179,6 +203,7 @@
 						<li><b>user-data</b> - Array of user data.</li>
 						<li><b>user-permissions</b> - Array of user permissions.</li>
 						<li><b>user-root</b> - <a href="filesystem.htm">Filesystem</a> folder of user folder.</li>
+						<li><b>verbose-errors</b> - Defines whether system prints out full error details for the request</li>
 						<li><b>view</b> - Currently used view.</li>
 						<li><b>web-root</b> - Web root URL node, in case system is not installed in root of the website.</li>
 						<li><b>whitelist-limiter</b> - Comma-separated list of IP addresses that are allowed to make HTTP requests.</li>
@@ -187,6 +212,18 @@
 				<h3>public $databaseConnection=false</h3>
 					
 					<p>This should hold <a href="database.htm">Database</a> class and connection data, if used.</p>
+					
+				<h3>private $sessionHandler=false</h3>
+				
+					<p>This holds the session handler for session management. This is a WWW_Sessions class from '/engine/class.www-sessions.php' file.</p>
+					
+				<h3>private $sessionStarted=false</h3>
+				
+					<p>This is an internal variable that State uses to check if it has already validated sessions or not.</p>
+					
+				<h3>private $originalSessionData=array()</h3>
+				
+					<p>This carries the session data that was active at the moment sessions were created. It is used to compare later on if sessions need to be commited or not.</p>
 			
 				<h3>private $messenger=false</h3>
 				
@@ -284,17 +321,13 @@
 				
 					<p>This method returns the currently active public token that is used to increase security against cross-site-request-forgery attacks. This method returns false if user session is not populated, in which case public token is not needed. $regenerate sets if the token should be regenerated if it already exists, this invalidates forms when Back button is used after submitting data, but is more secure.</p>
 				
-				<h3>final public function startSession($lifetime=0,$secure=false,$httpOnly=true)</h3>
+				<h3>final public function startSession()</h3>
 				
-					<p>This method starts sessions. This is called automatically if sessions are accessed but sessions have not yet been started. $lifetime is the lifetime of the cookie in seconds. $secure flag is for session cookie to be secure and $httpOnly will mean that cookie is for HTTP only and cannot be accessed with scripts.</p>
+					<p>This method validates current session data and checks for lifetime as well as session fingerprint. It notifies session handler if any changes have to be made.</p>
 				
 				<h3>final public function regenerateSession($deleteOld=true)</h3>
 				
 					<p>This method regenerates ongoing session with a new ID. $deleteOld, if set, deletes the previous session.</p>
-				
-				<h3>final public function destroySession()</h3>
-				
-					<p>This method clears the session variable, if it is populated for current session. Session and the cookie is actually destroyed by State '__destruct()' method.</p>
 				
 				<h3>final public function setSession($key=false,$value=false)</h3>
 				

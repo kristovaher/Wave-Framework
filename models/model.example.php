@@ -43,7 +43,7 @@ class WWW_model_example extends WWW_Factory {
 	/**
 	 * This is intended to load data from database
 	 *
-	 * @param integer [$id] identifier of the object loaded
+	 * @param integer $id identifier of the object loaded
 	 * @return boolean
 	 */
 	public function load($id){

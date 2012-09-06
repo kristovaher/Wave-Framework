@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/database.htm
  * @since      1.1.2
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 class WWW_Database {
@@ -81,13 +81,13 @@ class WWW_Database {
 	 * This constructor method returns new Database object as well as includes options to quickly 
 	 * assign database credentials in the same request.
 	 *
-	 * @param string [$type] database type, can be 'mysql', 'sqlite', 'postgresql', 'oracle' or 'mssql'
-	 * @param string [$host] database server address or SQLite database file location
-	 * @param string [$database] database name
-	 * @param string [$username] username
-	 * @param string [$password] password
-	 * @param boolean [$showErrors] whether database errors trigger PHP errors or not
-	 * @param boolean [$persistent] whether database connection is persistent or not (usually not recommended)
+	 * @param string $type database type, can be 'mysql', 'sqlite', 'postgresql', 'oracle' or 'mssql'
+	 * @param string $host database server address or SQLite database file location
+	 * @param string $database database name
+	 * @param string $username username
+	 * @param string $password password
+	 * @param boolean $showErrors whether database errors trigger PHP errors or not
+	 * @param boolean $persistent whether database connection is persistent or not (usually not recommended)
 	 * @return object
 	 */
 	public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=true,$persistent=false){
@@ -119,12 +119,36 @@ class WWW_Database {
 	 */
 	public function dbConnect(){
 	
+		// This is a connection command for PDO
+		$connectLine='';
+		
+		// Connection command is built based on database settings
+		if($this->host){
+			// Looking for port information
+			if(strpos($this->host,':')!==false){
+				$bits=explode(':',$this->host);
+				$port=array_pop($bits);
+				// If port is assumed to be included
+				if(is_numeric($port)){
+					$connectLine.='host='.implode(':',$bits).';port='.$port.';';
+				} else {
+					$connectLine.='host='.$this->host.';';
+				}
+			} else {
+				$connectLine.='host='.$this->host.';';
+			}
+		}
+		// If database name is set
+		if($this->database){
+			$connectLine.='dbname='.$this->database.';';
+		}
+	
 		// Actions based on database type
 		switch($this->type){
 			case 'mysql':
 				// This mode can only be used if PDO MySQL is loaded as PHP extension
 				if(extension_loaded('pdo_mysql')){
-					$this->pdo=new PDO('mysql:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent,PDO::MYSQL_ATTR_INIT_COMMAND=>'SET NAMES \'UTF8\''));
+					$this->pdo=new PDO('mysql:'.$connectLine,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent,PDO::MYSQL_ATTR_INIT_COMMAND=>'SET NAMES \'UTF8\''));
 					if($this->pdo){
 						$this->connected=true;
 					} else {
@@ -137,7 +161,7 @@ class WWW_Database {
 			case 'sqlite':
 				// This mode can only be used if PDO SQLite is loaded as PHP extension
 				if(extension_loaded('pdo_sqlite')){
-					$this->pdo=new PDO('sqlite:'.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
+					$this->pdo=new PDO('sqlite:'.$connectLine,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->connected=true;
 					} else {
@@ -150,7 +174,7 @@ class WWW_Database {
 			case 'postgresql':
 				// This mode can only be used if PDO PostgreSQL is loaded as PHP extension
 				if(extension_loaded('pdo_pgsql')){
-					$this->pdo=new PDO('pgsql:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
+					$this->pdo=new PDO('pgsql:'.$connectLine,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->pdo->exec('SET NAMES \'UTF8\'');
 						$this->connected=true;
@@ -164,7 +188,7 @@ class WWW_Database {
 			case 'oracle':
 				// This mode can only be used if PDO Oracle is loaded as PHP extension
 				if(extension_loaded('pdo_oci')){
-					$this->pdo=new PDO('oci:dbname='.$this->database.';charset=AL32UTF8',$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
+					$this->pdo=new PDO('oci:'.$connectLine.';charset=AL32UTF8',$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->connected=true;
 					} else {
@@ -177,7 +201,7 @@ class WWW_Database {
 			case 'mssql':
 				// This mode can only be used if PDO MSSQL is loaded as PHP extension
 				if(extension_loaded('pdo_mssql')){
-					$this->pdo=new PDO('dblib:host='.$this->host.';dbname='.$this->database,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
+					$this->pdo=new PDO('dblib:'.$connectLine,$this->username,$this->password,array(PDO::ATTR_PERSISTENT=>$this->persistent));
 					if($this->pdo){
 						$this->pdo->exec('SET NAMES \'UTF8\'');
 						$this->connected=true;
@@ -203,7 +227,7 @@ class WWW_Database {
 	 * This disconnects current database connection and resets query counter, if 
 	 * $resetQueryCounter is set to true. Returns false if no connection was present.
 	 *
-	 * @param boolean [$resetQueryCounter] whether to reset the query counter
+	 * @param boolean $resetQueryCounter whether to reset the query counter
 	 * @return boolean
 	 */
 	public function dbDisconnect($resetQueryCounter=false){
@@ -232,8 +256,8 @@ class WWW_Database {
 	 * returns false, if the query failed. This method is mostly meant for SELECT queries 
 	 * that return multiple rows.
 	 *
-	 * @param string [$queryString] query string, a statement to prepare with PDO
-	 * @param array [$variables] array of variables to use in prepared statement
+	 * @param string $queryString query string, a statement to prepare with PDO
+	 * @param array $variables array of variables to use in prepared statement
 	 * @return array or false if failed
 	 */
 	public function dbMultiple($queryString,$variables=array()){
@@ -274,8 +298,8 @@ class WWW_Database {
 	 * method returns the first row of the matching result, or it returns false, if the query 
 	 * failed. This method is mostly meant for SELECT queries that return a single row.
 	 *
-	 * @param string [$queryString] query string, a statement to prepare with PDO
-	 * @param array [$variables] array of variables to use in prepared statement
+	 * @param string $queryString query string, a statement to prepare with PDO
+	 * @param array $variables array of variables to use in prepared statement
 	 * @return array or false if failed
 	 */
 	public function dbSingle($queryString,$variables=array()){
@@ -317,8 +341,8 @@ class WWW_Database {
 	 * the query was successful or not. This method is mostly meant for INSERT, UPDATE and 
 	 * DELETE type of queries.
 	 *
-	 * @param string [$queryString] query string, a statement to prepare with PDO
-	 * @param array [$variables] array of variables to use in prepared statement
+	 * @param string $queryString query string, a statement to prepare with PDO
+	 * @param array $variables array of variables to use in prepared statement
 	 * @return boolean or integer of affected rows
 	 */
 	public function dbCommand($queryString,$variables=array()){
@@ -362,9 +386,9 @@ class WWW_Database {
 	 * all $key values from that array into a new, separate array. If $unique is set, then it 
 	 * only returns unique keys.
 	 *
-	 * @param array [$array] array to filter from
-	 * @param string [$key] key to return
-	 * @param boolean [$unique] if returned array should only have only unique values
+	 * @param array $array array to filter from
+	 * @param string $key key to return
+	 * @param boolean $unique if returned array should only have only unique values
 	 * @return array or mixed if source is not an array
 	 */
 	public function dbArray($array,$key,$unique=true){
@@ -399,28 +423,51 @@ class WWW_Database {
 	 * variables, like the ones sent to dbSingle(), dbMultiple() and dbCommand() requests. 
 	 * It returns a prepared query string.
 	 *
-	 * @param string [$query] query string
-	 * @param string [$variables] values sent to PDO
+	 * @param string $query query string
+	 * @param string $variables values sent to PDO
 	 * @return string
 	 */
 	public function dbDebug($query,$variables=array()){
+		// Attempting to connect to database, if not connected
+		if($this->connected!=1){
+			$this->dbConnect();
+		}
 		// Attempt to simulate PDO query-building
 		$keys=array();
 		$values=array();
+		// Type is either 1 for positioned variables or 2 for name based tokens
+		// 0 means that it is undefined
+		$type=0;
+		// Making sure that variables are not empty
 		if(!empty($variables)){
+			// This method requires database connection
+			if($this->connected!=1){
+				$this->dbConnect();
+			}
+			// Looping over each of the input variables
 			foreach($variables as $key=>$value){
-				if(is_string($key)){
+				// Finding out the prepared statement type
+				if($type==0){
+					if(is_string($key)){
+						$type=2;
+					} else {
+						$type=1;
+					}
+				}
+				// Keys are detected based on type
+				if($type==2){
 					$keys[]='/:'.$key.'/';
 				} else {
 					$keys[]='/[?]/';
 				}
-				if(is_numeric($value)){
-					$values[]=intval($value);
-				} else {
-					$values[]=$this->pdo->quote($value);
-				}
+				// Casting the PDO quote function on the variable
+				$values[]=$this->pdo->quote($value);
 			}
-			return preg_replace($keys,$values,$query,1);
+			if($type==2){
+				return preg_replace($keys,$values,$query);
+			} else {
+				return preg_replace($keys,$values,$query,1);
+			}
 		} else {
 			return $query;
 		}
@@ -550,9 +597,9 @@ class WWW_Database {
 	 * escapes the value to be suitable when used inside a LIKE match. If $stripQuotes is set, 
 	 * then the value will also strip any quotes, if they happen to be added to the value.
 	 *
-	 * @param string [$value] input value
-	 * @param string [$type] Mmthod of quoting, either 'escape', 'integer', 'alpha', 'field' or 'like'
-	 * @param boolean [$stripQuotes] whether the resulting quotes will be stripped from the string, if they get set
+	 * @param string $value input value
+	 * @param string $type Mmthod of quoting, either 'escape', 'integer', 'alpha', 'field' or 'like'
+	 * @param boolean $stripQuotes whether the resulting quotes will be stripped from the string, if they get set
 	 * @return string
 	 */
 	public function dbQuote($value,$type='escape',$stripQuotes=false){
@@ -602,9 +649,9 @@ class WWW_Database {
 	 * query to be checked and $queryString with $variables for debugging purposes, as it attempts 
 	 * to rebuild the query sent to PDO using dbDebug() method.
 	 *
-	 * @param object [$query] query object from PDO
-	 * @param string [$queryString] query string
-	 * @param array [$variables] variables sent to query
+	 * @param object $query query object from PDO
+	 * @param string $queryString query string
+	 * @param array $variables variables sent to query
 	 * @return boolean or throws error
 	 */
 	private function dbErrorCheck($query,$queryString=false,$variables=array()){

@@ -29,7 +29,18 @@
 				
 				<p>If http-authentication is set to 1, then HTTP authentication is required before any requests go through. It is also possible to limit the entire access to only a single IP or multiple IP addresses by assigning http-authentication-ip a comma separated list of IP addresses. These settings are also used by developer tools in /tools/ subfolder.</p>
 				
-			<h2>Debugging and logging</h2>
+			<h2>Logging and Debugging</h2>
+			
+				<p><b>logger<br/>
+				logger-ip</b></p>
+				
+				<p>This turns on <a href="gateway.htm">Index Gateway</a> performance logging, which stores all information possible about every HTTP request. If this is set to '*' then all HTTP requests are logged, if it is set to 0, then no requests are logged. Value can also be a regular expression, in which case only requests that match the regular expression will be logged (you can use this to log only requests on a specific file, for example). Logging can also be tied to only specific IP address or addresses, if you set logger-ip to have an IP address or comma separated list of addresses.</p>
+				
+				<p><b>verbose-errors</b></p>
+				
+				<p>This settings turns on verbose error messages for fatal/critical errors that stop the script. This will show complete error information when it is encountered on the page. This setting does not apply to warnings and notices, latter of which are all visible under Debugger script. This is turned off by default.</p>
+				
+			<h2>Database</h2>
 			
 				<p><b>database-type<br/>
 				database-host<br/>
@@ -39,14 +50,7 @@
 				database-errors<br/>
 				database-persistent</b></p>
 			
-				<p>Wave Framework can connect to multiple <a href="guide_database.htm">Database</a> types, database-type values can be 'mysql', 'postgresql', 'sqlite', 'mssql' and 'oracle'. If database values are not set, then system won't attempt to connect to database. Persistent connections are allowed by using database-persistent flag, in which case same connection handle will be shared across requests from different user agents, but note that this flag is not recommended and can cause additional performance issues.</p>
-				
-			<h2>Database</h2>
-			
-				<p><b>logger<br/>
-				logger-ip</b></p>
-				
-				<p>This turns on <a href="gateway.htm">Index Gateway</a> performance logging, which stores all information possible about every HTTP request. If this is set to '*' then all HTTP requests are logged, if it is set to 0, then no requests are logged. Value can also be a regular expression, in which case only requests that match the regular expression will be logged (you can use this to log only requests on a specific file, for example). Logging can also be tied to only specific IP address or addresses, if you set logger-ip to have an IP address or comma separated list of addresses.</p>
+				<p>Wave Framework can connect to multiple <a href="guide_database.htm">Database</a> types, database-type values can be 'mysql', 'postgresql', 'sqlite', 'mssql' and 'oracle'. If database values are not set, then system won't attempt to connect to database. Persistent connections are allowed by using database-persistent flag, in which case same connection handle will be shared across requests from different user agents, but note that this flag is not recommended and can cause additional performance issues. If you need to add port information for host, add it after host name, like 'www.example.com:3306'.</p>
 				
 			<h2>Server</h2>
 			
@@ -83,6 +87,14 @@
 				
 				<p>This is the folder that is used to store various security certificates and OpenSSL keys, such as ones used by various API's or e-payment systems.</p>
 				
+				<p><b>memory-limit</b></p>
+				
+				<p>This sets the memory limit for the Wave Framework requests. Setting this value does not guarantee that it will be success, as certain servers disable setting memory limit with PHP. This setting is undefined by default, thus Wave Framework uses the internal memory limit that is set in the server.</p>
+				
+				<p><b>time-limit</b></p>
+				
+				<p>This sets the time limit for the Wave Framework requests. Setting this value does not guarantee that it will be success, as certain servers disable setting time limit with PHP. This setting is undefined by default, thus Wave Framework uses the internal time limit that is set in the server. This value is in seconds.</p>
+				
 			<h2>Handler Extensions</h2>
 
 				<p><b>image-extensions</b></p>
@@ -117,6 +129,10 @@
 				<p><b>web-root</b></p>
 				
 				<p>While most websites are accessible from the domain name and root folder (like http://www.example.com/), then some websites are set up in subfolders (like http://www.example.com/web/). While Wave Framework is able to detect this automatically, should this automatic detection fail, it is recommended to write the web root node here. For 'http://www.example.com/web/' address it would be '/web/'. This value is used when referencing links or loading content in a website.</p>
+				
+				<p><b>base-url</b></p>
+				
+				<p>This value is usually automatically generated from HTTPS setting, 'http-host' and 'web-root' values. This should only be defined in Configuration should the base URL be somehow detected incorrectly. This is the base URL that is stored in HTML header.</p>
 				
 				<p><b>enforce-url-end-slash</b></p>
 				
@@ -155,7 +171,28 @@
 				
 				<p><b>apc</b></p>
 				
-				<p>APC extension is not officially part of PHP, but if web server supports APC, then this can speed up caching and performance. If this setting is set to 1 and APC is supported on the server, then Wave Framework will use APC for caching rather than filesystem folders in some cases. This setting is set to 1 by default.</p>
+				<p>APC extension is not officially part of PHP, but if web server supports APC, then this can speed up caching and performance. If this setting is set to 1 and APC is supported on the server, then Wave Framework will use APC for caching rather than filesystem folders in some cases. This setting is set to 0 by default.</p>
+				
+				<p><b>cache-database<br/>
+				cache-database-type<br/>
+				cache-database-host<br/>
+				cache-database-name<br/>
+				cache-database-username<br/>
+				cache-database-password<br/>
+				cache-database-errors<br/>
+				cache-database-persistent<br/>
+				cache-database-table-name<br/>
+				cache-database-address-column<br/>
+				cache-database-timestamp-column<br/>
+				cache-database-data-column</b></p>
+				
+				<p>If these are set, then Wave Framework will use database caching as opposed to filesystem based caching for all Data Handler and API Handler requests. Static files would still use filesystem specific cache if on-demand parameters are used. Database caching is generally slower than filesystem cache, but it has the benefits of being shared. Note that if the cache-database-* settings are not set and the rest of the settings are, then the main database settings are used for the connection.</p>
+				
+				<p><b>memcache<br/>
+				memcache-host<br/>
+				memcache-port</b></p>
+				
+				<p>Memcache can be used to improve caching speeds noticeably in Wave Framework and speed up your website or web service considerably. If host and port are not set, then localhost and 11211 port is used for the connection.</p>
 				
 			<h2>Dynamic Resources</h2>
 				
@@ -219,17 +256,21 @@
 				
 			<h2>Sessions</h2>
 			
-				<p><b>session-namespace</b></p>
+				<p><b>session-name</b></p>
 				
 				<p>This setting is the namespace/cookie value used for sessions. For example this value is the cookie name for sessions. If this setting is not set in configuration, then Wave Framework generates this value by creating a numeric hash from the root directory address on the server. It is not necessary to change this value unless your system runs on multiple servers with different system root addresses at the same time and you need to carry the sessions across.</p>
 				
-				<p><b>session-user-key<br/>session-permissions-key<br/>session-fingerprint-key</b></p>
+				<p><b>session-regenerate</b></p>
 				
-				<p>Wave Framework has a basic user and permissions handling through sessions as well as session fingerprinting, which can be accessed through <a href="guide_mvc.htm">MVC</a> objects. This sets the keys under which user data and permissions are stored in sessions. These values are set to 'www-user', 'www-permissions' and 'www-fingerprint' by default.</p>
+				<p>This is the amount of seconds that have to pass before Wave Framework automatically regenerates the session cookie. This is set to 0 by default, thus session cookies are not regenerated automatically.</p>
 				
-				<p><b>session-lifetime</b></p>
+				<p><b>session-lifetime<br/>session-lifetime<br/>session-path<br/>session-domain<br/>session-secure<br/>session-http-only</b></p>
 				
-				<p>This is, in seconds, the expected length of PHP sessions. This is only changed if server allows to change PHP setting of 'session.gc_maxlifetime' with ini_set() function and defaults to that same value, if left undefined in <a href="configuration.htm">Configuration</a>. Note that this does not necessarily mean that the session will last this amount of seconds, as PHP session garbage collection or cookie may become invalid before that. Session cookie duration is entirely independent from this value, but Wave Framework does regenerate session cookies, if it detects the session start time being beyond the value of this setting.</p>
+				<p>These values are session cookie settings. State assignes them by default and that is usually recommended, but you can assign your own values here. If 'session-lifetime' value is 0, then sessions will last until they time out in browsers. That is also the default.</p>
+				
+				<p><b>session-user-key<br/>session-permissions-key<br/>session-fingerprint-key<br/>session-timestamp-key</b></p>
+				
+				<p>Wave Framework has a basic user and permissions handling through sessions as well as session fingerprinting, which can be accessed through <a href="guide_mvc.htm">MVC</a> objects. This sets the keys under which user data and permissions are stored in sessions. These values are set to 'www-user', 'www-permissions', 'www-fingerprint' and 'www-timestamp' by default.</p>
 				
 				<p><b>session-fingerprint</b></p>
 				

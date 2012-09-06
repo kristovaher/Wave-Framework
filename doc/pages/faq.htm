@@ -117,5 +117,13 @@
 				
 				<p>While there is no way to specify how Wave Framework handles sessions directly, it is possible in PHP to rewrite session handling functions that PHP natively uses (the same ones that Wave Framework implements). PHP function that defines all the functions used for session handling is the session_set_save_handler(). You can get more information about this function from PHP's own documentation. You should define the sessions you need in in the <a href="guide_autoload.htm">Autoload</a> script in '/resources/autoload.php' file. Read more about <a href="guide_autoload.htm">Autoload</a> script in its own documentation.</p>
 					
+			<h3>My Requests Fail and Decompression Error is Returned By the Browser?</h3>
+			
+				<p>When browsers cannot decompress data that is sent from the server, then they may throw a warning page that says such. Some browsers, like Firefox, tend to fall back to non-compressed output, but Chrome browser (for example) requires the compression algorithms to work and throws a 330 error if it fails.</p>
+				
+				<p>In order to see what is wrong, you should turn off output compression in your Configuration file. This allows you to see the exact output sent by the server.</p>
+				
+				<p>Usually this compression error comes as a result of empty space existing after your PHP scripts, so make sure that the scripts you have edited do not have empty space after closing PHP tags. Alternative is to not use closing tags on PHP scripts at all.</p>
+					
 	</body>
 </html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Session Handler Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Session Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-sessions.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Session Handler class of Wave Framework allows you to have full control over how sessions are loaded and how they are stored. Wave Framework uses filesystem specific session storage by default and this documentation here gives an overview of the WWW_Sessions class that does exactly that.</p>
+				
+				<p>You can create a copy of this sessions file and rename it to something else and then point to this new copy in Configuration file of Wave Framework. This allows you to use your own session handling, for example when you need to use database tables for session storage.</p>
+				
+				<p>The rest of this document details the use of Sessions class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
+				
+			<h2>Using Session class</h2>
+			
+				<p>To use Sessions class, it is recommended to load Sessions class and create a Sessions object as early as possible. The default sessions handler checks if user agent has provided a session cookie or not and if it has, then also automatically starts sessions.</p>
+				
+<pre>
+	<code>
+	// Including the class definition
+	require('/resources/class.sessions.php');
+	// The first variable is the sessions name (also used for cookie name)
+	$sessions=new WWW_Sessions('PHPSESSID');
+	</code>
+</pre>
+
+				<p>If session cookie did not exist then sessions should be started automatically. This is done with the following method:</p>
+				
+<pre>
+	<code>
+	$sessions->sessionOpen();
+	</code>
+</pre>
+
+				<p>The above call will check if it finds a session cookie with the current session name or not and if it does, then it populates $sessions->sessionData array with session information. So then you can print out your entire session data like this:</p>
+				
+<pre>
+	<code>
+	print_r($sessions->sessionData);
+	</code>
+</pre>
+
+				<p>You can also send information to Session Handler about the cookie configuration, such as cookie lifetime and path information. This method call accepts an array of variables that tell Session Handler how long to store session data:</p>
+				
+<pre>
+	<code>
+	$sessions->sessionCookie(array(
+		'lifetime'=>0
+		'domain'=>'www.example.com'
+	));
+	</code>
+</pre>
+
+				<p>You can also notify Session Handler that it should regenerate session ID and return a new cookie value when sessions are commited. You can do it by changing the appropriate flag:</p>
+				
+<pre>
+	<code>
+	$sessions->regenerateId=true;
+	</code>
+</pre>
+
+				<p>Session Handler stores sessions in data with sessionCommit() call. If sessionData variable is empty, then it attempts to delete the session cookie and remove session storage entirely. This means that sessions are only used when they actually store any values. This method stores session data and returns a cookie to the user agent:</p>
+				
+<pre>
+	<code>
+	$sessions->sessionCommit();
+	</code>
+</pre>
+
+				<p>Wave Framework only calls sessionCommit() when it actually detects if data has been changed, since it is an improvement in performance if session data is not constantly written.</p>
+				
+				<p>Session Handler itself does not include garbage collection, this means that session files remain on the server until they are removed with the Cleaner script or through some other means.</p>
+
+			<h2>Session Parameters</h2>
+			
+				<h3>public $sessionName</h3>
+				
+					<p>This is the default session name. Wave Framework does not use 'PHPSESSID' by default and instead sets the session name (and cookie value) that starts with WWW prefix and is followed by a number generated from system folder specific folders.</p>
+					
+				<h3>public $sessionId=false</h3>
+				
+					<p>This carries the currently known session ID value. This is the value of the session cookie.</p>
+					
+				<h3>public $sessionData=array()</h3>
+				
+					<p>This array stores session data. This data will be stored as serialized string in session storage in filesystem or (if you rewrite methods of this class) in database..</p>
+					
+				<h3>public $sessionCookie=array()</h3>
+				
+					<p>This holds information about session cookie and its various configuration settings. These will be used whenever sessions are created.</p>
+					
+				<h3>public $regenerateId=false</h3>
+				
+					<p>This is a true-false flag about whether session ID should be regenerated. This can be sent by the system that uses the Session Handler at any time before sessions are commited. Wave Framework uses this to regenerate cookies when it detects the cookie lifetime is about to end.</p>
+					
+				<h3>public $regenerateRemoveOld=true</h3>
+				
+					<p>This tells Wave Framework to remove the old cookie if ID is being regenerated.</p>
+					
+				<h3>private $databaseConnection=false</h3>
+				
+					<p>This holds connection to database link. This is WWW_Database class by default, if database connection is used. Thus you can use these values to log session creation or entirely replace filesystem specific session creation with your own.</p>
+					
+				<h3>private $cookieFolder=false</h3>
+				
+					<p>This holds the cookie folder for the session. This is where the cookie will be stored in the filesystem.</p>
+				
+			<h2>Session Methods</h2>
+				
+				<h3>public function __construct($sessionName='PHPSESSID',$databaseConnection=false)</h3>
+				
+					<p>Construction method of Session Handler takes two parameters. One for session name and another for database connection link to (preferably) WWW_Database class. Construction also starts sessions automatically if it detects that the user agent has provided a session cookie with a value.</p>
+					
+				<h3>public function sessionOpen($sessionName=false,$sessionLifetime=0)</h3>
+				
+					<p>This method opens sessions. It checks if a previous session is active and closes it. This method functions differently based on if session cookie is set or not. If session cookie is set, then it attempts to populate session data from session storage if it finds a matching session. If not, then it generates a new session ID and clears the session data array.</p>
+					
+				<h3>public function sessionCommit()</h3>
+				
+					<p>This method commits sessions to database. It uses current session configuration and also creates or removes session cookies, if this is necessary. Wave Framework calls this method ONLY if sessions have actually changed or if they are assigned to be regenerated. This method is not the place to track if sessions are still active (use the sessionOpen() method for that).</p>
+					
+				<h3>public function sessionCookie($settings)</h3>
+				
+					<p>This function simply sets session cookie configuration to Session Handler. This is used by Session Handler to set session cookies.</p>
+					
+					<p>These are the values that are used for $settings:</p>
+					
+					<ul>
+						<li><b>lifetime</b> - Duration of seconds how long the session cookie is set. 0 if until the end of browser session.</li>
+						<li><b>path</b> - Path on website that the cookie applies to.</li>
+						<li><b>domain</b> - Cookie domain name.</li>
+						<li><b>secure</b> - Whether the cookie is accessible only over HTTPS.</li>
+						<li><b>http-only</b> - Whether the cookie is not accessible with scripts.</li>
+					</ul>
+					
+				<h3>private function generateSessionId($salt='')</h3>
+				
+					<p>This method generates a new session ID value. By default the SHA-1 hash string is generated from user IP, server host address, request unique ID, microtime() and a custom salt.</p>
+			
+	</body>
+</html>

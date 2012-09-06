@@ -34,9 +34,6 @@
 	$userAgent=$this->getState('client-user-agent');
 	// This is root of the writable folder where you can store various file uploads
 	$userData=$this->getState('user-root');
-	// This is a fingerprint of the user agent that is making the request
-	// Might not be entirely unique, but good for some occasions
-	$userData=$this->getState('fingerprint');
 	// This is assumed as the IP address of the client that is making the request
 	$ip=$this->getState('client-ip');
 	// If the user agent has requested not to be tracked

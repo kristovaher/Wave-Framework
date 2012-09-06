@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/imager.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 class WWW_Imager {
@@ -46,7 +46,7 @@ class WWW_Imager {
 	 * of image as well as image resolution, which is stored in $width and $height variables.
 	 * Method returns true if image was loaded successfully.
 	 *
-	 * @param string [$location] source file location in file system
+	 * @param string $location source file location in file system
 	 * @return boolean
 	 */
 	public function input($location){
@@ -103,9 +103,9 @@ class WWW_Imager {
 	 * quality (from 0-100) and $format is used to define what file format the picture is 
 	 * returned. $format can be 'jpg', 'png' or 'gif'.
 	 *
-	 * @param string [$location] new file location in file system. If not set, then returns file data to output
-	 * @param integer [$quality] quality percentage, higher is better
-	 * @param string [$format] output file extension or type, 'png', 'jpg' or 'gif'
+	 * @param string $location new file location in file system. If not set, then returns file data to output
+	 * @param integer $quality quality percentage, higher is better
+	 * @param string $format output file extension or type, 'png', 'jpg' or 'gif'
 	 * @return boolean
 	 */
 	public function output($location=false,$quality=90,$format=false){
@@ -137,25 +137,13 @@ class WWW_Imager {
 			// Different file types have different compression levels for quality
 			switch($format){
 				case 'jpg':
-					if(imagejpeg($this->resource,$location,$quality)){
-						return true;
-					} else {
-						return false;
-					}
+					return imagejpeg($this->resource,$location,$quality);
 					break;
 				case 'png':
-					if(imagepng($this->resource,$location,(9-floor($quality/10)))){
-						return true;
-					} else {
-						return false;
-					}
+					return imagepng($this->resource,$location,(9-floor($quality/10)));
 					break;
 				case 'gif':
-					if(imagegif($this->resource,$location)){
-						return true;
-					} else {
-						return false;
-					}
+					return imagegif($this->resource,$location);
 					break;
 				default:
 					trigger_error('This output format is not supported',E_USER_ERROR);
@@ -167,9 +155,10 @@ class WWW_Imager {
 			// Different file types have different compression levels for quality
 			switch($format){
 				case 'jpg':
+                    // Pushing proper headers
+                    header('Content-Type: image/jpeg');
 					// Second parameter of null means that image is pushed to output buffer instead of stored in file
 					if(imagejpeg($this->resource,null,$quality)){
-						header('Content-Type: image/jpeg');
 						return true;
 					} else {
 						// 500 header is returned if file was not created
@@ -178,9 +167,10 @@ class WWW_Imager {
 					}
 					break;
 				case 'png':
+                    // Pushing proper headers
+                    header('Content-Type: image/png');
 					// PNG format has compression from 0-9 with 0 being the best, so quality is updated accordingly
 					if(imagepng($this->resource,null,(9-floor($quality/10)))){
-						header('Content-Type: image/png');
 						return true;
 					} else {
 						// 500 header is returned if file was not created
@@ -189,9 +179,10 @@ class WWW_Imager {
 					}
 					break;
 				case 'gif':
+                    // Pushing proper headers
+                    header('Content-Type: image/gif');
 					// Second parameter not used means that image is pushed to output buffer instead of stored in file
 					if(imagegif($this->resource)){
-						header('Content-Type: image/gif');
 						return true;
 					} else {
 						// 500 header is returned if file was not created
@@ -205,6 +196,9 @@ class WWW_Imager {
 			}
 			
 		}
+
+        // Something must have gone wrong
+        return false;
 		
 	}
 	
@@ -213,9 +207,9 @@ class WWW_Imager {
 	 * on-demand image loading parameters, to an image in $source folder and stored in $target 
 	 * folder. If $target is not set, then image is returned to output buffer.
 	 *
-	 * @param string [$source] source file location
-	 * @param string [$command] series of commands that will be applied to the image
-	 * @param string [$target] target file location
+	 * @param string $source source file location
+	 * @param string $command series of commands that will be applied to the image
+	 * @param string $target target file location
 	 * @return boolean
 	 */
 	public function commands($source,$command,$target=false){
@@ -473,10 +467,10 @@ class WWW_Imager {
 	 * position of the image on the new, resized canvas and accept both numeric (pixel) values 
 	 * as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'.
 	 *
-	 * @param integer [$width] width of resulting image
-	 * @param integer [$height] height of resulting image
-	 * @param string [$left] position from the left edge,an be 'center', 'left', 'right' or a pixel value.
-	 * @param string [$top] position from the top edge,an be 'center', 'top', 'bottom' or a pixel value.
+	 * @param integer $width width of resulting image
+	 * @param integer $height height of resulting image
+	 * @param string $left position from the left edge,an be 'center', 'left', 'right' or a pixel value.
+	 * @param string $top position from the top edge,an be 'center', 'top', 'bottom' or a pixel value.
 	 * @return boolean
 	 */
 	public function resizeFitCrop($width,$height,$left='center',$top='center'){
@@ -570,13 +564,13 @@ class WWW_Imager {
 	 * as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values 
 	 * for background color in case background is required (not used for PNG images).
 	 *
-	 * @param integer [$width] width of resulting image
-	 * @param integer [$height] height of resulting image
-	 * @param string [$left] position from the left edge, can be 'center', 'left', 'right' or a pixel value
-	 * @param string [$top] position from the top edge, can be 'center', 'top', 'bottom' or a pixel value
-	 * @param integer [$red] amount of red color for background, from 0-255
-	 * @param integer [$green] amount of green color for background, from 0-255
-	 * @param integer [$blue] amount of blue color for background, from 0-255
+	 * @param integer $width width of resulting image
+	 * @param integer $height height of resulting image
+	 * @param string $left position from the left edge, can be 'center', 'left', 'right' or a pixel value
+	 * @param string $top position from the top edge, can be 'center', 'top', 'bottom' or a pixel value
+	 * @param integer $red amount of red color for background, from 0-255
+	 * @param integer $green amount of green color for background, from 0-255
+	 * @param integer $blue amount of blue color for background, from 0-255
 	 * @return boolean
 	 */
 	public function resizeCrop($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0){
@@ -685,13 +679,13 @@ class WWW_Imager {
 	 * ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB 
 	 * values for background color in case background is required (not used for PNG images).
 	 * 
-	 * @param integer [$width] width of resulting image
-	 * @param integer [$height] height of resulting image
-	 * @param integer [$left] position from the left edge. Can be 'center', 'left', 'right' or a pixel value
-	 * @param integer [$top] position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value
-	 * @param integer [$red] amount of red color for background, from 0-255
-	 * @param integer [$green] amount of green color for background, from 0-255
-	 * @param integer [$blue] amount of blue color for background, from 0-255
+	 * @param integer $width width of resulting image
+	 * @param integer $height height of resulting image
+	 * @param integer $left position from the left edge. Can be 'center', 'left', 'right' or a pixel value
+	 * @param integer $top position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value
+	 * @param integer $red amount of red color for background, from 0-255
+	 * @param integer $green amount of green color for background, from 0-255
+	 * @param integer $blue amount of blue color for background, from 0-255
 	 * @return boolean
 	 */
 	public function resizeFit($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0){
@@ -812,8 +806,8 @@ class WWW_Imager {
 	 * and $blue are RGB values for background color in case background is required (not used for 
 	 * PNG images).
 	 *
-	 * @param integer [$width] width of resulting image
-	 * @param integer [$height] height of resulting image
+	 * @param integer $width width of resulting image
+	 * @param integer $height height of resulting image
 	 * @return boolean
 	 */
 	public function resizeFitNoBackground($width,$height){
@@ -847,7 +841,7 @@ class WWW_Imager {
 	 * This method simply resizes the image to fixed width set with $width variable. New image 
 	 * height depends on the result of the resize.
 	 *
-	 * @param integer [$width] width of resulting image
+	 * @param integer $width width of resulting image
 	 * @return boolean
 	 */
 	public function resizeWidth($width){
@@ -887,7 +881,7 @@ class WWW_Imager {
 	 * This method simply resizes the image to fixed height set with $height variable. New image 
 	 * width depends on the result of the resize.
 	 *
-	 * @param integer [$height] height of resulting image
+	 * @param integer $height height of resulting image
 	 * @return boolean
 	 */
 	public function resizeHeight($height){
@@ -931,9 +925,9 @@ class WWW_Imager {
 	 * $settings is an array of variables that are expected to be sent with imagefilter() and 
 	 * imageconvulation() methods.
 	 *
-	 * @param integer [$type] filtering type
-	 * @param integer [$alpha] level of alpha layering to use on top of original image
-	 * @param integer [$settings] filter settings is an array that carries up to three variables
+	 * @param integer $type filtering type
+	 * @param integer $alpha level of alpha layering to use on top of original image
+	 * @param integer $settings filter settings is an array that carries up to three variables
 	 * @return boolean
 	 */
 	public function applyFilter($type,$alpha=100,$settings=array()){

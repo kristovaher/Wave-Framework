@@ -74,7 +74,11 @@
 			
 				<p>Sessions are used as the most common method for doing user sessions in modern websites. Sessions hold a cookie in users computer, value of which is used to define a session variable on the web server. This variable can store any kind of information.</p>
 				
-				<p>Setting, getting and unsetting session variables is very similar to how you would set cookies (as shown in the previous section). You do not need to separately start sessions in Wave Framework, as sessions are internally namespaced and Wave Framework will start sessions itself, when session variables are accessed.</p>
+				<p>Wave Framework has a number of session-related settings in Configuration file, where you can set session cookie duration and other related information.</p>
+				
+				<p>Wave Framework also allows the developer to overwrite the default Session Handler. By default the projects use the session handler that is defined in '/engine/class.www-sessions.php' script as WWW_Sessions class and sessions are stored in '/filesystem/sessions/' subfolder by default. But if you need to implement database-specific session handling then this is the file that you should edit.</p>
+				
+				<p>Setting, getting and unsetting session variables is very similar to how you would set cookies (as shown in the previous section). You do not need to separately start sessions in Wave Framework, as sessions are loaded and Wave Framework will start sessions itself, when session variables are accessed.</p>
 				
 				<p>Sessions do not have a separate configuration, so setSession() method only takes two variables maximum. Here are the examples of setting a session variable, getting a value from a session variable and unsetting a session variable:</p>
 								
@@ -91,26 +95,22 @@
 	$value=$this->unsetSession('my-session-key');
 	</code>
 </pre>
-				
-				<p>It is however possible to also start sessions manually, which allows you to set some session cookie configuration as well. The first option defines the cookie lifetime and it defaults to 0. The second option, for secure cookie, is 'false' by default. If this is set to true then this cookie is set only for secure HTTPS connections. Third parameter, for HTTP only, means that the cookie cannot be accessed by other scripts - this is set to 'true' by default. Example here:</p>
+
+				<p>Wave Framework also has calls for regenerating session ID. This means that the browser will receive a new cookie value for sessions, while the data of the session remains the same:</p>
 				
 <pre>
 	<code>
-	// Regular session-start call (usually this is called automatically)
-	$this->startSession();
-	// Starts sessions with secure connection only and allows the cookie to be accessed with scripts
-	$this->startSession(0,true,false);
+	$this->regenerateSession();
 	</code>
 </pre>
 
-				<p>Wave Framework also has calls for regenerating session ID as well as destroying sessions. Examples of which are here:</p>
+				<p>Wave Framework can also regenerate sessions by itself based on regeneration-timer that is set in Configuration. If 'session-regenerate' is set in Configuration to a number of seconds, then Wave Framework will regenerate a session after this amount of seconds have passed.</p>
+
+				<p>There is no separate call for destroying sessions. Wave Framework Session Handler removes sessions only if they are not used anymore and are empty. But it is possible to tell Wave Framework to unset all sessions - and thus destroy sessions - with this command:</p>
 				
 <pre>
 	<code>
-	// Regenerating session ID
-	$this->regenerateSession();
-	// Destroying sessions
-	$this->destroySession();
+	$this->unsetSession();
 	</code>
 </pre>
 

@@ -20,14 +20,14 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 /**
  * This function clears a folder and all of its subfolders and is run recursively
  *
- * @param string [$directory] location of directory in filesystem
- * @param integer [$cutoff] UNIX timestamp after which files will not be removed
+ * @param string $directory location of directory in filesystem
+ * @param integer $cutoff UNIX timestamp after which files will not be removed
  * @return array as log
  */
 function dirCleaner($directory,$cutoff=0){
@@ -82,9 +82,9 @@ function dirCleaner($directory,$cutoff=0){
 /**
  * This function lists all files and directories in a specific directory
  *
- * @param string [$directory] location of directory in filesystem
- * @param string [$type] can be 'all', 'folders', 'files'
- * @param integer [$files] internal parameter used recursively
+ * @param string $files location of directory in filesystem
+ * @param string $type can be 'all', 'folders', 'files'
+ * @param bool $files whether files are included
  * @return array as file index
  */
 function fileIndex($directory,$type='all',$files=false){
@@ -128,9 +128,9 @@ function fileIndex($directory,$type='all',$files=false){
 /**
  * This function clears a folder and all of its subfolders and is run recursively
  *
- * @param resource [$ftp] FTP connection resource
- * @param string [$from] source folder
- * @param string [$to] target folder
+ * @param resource $ftp FTP connection resource
+ * @param string $from source folder
+ * @param string $to target folder
  * @return array as log
  */
 function ftpFileMover($ftp,$from,$to){
@@ -187,9 +187,9 @@ function ftpFileMover($ftp,$from,$to){
 /**
  * This function creates a *.zip archive of all the core files (everything except /filesystem/)
  *
- * @param string [$source] root folder to backup
- * @param string [$archive] archive location and filename for backup
- * @param boolean [$filesystemBackup] whether filesystem folder will also be backed up
+ * @param string $source root folder to backup
+ * @param string $archive archive location and filename for backup
+ * @param boolean $filesystemBackup whether filesystem folder will also be backed up
  * @return boolean
  */
 function systemBackup($source,$archive,$filesystemBackup=false){
@@ -268,7 +268,7 @@ function systemBackup($source,$archive,$filesystemBackup=false){
 /**
  * This returns true IP
  *
- * @param array [$trustedProxies] array of trusted proxies
+ * @param array $trustedProxies array of trusted proxies
  * @return string
  */
 function getTrueIP($trustedProxies=false){

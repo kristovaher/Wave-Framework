@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.2.0
  */
 
 // SOLVING THE HTTP REQUEST
@@ -70,11 +70,6 @@
 		// Configuration is parsed from INI file in the root of the system
 		$config=parse_ini_file(__ROOT__.'config.ini');
 		
-		// Trusted proxies and IP address
-		if(isset($config['trusted-proxies'])){
-			$config['trusted-proxies']=explode(',',$config['trusted-proxies']);
-		}
-		
 		// List of logger IP's
 		if(isset($config['logger-ip'])){
 			$config['logger-ip']=explode(',',$config['logger-ip']);
@@ -121,6 +116,11 @@
 			$config['trusted-proxies']=explode(',',$config['trusted-proxies']);
 		} else {
 			$config['trusted-proxies']=array('*');
+		}
+	
+		// Trusted proxies and IP address
+		if(isset($config['session-fingerprint'])){
+			$config['session-fingerprint']=explode(',',$config['session-fingerprint']);
 		}
 		
 		// Cache of parsed INI file is stored for later use
@@ -243,9 +243,6 @@
 			if(!empty($_COOKIE)){
 				$error['cookies']=$_COOKIE;
 			}
-			if(!empty($_SESSION)){
-				$error['session']=$_SESSION;
-			}
 			if(!empty($_SERVER)){
 				$error['server']=$_SERVER;
 			}
@@ -257,6 +254,7 @@
 			
 			// Writing current error and file to the array as well
 			$error=array();
+			$error['url']=$_SERVER['REQUEST_URI'];
 			$error['type']=$errorCheck['type'];
 			$error['file']=$errorCheck['file'];
 			$error['line']=$errorCheck['line'];
@@ -264,7 +262,7 @@
 			$errorReport[]=$error;
 			
 			// Logging the error, the error filename is calculated from current error message (this makes sure there are no duplicates, if the error message is the same).
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.md5($error['file'].$error['message']).'.log',json_encode($errorReport)."\n",FILE_APPEND);
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.md5($error['file'].$error['message']).'.tmp',json_encode($errorReport)."\n",FILE_APPEND);
 				
 			// As long as the error level is set to display errors of this type				
 			if($fatalError){
@@ -279,8 +277,18 @@
 				header('HTTP/1.1 500 Internal Server Error');
 				
 				// Regular users will be shown a friendly error message
-				echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST</div>';
-				echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">ERROR HAS BEEN LOGGED FOR FURTHER INVESTIGATION</div>';
+				global $config;
+				if(isset($config['verbose-errors']) && $config['verbose-errors']==1){
+					echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">CRITICAL ERROR ENCOUNTERED</div>';
+					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>TYPE</b>: '.htmlspecialchars($errorCheck['type']).'</div>';
+					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>FILE</b>: '.htmlspecialchars($errorCheck['file']).'</div>';
+					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>LINE</b>: '.htmlspecialchars($errorCheck['line']).'</div>';
+					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>MESSAGE</b>: '.htmlspecialchars($errorCheck['message']).'</div>';
+					echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">FULL STACK TRACE AVAILABLE FROM DEBUGGER SCRIPT</div>';
+				} else {
+					echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST</div>';
+					echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">ERROR HAS BEEN LOGGED FOR FURTHER INVESTIGATION</div>';
+				}
 				
 				// Closing the entire request
 				die();

@@ -127,6 +127,7 @@
 			/filesystem/limiter/<br/>
 			/filesystem/logs/<br/>
 			/filesystem/messenger/<br/>
+			/filesystem/sessions/<br/>
 			/filesystem/static/<br/>
 			/filesystem/tokens/<br/>
 			/filesystem/tmp/<br/>
@@ -268,6 +269,10 @@
 			<p><b>/tools/www-updater.php</b></p>
 
 			<p>This is an update script template, if file with this name is added to root archive of update zip files that is given to /tools/updater.php, then this script is also executed (and then removed). This script is useful to store in other update-related commands, such as file permissions, database changes and so on.</p>
+
+			<p><b>/tools/www-cleaner.php</b></p>
+
+			<p>This is a maintenance script template. It works similarly to Cleaner tool, but is intended to be called by the server in order to automatically clean the filesystem folders. The only difference is that the log is shown only if the server itself makes the request and the 'cutoff' value cannot be sent with the request by default. Developer should change this script accordingly to make it suitable for use in whatever system it is implemented on.</p>
 
 			<p><b>/views/</b></p>
 

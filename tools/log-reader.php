@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.1.8
+ * @version    3.2.0
  */
 
 // This initializes tools and authentication
@@ -29,7 +29,7 @@ header('Content-Type: text/html;charset=utf-8');
 if(isset($_GET['internal'])){
 
 	// Actual log address
-	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.log';
+	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.tmp';
 	
 	// If file is set for deletion
 	if(isset($_GET['delete']) && file_exists($logAddress)){
@@ -42,7 +42,7 @@ if(isset($_GET['internal'])){
 } elseif(isset($_GET['api'])){
 
 	// Actual log address
-	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.log';
+	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'api.tmp';
 	
 	// If file is set for deletion
 	if(isset($_GET['delete']) && file_exists($logAddress)){
@@ -86,7 +86,7 @@ if(isset($_GET['internal'])){
 	$logSubfolder=substr($logFileName,0,10);
 	
 	// Actual log address
-	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.log';
+	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp';
 	
 	// If file is set for deletion
 	if(isset($_GET['delete']) && file_exists($logAddress)){

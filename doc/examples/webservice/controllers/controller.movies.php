@@ -26,7 +26,7 @@ class WWW_controller_movies extends WWW_Factory {
 	/**
 	 * Adding movie data to database
 	 *
-	 * @param array [$input] input data array
+	 * @param array $input input data array
 	 * @input [title] movie title
 	 * @input [year] movie year
 	 * @return array
@@ -55,7 +55,7 @@ class WWW_controller_movies extends WWW_Factory {
 	/**
 	 * This returns data about a movie based on ID
 	 *
-	 * @param array [$input] input data array
+	 * @param array $input input data array
 	 * @input [id] movie ID
 	 * @return array
 	 * @output [title] movie title
@@ -101,7 +101,7 @@ class WWW_controller_movies extends WWW_Factory {
 	/**
 	 * This deletes a movie from database
 	 *
-	 * @param array [$input] input data array
+	 * @param array $input input data array
 	 * @input [id] movie ID
 	 * @return array
 	 * @output [success] if movie was deleted

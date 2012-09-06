@@ -26,7 +26,7 @@ class WWW_Minifier {
 	 * This method removes comments, tabs, spaces, new-lines and various other spaces from 
 	 * text. It assumes that text is in a CSS-like format.
 	 *
-	 * @param string [$data] data string to be minified
+	 * @param string $data data string to be minified
 	 * @return string
 	 */
 	public static function minifyCSS($data){
@@ -48,7 +48,7 @@ class WWW_Minifier {
 	 * This method removes comments, tabs, spaces, new-lines and various other spaces from 
 	 * text. It assumes that text is in a JavaScript-like format.
 	 *
-	 * @param string [$data] data string to be minified
+	 * @param string $data data string to be minified
 	 * @return string
 	 */
 	public static function minifyJS($data){
@@ -68,7 +68,7 @@ class WWW_Minifier {
 	 * This method removes comments, tabs, spaces, new-lines and various other spaces from 
 	 * text. It assumes that text is in a HTML-like format.
 	 *
-	 * @param string [$data] data string to be minified
+	 * @param string $data data string to be minified
 	 * @return string
 	 */
 	public static function minifyHTML($data){
@@ -86,7 +86,7 @@ class WWW_Minifier {
 	 * This method removes comments, tabs, spaces, new-lines and various other spaces from 
 	 * text. It assumes that text is in a XML-like format.
 	 *
-	 * @param string [$data] data string to be minified
+	 * @param string $data data string to be minified
 	 * @return string
 	 */
 	public static function minifyXML($data){

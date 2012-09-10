@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.2.0
+ * @version    3.2.1
  */
 
 /*
@@ -68,6 +68,7 @@ function WWW_Wrapper(address,language){
 		apiPublicToken:false,
 		apiHashValidation:true,
 		returnHash:false,
+		headers:false,
 		returnTimestamp:false,
 		trueCallback:false,
 		falseCallback:false,
@@ -106,7 +107,7 @@ function WWW_Wrapper(address,language){
 	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
 	 * defined for future purpose.
 	 */
-	var userAgent='WWWFramework/3.2.0 (JavaScript)';
+	var userAgent='WWWFramework/3.2.1 (JavaScript)';
 	
 	/*
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -235,6 +236,10 @@ function WWW_Wrapper(address,language){
 				case 'www-state':
 					apiState.apiStateKey=value;
 					log.push('API state check key set to: '+value);
+					break;
+				case 'www-headers':
+					// Headers cannot be set for responses
+					log.push('Cannot request framework specific headers to be sent as headers from server');
 					break;
 				case 'www-unserialize':
 					if(value){
@@ -883,7 +888,10 @@ function WWW_Wrapper(address,language){
 				if(thisInputData['www-command']=='www-create-session' && resultData['www-token']!=null){
 					apiState.apiToken=resultData['www-token'];
 					log.push('Session token was found in reply, API session token set to: '+resultData['www-token']);
-				}					
+				} else if(thisInputData['www-command']=='www-destroy-session'){
+					apiState.apiToken=false;
+					log.push('Session has been destroyed');
+				}
 				
 				// If callback function is set
 				if(thisApiState.trueCallback && resultData['www-response-code']!=null && resultData['www-response-code']>=500){

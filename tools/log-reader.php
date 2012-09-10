@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.2.1
  */
 
 // This initializes tools and authentication
@@ -143,9 +143,18 @@ if(isset($_GET['internal'])){
 			
 				// File delete link
 				echo '<h3 onclick="if(confirm(\'Are you sure?\')){ document.location.href=document.location.href+\'&delete\'; }" class="red bold" style="cursor:pointer;">Click to delete this log</h3>';
-
-				// Log files are stored as JSON serialized arrays, separated with line-breaks
-				$log=explode("\n",file_get_contents($logAddress));
+				
+				// Getting error file size
+				$filesize=filesize($logAddress);
+				// Attempting to get memory limit
+				$memory=ini_get('memory_limit');
+				if($memory){
+					$memory=iniSettingToBytes($memory);
+					// Getting the amount of bytes currently allocated
+					$memory=$memory-memory_get_usage();
+					// available memory is 'about half' of the actual memory, just in case the array creation takes a lot of memory
+					$memory=intval($memory/2);
+				}
 				
 				// Output buffer allows to increase peformance due to multiple echo's
 				ob_start();
@@ -153,55 +162,65 @@ if(isset($_GET['internal'])){
 				// This variable holds various summary statistics
 				$summary=array();
 				
-				// Printing out every line from the log file
-				foreach($log as $l){
+				// Log is only shown if memory limit could not be gotten or is less than the file size
+				if(!$memory || $filesize<$memory){
+				
+					// Log files are stored as JSON serialized arrays, separated with line-breaks
+					$log=explode("\n",file_get_contents($logAddress));
 					
-					if(isset($_GET['api']) && $l!=''){
-						$logDetails=explode("\t",$l);
-						echo '<div class="block">';
-							// Printing out log data
-							echo '<b>'.date('d.m.Y H:i:s',$logDetails[0]).'</b> '.$logDetails[1].' -&gt; '.$logDetails[2].'<br/>';
-						echo '</div>';
-						if($logDetails[0]>=($_SERVER['REQUEST_TIME']-2592000)){
-							$summary['30days'][$logDetails[1]][$logDetails[2]]++;
-						}
-						$summary['totals'][$logDetails[1]][$logDetails[2]]++;
-					} else {
-						// Log data is deencoded from JSON string
-						$l=json_decode($l,true);
-						// Log entry should be an array once decoded
-						if(is_array($l)){
-							$accepted=true;
-							// Breaking out of the loop if the assigned key value is not the one that is required
-                            if(isset($types)){
-                                foreach($types as $key=>$t){
-                                    if($key!='all' && $t!==true){
-                                        if(!isset($l[str_replace('['.$t.']','',$key)]) || $l[str_replace('['.$t.']','',$key)]!=$t){
-                                            $accepted=false;
-                                        }
-                                    }
-                                }
-                            }
-							if($accepted){
-								echo '<div class="border block">';
+					// Printing out every line from the log file
+					foreach($log as $l){
+						
+						if(isset($_GET['api']) && $l!=''){
+							$logDetails=explode("\t",$l);
+							echo '<div class="block">';
 								// Printing out log data
-								foreach($l as $key=>$entry){
-									if(isset($_GET['internal']) || isset($types['all']) || isset($types[$key])){
-										if(!is_array($entry)){
-											echo '<b>'.$key.':</b> '.$entry.'<br/>';
-										} else {
-											echo '<b>'.$key.':</b>';
-											echo '<pre class="small box disabled">';
-											print_r($entry);
-											echo '</pre>';
+								echo '<b>'.date('d.m.Y H:i:s',$logDetails[0]).'</b> '.$logDetails[1].' -&gt; '.$logDetails[2].'<br/>';
+							echo '</div>';
+							if($logDetails[0]>=($_SERVER['REQUEST_TIME']-2592000)){
+								$summary['30days'][$logDetails[1]][$logDetails[2]]++;
+							}
+							$summary['totals'][$logDetails[1]][$logDetails[2]]++;
+						} else {
+							// Log data is deencoded from JSON string
+							$l=json_decode($l,true);
+							// Log entry should be an array once decoded
+							if(is_array($l)){
+								$accepted=true;
+								// Breaking out of the loop if the assigned key value is not the one that is required
+								if(isset($types)){
+									foreach($types as $key=>$t){
+										if($key!='all' && $t!==true){
+											if(!isset($l[str_replace('['.$t.']','',$key)]) || $l[str_replace('['.$t.']','',$key)]!=$t){
+												$accepted=false;
+											}
 										}
 									}
 								}
-								echo '</div>';
+								if($accepted){
+									echo '<div class="border block">';
+									// Printing out log data
+									foreach($l as $key=>$entry){
+										if(isset($_GET['internal']) || isset($types['all']) || isset($types[$key])){
+											if(!is_array($entry)){
+												echo '<b>'.$key.':</b> '.$entry.'<br/>';
+											} else {
+												echo '<b>'.$key.':</b>';
+												echo '<pre class="small box disabled">';
+												print_r($entry);
+												echo '</pre>';
+											}
+										}
+									}
+									echo '</div>';
+								}
 							}
 						}
+						
 					}
-					
+				
+				} else {
+					echo '<p class="bold">This log is too large for PHP to handle.</p>';
 				}
 				
 				// Getting the content from output buffer

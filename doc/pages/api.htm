@@ -186,17 +186,13 @@
 					
 					<p>This is a method that converts an array to an XML string. It can convert to both common XML as well as to RSS format. $apiResult is the data sent to the request. If $type is set to 'rss' then RSS formatting is used, otherwise a regular XML is returned. This is an internal method used by output() call.</p>
 					
-				<h3>final private function toXMLnode($data)</h3>
+				<h3>final private function toXMLnode($data,$numeric='node')</h3>
 					
-					<p>This is a helper method for toXML() method and is used to build an XML node. This method is private and is not used elsewhere.</p>
+					<p>This is a helper method for toXML() method and is used to build an XML node. This method is private and is not used elsewhere. $numeric is what is the tag name for keys that are numeric (such as numeric array keys).</p>
 					
 				<h3>final private function toCSV($apiResult)</h3>
 					
 					<p>This method converts an array to CSV format, based on the structure of the array. It uses tabs as a column separator and separates values by commas, if sub-arrays are used. $apiResult is the data sent by output() method.</p>
-					
-				<h3>final private function toBinary($apiResult)</h3>
-					
-					<p>This looks at the input data from $apiResult and tries to determine if the result was a success or not. It considers response code namespace 5XX as a successful call and considers everything else a failure.</p>
 					
 				<h3>final private function toINI($apiResult)</h3>
 					

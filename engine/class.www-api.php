@@ -315,6 +315,7 @@ final class WWW_API {
 					'custom-header'=>false,
 					'hash'=>false,
 					'hash-validation'=>true,
+					'headers'=>(isset($apiInputData['www-headers']))?$apiInputData['www-headers']:false,
 					'ip-session'=>false,
 					'last-modified'=>$this->state->data['request-time'],
 					'minify-output'=>(isset($apiInputData['www-minify']))?$apiInputData['www-minify']:false,
@@ -328,7 +329,7 @@ final class WWW_API {
 					'return-type'=>(isset($apiInputData['www-return-type']))?$apiInputData['www-return-type']:'json',
 					'secret-key'=>false,
 					'token'=>false,
-					'state-key'=>false,
+					'state-key'=>(isset($apiInputData['www-state']))?$apiInputData['www-state']:false,
 					'commands'=>'*',
 					'token-file'=>false,
 					'token-directory'=>false,
@@ -380,13 +381,13 @@ final class WWW_API {
 					if(in_array($apiInputData['www-language'],$this->state->data['languages'])){
 						$this->state->data['language']=$apiInputData['www-language'];
 					} else {
-						return $this->output(array('www-message'=>'This language is not defined','www-response-code'=>116),$apiState);
+						return $this->output(array('www-message'=>'Language cannot be found','www-response-code'=>116),$apiState);
 					}
 				}
 				
-				// This can be passed to prevent cross-site forgeries
-				if(isset($apiInputData['www-state'])){
-					$apiState['state-key']=$apiInputData['www-state'];
+				// System specific output cannot be pushed to headers if the request is PHP-specific
+				if($apiState['return-type']=='php' && $apiState['headers']){
+					$apiState['headers']=false;
 				}
 				
 				// This tests if cache value sent through input is valid
@@ -473,7 +474,7 @@ final class WWW_API {
 								$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
 								
 							} else {
-								return $this->output(array('www-message'=>'API profile configuration incorrect: Secret key missing from configuration','www-response-code'=>109),$apiState);
+								return $this->output(array('www-message'=>'API profile configuration incorrect: secret key missing from configuration','www-response-code'=>109),$apiState);
 							}
 							
 							// Checks for whether token timeout is set on the API profile					
@@ -678,7 +679,7 @@ final class WWW_API {
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
+					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
 					
 					// If nothing is left in cookie container
 					if(empty($cacheValidator['www-cookie'])){
@@ -814,7 +815,7 @@ final class WWW_API {
 							// If cache subdirectory does not exist, it is created
 							if(!is_dir($cacheFolder)){
 								if(!mkdir($cacheFolder,0755)){
-									return $this->output(array('www-message'=>'Server configuration error: Cannot create cache folder','www-response-code'=>100),$apiState);
+									return $this->output(array('www-message'=>'Server configuration error: cannot create cache folder','www-response-code'=>100),$apiState);
 								}
 							}
 							// Cache is stored in serialized form
@@ -825,7 +826,7 @@ final class WWW_API {
 								$cacheTags=explode(',',$apiInputData['www-cache-tags']);
 								foreach($cacheTags as $tag){
 									if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
-										return $this->output(array('www-message'=>'Server configuration error: Cannot create cache tag index','www-response-code'=>100),$apiState);
+										return $this->output(array('www-message'=>'Server configuration error: cannot create cache tag index','www-response-code'=>100),$apiState);
 									}
 								}
 							}
@@ -889,7 +890,12 @@ final class WWW_API {
 			// This filters the result through various PHP and header specific commands
 			if($apiState['disable-callbacks']==false && (!isset($apiResult['www-disable-callbacks']) || $apiResult['www-disable-callbacks']==false)){
 				$this->apiCallbacks($apiResult,$useLogger);
+				// Unsetting the callback variables
+				unset($apiResult['www-set-header'],$apiResult['www-unset-header'],$apiResult['www-set-cookie'],$apiResult['www-unset-cookie'],$apiResult['www-set-session'],$apiResult['www-unset-session'],$apiResult['www-temporary-redirect'],$apiResult['www-permanent-redirect']);
 			}
+			
+			// Unsetting various output variables that are not needed
+			unset($apiResult['www-disable-callbacks']);
 					
 			// Simple flag for error check, this is used for output encryption
 			$errorFound=false;
@@ -910,7 +916,7 @@ final class WWW_API {
 			
 			// DATA CONVERSION FROM RESULT TO REQUESTED FORMAT
 			
-				// If actual output is already detected
+				// If output is overwritten with www-data key, for example from output buffer
 				if(isset($apiResult['www-data'])){
 				
 					// Actual output is stored in www-output key
@@ -943,6 +949,20 @@ final class WWW_API {
 						}
 						
 					}
+				
+					// If www-* prefix headers were meant for headers-only
+					if($apiState['headers']){
+						if(isset($apiResult['www-response-code'])){
+							header('www-response-code:'.$apiResult['www-response-code']);
+							unset($apiResult['www-response-code']);
+						}
+						if(isset($apiResult['www-message'])){
+							header('www-message:'.$apiResult['www-message']);
+							unset($apiResult['www-message']);
+						}
+					} elseif(isset($apiResult['www-response-code'])){
+						$responseCode=$apiResult['www-response-code'];
+					}
 		
 					// Data is custom-formatted based on request
 					switch($apiState['return-type']){
@@ -950,30 +970,43 @@ final class WWW_API {
 							// Encodes the resulting array in JSON
 							$apiResult=json_encode($apiResult);
 							break;
-						case 'binary':
-							// If the result is empty string or empty array or false, then binary returns a 0, otherwise it returns 1
-							$apiResult=$this->toBinary($apiResult);
-							break;
 						case 'xml':
 							// Result array is turned into an XML string
 							$apiResult=$this->toXML($apiResult);
+							break;
+						case 'binary':
+							// If the result is empty string or empty array or false, then binary returns a 0, otherwise it returns 1
+							if((isset($responseCode) && $responseCode>=500) || (!isset($responseCode) && !empty($apiResult))){
+								$apiResult=1;
+							} else {
+								$apiResult=0;
+							}
 							break;
 						case 'rss':
 							// Result array is turned into an XML string
 							// The data should be formatted based on RSS 2.0 specification
 							$apiResult=$this->toXML($apiResult,'rss');
 							break;
+						case 'atom':
+							// Result array is turned into an XML string
+							// The data should be formatted based on Atom RSS specification
+							$apiResult=$this->toXML($apiResult,'atom');
+							break;
 						case 'csv':
 							// Result array is turned into a CSV file
 							$apiResult=$this->toCSV($apiResult);
 							break;
-						case 'serializedarray':
+						case 'serialized':
 							// Array is simply serialized
 							$apiResult=serialize($apiResult);
 							break;
-						case 'querystring':
+						case 'query':
 							// Array is built into serialized query string
 							$apiResult=http_build_query($apiResult);
+							break;
+						case 'print':
+							// Array is built into serialized query string
+							$apiResult=print_r($apiResult,true);
 							break;
 						case 'ini':
 							// This converts result into an INI string
@@ -1016,6 +1049,10 @@ final class WWW_API {
 							$apiResult=WWW_Minifier::minifyCSS($apiResult);
 							break;
 						case 'rss':
+							// RSS minification eliminates extra spaces and newlines and other formatting
+							$apiResult=WWW_Minifier::minifyXML($apiResult);
+							break;
+						case 'atom':
 							// RSS minification eliminates extra spaces and newlines and other formatting
 							$apiResult=WWW_Minifier::minifyXML($apiResult);
 							break;
@@ -1092,6 +1129,9 @@ final class WWW_API {
 									break;
 								case 'rss':
 									header('Content-Type: application/rss+xml;charset=utf-8;');
+									break;
+								case 'atom':
+									header('Content-Type: application/atom+xml;charset=utf-8;');
 									break;
 								case 'csv':
 									header('Content-Type: text/csv;charset=utf-8;');
@@ -1207,6 +1247,18 @@ final class WWW_API {
 						header($data['www-set-header']);
 					}
 				}
+		
+				// This sets a specific header
+				if(isset($data['www-unset-header'])){
+					// It is possible to set multiple headers simultaneously
+					if(is_array($data['www-unset-header'])){
+						foreach($data['www-unset-header'] as $header){
+							header_remove($header);
+						}
+					} else {
+						header_remove($data['www-unset-header']);
+					}
+				}
 				
 			// COOKIES AND SESSIONS
 			
@@ -1299,36 +1351,81 @@ final class WWW_API {
 		 * returned. This is an internal method used by output() call.
 		 *
 		 * @param array $apiResult array data returned from API call
-		 * @param string $type If set to 'rss', then transforms to RSS tags, else as XML
+		 * @param string $type If set to 'rss' or 'atom', then transforms to RSS tags, else as XML
 		 * @return string
 		 */
 		final private function toXML($apiResult,$type=false){
+		
+			// XML Header
+			$xml='<?xml version="1.0" encoding="utf-8"?>';
 			
+			// Array of legal keys
+			$legal=array();
+			
+			// If RSS/ATOM namespace is set or not
+			if($type=='rss' || $type=='atom'){
+				// If namespace is not set, then default Wave Framework namespace is used
+				if(!isset($apiResult['www-xml-namespace'])){
+					$namespace='xmlns:www="http://www.waveframework.com"';
+				} else {
+					// Finding the namespace from the namespace URL
+					$namespace=str_replace('xmlns:','',$apiResult['www-xml-namespace']);
+					$namespace='xmlns:'.$namespace;
+					unset($apiResult['www-xml-namespace']);
+				}
+			} else {
+				if(isset($apiResult['www-xml-root'])){
+					$rootNode=$apiResult['www-xml-root'];
+					unset($apiResult['www-xml-root']);
+				} else {
+					$rootNode='www';
+				}
+			}
+			
+			// Numeric XML nodes will be defined with this
+			if(isset($apiResult['www-xml-numeric'])){
+				$numeric=$apiResult['www-xml-numeric'];
+				unset($apiResult['www-xml-numeric']);
+			} else {
+				$numeric='node';
+			}
+			
+			// Content header
 			// Different XML header is used based on whether it is an RSS or not
 			if($type=='rss'){
-                $xml='<?xml version="1.0" encoding="utf-8"?><rss version="2.0">';
+				$xml.='<rss version="2.0" '.$namespace.'>';
+			} elseif($type=='atom'){
+				$xml.='<feed xmlns="http://www.w3.org/2005/Atom" '.$namespace.'>';
 			} else {
-                $xml='<?xml version="1.0" encoding="utf-8"?><www>';
+				$xml.='<'.$rootNode.'>';
 			}
+			
 			// This is the recursive function used
-			$xml.=$this->toXMLnode($apiResult);
-			if(!$type){
-				$xml.='</www>';
-			} else {
+			$xml.=$this->toXMLnode($apiResult,$numeric);
+			
+			if($type=='rss'){
 				$xml.='</rss>';
+			} elseif($type=='atom'){
+				$xml.='</feed>';
+			} else {
+				$xml.='</'.$rootNode.'>';
 			}
+				
+			// Returning the string
 			return $xml;
 				
 		}
 		
 		/**
 		 * This is a helper method for toXML() method and is used to build an XML node. This 
-		 * method is private and is not used elsewhere.
+		 * method is private and is not used elsewhere. $numeric is what is the tag name for 
+		 * keys that are numeric (such as numeric array keys).
 		 *
 		 * @param array $data data array to convert
+		 * @param string $numeric node name for numeric values from the array
 		 * @return string
 		 */
-		final private function toXMLnode($data){
+		final private function toXMLnode($data,$numeric='node'){
 			// By default the result is empty
 			$return='';
 			foreach($data as $key=>$val){
@@ -1344,24 +1441,24 @@ final class WWW_API {
 					}
 					// If element is an array then this function is called again recursively
 					if(is_array($val)){
-						// XML does not allow numeric nodes, so generic '<node>' is used
+						// XML does not allow numeric nodes, so generic $numeric value is used
 						if(is_numeric($key)){
-							$return.='<node'.$attributes.'>';
+							$return.='<'.$numeric.$attributes.'>';
 						} else {
 							$return.='<'.$key.$attributes.'>';
 						}
 						// Recursive call
-						$return.=$this->toXMLnode($val);
+						$return.=$this->toXMLnode($val,$numeric);
 						if(is_numeric($key)){
-							$return.='</node>';
+							$return.='</'.$numeric.'>';
 						} else {
 							$return.='</'.$key.'>';
 						}
 					} else {
-						// XML does not allow numeric nodes, so generic '<node>' is used
+						// XML does not allow numeric nodes, so generic $numeric value is used
 						if(is_numeric($key)){
 							// Data is filtered for special characters
-							$return.='<node'.$attributes.'>'.htmlspecialchars($val).'</node>';
+							$return.='<'.$numeric.$attributes.'>'.htmlspecialchars($val).'</'.$numeric.'>';
 						} else {
 							$return.='<'.$key.$attributes.'>'.htmlspecialchars($val).'</'.$key.'>';
 						}
@@ -1426,23 +1523,6 @@ final class WWW_API {
 			// Result is imploded and returned
 			return implode("\n",$result);
 			
-		}
-		
-		/**
-		 * This looks at the input data from $apiResult and tries to determine if the result 
-		 * was a success or not. It considers response code namespace 5XX as a successful 
-		 * call and considers everything else a failure.
-		 *
-		 * @param array $apiResult data returned from API call
-		 * @return boolean as integer representation
-		 */
-		final private function toBinary($apiResult){
-			// Based on the returned array, system 'assumes' whether the action was a success or not
-			if((isset($apiResult['www-response-code']) && $apiResult['www-response-code']>=500) || (!isset($apiResult['www-response-code']) && !empty($apiResult))){
-				return 1;
-			} else {
-				return 0;
-			}
 		}
 		
 		/**

@@ -89,7 +89,7 @@ class WWW_State	{
 				'404-image-placeholder'=>true,
 				'404-view'=>'404',
 				'apc'=>0,
-				'api-logging'=>false,
+				'api-logging'=>array('*','!public'),
 				'api-profile'=>'public',
 				'api-public-profile'=>'public',
 				'api-public-token'=>false,
@@ -157,7 +157,7 @@ class WWW_State	{
 				'image-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'index-url-cache-timeout'=>0,
 				'index-view-cache-timeout'=>0,
-				'internal-logging'=>false,
+				'internal-logging'=>array('*','!input-data','!output-data'),
 				'keys-root'=>false,
 				'language'=>false,
 				'languages'=>array('en'),
@@ -201,6 +201,7 @@ class WWW_State	{
 				'time-limit'=>false,
 				'timezone'=>false,
 				'tmp-root'=>false,
+				'trace-errors'=>false,
 				'translations'=>array(),
 				'true-request'=>false,
 				'trusted-proxies'=>array('*'),
@@ -221,6 +222,8 @@ class WWW_State	{
 			if(!empty($config)){
 				$this->setState($config);
 			}
+			
+		// CHECKING FOR SERVER OR PHP SPECIFIC CONFIGURATION OPTIONS AND ASSIGNING UNSET CONFIGURATIONS
 		
 			// Removing full stop from the beginning of both directory URL's
 			if($this->data['web-root'][0]=='.'){
@@ -266,8 +269,6 @@ class WWW_State	{
 			if(!$this->data['keys-root']){
 				$this->data['keys-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'keys-'.DIRECTORY_SEPARATOR;
 			}
-			
-		// CHECKING FOR SERVER OR PHP SPECIFIC CONFIGURATION OPTIONS
 				
 			// If timezone is still set to false, then system attempts to set the currently set timezone
 			// Some systems throw deprecated warning if this value is not set

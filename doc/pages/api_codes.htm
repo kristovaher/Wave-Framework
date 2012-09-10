@@ -42,59 +42,59 @@
 				
 					<p>This means that the API request, which used public API profile, did not provide a public request token. Either the token was not added to the request or was incorrect. Public request tokens protect the website from cross-site-request-forgeries.</p>
 					
-				<h3>102 - API profile not found</h3>
+				<h3>103 - API profile not found</h3>
 				
 					<p>API profile that is used with the request (sent as 'www-profile') was not found in the API profiles file. You should double-check to make sure this profile actually exists.</p>
 					
-				<h3>103 - API profile is disabled</h3>
+				<h3>104 - API profile is disabled</h3>
 				
 					<p>This error message means that while the API profile does exist in the system, it is currently disabled and you should either change the setting in API profiles file, or ask the API owner to change this setting.</p>
 					
-				<h3>104 - API profile not allowed from this IP</h3>
+				<h3>105 - API profile not allowed from this IP</h3>
 				
 					<p>This error means that the IP, where the request is made from, is not allowed and that the API profile that is used has only specific allowed IP's defined in API profiles file.</p>
 					
-				<h3>105 - API command is not allowed for this profile</h3>
+				<h3>106 - API command is not allowed for this profile</h3>
 				
 					<p>This error means that while API profile is correct, the requested 'www-command' is not allowed to be called with this API profile. This is a permissions problem.</p>
 					
-				<h3>106 - API request validation timestamp is missing</h3>
+				<h3>107 - API request validation timestamp is missing</h3>
 				
 					<p>This error message means that the current API profile requires that you send a 'www-timestamp' of the time you made the request for validation purposes.</p>
 					
-				<h3>107 - API request timestamp is too old</h3>
+				<h3>108 - API request timestamp is too old</h3>
 				
 					<p>This error message means that the sent www-timestamp was too old for the responding server and the server considers it insecure to return a response to the request.</p>
 				
-				<h3>108 - API profile configuration incorrect</h3>
+				<h3>109 - API profile configuration incorrect</h3>
 				
 					<p>This means that there's a problem with API profile configuration, that is being used. This usually means that the secret key or certificate is missing.</p>
 					
-				<h3>109 - API request validation hash is missing</h3>
+				<h3>110 - API request validation hash is missing</h3>
 				
 					<p>This error means that the server needs to validate the input data and the validation hash that is used for this purpose, sent with 'www-hash', was missing.</p>
 					
-				<h3>110 - API session token does not exist or is timed out </h3>
+				<h3>111 - API session token does not exist or is timed out </h3>
 				
 					<p>This error means that the session token, which is used to validate API requests, does not exist anymore or has timed out and a new token should be generated.</p>
 					
-				<h3>111 - API profile authentication failed</h3>
+				<h3>112 - API profile authentication failed</h3>
 				
 					<p>This error message means that the API profile input hash validation or token authentication failed, which means that either the validation calculation is incorrect or the data has been tampered with or that the token was incorrect. This is a security error.</p>
 					
-				<h3>112 - API session token commands cannot be used with public profile</h3>
+				<h3>113 - API session token commands cannot be used with public profile</h3>
 				
 					<p>Public API's cannot create validation tokens (though their requests can create regular sessions and cookies). This error is returned when it is attempted to create a token with a public profile.</p>
 					
-				<h3>113 - Problem decrypting encrypted data</h3>
+				<h3>114 - Problem decrypting encrypted data</h3>
 				
 					<p>If encrypted data was sent to the server, then this error message means that the server was unable to decrypt this encrypted data and is unable to proceed.</p>
 					
-				<h3>114 - API request recognized, but unable to handle</h3>
+				<h3>115 - API request recognized, but unable to handle</h3>
 				
 					<p>This error means that the 'www-command' sent to the server cannot be properly handled and usually means that the controller or the method does not exist.</p>
 					
-				<h3>115 - This language is not defined</h3>
+				<h3>116 - Language cannot be found</h3>
 				
 					<p>If language is sent with the request, then this error message is thrown when the defined language cannot be found in the system.</p>
 				

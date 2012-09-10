@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.2.1
  */
 
 // SOLVING THE HTTP REQUEST
@@ -84,6 +84,8 @@
 		if(isset($config['internal-logging'])){
 			$config['internal-logging']=explode(',',$config['internal-logging']);
 		}
+		
+		// API logging settings
 		if(isset($config['api-logging'])){
 			$config['api-logging']=explode(',',$config['api-logging']);
 		}
@@ -218,6 +220,8 @@
 		// If there is an error and it is not a deprecated Line 0 error (which sporadically is thrown in PHP 5.3.4)
 		if($errorCheck && ($errorCheck['line']!=0 || $errorCheck['type']<E_DEPRECATED)){
 		
+			global $config;
+		
 			// Detecting if error is fatal - thus if error message should be shown to the user
 			$fatalError=false;
 			if(in_array($errorCheck['type'],array(E_ERROR,E_USER_ERROR,E_CORE_ERROR,E_PARSE))){
@@ -250,7 +254,9 @@
 			$errorReport[]=$error;
 			
 			//Adding backtrace
-			$errorReport[]=debug_backtrace();
+			if(isset($config['trace-errors']) && $config['trace-errors']==1){
+				$errorReport[]=debug_backtrace();
+			}
 			
 			// Writing current error and file to the array as well
 			$error=array();
@@ -277,14 +283,17 @@
 				header('HTTP/1.1 500 Internal Server Error');
 				
 				// Regular users will be shown a friendly error message
-				global $config;
 				if(isset($config['verbose-errors']) && $config['verbose-errors']==1){
 					echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">CRITICAL ERROR ENCOUNTERED</div>';
 					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>TYPE</b>: '.htmlspecialchars($errorCheck['type']).'</div>';
 					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>FILE</b>: '.htmlspecialchars($errorCheck['file']).'</div>';
 					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>LINE</b>: '.htmlspecialchars($errorCheck['line']).'</div>';
 					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>MESSAGE</b>: '.htmlspecialchars($errorCheck['message']).'</div>';
-					echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">FULL STACK TRACE AVAILABLE FROM DEBUGGER SCRIPT</div>';
+					if(isset($config['trace-errors']) && $config['trace-errors']==1){
+						echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">FULL STACK TRACE AVAILABLE FROM DEBUGGER SCRIPT</div>';
+					} else {
+						echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">FULL STACK TRACE IS NOT LOGGED BY DEBUGGER</div>';
+					}
 				} else {
 					echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST</div>';
 					echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">ERROR HAS BEEN LOGGED FOR FURTHER INVESTIGATION</div>';

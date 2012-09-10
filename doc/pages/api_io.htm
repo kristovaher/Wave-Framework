@@ -54,10 +54,12 @@
 						<li><b>binary</b> - This makes the API return either 1 or 0, based on the response from Controller. If the Controller returns a response code that API considers a success, then 1 will be returned. Binary return type is useful when you just wish to check if a command was successful or not.</li>
 						<li><b>xml</b> - This returns data in XML format.</li>
 						<li><b>rss</b> - This returns data in RSS format. This is similar to XML format, except it comes with RSS headers and core XML frame. It does not validate the array to be compatible with RSS however, this should be done by the developer.</li>
+						<li><b>atom</b> - This is similar to RSS format above.</li>
 						<li><b>csv</b> - Data can also be returned in CSV format. It is possible to convert a single value, single array or array of arrays into CSV format.</li>
-						<li><b>serializedarray</b> - This uses PHP's serialize() function on the response. This can be used to request data from API in cases where JSON is not useful or supported.</li>
-						<li><b>querystring</b> - This returns data the way data is formatted in a GET request string or in (some) POST data. This is similar to serializedarray and is useful in cases where JSON is not supported.</li>
+						<li><b>serialized</b> - This uses PHP's serialize() function on the response. This can be used to request data from API in cases where JSON is not useful or supported.</li>
+						<li><b>query</b> - This returns data the way data is formatted in a GET request string or in (some) POST data. This is similar to serializedarray and is useful in cases where JSON is not supported.</li>
 						<li><b>ini</b> - It is also possible to return data as an INI file. This also supports converting a single value, an array and array of arrays.</li>
+						<li><b>print</b> - This prints out the contents of an array with print_r() function, it is useful for debugging only.</li>
 						<li><b><i>[other]</i></b> - Other return types are set. These return types are returned by default with 'text/plain' content type headers and can be checked for in the controllers.</li>
 					</ul>
 					
@@ -163,21 +165,25 @@
 				
 					<p>This is required if public API profile is used and the setting for 'api-public-token' in <a href="configuration.htm">Configuration</a> is set to 1. This means that it requires that a request token - used to protect against Cross Site Request Forgery - is set and is the same as the one stored in sessions. This is only required if you use sessions and store data in Wave Framework setUser() storage.</p>
 				
+				<h3>www-headers</h3>
+				
+					<p>If this is set to 1, then 'www-response-code' and 'www-message' response keys will be sent in headers instead. This allows the output data array to be 'cleaner', but requires the developer to test the existence of these values if they are important for the system. PHP API Wrapper supports this internally, but JavaScript API Wrapper does not.</p>
+				
 			<h2>API Output - Flags and Values</h2>
 			
 				<p>API will return whatever data controller returns and in a format that was defined in input of 'www-return-type'. But there are some Wave Framework specific values that can be returned together with the response and these values can be checked for things like errors and response codes.</p> 
 				
-				<p>Note that these values may not be present in the response, it entirely depends if the developer uses them. The only exception is when an error occurs.</p>
+				<p>Note that these values may not be present in the response, it entirely depends if the developer uses them. Most of the output flags and values will be removed entirely before output is returned to the user agent. The only exception is when an error occurs.</p>
 				
 				<p>These are the values that may be found in the response from API:</p>
 				
 				<h3>www-message</h3>
 				
-					<p>This is a verbose message returned from API about whether the API command was successful or not. This is not translated and is language-independent.</p>
+					<p>This is a verbose message returned from API about whether the API command was successful or not. This is not translated and is language-independent. This can be hidden over HTTP API if 'www-headers' is sent as '1' with the request, which makes this value be visible only in HTTP headers.</p>
 				
 				<h3>www-response-code</h3>
 				
-					<p>This is response code from API. This value could be in 1XX namespace (for system and configuration and formatting errors), 2XX namespace (used by API Wrappers), 3XX namespace (used for custom developer defined error messages), 4XX namespace (used for negative and failed messages where error did not occur but the intended action did not happen either) and 5XX namespace (which is used for a successful response). There is more information on this in the Response Codes documentation.</p>
+					<p>This is response code from API. This value could be in 1XX namespace (for system and configuration and formatting errors), 2XX namespace (used by API Wrappers), 3XX namespace (used for custom developer defined error messages), 4XX namespace (used for negative and failed messages where error did not occur but the intended action did not happen either) and 5XX namespace (which is used for a successful response). There is more information on this in the Response Codes documentation. This can be hidden over HTTP API if 'www-headers' is sent as '1' with the request, which makes this value be visible only in HTTP headers.</p>
 				
 				<h3>www-token</h3>
 				
@@ -227,6 +233,10 @@
 				
 					<p>This unsets a single session variable or an array of session variables based on cookie name in the array of this value.</p>
 				
+				<h3>www-unset-header</h3>
+				
+					<p>This unsets a single header or an array of headers based on the header name in the array of this value.</p>
+				
 				<h3>www-temporary-redirect</h3>
 				
 					<p>If this is set, then user agent is told to redirect to the value of this variable. This is for a 302 Temporary Redirect header.</p>
@@ -234,6 +244,18 @@
 				<h3>www-permanent-redirect</h3>
 				
 					<p>If this is set, then user agent is told to redirect to the value of this variable. This is for a 301 Permanent Redirect header.</p>
+					
+				<h3>www-xml-namespace</h3>
+				
+					<p>This is a namespace parameter and URL that will be set for the XML, if XML data type is requested. Default is 'xmlns:www="http://www.waveframework.com"'.</p>
+					
+				<h3>www-xml-root</h3>
+				
+					<p>This is the XML root node elements name if the output format is XML. This is 'www' by default.</p>
+					
+				<h3>www-xml-numeric</h3>
+				
+					<p>If this is set and the output format is XML, then numeric array entries will be set with this name in the output XML. By default it is 'node'.</p>
 			
 	</body>
 </html>

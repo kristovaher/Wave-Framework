@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.2.0
+ * @version    3.2.1
  */
 
 class WWW_Wrapper {
@@ -47,6 +47,7 @@ class WWW_Wrapper {
 		'apiPublicToken'=>false,
 		'apiHashValidation'=>true,
 		'apiStateKey'=>false,
+		'headers'=>false,
 		'returnHash'=>false,
 		'returnTimestamp'=>false,
 		'trueCallback'=>false,
@@ -117,7 +118,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.2.0 (PHP)';
+	private $userAgent='WaveFramework/3.2.1 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -355,6 +356,14 @@ class WWW_Wrapper {
 					$this->apiState['apiStateKey']=$value;
 					$this->log[]='API state check key set to: '.$value;
 					break;
+				case 'www-headers':
+					$this->apiState['headers']=$value;
+					if($value){
+						$this->log[]='System specific parameters will be returned as headers';
+					} else {
+						$this->log[]='System specific parameters will be returned as part of response';
+					}
+					break;
 				case 'www-return-hash':
 					$this->apiState['returnHash']=$value;
 					if($value){
@@ -548,6 +557,7 @@ class WWW_Wrapper {
 				$this->apiState['apiToken']=false;
 				$this->apiState['apiPublicToken']=false;
 				$this->apiState['apiHashValidation']=true;
+				$this->apiState['headers']=false;
 				$this->apiState['returnHash']=false;
 				$this->apiState['returnTimestamp']=false;
 				$this->apiState['requestTimeout']=10;
@@ -627,6 +637,10 @@ class WWW_Wrapper {
 			// Assigning the state check key
 			if($thisApiState['apiStateKey']!=false){
 				$thisInputData['www-state']=$thisApiState['apiStateKey'];
+			}
+			// Notifying API to return www-* prefix data in headers
+			if($thisApiState['headers']!=false){
+				$thisInputData['www-headers']=1;
 			}
 			// Assigning return-timestamp flag to request
 			if($thisApiState['returnTimestamp']==true || $thisApiState['returnTimestamp']==1){
@@ -794,7 +808,7 @@ class WWW_Wrapper {
 							CURLOPT_HTTPGET=>true,
 							CURLOPT_TIMEOUT=>$thisApiState['requestTimeout'],
 							CURLOPT_USERAGENT=>$this->userAgent,
-							CURLOPT_HEADER=>false,
+							CURLOPT_HEADER=>true,
 							CURLOPT_RETURNTRANSFER=>true,
 							CURLOPT_FOLLOWLOCATION=>false,
 							CURLOPT_COOKIESESSION=>true,
@@ -814,6 +828,8 @@ class WWW_Wrapper {
 						curl_setopt_array($cURL,$requestOptions);
 						// Executing the request
 						$resultData=curl_exec($cURL);
+						list($resultHeaders,$resultData)=explode("\r\n\r\n",$resultData,2);
+						$resultHeaders=explode("\n",$resultHeaders);
 						
 						// Returning false if the request failed
 						if(!$resultData){
@@ -843,6 +859,8 @@ class WWW_Wrapper {
 						if(!$resultData=file_get_contents($requestURL.'?'.$requestData)){
 							return $this->errorHandler($thisInputData,204,'GET request failed: file_get_contents() failed',$thisApiState['errorCallback']);
 						}
+						// It is not possible to get headers with file_get_contents()
+						$resultHeaders=array();
 						
 					}
 					
@@ -924,7 +942,7 @@ class WWW_Wrapper {
 							CURLOPT_POSTFIELDS=>$postData,
 							CURLOPT_TIMEOUT=>$thisApiState['requestTimeout'],
 							CURLOPT_USERAGENT=>$this->userAgent,
-							CURLOPT_HEADER=>false,
+							CURLOPT_HEADER=>true,
 							CURLOPT_RETURNTRANSFER=>true,
 							CURLOPT_FOLLOWLOCATION=>false,
 							CURLOPT_COOKIESESSION=>true,
@@ -944,6 +962,8 @@ class WWW_Wrapper {
 						curl_setopt_array($cURL,$requestOptions);
 						// Executing the request
 						$resultData=curl_exec($cURL);
+						list($resultHeaders,$resultData)=explode("\r\n\r\n",$resultData,2);
+						$resultHeaders=explode("\n",$resultHeaders);
 					
 						// Log entry
 						$this->log[]='Making POST request to API using cURL to URL: '.$this->apiAddress;
@@ -974,11 +994,12 @@ class WWW_Wrapper {
 				
 				// Log entry
 				$this->log[]='Result of request: '.$resultData;
+				$this->log[]='Headers of request: '.implode(',',$resultHeaders);
 				
 			// DECRYPTION
 				
 				// If requested data was encrypted, then this attempts to decrypt the data
-				// This also checks to make sure that a serialized data was not returned (which is usually an error)
+				// This also checks to make sure that a serialized data was not returned (which usually means an error)
 				if(strpos($resultData,'{')===false && strpos($resultData,'[')===false && isset($thisCryptedData['www-crypt-output']) || isset($thisInputData['www-crypt-output'])){
 					// Getting the decryption key
 					if(isset($thisCryptedData['www-crypt-output'])){
@@ -1037,13 +1058,37 @@ class WWW_Wrapper {
 						}
 					}
 					
+					// Default response code and message
+					$responseCode=500;
+					$responseMessage='OK';
+					
+					// Checking if the result had differend response code and message
+					if(isset($resultData['www-response-code'])){
+						$responseCode=$resultData['www-response-code'];
+						if(isset($resultData['www-message'])){
+							$responseMessage=$resultData['www-message'];
+						}
+					}
+					
+				// WAVE HEADER RESPONSES
+			
+					// If headers are assigned to contain www-* response values
+					if($thisApiState['headers']){
+						if(isset($resultHeaders['www-response-code'])){
+							$responseCode=$wwwHeaders['www-response-code'];
+						}
+						if(isset($resultHeaders['www-message'])){
+							$responseMessage=$wwwHeaders['www-message'];
+						}
+					}
+					
 				// ERRORS
 				
-					if(isset($resultData['www-response-code']) && $resultData['www-response-code']<400){
-						if(isset($resultData['www-message'])){
-							return $this->errorHandler($thisInputData,$resultData['www-response-code'],$resultData['www-message'],$thisApiState['errorCallback']);
+					if($responseCode<400){
+						if(isset($responseMessage)){
+							return $this->errorHandler($thisInputData,$responseCode,$responseMessage,$thisApiState['errorCallback']);
 						} else {
-							return $this->errorHandler($thisInputData,$resultData['www-response-code'],'',$thisApiState['errorCallback']);
+							return $this->errorHandler($thisInputData,$responseCode,'Error',$thisApiState['errorCallback']);
 						}
 					}
 					
@@ -1113,10 +1158,13 @@ class WWW_Wrapper {
 				if($thisInputData['www-command']=='www-create-session' && isset($resultData['www-token'])){
 					$this->apiState['apiToken']=$resultData['www-token'];
 					$this->log[]='Session token was found in reply, API session token set to: '.$resultData['www-token'];
+				} elseif($thisInputData['www-command']=='www-destroy-session'){
+					$this->apiState['apiToken']=false;
+					$this->log[]='Session has been destroyed';
 				}
 				
 				// If callback has been defined
-				if($thisApiState['trueCallback'] && isset($resultData['www-response-code']) && $resultData['www-response-code']>=500){
+				if($thisApiState['trueCallback'] && $responseCode>=500){
 					// If the callback is a function name and not a function itself
 					if(gettype($thisApiState['trueCallback'])!=='object'){
 						// Calling user function
@@ -1131,7 +1179,7 @@ class WWW_Wrapper {
 						// Returning data from callback
 						return $thisApiState['trueCallback']($resultData);
 					}
-				} elseif($thisApiState['falseCallback'] && isset($resultData['www-response-code']) && $resultData['www-response-code']<500){
+				} elseif($thisApiState['falseCallback'] && $responseCode<500){
 					// If the callback is a function name and not a function itself
 					if(gettype($thisApiState['falseCallback'])!=='object'){
 						// Calling user function

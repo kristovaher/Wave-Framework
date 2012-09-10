@@ -20,7 +20,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.2.1
  */
 
 /**
@@ -292,6 +292,28 @@ function getTrueIP($trustedProxies=false){
 	// Returning the IP address
 	return $ip;
 	
+}
+
+/**
+ * Purpose of this function is to convert an INI setting for things like 
+ * memory to a value in bytes. This function originates from PHP documentation.
+ *
+ * @param $value
+ * @return integer
+ */
+function iniSettingToBytes($value) {
+    $value=trim($value);
+    $unit=strtolower($value[strlen($value)-1]);
+    switch($unit) {
+        // The 'G' modifier is available since PHP 5.1.0
+        case 'g':
+            $value *= 1024;
+        case 'm':
+            $value *= 1024;
+        case 'k':
+            $value *= 1024;
+    }
+    return $value;
 }
 
 ?>

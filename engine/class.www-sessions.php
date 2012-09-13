@@ -78,7 +78,7 @@ final class WWW_Sessions {
 	private $cookieFolder=false;
 	
 	/**
-	 * This holds whether sessions are actually commited or not. This is set to true when Test Suite is run.
+	 * This holds whether sessions are actually committed or not. This is set to true when Test Suite is run.
 	 */
 	private $noCommit=false;
 	

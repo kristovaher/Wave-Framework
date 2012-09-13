@@ -1359,9 +1359,6 @@ final class WWW_API {
 			// XML Header
 			$xml='<?xml version="1.0" encoding="utf-8"?>';
 			
-			// Array of legal keys
-			$legal=array();
-			
 			// If RSS/ATOM namespace is set or not
 			if($type=='rss' || $type=='atom'){
 				// If namespace is not set, then default Wave Framework namespace is used

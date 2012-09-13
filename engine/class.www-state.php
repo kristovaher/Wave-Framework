@@ -558,11 +558,7 @@ class WWW_State	{
 					break;
 				case 'time-limit':
 					if($value){
-						if(set_time_limit($value)){
-							$this->data[$variable]=$value;
-						} else {
-							trigger_error('Cannot set time limit to '.$value,E_USER_WARNING);
-						}
+						set_time_limit($value);
 					}
 					break;
 				case 'output-compression':

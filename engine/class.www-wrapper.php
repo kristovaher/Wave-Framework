@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.2.1
+ * @version    3.2.2
  */
 
 class WWW_Wrapper {
@@ -118,7 +118,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.2.1 (PHP)';
+	private $userAgent='WaveFramework/3.2.2 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -606,19 +606,19 @@ class WWW_Wrapper {
 			// In case variables have been sent with a single request
 			if($variables && is_array($variables)){
 				foreach($variables as $key=>$value){
-					// Settin variable throuhg input setter
+					// Setting variable through input setter
 					$this->setInput($key,$value);
 				}
 			}
 			if($fileVariables && is_array($fileVariables)){
 				foreach($fileVariables as $key=>$value){
-					// Settin variable throuhg input setter
+					// Setting variable through input setter
 					$this->setFile($key,$value);
 				}
 			}
 			if($cryptedVariables && is_array($cryptedVariables)){
 				foreach($cryptedVariables as $key=>$value){
-					// Settin variable throuhg input setter
+					// Setting variable through input setter
 					$this->setCryptedInput($key,$value);
 				}
 			}
@@ -869,9 +869,6 @@ class WWW_Wrapper {
 					// cURL is used unless it is not supported on the server
 					if($this->curlEnabled){
 					
-						// This variable will hold the eventual POST data
-						$postData=array();
-					
 						// If there are no input files, then the entire data stream is added as a POST variable stream
 						if(!empty($this->inputFiles)){
 						
@@ -1075,10 +1072,10 @@ class WWW_Wrapper {
 					// If headers are assigned to contain www-* response values
 					if($thisApiState['headers']){
 						if(isset($resultHeaders['www-response-code'])){
-							$responseCode=$wwwHeaders['www-response-code'];
+							$responseCode=$resultHeaders['www-response-code'];
 						}
 						if(isset($resultHeaders['www-message'])){
-							$responseMessage=$wwwHeaders['www-message'];
+							$responseMessage=$resultHeaders['www-message'];
 						}
 					}
 					

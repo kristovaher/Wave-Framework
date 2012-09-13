@@ -50,11 +50,19 @@
 				database-host<br/>
 				database-name<br/>
 				database-username<br/>
-				database-password<br/>
-				database-errors<br/>
-				database-persistent</b></p>
+				database-password</p>
 			
 				<p>Wave Framework can connect to multiple <a href="guide_database.htm">Database</a> types, database-type values can be 'mysql', 'postgresql', 'sqlite', 'mssql' and 'oracle'. If database values are not set, then system won't attempt to connect to database. Persistent connections are allowed by using database-persistent flag, in which case same connection handle will be shared across requests from different user agents, but note that this flag is not recommended and can cause additional performance issues. If you need to add port information for host, add it after host name, like 'www.example.com:3306'.</p>
+				
+				<p><b>test-database-type<br/>
+				test-database-host<br/>
+				test-database-name<br/>
+				test-database-username<br/>
+				test-database-password<br/>
+				test-database-errors<br/>
+				test-database-persistent</b></p>
+				
+				<p>These are database credentials for the Test Suite that is run by the test script and tests stored at '/tools/' subfolder. It is recommended that the test database is identical in structure to live database, otherwise the tests can affect actual database in negative ways.</p>
 				
 			<h2>Server</h2>
 			

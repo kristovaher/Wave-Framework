@@ -32,27 +32,29 @@ FEATURES
  * Dynamically loaded Hierarchical MVC objects through Factory pattern
  * API returns XML, CSV, JSON, HTML, native PHP and other data formats
  * Compressed data output with Deflate and Gzip
- * Input and output data is fully UTF-8
- * PDO-specific database controller for general-use database connections
+ * Input and output data is UTF-8 encoded
+ * PDO-based database controller for general-use database connections
  * Index gateway and Handlers for all types of HTTP requests
- * Caching system with tagging support for all types of dynamic and static requests
+ * Caching system with tagging support for dynamic and static requests
  * View and URL Controllers that support multiple languages and clean URL's
- * Users and permissions control
+ * Simple users and permissions control layer
  * jQuery JavaScript framework supported
  * On-demand dynamic image resizer and editor
  * On-demand resource compression, unifying and minifying
  * Automatic sitemap.xml and robots.txt generation
  * Automatically generated API documentation
- * API wrapper classes that make browser and server to server communication easy
+ * API wrapper classes that make browser and server communication easy
  * 256bit Rijndael encrypted data transmission
  * API Observers for creating event-specific listeners
- * Installation-specific MVC class and resource overrides
+ * Autoloader and installation-specific MVC class and resource overrides
+ * Custom on-demand session handling
  * Request limiter that can block HTTP requests under certain conditions
- * Request logger that can be used for detailed performance grading of HTTP requests
+ * Request logger that can be used for detailed performance reports
  * Debugging, backup, update and filesystem maintenance tools
  * Compatibility script that tests support for server setup
  * Supports Apache and Nginx servers in Linux and Windows environments
- * Supports APC extension
+ * Test Suite for API Testing
+ * Filesystem caching, database cache, APC and Memcache supported
  * 100+ pages of detailed documentation and tutorials
  * Licensed under GNU Lesser General Public License Version 3
  

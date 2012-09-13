@@ -13,11 +13,16 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.2.2
  */
 
-// Main configuration file is included
-$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
+// Main configuration file is included from initialized temporary file if it exists
+if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp')){
+	$config=unserialize(file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp'));
+} else {
+	// If temporary configuration file does not exist, then configuration is load from INI file
+	$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
+}
 
 // Configuration is required
 if($config){
@@ -32,6 +37,9 @@ if($config){
 	}
 	// Setting the timezone
 	date_default_timezone_set($config['timezone']);
+	
+	// Defining root directory, this is required by handlers in /engine/ subfolder
+	define('__ROOT__',realpath('../').DIRECTORY_SEPARATOR);
 
 	// Requiring some maintenance functions
 	require('.'.DIRECTORY_SEPARATOR.'tools_functions.php');

@@ -117,10 +117,14 @@
 				<h3>private $cookieFolder=false</h3>
 				
 					<p>This holds the cookie folder for the session. This is where the cookie will be stored in the filesystem.</p>
+					
+				<h3>private $noCommit=false</h3>
+				
+					<p>This holds whether sessions are actually commited or not. This is set to true when Test Suite is run.</p>
 				
 			<h2>Session Methods</h2>
 				
-				<h3>public function __construct($sessionName='PHPSESSID',$databaseConnection=false)</h3>
+				<h3>public function __construct($sessionName='PHPSESSID',$sessionLifetime=0,$databaseConnection=false,$noCommit=false)</h3>
 				
 					<p>Construction method of Session Handler takes two parameters. One for session name and another for database connection link to (preferably) WWW_Database class. Construction also starts sessions automatically if it detects that the user agent has provided a session cookie with a value.</p>
 					

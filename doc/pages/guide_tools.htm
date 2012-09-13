@@ -85,7 +85,7 @@
 				
 				<p>It is also possible to send a cut-off timestamp, by assigning a 'cutoff' GET variable to the request. This Unix timestamp will be compared against every file in those assigned folders and if the file is newer or has been modified since that timestamp, then the file is not deleted.</p>
 				
-				<p>There is also a file 'www-cleaner.php' that can be run exactly the same way, but this script requires manual configuration for the 'cutoff' timestamp value and shows log only if it is run from the same server that it is on. The actual modes are the same as they are in regular cleaner tool.</p>
+				<p>There is also a file 'www-cleaner.php' that can be run exactly the same way, but this script requires manual configuration for the 'cutoff' timestamp value and shows log only if it is run from the same server that it is on. The actual modes are the same as they are in regular cleaner tool, but again have to be defined in the script in order to make it as secure as possible from outside requests.</p>
 				
 			<h2>Backup</h2>
 			
@@ -139,6 +139,8 @@
 			
 			<h2>Updater</h2>
 			
+				<p><b>Location: /tools/updater.php</b></p>
+			
 				<p>Updater script is used to update Wave Framework or software that is built on Wave Framework. Updater has a minimal user interface and update is processed over FTP. Updater script asks either a URL of the update archive file or a file upload with the archive (*.zip format), then the root directory (in case the FTP credentials have a different root directory), FTP username as well as FTP password.</p>
 				
 				<p>Updater requires FTP access to file system to work properly, since it requires permissions to add or overwrite files and folders that may not be possible with regular PHP permissions on some web servers.</p>
@@ -156,5 +158,49 @@
 				
 				<p>For the Updater to work correctly, the files included in the archive must follow the 'root' folder structure of Wave Framework installation and also include .version file. This version file is checked to make sure that update version numbers (for all listed entries in .version file) are at least equal or larger than the number in the archive for both Wave Framework and system. Version numbers should be listed as PHP standard version format, like X.X.X.</p>
 			
+			<h2>Test Suite</h2>
+			
+				<p><b>Location: /tools/tester.php</b></p>
+				
+				<p>Wave Framework includes a full test suite for writing tests for API's and running said tests. Tests themselves are defined in '/tools/tests/' subfolder and they can be run based on settings from the Test Suite tool. This Test Suite tool then returns the results from said tests and whether the tests failed or not. If tests included errors, then it also gives the full log of the errors.</p>
+			
+				<p>An example test case is included in '/tools/tests/' subfolder in 'example.ini' file. This test runs the 'example-get' command and checks if the response is accepted or not.</p>
+				
+				<p>To write a new test case, you need to create a new *.ini file in '/tests/' subfolder. It is recommended that you take a look at the example test and base your tests according to them. Basically a single test consists of three groups (defined between brackets). The first group is the API command that is being tested, the second and third groups are 'input' and 'output'. The input and output groups must follow the command group.</p>
+				
+				<p>You can define variables under the command group, these variables will be sent as fixed values to the API. For example you can define there if you wish to use cache or not.</p>
+				
+				<p>Input and output groups have to include variables (as array keys). Input group keys and values define what input data will be sent with the API request. This input data can also be dynamic which are defined by these values:</p>
+				
+				<ul>
+					<li><b>:numeric:</b> - Sets a random number between 0 and 2147483647</li>
+					<li><b>:numeric:1-20</b> - Sets a random number between 1 and 20</li>
+					<li><b>:alpha:</b> - Sets a string up to 32 characters in length</li>
+					<li><b>:alpha:1-10</b> - Sets a string with character length between 1 and 10</li>
+					<li><b>:alphanumeric:</b> - Sets an alphanumeric string up to 32 characters in length</li>
+					<li><b>:alphanumeric:1-10</b> - Sets an alphanumeric string with character length between 1 and 10</li>
+					<li><b>:fixed:a,b,c</b> - Fixed value from the comma-separated list (either 'a', 'b' or 'c' in the example)</li>
+				</ul>
+					
+				<p>Wave Framework generates these input variables automatically. If a dynamic variable is not set, then the test will get the value as-is.</p>
+				
+				<p>Output group keys and values define what value is expected from the API response. Thus if the output is different, then the test is considered as failed. As with input values, you can set a fixed value for output as well as a dynamic value. These are the allowed dynamic values:</p>
+				
+				<ul>
+					<li><b>:numeric:</b> - Value must be numeric</li>
+					<li><b>:numeric:1-20</b> - Value must be numeric between 1 and 20</li>
+					<li><b>:alpha:</b> - Value must be a character string</li>
+					<li><b>:alpha:1-10</b> - Value must be a character string between 1 and 10 characters in length</li>
+					<li><b>:alphanumeric:</b> - Value must be a character string</li>
+					<li><b>:alphanumeric:1-10</b> - Value must be a character string between 1 and 10 characters in length</li>
+					<li><b>:fixed:a,b,c</b> - Value must be from a fixed list, either 'a', 'b' or 'c'.</li>
+				</ul>
+				
+				<p>You can assign both how many times tests are run as well as how much is the maximum execution time allocated for PHP when running the script. This is useful since sometimes it may be difficult to run a large amount of tests that are canceled by the server prematurely.</p>
+				
+				<p>If you want to run the same command multiple times, then add a postfix #1 (or some other number) into the group name.</p>
+				
+				<p>After the tests are run, the Test Suite shows a summary of how many tests failed and gives detailed information about each failed test.</p>
+
 	</body>
 </html>

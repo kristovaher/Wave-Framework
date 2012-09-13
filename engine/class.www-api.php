@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.2.2
  */
 
 final class WWW_API {
@@ -679,7 +679,7 @@ final class WWW_API {
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator['www-cookie'][$this->state->data['session-namespace']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
+					unset($cacheValidator['www-cookie'][$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
 					
 					// If nothing is left in cookie container
 					if(empty($cacheValidator['www-cookie'])){
@@ -1731,11 +1731,11 @@ final class WWW_API {
 			// Storing variable to cache
 			if($this->memcache){
 				// Storing the variable in Memcache
-				if(!$this->memcache->set($this->state->data['session-namespace'].$keyAddress,$value)){
+				if(!$this->memcache->set($this->state->data['session-name'].$keyAddress,$value)){
 					trigger_error('Cannot store file cache in Memcache',E_USER_ERROR);
 				}
 				// Memcache requires additional field to store the timestamp of cache
-				$this->memcache->set($this->state->data['session-namespace'].$keyAddress.'-time',$this->state->data['request-time']);
+				$this->memcache->set($this->state->data['session-name'].$keyAddress.'-time',$this->state->data['request-time']);
 			} elseif($this->apc){
 				// Storing the value in APC storage
 				if(!apc_store($keyAddress,$value)){
@@ -1750,7 +1750,7 @@ final class WWW_API {
 					$value=serialize($value);
 					// Attempting to write cache in database
 					if(!$this->databaseCache->dbCommand('
-						INSERT INTO '.$this->state->data['cache-database-table-name'].' SET '.$this->state->data['cache-database-address-column'].'=?, '.$this->state->data['cache-database-timestamp-column'].'=?, '.$this->state->data['cache-database-data-column'].'=? ON DUPLICATE KEY UPDATE '.$this->state->data['cache-database-data-column'].'=?, '.$this->state->data['cache-database-timestamp-column'].'=?;',array(md5($this->state->data['session-namespace'].$keyAddress),$this->state->data['request-time'],$value,$value,$this->state->data['request-time']))){
+						INSERT INTO '.$this->state->data['cache-database-table-name'].' SET '.$this->state->data['cache-database-address-column'].'=?, '.$this->state->data['cache-database-timestamp-column'].'=?, '.$this->state->data['cache-database-data-column'].'=? ON DUPLICATE KEY UPDATE '.$this->state->data['cache-database-data-column'].'=?, '.$this->state->data['cache-database-timestamp-column'].'=?;',array(md5($this->state->data['session-name'].$keyAddress),$this->state->data['request-time'],$value,$value,$this->state->data['request-time']))){
 						trigger_error('Cannot store file cache in database',E_USER_ERROR);
 					}
 				} else {
@@ -1785,14 +1785,14 @@ final class WWW_API {
 			}
 			// Accessing cache
 			if($this->memcache){
-				return $this->memcache->get($this->state->data['session-namespace'].$keyAddress);
+				return $this->memcache->get($this->state->data['session-name'].$keyAddress);
 			} elseif($this->apc){
 				return apc_fetch($keyAddress);
 			} else {
 				// Cache can be stored in database or in filesystem
 				if($this->databaseCache){
 					// Attempting to load cache from database
-					$result=$this->databaseCache->dbSingle('SELECT '.$this->state->data['cache-database-data-column'].' FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-namespace'].$keyAddress)));
+					$result=$this->databaseCache->dbSingle('SELECT '.$this->state->data['cache-database-data-column'].' FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-name'].$keyAddress)));
 					if($result){
 						return unserialize($result[$this->state->data['cache-database-data-column']]);
 					}
@@ -1822,7 +1822,7 @@ final class WWW_API {
 			}
 			// Accessing cache
 			if($this->memcache){
-				return $this->memcache->get($this->state->data['session-namespace'].$keyAddress.'-time');
+				return $this->memcache->get($this->state->data['session-name'].$keyAddress.'-time');
 			} elseif($this->apc){
 				if(apc_exists(array($keyAddress,$keyAddress.'-time'))){
 					return apc_fetch($keyAddress.'-time');
@@ -1831,7 +1831,7 @@ final class WWW_API {
 				// Cache can be stored in database or in filesystem
 				if($this->databaseCache){
 					// Attempting to load cache from database
-					$result=$this->databaseCache->dbSingle('SELECT '.$this->state->data['cache-database-timestamp-column'].' FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-namespace'].$keyAddress)));
+					$result=$this->databaseCache->dbSingle('SELECT '.$this->state->data['cache-database-timestamp-column'].' FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-name'].$keyAddress)));
 					if($result){
 						return $result[$this->state->data['cache-database-timestamp-column']];
 					}
@@ -1860,8 +1860,8 @@ final class WWW_API {
 			}
 			// Accessing cache
 			if($this->memcache){
-				$this->memcache->delete($this->state->data['session-namespace'].$keyAddress);
-				$this->memcache->delete($this->state->data['session-namespace'].$keyAddress.'-time');
+				$this->memcache->delete($this->state->data['session-name'].$keyAddress);
+				$this->memcache->delete($this->state->data['session-name'].$keyAddress.'-time');
 				return true;
 			} elseif($this->apc){
 				// Testing if key exists
@@ -1874,7 +1874,7 @@ final class WWW_API {
 				// Cache can be stored in database or in filesystem
 				if($this->databaseCache){
 					// Attempting to write cache in database
-					if($this->databaseCache->dbCommand('DELETE FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-namespace'].$keyAddress)))){
+					if($this->databaseCache->dbCommand('DELETE FROM '.$this->state->data['cache-database-table-name'].' WHERE '.$this->state->data['cache-database-address-column'].'=?;',array(md5($this->state->data['session-name'].$keyAddress)))){
 						return true;
 					}
 				} else {

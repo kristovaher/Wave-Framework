@@ -38,7 +38,7 @@
 
 			<h2>API Profiles</h2>
 			
-				<p>API Profiles of Wave Framework are stored in /resources/api.profiles.ini file. This file stores an array of API profile names and their secret keys and other configuration options. When API is called with an API profile that is from this list and is not set as public in framework <a href="configuration.htm">Configuration</a>, then this API profile has to be authenticated with either a secret key or a session token. Every API profile is a group in this file, it's name written in brackets, followed by various settings for the API profile.</p>
+				<p>API Profiles of Wave Framework are stored in '/resources/api.profiles.ini' file. This file stores an array of API profile names and their secret keys and other configuration options. When API is called with an API profile that is from this list and is not set as public in framework <a href="configuration.htm">Configuration</a>, then this API profile has to be authenticated with either a secret key or a session token. Every API profile is a group in this file, its name written in brackets, followed by various settings for the API profile.</p>
 				
 				<p>One API profile in the API Profiles file is considered public and is set by 'api-public-profile' configuration setting in /config.ini file. If this is not set in configuration, then 'public' is the assumed name for a public API profile.</p>
 				
@@ -47,7 +47,7 @@
 				<ul>
 					<li><b>disabled</b> - If this is set to 1, then this API profile can remain defined in API Profiles file, but it cannot be used to make API requests.</li>
 					<li><b>ip</b> - This is the IP or comma-separated list of IP addresses that are allowed to make requests using this API profile. If this value is set to '*', which is also the default, then all IP's are allowed to make requessts.</li>
-					<li><b>commands</b> - This is comma separated list of 'www-command' values that are allowed by this API profile. If this is set to '*', then all API commands are allowed.</li>
+					<li><b>commands</b> - This is comma-separated list of 'www-command' values that are allowed by this API profile. If this is set to '*', then all API commands are allowed. You can specifically disallow some commands by setting an exclamation mark '!' before the command name, for example '*,!example-get' allows for all commands except 'example-get'.</li>
 				</ul>
 				
 				<p>These settings are used for non-public and authenticated API profiles only:</p>
@@ -309,7 +309,7 @@
 					<li>If server B finds the 'www-token' value to be correct, then the <a href="guide_api.htm">API</a> call is validated and executed, with the response returned to server A.</li>
 				</ul>
 				
-				<p>In order to make API Profile not use the default hash based validation, 'hash-validation' flag has to be turned off for the API profile in /resources/api.profiles.ini file. For example, this would be a good API profile for testing this type of validation:</p>
+				<p>In order to make API Profile not use the default hash based validation, 'hash-validation' flag has to be turned off for the API profile in '/resources/api.profiles.ini' file. For example, this would be a good API profile for testing this type of validation:</p>
 				
 <pre>
 	<code>

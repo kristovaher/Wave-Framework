@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/sessions.htm
  * @since      3.2.0
- * @version    3.2.0
+ * @version    3.2.2
  */
  
 final class WWW_Sessions {
@@ -78,16 +78,23 @@ final class WWW_Sessions {
 	private $cookieFolder=false;
 	
 	/**
+	 * This holds whether sessions are actually commited or not. This is set to true when Test Suite is run.
+	 */
+	private $noCommit=false;
+	
+	/**
 	 * Construction method of Session Handler takes two parameters. One for session name and another
 	 * for database connection link to (preferably) WWW_Database class. Construction also starts 
 	 * sessions automatically if it detects that the user agent has provided a session cookie with
 	 * a value.
 	 *
-	 * @param [$sessionName] session and cookie name
-	 * @param [$databaseConnection] database object
+	 * @param string $sessionName session and cookie name
+	 * @param integer $sessionLifetime how long sessions last
+	 * @param object $databaseConnection database object
+	 * @param boolean $noCommit whether databases will actually be commited
 	 * @return object
 	 */
-	public function __construct($sessionName='PHPSESSID',$sessionLifetime=0,$databaseConnection=false){
+	public function __construct($sessionName='PHPSESSID',$sessionLifetime=0,$databaseConnection=false,$noCommit=false){
 	
 		// This loads the same database connection that is loaded by Data and API Handlers if
 		// the settings are used in Configuration file. Database is not used by Session Handler
@@ -96,6 +103,9 @@ final class WWW_Sessions {
 		
 		// Session name is what will be set as cookie name
 		$this->sessionName=$sessionName;
+		
+		// Session name is what will be set as cookie name
+		$this->noCommit=$noCommit;
 	
 		// Handler will attempt to load session data if session cookie is sent by the user agent
 		if(isset($_COOKIE[$this->sessionName])){
@@ -110,8 +120,8 @@ final class WWW_Sessions {
 	 * is set, then it attempts to populate session data from session storage if it finds a matching
 	 * session. If not, then it generates a new session ID and clears the session data array.
 	 *
-	 * @param [$sessionName] if session name is sent, then sessions will be started with this name.
-	 * @param [$sessionLifetime] the age of token file to be still considered a valid token
+	 * @param string $sessionName if session name is sent, then sessions will be started with this name.
+	 * @param integer $sessionLifetime the age of token file to be still considered a valid token
 	 * @return boolean
 	 */
 	public function sessionOpen($sessionName=false,$sessionLifetime=0){
@@ -147,7 +157,9 @@ final class WWW_Sessions {
 				// Loading actual session data and casting the data to array
 				$this->sessionData=json_decode(file_get_contents($this->cookieFolder.$this->sessionId.'.tmp'),true);
 				// Updating the last-modified time of the session storage file
-				touch($this->cookieFolder.$this->sessionId.'.tmp');
+				if(!$this->noCommit){
+					touch($this->cookieFolder.$this->sessionId.'.tmp');
+				}
 				
 			} else {
 			
@@ -182,60 +194,68 @@ final class WWW_Sessions {
 		// is removed if the user agent has one set.
 		if(isset($_COOKIE[$this->sessionName]) && empty($this->sessionData)){
 		
-			// Removing the session storage file
-			if(file_exists($this->cookieFolder.$this->sessionId.'.tmp')){
-				unlink($this->cookieFolder.$this->sessionId.'.tmp');
-			}
-			// Removing session cookie
-			if(isset($_COOKIE[$this->sessionName])){
-				setcookie($this->sessionName,false,1,$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
-			}
+			// This is only done if sessions are actually commited and not just simulated
+			if(!$this->noCommit){
 			
-			// Sessions have been removed
-			return true;
+				// Removing the session storage file
+				if(file_exists($this->cookieFolder.$this->sessionId.'.tmp')){
+					unlink($this->cookieFolder.$this->sessionId.'.tmp');
+				}
+				
+				// Removing session cookie
+				if(isset($_COOKIE[$this->sessionName])){
+					setcookie($this->sessionName,false,1,$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
+				}
+				
+			}
 			
 		} else {
 		
-			// If there is no session cookie from the user agent or it is set to be regenerated
-			if(!isset($_COOKIE[$this->sessionName]) || $this->regenerateId){
-			
-				// If the old storage is assigned to be deleted
-				if($this->regenerateRemoveOld){
-					if(file_exists($this->cookieFolder.$this->sessionId.'.tmp')){
-						unlink($this->cookieFolder.$this->sessionId.'.tmp');
+			// This is only done if sessions are actually commited and not just simulated
+			if(!$this->noCommit){
+		
+				// If there is no session cookie from the user agent or it is set to be regenerated
+				if(!isset($_COOKIE[$this->sessionName]) || $this->regenerateId){
+				
+					// If the old storage is assigned to be deleted
+					if($this->regenerateRemoveOld){
+						if(file_exists($this->cookieFolder.$this->sessionId.'.tmp')){
+							unlink($this->cookieFolder.$this->sessionId.'.tmp');
+						}
+					}
+					
+					// Generating a new session ID
+					$this->sessionId=$this->generateSessionId();
+					// Session storage address is based on session ID name in the filesystem
+					$this->cookieFolder=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($this->sessionId,0,2).DIRECTORY_SEPARATOR;
+					
+					// If lifetime is set to 0, then cookie will last as long as session lasts in browser
+					if($this->sessionCookie['lifetime']==0){
+						setcookie($this->sessionName,$this->sessionId,0,$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
+					} else {
+						setcookie($this->sessionName,$this->sessionId,(time()+$this->sessionCookie['lifetime']),$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
+					}
+					
+				}
+				
+				// If session cookie storage subfolder does not exist, then the handler creates it
+				if(!is_dir($this->cookieFolder)){
+					if(!mkdir($this->cookieFolder,0755)){
+						trigger_error('Cannot create session folder in '.$this->cookieFolder,E_USER_ERROR);
 					}
 				}
 				
-				// Generating a new session ID
-				$this->sessionId=$this->generateSessionId();
-				// Session storage address is based on session ID name in the filesystem
-				$this->cookieFolder=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($this->sessionId,0,2).DIRECTORY_SEPARATOR;
-				
-				// If lifetime is set to 0, then cookie will last as long as session lasts in browser
-				if($this->sessionCookie['lifetime']==0){
-					setcookie($this->sessionName,$this->sessionId,0,$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
-				} else {
-					setcookie($this->sessionName,$this->sessionId,(time()+$this->sessionCookie['lifetime']),$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
-				}
-				
+				// Session data is stored in session storage
+				if(!file_put_contents($this->cookieFolder.$this->sessionId.'.tmp',json_encode($this->sessionData))){
+					trigger_error('Cannot write session data to /filesystem/sessions/',E_USER_ERROR);
+				}	
+			
 			}
-			
-			// If session cookie storage subfolder does not exist, then the handler creates it
-			if(!is_dir($this->cookieFolder)){
-				if(!mkdir($this->cookieFolder,0755)){
-					trigger_error('Cannot create session folder in '.$this->cookieFolder,E_USER_ERROR);
-				}
-			}
-			
-			// Session data is stored in session storage
-			if(!file_put_contents($this->cookieFolder.$this->sessionId.'.tmp',json_encode($this->sessionData))){
-				trigger_error('Cannot write session data to /filesystem/sessions/',E_USER_ERROR);
-			}	
-			
-			// Sessions have been stored
-			return true;
 			
 		}
+		
+		// Commit complete
+		return true;
 		
 	}
 	

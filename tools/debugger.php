@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.1
+ * @version    3.2.2
  */
 
 // This initializes tools and authentication
@@ -93,7 +93,7 @@ if(empty($_GET)){
 		echo '</h4>';
 		
 		// Subheader
-		echo '<h2>Logged errors</h2>';
+		echo '<h2>Logged Errors</h2>';
 		
 		// Action is based on GET values
 		if(empty($_GET)){

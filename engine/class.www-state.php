@@ -19,18 +19,20 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.2.2
  */
 
 class WWW_State	{
 
 	/**
-	 * This should hold WWW_Database class and connection data, if used.
+	 * This is the primary variable of State class and it carries representation of the system 
+	 * configuration, both loaded from /config.ini file as well as initialized from environmental 
+	 * server variables.
 	 */
 	public $data=array();
 	
 	/**
-	 * Database connection is stored in this variable, if set
+	 * This should hold Database class and connection data, if used.
 	 */
 	public $databaseConnection=false;
 	
@@ -198,6 +200,12 @@ class WWW_State	{
 				'sitemap-raw'=>array(),
 				'static-root'=>false,
 				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
+				'test-database-host'=>false,
+				'test-database-name'=>false,
+				'test-database-password'=>false,
+				'test-database-type'=>false,
+				'test-database-username'=>false,
+				'testing'=>false,
 				'time-limit'=>false,
 				'timezone'=>false,
 				'tmp-root'=>false,

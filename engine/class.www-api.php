@@ -1064,7 +1064,7 @@ final class WWW_API {
 			
 			// OUTPUT ENCRYPTION
 			
-				if($apiState['push-output'] && $apiState['output-crypt-key'] && !$errorFound){
+				if($apiState['push-output'] && $apiState['crypt-output'] && !$errorFound){
 					// Returned result will be with plain text instead of requested format, but only if header is not already overwritten
 					if(!$apiState['content-type-header']){
 						$apiState['content-type-header']='Content-Type: text/plain;charset=utf-8';

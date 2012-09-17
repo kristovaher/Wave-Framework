@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/limiter.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.2.3
  */
 
 class WWW_Limiter {
@@ -352,6 +352,9 @@ class WWW_Limiter {
 			}
 			// Script is halted
 			die();
+		} else {
+			// This tells the browser to remember to use HTTPS when accessing the site.
+			header('Strict-Transport-Security: max-age=2147483647 [; includeSubdomains]');
 		}
 		
 		// HTTPS check processed

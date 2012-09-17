@@ -161,6 +161,18 @@
 				
 				<p>Robots flags are used by search engines and web crawlers when gathering information about web pages that they visit. These flags are 'guides' to robots that tell robots to either index the content of pages or not. In Wave Framework, 'robots' is considered the fallback setting, but you can set different defaults for images, static resources, served files and so on. It is also possible to assign different robots setting to each URL through sitemap files in /resources/ folder. These values are set to 'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet' by default, which disallows indexing.</p>
 				
+				<p><b>frame-permissions</b></p>
+				
+				<p>This sets whether the pages rendered through View Controller are allowed to be shown in a frame, like an iFrame, or not. This can be set to either 'deny' or 'sameorigin' or left empty. The default value is empty, so the pages can be loaded to a frame at all times.</p>
+	
+				<p><b>content-security-policy</b></p>
+				
+				<p>This sets the CSP (content security policy) setting for the domains that your site is allowed to load data from. This allows for whitelisted cross-site scripting and accessing resources on other domains, while also blacklisting other domains. This is not used by default.</p>
+				
+				<p><b>access-control</b></p>
+				
+				<p>This sets what domains are allowed to access the API or load resources from this installation. This sets an 'Access-Control-Allow-Origin' header to all of the HTTP requests. This is not set by default, thus disallowing cross-domain requests to this system. This allows you to make cross-domain requests to this resource if '*' is set or another domain.</p>
+				
 			<h2>Optimizations and Cache</h2>
 				
 				<p><b>output-compression</b></p>

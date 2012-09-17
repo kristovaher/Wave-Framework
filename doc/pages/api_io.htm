@@ -103,10 +103,6 @@
 				
 					<p>This variable has nothing to do with <a href="state.htm">State</a> Class of Wave Framework or the state object that API uses at the time of request. This is a security keyword, if this value is sent to API, then API also returns that same value in response. This can be used to validate if a response is for the same request that was made, or not. You can read more about this variable in API Security documentation.</p>
 					
-				<h3>www-files</h3>
-				
-					<p>This is an array of uploaded files, this is by default populated by $_FILES array and should not be sent by API request directly.</p>
-					
 				<h3>www-data</h3>
 				
 					<p>This usually carries input stream data, if sent. This is used only when submitting contents in POST as input stream.</p>
@@ -136,10 +132,6 @@
 				<h3>www-ip-session</h3>
 					
 					<p>If this value is set, then the session token will be tied to the specific IP address where the request is made from. This is useful when it comes to protecting your session token. There is more information on this variable in API Security documentation.</p>
-					
-				<h3>www-cookie</h3>
-				
-					<p>This variable should hold the data from $_COOKIE variable, if $_COOKIE is not empty. It should not be sent to API directly as it would be overwritten.</p>
 					
 				<h3>www-session</h3>
 				

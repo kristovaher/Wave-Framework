@@ -36,7 +36,7 @@
 				
 				<p>First it sends the current requested URL to <a href="guide_url.htm">URL Controller</a> with 'url-solve' command, which determines what view the user agent is requesting, what language is currently defined and so on. <a href="guide_url.htm">URL Controller</a> also redirects the client, if the URL seems to be in incorrect format. <a href="guide_url.htm">URL Controller</a> detects the View that should be loaded based on sitemap configuration stored in /resources/[language].sitemap.ini files.</p>
 				
-				<p>All input data from POST, GET, FILES and COOKIE arrays are merged into a single input array, which works similarly to $_REQUEST. Sessions are also started, if session cookie is detected. File and cookie input is stored with additional array keys of 'www-files' and 'www-cookie'. Session data is stored similarly in 'www-session', but this is assigned by API itself and not the handlers.</p>
+				<p>All input data from POST, GET, FILES and COOKIE arrays are merged into a single input array, which works similarly to $_REQUEST. Sessions are also started, if session cookie is detected. Session data is stored as 'www-session', but this is assigned by API itself and not by the handlers.</p>
 				
 				<p>Data Handler makes a new <a href="guide_api.htm">API</a> call to <a href="guide_view.htm">View Controller</a>, which is usually the file from /controllers/controller.view.php but other <a href="guide_view.htm">View Controllers</a> (and Controller methods) can be called. <a href="guide_view.htm">View Controller</a> will load the appropriate views and return data to user agent.</p>
 				

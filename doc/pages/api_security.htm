@@ -487,9 +487,7 @@
 				
 				<h3>Decrypting Encrypted Response</h3>
 				
-					<p>If 'www-crypt-output' is set and is a string (longer the better) as part of the API request, then this tells Wave Framework API to also encrypt the entire output. Differently from sending encrypted input, when output encryption is requested then the entire response is serialized and returned as encrypted string. Wave Framework will also not use the token to encrypt the response, it instead uses secret key and the value of 'www-crypt-input'. This is because the session token is more likely to change over time than secret key.</p>
-					
-					<p>In order to keep 'www-crypt-output' value a secret, then it could be sent as part of 'www-crypt-input' encrypted data.</p>
+					<p>If 'www-crypt-output' is set to 1, then this tells Wave Framework API to also encrypt the entire output. Differently from sending encrypted input, when output encryption is requested then the entire response is serialized and returned as encrypted string. Wave Framework will also use the token to encrypt the response.</p>
 					
 					<p>We can request encrypted response by changing the input data array as follows:</p>
 					
@@ -499,7 +497,7 @@
 	$inputData=array(
 		'www-command'=&gt;'example-get',
 		'www-return-type'=&gt;'xml',
-		'www-crypt-output'=&gt;'my-cypher',
+		'www-crypt-output'=&gt;1,
 		'www-profile'=&gt;'custom-profile'
 	);
 	...
@@ -521,9 +519,7 @@
 	<code>
 	...
 	// $response would be the encrypted response string from API
-	// $myCypher would be the value of 'www-crypt-output' that was sent with the request
-	// $mySecretKey would be the secret key of the API profile
-	$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($myCypher),base64_decode($response),MCRYPT_MODE_CBC,$mySecretKey);
+	$result=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($myApiToken),base64_decode($response),MCRYPT_MODE_CBC,$mySecretKey);
 	...
 	</code>
 </pre>

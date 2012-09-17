@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_api.htm
  * @since      1.5.0
- * @version    3.2.0
+ * @version    3.2.3
  */
 
 //INITIALIZATION
@@ -78,18 +78,35 @@
 		}
 	}
 	
+	// This holds information about API validation and its exceptions
+	$apiValidation=array();
+	
 	// All the data sent by user agent is added here and merged into one array
-	if(!empty($_POST)){ 
+	if(!empty($_POST)){
 		$inputData+=$_POST; 
 	}
 	if(!empty($_GET)){ 
 		$inputData+=$_GET; 
 	}
-	if(!empty($_FILES)){ 
-		$inputData['www-files']=$_FILES;
-	}
 	if(!empty($_COOKIE)){ 
-		$inputData['www-cookie']=$_COOKIE;
+		foreach($_COOKIE as $key=>$cookie){
+			// This is a security measure to make sure that only actual cookies can be negated from validation
+			if(!isset($inputData[$key])){
+				$inputData[$key]=$cookie;
+				// Cookies are not part of input data validation, so they are added to exceptions
+				$apiValidation[]=$key;
+			}
+		}
+	}
+	if(!empty($_FILES)){
+		foreach($_FILES as $key=>$file){
+			// This is a security measure to make sure that only uploaded files can be negated from validation
+			if(!isset($inputData[$key])){
+				$inputData[$key]=$file;
+				// File uploads are not part of input data validation, so they are added to exceptions
+				$apiValidation[]=$key;
+			}
+		}
 	}
 	
 // SENDING COMMAND TO API
@@ -102,7 +119,7 @@
 	}
 	
 	// API command is executed with all the data that was sent by the user agent, along with other www-* settings
-	$apiResult=$api->command($inputData,false,true,true);
+	$apiResult=$api->command($inputData,false,$apiValidation,true);
 	
 // LOGGER
 	

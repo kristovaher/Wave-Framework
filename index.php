@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.2.1
+ * @version    3.2.3
  */
 
 // SOLVING THE HTTP REQUEST
@@ -135,6 +135,11 @@
 	} else {
 		// Since INI file has not been changed, configuration is loaded from cache
 		$config=unserialize(file_get_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp'));
+	}
+	
+	// If access control header is set in configuration
+	if(isset($config['access-control'])){
+		header('Access-Control-Allow-Origin: '.$config['access-control']);
 	}
 	
 	// Setting the timezone

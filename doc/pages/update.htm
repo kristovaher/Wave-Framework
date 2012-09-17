@@ -38,6 +38,12 @@
 				
 				<p>This means that when updating, you can safely ignore these folders from update archives and focus on actual core files that might need updating, namely the '/index.php' file and files from '/engine/' folder. Core files of Wave Framework also have version information listed in their file headers as of 3.1.4 and you can refer to this header information to know if your file needs to be updated or not, when comparing it against the latest release.</p>
 				
+			<h3>How to Update from 3.2.2 to 3.2.3</h3>
+			
+				<ul>
+					<li>The 'www-files' and 'www-cookie' input data is not sent anymore, $_FILES and $_COOKIE arrays are merged like any other variable to the single input data. This is in order to standardize input data even further.</li>
+				</ul>
+				
 			<h3>How to Update from 3.2.0 to 3.2.1</h3>
 			
 				<ul>

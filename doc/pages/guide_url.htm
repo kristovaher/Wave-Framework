@@ -85,6 +85,8 @@
 					<li><b>priority</b> - Value from 0.0 to 1.0 and this is shown in generated sitemap.xml file.</li>
 					<li><b>change-frequency</b> - Value of 'always','hourly','daily','weekly','monthly','yearly','never' and this is shown in automatically generated sitemap.xml files.</li>
 					<li><b>last-modified</b> - Time in YYYY-MM-DD format for the last time content of this page was modified. This is shown in automatically generated sitemap.xml files.</li>
+					<li><b>frame-permissions</b> - Either 'deny' or 'sameorigin', if this is set then that URL has a different frame-permission rule from configuration file.</li>
+					<li><b>content-security-policy</b> - This is the content security policy rule for loading external content, it overwrites the default configuration.</li>
 				</ul>
 				
 				<p>General rule is to create one Sitemap file for each language that is defined in configuration and then add your basic URL's to your Sitemap file. Please note that you should also add your View files to /views/ folder, that are referenced in Sitemap, otherwise Wave Framework is unable to load the appropriate views.</p>				

@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.2.3
  */
 
 class WWW_controller_view extends WWW_Factory {
@@ -31,7 +31,7 @@ class WWW_controller_view extends WWW_Factory {
 	public function load($input){
 	
 		// Unsetting input data that are only used by API and are accessible elsewhere by the user
-		unset($input['www-command'],$input['www-return-type'],$input['www-cache-timeout'],$input['www-request'],$input['www-cookie'],$input['www-session'],$input['www-cache-tags']);
+		unset($input['www-command'],$input['www-return-type'],$input['www-cache-timeout'],$input['www-request'],$input['www-session'],$input['www-cache-tags']);
 	
 		// Getting view information
 		$view=$this->getState('view');
@@ -104,7 +104,7 @@ class WWW_controller_view extends WWW_Factory {
 					<meta name="viewport" content="width=device-width"/> 
 					<?php if($view['robots']!=''){ ?>
 						<!-- Robots -->
-						<meta content="<?=$view['robots']?>" name="robots"/>
+						<meta name="robots" content="<?=$view['robots']?>"/>
 					<?php } ?>
 					<!-- Content information -->
 					<?php if(isset($view['meta-keywords'])){ ?>

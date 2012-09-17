@@ -83,6 +83,7 @@
 					<ul>
 						<li><b>404-image-placeholder</b> - True or false flag for whether placeholder 404 image is used.</li>
 						<li><b>404-view</b> - View keyword that is loaded when <a href="guide_url.htm">URL Controller</a> cannot find a page.</li>
+						<li><b>access-control</b> - This is set as the access-control header for all requests.</li>
 						<li><b>apc</b> - True or false flag for whether the system attempts to use APC PHP accelerator.</li>
 						<li><b>api-logging</b> - If this is set to false, then API logging is not used. Otherwise this should be an array of logging flags.</li>
 						<li><b>api-profile</b> - Currently used API profile, this is set by the API.</li>
@@ -104,6 +105,7 @@
 						<li><b>cache-database-username</b> - Cache database username.</li>
 						<li><b>client-ip</b> - IP address of the client that makes the request, this is detected by the system and takes into account proxies.</li>
 						<li><b>client-user-agent</b> - Client user agent string that makes the request.</li>
+						<li><b>content-security-policy</b> - This is the content security policy rule for loading external content.</li>
 						<li><b>data-root</b> - Location of <a href="filesystem.htm">Filesystem</a> '/data/' folder which is used to store filesystem database files.</li>
 						<li><b>database-errors</b> - True or false flag for whether database errors are logged.</li>
 						<li><b>database-host</b> - Database host name.</li>
@@ -126,6 +128,7 @@
 						<li><b>file-robots</b> - Robots command string for file downloads.</li>
 						<li><b>fingerprint</b> - Fingerprint string about the user agent that made the request, only used if session fingerprinting is used.</li>
 						<li><b>forbidden-extensions</b> - Array of file extensions that cannot be requested over HTTP.</li>
+						<li><b>frame-permissions</b> - This is used for the header that states if a URL can be used from a frame or not.</li>
 						<li><b>headers-set</b> - This is the list of headers to be set. Value assigns whether it should replace previously set header like that or not.</li>
 						<li><b>headers-unset</b> - This is the list of headers that should be moved.</li>
 						<li><b>home-view</b> - View keyword that is considered for 'home' or 'root' pages.</li>

@@ -998,19 +998,13 @@ class WWW_Wrapper {
 				// If requested data was encrypted, then this attempts to decrypt the data
 				// This also checks to make sure that a serialized data was not returned (which usually means an error)
 				if(strpos($resultData,'{')===false && strpos($resultData,'[')===false && isset($thisCryptedData['www-crypt-output']) || isset($thisInputData['www-crypt-output'])){
-					// Getting the decryption key
-					if(isset($thisCryptedData['www-crypt-output'])){
-						$cryptKey=$thisCryptedData['www-crypt-output'];
-					} else {
-						$cryptKey=$thisInputData['www-crypt-output'];
-					}
 					// Decryption is different based on whether secret key was used or not
 					if($thisApiState['apiSecretKey']){
 						// If secret key was set, then decryption uses the secret key for initialization vector
-						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey']));
+						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),base64_decode($resultData),MCRYPT_MODE_CBC,md5($thisApiState['apiSecretKey']));
 					} else {
 						// Without secret key the system assumes that public profile is used and decryption is done in ECB mode
-						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($cryptKey),base64_decode($resultData),MCRYPT_MODE_ECB);
+						$resultData=mcrypt_decrypt(MCRYPT_RIJNDAEL_256,md5($thisApiState['apiToken']),base64_decode($resultData),MCRYPT_MODE_ECB);
 					}
 					// If decryption was a success
 					if($resultData){

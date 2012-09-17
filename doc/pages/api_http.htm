@@ -215,6 +215,46 @@
 					<p>Wave Framework uses the request content type as means to find out what type of request was made and if it includes input streams that it cannot get from query string or other variables.</p>
 					
 					<p>After the request is made, then the controllers can access the contents of the request from 'www-data' input key.</p>
+					
+				<h3>Uploading files</h3>
+				
+					<p>Files can be uploaded similarly to how a file upload is done with HTML forms and PHP. As with other input variables, $_FILES is merged down into a single input array by Wave Framework and can then be accessed independently. Here is an example:</p>
+					
+<pre>
+	<code>
+	&lt;form method=&quot;post&quot; enctype=&quot;multipart/form-data&quot; action=&quot;json.api?www-command=example-upload&quot;&gt;
+		&lt;input type=&quot;file&quot; name=&quot;my-file&quot;/&gt;
+		&lt;input type=&quot;submit&quot; value=&quot;SEND&quot;/&gt;
+	&lt;/form&gt;
+	</code>
+</pre>
+
+					<p>Please note that the 'www-command' that is used in the above example does not exist as an example in Wave Framework. But if 'example' controller existed with 'upload' method, then the uploaded file data would be available in the controller as $input['my-file'] (this is based on the HTML form file input fields name). This array can be like this:</p>
+					
+<pre>
+	<code>
+    [my-file] => Array
+        (
+            [name] => picture.jpg
+            [type] => image/jpeg
+            [tmp_name] => /var/tmp/phpdqdWM7
+            [error] => 0
+            [size] => 472821
+        )
+	</code>
+</pre>
+
+					<p>Since this can also be sent as any other form of upload, you should always validate this data before doing anything with the file. PHP places the uploaded files by default to the 'tmp_name' key of that array, so you have to first make sure that the file is actually uploaded (this is a security measure since a malicious script can set anything as that input value) and then move the upload to where it needs to go. Like this:</p>
+					
+<pre>
+	<code>
+	if(is_uploaded_file($input['my-file']['tmp_name'])){
+		// Move the file to its destination
+	} else {
+		// Throw an error
+	}
+	</code>
+</pre>	
 			
 	</body>
 </html>

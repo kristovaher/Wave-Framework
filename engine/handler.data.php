@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_data.htm
  * @since      1.5.0
- * @version    3.2.0
+ * @version    3.2.3
  */
 
 // INITIALIZATION
@@ -89,18 +89,15 @@
 		// All the data sent by user agent is added here and merged into one array
 		if(!empty($_POST)){ 
 			$inputData=$_POST; 
-		} elseif(is_array($state->data['http-input'])){
-			// http-input is POST data that is sent as a stream (as XML or JSON)
-			$inputData=$state->data['http-input'];
 		}
 		if(!empty($_GET)){ 
 			$inputData+=$_GET; 
 		}
-		if(!empty($_FILES)){ 
-			$inputData['www-files']=$_FILES;
-		}
 		if(!empty($_COOKIE)){ 
-			$inputData['www-cookie']=$_COOKIE;
+			$inputData+=$_COOKIE;
+		}
+		if(!empty($_FILES)){
+			$inputData+=$_FILES;
 		}
 
 		// If index view cache is not configured, it is turned of by default

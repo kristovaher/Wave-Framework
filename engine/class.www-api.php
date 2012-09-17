@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.2.2
+ * @version    3.2.3
  */
 
 final class WWW_API {
@@ -289,7 +289,7 @@ final class WWW_API {
 		 * 
 		 * @param array $apiInputData array of input data
 		 * @param boolean $useBuffer whether API calls are buffered per request
-		 * @param boolean $apiValidation if API uses profile validation or not
+		 * @param boolean $apiValidation if API uses profile validation or not, can also hold an array of exceptions
 		 * @param boolean $useLogger whether logger array is updated during execution
 		 * @return array/string depending on API request input data
 		 */
@@ -320,7 +320,7 @@ final class WWW_API {
 					'last-modified'=>$this->state->data['request-time'],
 					'minify-output'=>(isset($apiInputData['www-minify']))?$apiInputData['www-minify']:false,
 					'disable-callbacks'=>(isset($apiInputData['www-disable-callbacks']))?$apiInputData['www-disable-callbacks']:false,
-					'output-crypt-key'=>false,
+					'crypt-output'=>false,
 					'profile'=>$this->state->data['api-public-profile'],
 					'public-token'=>$this->state->data['api-public-token'],
 					'push-output'=>(isset($apiInputData['www-output']))?$apiInputData['www-output']:true,
@@ -391,7 +391,7 @@ final class WWW_API {
 				}
 				
 				// This tests if cache value sent through input is valid
-				if($apiState['command']!='www-create-session' && isset($apiInputData['www-cache-timeout']) && $apiInputData['www-cache-timeout']>=0 && !isset($apiInputData['www-files'])){
+				if($apiState['command']!='www-create-session' && isset($apiInputData['www-cache-timeout']) && $apiInputData['www-cache-timeout']>=0){
 					$apiState['cache-timeout']=$apiInputData['www-cache-timeout'];
 				}
 				
@@ -546,7 +546,14 @@ final class WWW_API {
 							// Validation hash is calculated from input data
 							$validationData=$apiInputData;
 							// Session input is not considered for validation hash and is unset
-							unset($validationData['www-hash'],$validationData['www-session'],$validationData['www-cookie'],$validationData['www-files']);
+							unset($validationData['www-hash'],$validationData['www-session']);
+						
+							// Unsetting any possible exceptions (such as file uploads and cookie input)
+							if(is_array($apiValidation) && !empty($apiValidation)){
+								foreach($apiValidation as $unset){
+									unset($validationData[$unset]);
+								}
+							}
 							
 							// If token is set then this is used for validation as long as the command is not www-create-session
 							if($apiState['token'] && $apiState['command']!='www-create-session'){
@@ -610,7 +617,7 @@ final class WWW_API {
 						// If this is set, then the value of this is used to crypt the output
 						// Please note that while www-crypt-output key can be set outside www-crypt-input data, it is recommended to keep that key within crypted input when making a request
 						if(isset($apiInputData['www-crypt-output'])){
-							$apiState['output-crypt-key']=$apiInputData['www-crypt-output'];
+							$apiState['crypt-output']=$apiInputData['www-crypt-output'];
 						}
 						
 					// SESSION CREATION, DESTRUCTION AND VALIDATION COMMANDS
@@ -679,12 +686,7 @@ final class WWW_API {
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator['www-cookie'][$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
-					
-					// If nothing is left in cookie container
-					if(empty($cacheValidator['www-cookie'])){
-						unset($cacheValidator['www-cookie']);
-					}
+					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);
@@ -1070,10 +1072,10 @@ final class WWW_API {
 					// If token timeout is set, then profile must be defined
 					if($apiState['secret-key']){
 						// If secret key is set, then output will be crypted with CBC mode
-						$apiResult=$this->encryptData($apiResult,$apiState['output-crypt-key'],$apiState['secret-key']);
+						$apiResult=$this->encryptData($apiResult,$apiState['token'],$apiState['secret-key']);
 					} else {
 						// If secret key is not set (for public profiles), then output will be crypted with ECB mode
-						$apiResult=$this->encryptData($apiResult,$apiState['output-crypt-key']);
+						$apiResult=$this->encryptData($apiResult,$apiState['token']);
 					}
 				}
 			
@@ -1241,10 +1243,10 @@ final class WWW_API {
 					// It is possible to set multiple headers simultaneously
 					if(is_array($data['www-set-header'])){
 						foreach($data['www-set-header'] as $header){
-							header($header);
+							$this->state->setHeader($header);
 						}
 					} else {
-						header($data['www-set-header']);
+						$this->state->setHeader($data['www-set-header']);
 					}
 				}
 		
@@ -1253,10 +1255,10 @@ final class WWW_API {
 					// It is possible to set multiple headers simultaneously
 					if(is_array($data['www-unset-header'])){
 						foreach($data['www-unset-header'] as $header){
-							header_remove($header);
+							$this->state->unsetHeader($header);
 						}
 					} else {
-						header_remove($data['www-unset-header']);
+						$this->state->unsetHeader($data['www-unset-header']);
 					}
 				}
 				

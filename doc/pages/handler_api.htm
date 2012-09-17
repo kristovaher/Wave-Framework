@@ -32,7 +32,7 @@
 				
 				<p>API Handler loads <a href="api.htm">API</a> Class and creates a new API object with the current <a href="state.htm">State</a>.</p>
 				
-				<p>All input data from POST, GET, FILES and COOKIE arrays are merged into a single input array, which works similarly to $_REQUEST. Sessions are also started, if session cookie is detected. File and cookie input is stored with additional array keys of 'www-files' and 'www-cookie'. Session data is stored similarly in 'www-session', but this is assigned by API itself and not the handlers.</p>
+				<p>All input data from POST, GET, FILES and COOKIE arrays are merged into a single input array, which works similarly to $_REQUEST. Sessions are also started, if session cookie is detected. Session data is stored as 'www-session', but this is assigned by API itself and not by the handlers.</p>
 				
 				<p>If 'www-profile' is set in the input, then <a href="guide_api.htm">API</a> call is made using that profile and API will validate API profile by using the API profiles in /resources/api.profiles.ini file.</p>
 				

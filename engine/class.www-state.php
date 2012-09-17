@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.2.2
+ * @version    3.2.3
  */
 
 class WWW_State	{
@@ -90,6 +90,7 @@ class WWW_State	{
 			$this->data=array(
 				'404-image-placeholder'=>true,
 				'404-view'=>'404',
+				'access-control'=>false,
 				'apc'=>0,
 				'api-logging'=>array('*','!public'),
 				'api-profile'=>'public',
@@ -111,6 +112,7 @@ class WWW_State	{
 				'cache-database-username'=>'',
 				'client-ip'=>__IP__,
 				'client-user-agent'=>((isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:''),
+				'content-security-policy'=>false,
 				'data-root'=>false,
 				'database-errors'=>true,
 				'database-host'=>'localhost',
@@ -133,6 +135,7 @@ class WWW_State	{
 				'file-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'fingerprint'=>false,
 				'forbidden-extensions'=>array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini','empty'),
+				'frame-permissions'=>'',
 				'headers-set'=>array(),
 				'headers-unset'=>array(),
 				'home-view'=>'home',

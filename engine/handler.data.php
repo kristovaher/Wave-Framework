@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_data.htm
  * @since      1.5.0
- * @version    3.2.3
+ * @version    3.2.4
  */
 
 // INITIALIZATION
@@ -25,6 +25,11 @@
 	if(!isset($resourceAddress)){
 		header('HTTP/1.1 403 Forbidden');
 		die();
+	}
+	
+	// If access control header is set in configuration
+	if(isset($config['access-control'])){
+		header('Access-Control-Allow-Origin: '.$config['access-control']);
 	}
 
 	// If index URL cache is not configured, it is turned off by default

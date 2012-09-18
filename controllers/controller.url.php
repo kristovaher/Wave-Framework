@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_url.htm
  * @since      1.0.0
- * @version    3.2.3
+ * @version    3.2.4
  */
 
 class WWW_controller_url extends WWW_Factory {
@@ -398,21 +398,21 @@ class WWW_controller_url extends WWW_Factory {
 			// Writing robots data to header
 			if($data['robots']!=''){
 				// This header is not 'official HTTP header', but is widely supported by Google and others
-				$data['www-set-header'][]='X-Robots-Tag: '.$data['robots'];
+				$data['www-set-header'][]='Robots-Tag: '.$data['robots'];
 			}
 			
 			// Robots data is also returned to views
 			if(isset($data['frame-permissions']) && $data['frame-permissions']){
-				$data['www-set-header'][]='X-Frame-Options: '.$data['frame-permissions'];
+				$data['www-set-header'][]='Frame-Options: '.$data['frame-permissions'];
 			} elseif($tmp=$this->getState('frame-permissions')){
-				$data['www-set-header'][]='X-Frame-Options: '.$tmp;
+				$data['www-set-header'][]='Frame-Options: '.$tmp;
 			}
 			
 			// Content security policy headers
 			if(isset($data['content-security-policy']) && $data['content-security-policy']){
-				$data['www-set-header'][]='X-Content-Security-Policy: '.$data['content-security-policy'];
+				$data['www-set-header'][]='Content-Security-Policy: '.$data['content-security-policy'];
 			} elseif($tmp=$this->getState('content-security-policy')){
-				$data['www-set-header'][]='X-Content-Security-Policy: '.$tmp;
+				$data['www-set-header'][]='Content-Security-Policy: '.$tmp;
 			}
 			
 		// USER PERMISSIONS CHECKS

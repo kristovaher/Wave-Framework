@@ -70,6 +70,8 @@
 					<li><b>www-reset-log</b> - This means that the API will reset the log after each API call is made.</li>
 					<li><b>www-timestamp-duration</b> - This tells API Wrapper the maximum difference in seconds it accepts the timestamp from the response.</li>
 					<li><b>www-secret-key</b></li> - This stores the secret key of the application. This value is used for calculating validation hashes.</li>
+					<li><b>www-cookie-container</b></li> - This sets the absolute address for the cookie container.</li>
+					<li><b>www-certificate-container</b></li> - This sets the absolute address for the certificate container.</li>
 				</ul>
 				
 				<p>Please refer to Input and Output API Documentation to see the rest of the Wave Framework API flags and their description.</p>
@@ -200,9 +202,33 @@
 			
 <pre>
 	<code>
-	var token=WWW.getToken();
+	$token=$www->getToken();
 	</code>
 </pre>
+
+				<p>JavaScript API Wrapper also allows to use cookie containers, thus allowing to make the wrapper work like a browser that carries on a cookie session. For this to work, you need to set a cookie container, like this:</p>
+				
+<pre>
+	<code>
+	$www->setCookieContainer('cookies.tmp');
+	// Or as an input variable
+	$www->setInput('www-cookie-container','cookies.tmp');
+	</code>
+</pre>
+				
+				<p>As a result, if the API sets cookies, then Wrapper will store these cookies.</p>
+				
+				<p>If your API uses HTTPS and you need to validate that HTTPS host and the SSL certificate, then you can point to a certificate container file which will be used to check the certificate against. If you do not have a certificate bundle to validate against, then you can fetch one from this URL: http://curl.haxx.se/ca/ and see if it works. Note that when you set a certificate bundle then unofficial (self-signed) certificates will fail. You can assign a bundle like this:</p>
+				
+<pre>
+	<code>
+	$www->setCertificateContainer('cacert.pem');
+	// Or as an input variable
+	$www->setInput('www-certificate-container','cacert.pem');
+	</code>
+</pre>
+
+				<p>This method will return false if the container does not exist.</p>
 				
 			<h2>PHP API Wrapper Class Parameters</h2>
 			
@@ -254,6 +280,10 @@
 				
 					<p>This variable holds the address for the file that is used as a cookie container in the file system. This allows Wrapper to use cookies when making API requests.</p>
 			
+				<h3>private $certificateContainer=false</h3>
+				
+					<p>This variable holds the address for the file that is used as a certificate container in the file system. When this is set, then certificates are validated when they are used.</p>
+			
 				<h3>private $userAgent='WaveFramework/3.0.0 (PHP)'</h3>
 				
 					<p>This is the user-agent string of the API Wrapper and it is sent by the Wrapper when making cURL requests. It is useful later on to determine where the requests come from. Note that when cURL is not supported and file_get_contents() makes the request, then user agent is not sent with the request.</p>
@@ -285,6 +315,10 @@
 				<h3>public function setCookieContainer($location=false)</h3>
 					
 					<p>This method allows to set cookie container for cURL calls. If this is set to false, then cookies are not used at all. $location is the file that is used for cookie container, it is automatically created if the file does not exist.</p>
+			
+				<h3>public function setCertificateContainer($location=false)</h3>
+					
+					<p>This sets the CA Cert container file. This file can be gotten from various sources, like http://curl.haxx.se/docs/caextract.html and can be used to verify host and peer data with cURL requests.</p>
 			
 				<h3>public function clearCookieContainer($location=false)</h3>
 					

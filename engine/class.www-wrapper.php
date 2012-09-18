@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.2.2
+ * @version    3.2.4
  */
 
 class WWW_Wrapper {
@@ -113,12 +113,18 @@ class WWW_Wrapper {
 	private $cookieContainer=false;
 	
 	/**
+	 * This variable holds the address for the file that is used as a certificate container in the 
+	 * file system. When this is set, then certificates are validated when they are used.
+	 */
+	private $certificateContainer=false;
+	
+	/**
 	 * This is the user-agent string of the API Wrapper and it is sent by the Wrapper when making 
 	 * cURL requests. It is useful later on to determine where the requests come from. Note that 
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.2.2 (PHP)';
+	private $userAgent='WaveFramework/3.2.4 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -248,6 +254,35 @@ class WWW_Wrapper {
 			} else {
 				$this->cookieContainer=false;
 				$this->log[]='Cookies are turned off';
+				return true;
+			}
+		}
+		
+		/**
+		 * This sets the CA Cert container file. This file can be gotten from various sources, 
+		 * like http://curl.haxx.se/docs/caextract.html and can be used to verify host and 
+		 * peer data with cURL requests.
+		 *
+		 * @param string $location cookie container file location in filesystem
+		 * @return boolean
+		 */
+		public function setCertificateContainer($location=false){
+			// If value is anything but false
+			if($location){
+				// Testing if file exists or attempting to create that file
+				if(file_exists($location)){
+					$this->certificateContainer=$location;
+					$this->log[]='Certificate container set to: '.$location;
+					return true;
+				} else {
+					// Certificate container is not found
+					$this->certificateContainer=false;
+					$this->log[]='Cannot set certificate container to: '.$location;
+					return false;
+				}
+			} else {
+				$this->certificateContainer=false;
+				$this->log[]='Certificate container is not used';
 				return true;
 			}
 		}
@@ -464,6 +499,12 @@ class WWW_Wrapper {
 					break;
 				case 'www-output':
 					$this->log[]='Ignoring www-output setting, wrapper always requires output to be set to true';
+					break;
+				case 'www-cookie-container':
+					return $this->setCookieContainer($value);
+					break;
+				case 'www-certificate-container':
+					return $this->setcertificateContainer($value);
 					break;
 				default:
 					// True/false conversions for input strings
@@ -810,22 +851,31 @@ class WWW_Wrapper {
 							CURLOPT_USERAGENT=>$this->userAgent,
 							CURLOPT_HEADER=>true,
 							CURLOPT_RETURNTRANSFER=>true,
-							CURLOPT_FOLLOWLOCATION=>false,
-							CURLOPT_COOKIESESSION=>true,
-							CURLOPT_SSL_VERIFYPEER=>false
+							CURLOPT_FOLLOWLOCATION=>false
 						);
+						
 						// Cookies
 						if($this->cookieContainer){
 							curl_setopt_array($cURL,array(CURLOPT_COOKIESESSION=>false,CURLOPT_COOKIEFILE=>$this->cookieContainer,CURLOPT_COOKIEJAR=>$this->cookieContainer));
 						} else {
 							curl_setopt($cURL,CURLOPT_COOKIESESSION,true);
 						}
+						
+						// Certificates
+						if($this->certificateContainer){
+							curl_setopt_array($cURL,array(CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,CURLOPT_CAINFO=>$this->certificateContainer));
+						} else {
+							curl_setopt_array($cURL,array(CURLOPT_SSL_VERIFYPEER=>false,CURLOPT_SSL_VERIFYHOST=>false));
+						}
+						
 						// If last modified header is sent
 						if($thisApiState['lastModified']){
 							curl_setopt($cURL,CURLOPT_HTTPHEADER,array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',$thisApiState['lastModified']).' GMT'));
 						}
+						
 						// Assigning options to cURL object
 						curl_setopt_array($cURL,$requestOptions);
+						
 						// Executing the request
 						$resultData=curl_exec($cURL);
 						list($resultHeaders,$resultData)=explode("\r\n\r\n",$resultData,2);
@@ -941,22 +991,31 @@ class WWW_Wrapper {
 							CURLOPT_USERAGENT=>$this->userAgent,
 							CURLOPT_HEADER=>true,
 							CURLOPT_RETURNTRANSFER=>true,
-							CURLOPT_FOLLOWLOCATION=>false,
-							CURLOPT_COOKIESESSION=>true,
-							CURLOPT_SSL_VERIFYPEER=>false
+							CURLOPT_FOLLOWLOCATION=>false
 						);
+						
 						// Cookies
 						if($this->cookieContainer){
 							curl_setopt_array($cURL,array(CURLOPT_COOKIESESSION=>false,CURLOPT_COOKIEFILE=>$this->cookieContainer,CURLOPT_COOKIEJAR=>$this->cookieContainer));
 						} else {
 							curl_setopt($cURL,CURLOPT_COOKIESESSION,true);
 						}
+						
+						// Certificates
+						if($this->certificateContainer){
+							curl_setopt_array($cURL,array(CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,CURLOPT_CAINFO=>$this->certificateContainer));
+						} else {
+							curl_setopt_array($cURL,array(CURLOPT_SSL_VERIFYPEER=>false,CURLOPT_SSL_VERIFYHOST=>false));
+						}
+						
 						// If last modified header is sent
 						if($thisApiState['lastModified']){
 							curl_setopt($cURL,CURLOPT_HTTPHEADER,array('If-Modified-Since: '.gmdate('D, d M Y H:i:s',$thisApiState['lastModified']).' GMT'));
 						}
+						
 						// Assigning options to cURL object
 						curl_setopt_array($cURL,$requestOptions);
+						
 						// Executing the request
 						$resultData=curl_exec($cURL);
 						list($resultHeaders,$resultData)=explode("\r\n\r\n",$resultData,2);

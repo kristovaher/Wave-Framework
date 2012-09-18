@@ -48,6 +48,7 @@
 					<li><b>disabled</b> - If this is set to 1, then this API profile can remain defined in API Profiles file, but it cannot be used to make API requests.</li>
 					<li><b>ip</b> - This is the IP or comma-separated list of IP addresses that are allowed to make requests using this API profile. If this value is set to '*', which is also the default, then all IP's are allowed to make requessts.</li>
 					<li><b>commands</b> - This is comma-separated list of 'www-command' values that are allowed by this API profile. If this is set to '*', then all API commands are allowed. You can specifically disallow some commands by setting an exclamation mark '!' before the command name, for example '*,!example-get' allows for all commands except 'example-get'.</li>
+					<li><b>access-control</b> - This sets the domain origin rule that allows to use this profile over HTTP. These rules are needed for cross-origin domain requests to the API.</li>
 				</ul>
 				
 				<p>These settings are used for non-public and authenticated API profiles only:</p>

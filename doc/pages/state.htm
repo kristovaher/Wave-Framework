@@ -86,6 +86,7 @@
 						<li><b>access-control</b> - This is set as the access-control header for all requests.</li>
 						<li><b>apc</b> - True or false flag for whether the system attempts to use APC PHP accelerator.</li>
 						<li><b>api-logging</b> - If this is set to false, then API logging is not used. Otherwise this should be an array of logging flags.</li>
+						<li><b>api-permissions</b> - Array of currently set API permissions used whenever permissions are checked.</li>
 						<li><b>api-profile</b> - Currently used API profile, this is set by the API.</li>
 						<li><b>api-public-profile</b> - API profile name that is considered public.</li>
 						<li><b>api-public-token</b> - If this is set to 1, then a public API token is required to be sent with all web forms.</li>
@@ -321,7 +322,7 @@
 				
 				<h3>final public function checkPermissions($permission)</h3>
 				
-					<p>This checks for an existence of permissions in the user permissions session array. $permissions is either a comma-separated string of permissions to be checked, or an array. This method returns false when one of those permission keys is not set in the permissions session. Method returns true, if $permissions exist in the permissions session array.</p>
+					<p>This checks for an existence of permissions in the user permissions session array or in the API profile permissions setting. $permissions is either a comma-separated string of permissions to be checked, or an array. This method returns false when one of those permission keys is not set in the permissions session. Method returns true, if $permissions exist in the permissions session array.</p>
 				
 				<h3>final public function unsetPermissions()</h3>
 				

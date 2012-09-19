@@ -95,7 +95,9 @@
 	</code>
 </pre>
 
-				<p>You can also get an array of all currently set permissions as well as unset the permissions sessions. For example:</p>
+				<p>This permission check works for both public API calls (that are often used by website) as well as private API profiles. Public API profile does not have a permissions setting, public API profiles permissions are written in session storage for the currently active user. Private API permissions are set in API profiles file however and it is done the same way as with regular user permissions: it has to be a comma-separated list of allowed permissions.</p>
+				
+				<p>You can also get an array of all currently set permissions as well as unset the permission sessions. For example:</p>
 				
 <pre>
 	<code>

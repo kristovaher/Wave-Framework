@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.2.3
+ * @version    3.2.5
  */
 
 class WWW_State	{
@@ -93,6 +93,7 @@ class WWW_State	{
 				'access-control'=>false,
 				'apc'=>0,
 				'api-logging'=>array('*','!public'),
+				'api-permissions'=>array('*'),
 				'api-profile'=>'public',
 				'api-public-profile'=>'public',
 				'api-public-token'=>false,
@@ -1019,39 +1020,58 @@ class WWW_State	{
 		}
 	
 		/**
-		 * This checks for an existence of permissions in the user permissions session array.
-		 * $permissions is either a comma-separated string of permissions to be checked, or an 
-		 * array. This method returns false when one of those permission keys is not set in the
-		 * permissions session. Method returns true, if $permissions exist in the permissions 
-		 * session array.
+		 * This checks for an existence of permissions in the user permissions session array 
+		 * or in the API profile permissions setting. $permissions is either a comma-separated 
+		 * string of permissions to be checked, or an array. This method returns false when one 
+		 * of those permission keys is not set in the permissions session. Method returns true, 
+		 * if $permissions exist in the permissions session array.
 		 *
 		 * @param string|array $permissions comma-separated string or an array that is checked against permissions array
 		 * @return boolean
 		 */
 		final public function checkPermissions($permissions){
-			// Testing if permissions state has been populated or not
-			if(!$this->data['user-permissions']){
-				$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
-				// If this session key did not exist, then returning false
+		
+			// Public profile permissions are stored in the session
+			if($this->data['api-profile']==$this->data['api-public-profile']){
+				// Testing if permissions state has been populated or not
 				if(!$this->data['user-permissions']){
-					return false;
-				}
-			}
-			// If all permissions are set, then permissions will not be separately validated and true is assumed
-			if(!in_array('*',$this->data['user-permissions'])){
-				if(!is_array($permissions)){
-                    $permissions=explode(',',$permissions);
-				}
-				foreach($permissions as $p){
-					// Returning true or false depending on whether this key exists or not
-					if(!in_array($p,$this->data['user-permissions'])){
+					$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
+					// If this session key did not exist, then returning false
+					if(!$this->data['user-permissions']){
 						return false;
 					}
 				}
-                return true;
+				$permissionsMatch=$this->data['user-permissions'];
 			} else {
-				return true;
+				// Private API profile permissions are stored separately
+				$permissionsMatch=$this->data['api-permissions'];
 			}
+			
+			// Permissions are handled as an array
+			if(!is_array($permissions)){
+				$permissions=explode(',',$permissions);
+			}
+
+			// If all permissions are set, then permissions will not be separately validated and true is assumed
+			if(!in_array('*',$permissionsMatch)){
+				foreach($permissions as $p){
+					// Returning true or false depending on whether this key exists or not
+					if(!in_array($p,$permissionsMatch)){
+						return false;
+					}
+				}
+			} else {
+				foreach($permissions as $p){
+					// Returning false, if one of the permissions is disallowed
+					if(in_array('!'.$p,$permissionsMatch)){
+						return false;
+					}
+				}
+			}
+			
+			// Permission check passed
+			return true;
+			
 		}
 		
 		/**

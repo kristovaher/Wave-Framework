@@ -58,6 +58,7 @@
 					<li><b>token-timeout</b> - This setting tells API how long, in seconds, can an API token remain unused before being considered timed out. By default this value is 'infinite' and API session tokens do not expire.</li>
 					<li><b>timestamp-timeout</b> - This tells API that if www-timestamp is provided with the HTTP request, then how big a difference is accepted by the API profile in seconds for the request to still be considered valid. If request 'www-timestamp' value is different more than the value of this setting, compared to server timestamp, then the request is considered as failed.</li>
 					<li><b>hash-validation</b> - This setting is set to 1 by default. If this is set to 1, then hash-based validation is used, which means that a 'www-hash' value has to be generated from input data together with secret key or session token and sent with the request. Server will compare this value to its own calculated value and if it finds a difference, then the request is considered as failed.</li>
+					<li><b>permissions</b> - Comma separated list of permissions that can be checked by controller. Defaults to '*', which allows any.</li>
 				</ul>
 				
 				<p>You can define as many API profiles as you need in this file, or you can also generate this file yourself from <a href="guide_database.htm">Database</a> or through other methods.</p>

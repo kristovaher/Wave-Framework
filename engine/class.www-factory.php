@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.2.5
  */
 
 class WWW_Factory {
@@ -979,13 +979,15 @@ class WWW_Factory {
 		 * $permissions is either a comma-separated string of permissions to be checked, or an 
 		 * array. This method returns false when one of those permission keys is not set in the
 		 * permissions session. Method returns true, if $permissions exist in the permissions 
-		 * session array.
+		 * session array. If $trueNonPublic is set, then non-public-profiles will always return
+		 * true with this call, since API profile should already be considered as validated.
 		 *
 		 * @param string|array $permissions comma-separated string or an array that is checked against permissions array
+		 * @param boolean $trueNonPublic whether non-public API profiles always return true for permission checks
 		 * @return boolean
 		 */
-		final protected function checkPermissions($permissions){
-			return $this->WWW_API->state->checkPermissions($permissions);
+		final protected function checkPermissions($permissions,$trueNonPublic=true){
+			return $this->WWW_API->state->checkPermissions($permissions,$trueNonPublic);
 		}
 		
 		/**

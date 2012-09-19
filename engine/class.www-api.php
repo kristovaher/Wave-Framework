@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.2.4
+ * @version    3.2.5
  */
 
 final class WWW_API {
@@ -482,18 +482,24 @@ final class WWW_API {
 								// Since this is not null, token based validation is used
 								$apiState['token-timeout']=$this->apiProfiles[$apiState['profile']]['token-timeout'];
 							}
+							
+							// If permissions are set for the API profile, then writing this information to State				
+							if(isset($this->apiProfiles[$apiState['profile']]['permissions'])){
+								// Permissions are stored as a comma-separated string
+								$this->state->data['api-permissions']=explode(',',$this->apiProfiles[$apiState['profile']]['permissions']);
+							}
 						
+						}
+					
+						// If access control header is set in configuration
+						if(isset($this->apiProfiles[$apiState['profile']]['access-control'])){
+							$this->state->setHeader('Access-Control-Allow-Origin: '.$this->apiProfiles[$apiState['profile']]['access-control']);
+						} elseif($this->state->data['access-control']){
+							$this->state->setHeader('Access-Control-Allow-Origin: '.$config['access-control']);
 						}
 						
 					} else {
 						return $this->output(array('www-message'=>'API profile not found','www-response-code'=>103),$apiState);
-					}
-					
-					// If access control header is set in configuration
-					if(isset($this->apiProfiles[$apiState['profile']]['access-control'])){
-						$this->state->setHeader('Access-Control-Allow-Origin: '.$this->apiProfiles[$apiState['profile']]['access-control']);
-					} elseif($this->state->data['access-control']){
-						$this->state->setHeader('Access-Control-Allow-Origin: '.$config['access-control']);
 					}
 
 				}

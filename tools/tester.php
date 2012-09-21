@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.2
+ * @version    3.2.6
  */
 
 // This initializes tools and authentication
@@ -101,7 +101,7 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 		$testName=implode('.',$filename);
 		
 		// Loading test configuration
-		$configuration=parse_ini_file('tests'.DIRECTORY_SEPARATOR.$test,true);
+		$configuration=parse_ini_file('tests'.DIRECTORY_SEPARATOR.$test,true,INI_SCANNER_RAW);
 		if($configuration){
 		
 			// Resetting the variables about the current test
@@ -149,7 +149,7 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 								if(preg_match('/^:numeric:/',$value)){
 								
 									// Numeric input is either a random integer or an integer within range of numbers
-									$bits=explode(':',$value);
+									$bits=explode(':',$value,3);
 									if(isset($bits[2]) && $bits[2]!=''){
 										$bits=explode('-',$bits[2]);
 										$thisInput[$key]=rand($bits[0],$bits[1]);
@@ -162,7 +162,7 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 									// Alpha input is random characters and spaces
 									$characters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 									$charactersLength=strlen($characters)-1;
-									$bits=explode(':',$value);
+									$bits=explode(':',$value,3);
 									if(isset($bits[2]) && $bits[2]!=''){
 										$bits=explode('-',$bits[2]);
 										$length=rand($bits[0],$bits[1]);
@@ -181,7 +181,7 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 									// Alpha input is random characters and spaces
 									$characters="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
 									$charactersLength=strlen($characters)-1;
-									$bits=explode(':',$value);
+									$bits=explode(':',$value,3);
 									if(isset($bits[2]) && $bits[2]!=''){
 										$bits=explode('-',$bits[2]);
 										$length=rand($bits[0],$bits[1]);
@@ -198,7 +198,7 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 								} elseif(preg_match('/^:fixed:/',$value)){
 								
 									// Fixed input is a random value from a fixed list
-									$bits=explode(':',$value);
+									$bits=explode(':',$value,3);
 									if(isset($bits[2]) && $bits[2]!=''){
 										$bits=explode(',',$bits[2]);
 										$length=count($bits)-1;
@@ -249,7 +249,7 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 									if(preg_match('/^:numeric:/',$value)){
 									
 										// Testing if the return value is numeric and within accepted range
-										$bits=explode(':',$value);
+										$bits=explode(':',$value,3);
 										if(isset($bits[2]) && $bits[2]!=''){
 											$variables=explode('-',$bits[2]);
 											if(!preg_match('/^[0-9]*\Z/i',$result[$key]) || (is_numeric($variables[0]) && $result[$key]<$variables[0]) || (is_numeric($variables[1]) && $result[$key]>$variables[1])){
@@ -264,14 +264,14 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 									} elseif(preg_match('/^:alpha:/',$value)){
 									
 										// Testing if the response consists of letters
-										$bits=explode(':',$value);
+										$bits=explode(':',$value,3);
 										if(isset($bits[2]) && $bits[2]!=''){
 											$variables=explode('-',$bits[2]);
-											if(!preg_match('/(*UTF8)^[a-zA-Z ]*\Z/i',$result[$key]) || (is_numeric($variables[0]) && strlen($result[$key])<$variables[0]) || (is_numeric($variables[1]) && strlen($result[$key])>$variables[1])){
+											if(!preg_match('/^[[:alpha:] ]*\Z/ui',$result[$key]) || (is_numeric($variables[0]) && strlen($result[$key])<$variables[0]) || (is_numeric($variables[1]) && strlen($result[$key])>$variables[1])){
 												$testErrorLog[$testAddress]=$testName.' test '.$trueCommand.' iteration #'.$x.' - output key "'.$key.'" with the value "'.$result[$key].'" does not just have letters or is not within the expected length "'.$bits[2].'"';
 											}
 										} else {
-											if(!preg_match('/(*UTF8)^[a-zA-Z ]*\Z/i',$result[$key])){
+											if(!preg_match('/^[[:alpha:] ]*\Z/ui',$result[$key])){
 												$testErrorLog[$testAddress]=$testName.' test '.$trueCommand.' iteration #'.$x.' - output key "'.$key.'" with the value "'.$result[$key].'" does not just have letters';
 											}
 										}
@@ -279,14 +279,14 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 									} elseif(preg_match('/^:alphanumeric:/',$value)){
 									
 										// Testing if the response consists of letters and numbers
-										$bits=explode(':',$value);
+										$bits=explode(':',$value,3);
 										if(isset($bits[2]) && $bits[2]!=''){
 											$variables=explode('-',$bits[2]);
-											if(!preg_match('/(*UTF8)^[a-zA-Z0-9 ]*\Z/i',$result[$key]) || (is_numeric($variables[0]) && strlen($result[$key])<$variables[0]) || (is_numeric($variables[1]) && strlen($result[$key])>$variables[1])){
+											if(!preg_match('/^[[:alnum:] ]*\Z/ui',$result[$key]) || (is_numeric($variables[0]) && strlen($result[$key])<$variables[0]) || (is_numeric($variables[1]) && strlen($result[$key])>$variables[1])){
 												$testErrorLog[$testAddress]=$testName.' test '.$trueCommand.' iteration #'.$x.' - output key "'.$key.'" with the value "'.$result[$key].'" is not alphanumeric or within the expected length "'.$bits[2].'"';
 											}
 										} else {
-											if(!preg_match('/(*UTF8)^[a-zA-Z0-9 ]*\Z/i',$result[$key])){
+											if(!preg_match('/^[[:alnum:] ]*\Z/ui',$result[$key])){
 												$testErrorLog[$testAddress]=$testName.' test '.$trueCommand.' iteration #'.$x.' - output key "'.$key.'" with the value "'.$result[$key].'" is not alphanumeric';
 											}
 										}
@@ -294,7 +294,7 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 									} elseif(preg_match('/^:fixed:/',$value)){
 									
 										// Testing if the response is an accepted fixed value
-										$bits=explode(':',$value);
+										$bits=explode(':',$value,3);
 										if(isset($bits[2]) && $bits[2]!=''){
 											$variables=explode(',',$bits[2]);
 											if(!in_array($result[$key],$variables)){
@@ -302,6 +302,16 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 											}
 										} else {
 											$testErrorLog[$testAddress]=$testName.' test '.$trueCommand.' iteration #'.$x.' - output key "'.$key.'" with the value "'.$result[$key].'" could not be matched against empty fixed response';
+										}
+										
+									} elseif(preg_match('/^:any:/',$value)){
+									
+										// Testing if the response is an accepted fixed value
+										$bits=explode(':',$value,3);
+										if(isset($bits[2]) && $bits[2]!=''){
+											if(!preg_match('/^['.$bits[2].']*$/u',$result[$key])){
+												$testErrorLog[$testAddress]=$testName.' test '.$trueCommand.' iteration #'.$x.' - output key "'.$key.'" with the value "'.$result[$key].'" included illegal characters "'.$bits[2].'"';
+											}
 										}
 										
 									} else {
@@ -365,7 +375,7 @@ foreach($testFiles as $test){
 	// Ignoring the placeholder file
 	if($test!='.empty' && is_file('tests'.DIRECTORY_SEPARATOR.$test)){
 		// Test configuration should be stored as a grouped INI configuration file
-		$configuration=parse_ini_file('tests'.DIRECTORY_SEPARATOR.$test,true);
+		$configuration=parse_ini_file('tests'.DIRECTORY_SEPARATOR.$test,true,INI_SCANNER_RAW);
 		if($configuration){
 			$tests[$test]=$configuration;
 		}

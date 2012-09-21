@@ -194,6 +194,8 @@
 					<li><b>:alphanumeric:</b> - Value must be a character string</li>
 					<li><b>:alphanumeric:1-10</b> - Value must be a character string between 1 and 10 characters in length</li>
 					<li><b>:fixed:a,b,c</b> - Value must be from a fixed list, either 'a', 'b' or 'c'.</li>
+					<li><b>:any:</b> - Accepts any character, test would fail only if the output variable is not defined at all.</li>
+					<li><b>:any:a-zA-Z0-9</b> - After ':any:' key you can write a regular expression for matched characters.</li>
 				</ul>
 				
 				<p>You can assign both how many times tests are run as well as how much is the maximum execution time allocated for PHP when running the script. This is useful since sometimes it may be difficult to run a large amount of tests that are canceled by the server prematurely.</p>

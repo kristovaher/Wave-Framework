@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.2.4
+ * @version    3.2.6
  */
 
 // SOLVING THE HTTP REQUEST
@@ -68,7 +68,7 @@
 	if(!file_exists(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp') || filemtime(__ROOT__.'config.ini')>filemtime(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp')){
 		
 		// Configuration is parsed from INI file in the root of the system
-		$config=parse_ini_file(__ROOT__.'config.ini');
+		$config=parse_ini_file(__ROOT__.'config.ini',false,INI_SCANNER_RAW);
 		
 		// List of logger IP's
 		if(isset($config['logger-ip'])){

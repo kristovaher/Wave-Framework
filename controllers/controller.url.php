@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_url.htm
  * @since      1.0.0
- * @version    3.2.4
+ * @version    3.2.6
  */
 
 class WWW_controller_url extends WWW_Factory {
@@ -68,6 +68,7 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// To solve the request GET is separated from URL nodes
 		$requestNodesRaw=explode('?',$request,2);
+		
 		// This array stores all the URL nodes that will be matched against sitemap
 		$urlNodes=array();
 		
@@ -92,10 +93,8 @@ class WWW_controller_url extends WWW_Factory {
 			
 		} else {
 		
-			// Request is formatted to remove all potentially harmful characters
-			$requestFormatted=preg_replace('/^[\/]|[^A-Za-z\-\_0-9\/]/i','',strtolower($requestNodesRaw[0]));
 			// Request is exploded into an array that will be looped to find proper view
-			$requestNodes=explode('/',$requestFormatted);
+			$requestNodes=explode('/',urldecode($requestNodesRaw[0]));
 			// If slash is enforced at the end of the URL then user agent is redirected to such an URL
 			if($enforceSlash==true && end($requestNodes)!=''){
 				// If GET variables were set, system redirects to proper URL that has a slash in the end and appends the GET variables
@@ -135,9 +134,9 @@ class WWW_controller_url extends WWW_Factory {
 						if($nodeKey==0 && $enforceLanguageUrl==true){
 							// User agent is redirected to the same URL as before, but with the default language node added
 							if(isset($requestNodesRaw[1])){
-								return array('www-permanent-redirect'=>$webRoot.$language.'/'.$requestFormatted.'?'.$requestNodesRaw[1]);
+								return array('www-permanent-redirect'=>$webRoot.$language.'/'.$requestNodesRaw[0].'?'.$requestNodesRaw[1]);
 							} else {
-								return array('www-permanent-redirect'=>$webRoot.$language.'/'.$requestFormatted);
+								return array('www-permanent-redirect'=>$webRoot.$language.'/'.$requestNodesRaw[0]);
 							}
 						} else {
 							// If language node is set in request, but has no second URL node set, it is also assumed that it is default view
@@ -197,7 +196,8 @@ class WWW_controller_url extends WWW_Factory {
 					} else {
 						// If the node is not dynamic
 						if($settings['nodes'][$matchKey][0]!=':'){
-							if($urlNodes[$matchKey]!=$settings['nodes'][$matchKey]){
+							if(!preg_match('/^'.preg_quote($settings['nodes'][$matchKey],'/').'$/ui',$urlNodes[$matchKey])){
+							// if($urlNodes[$matchKey]!=$settings['nodes'][$matchKey]){
 								unset($siteMap[$key]);
 							}
 						} else {
@@ -223,7 +223,7 @@ class WWW_controller_url extends WWW_Factory {
 									break;
 								case 'alpha':
 									if($matched[2]==''){
-										if(!preg_match('/^[a-z\-\_]*$/i',$urlNodes[$matchKey])){
+										if(!preg_match('/^[[:alpha:]\-\_]*$/ui',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];
@@ -231,7 +231,7 @@ class WWW_controller_url extends WWW_Factory {
 									} else {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
-										if(!preg_match('/^[a-z\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
+										if(!preg_match('/^[[:alpha:]\-\_]*$/ui',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];
@@ -240,7 +240,7 @@ class WWW_controller_url extends WWW_Factory {
 									break;
 								case 'alphanumeric':
 									if($matched[2]==''){
-										if(!preg_match('/^[a-z0-9\-\_]*$/i',$urlNodes[$matchKey])){
+										if(!preg_match('/^[[:alnum:]\-\_]*$/ui',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];
@@ -248,7 +248,7 @@ class WWW_controller_url extends WWW_Factory {
 									} else {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
-										if(!preg_match('/^[a-z0-9\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
+										if(!preg_match('/^[[:alnum:]\-\_]*$/ui',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
 											$dynamicUrl[]=$urlNodes[$matchKey];
@@ -268,6 +268,18 @@ class WWW_controller_url extends WWW_Factory {
 										unset($siteMap[$key]);
 									}
 									break;
+								case 'any':
+									// Any character is accepted
+									if($matched[2]!=''){
+										if(!preg_match('/^['.$matched[2].']*$/u',$urlNodes[$matchKey])){
+											unset($siteMap[$key]);
+										} else {
+											$dynamicUrl[]=$urlNodes[$matchKey];
+										}
+									} else {
+										$dynamicUrl[]=$urlNodes[$matchKey];
+									}
+									break;
 							}
 						}
 					}
@@ -278,13 +290,18 @@ class WWW_controller_url extends WWW_Factory {
 			
 			// If all URL nodes have been matched and there's still a URL in the Sitemap array
 			if(empty($urlNodes) && !empty($siteMap)){
-				$siteMapInfo=array_pop($siteMap);
-				$view=$siteMapInfo['view'];
+				// Finding one of the matched URLs from the array
+				$siteMapInfo=array_shift($siteMap);
+				// If sitemap has defined the view
+				if(isset($siteMapInfo['view'])){
+					$view=$siteMapInfo['view'];
+				} else {
+					$view='';
+				}
 			} else {
 				// Formatting and returning the expected result array
 				return $this->returnViewData(array('view'=>$view404,'language'=>$language,'header'=>'HTTP/1.1 404 Not Found'));
 			}
-		
 			
 			// If the found view is home view, then we simply redirect to home view without the long url
 			if(empty($dynamicUrl) && $view==$viewHome){
@@ -324,23 +341,41 @@ class WWW_controller_url extends WWW_Factory {
 		if(!empty($dynamicUrl)){
 			// Unsolved URL's are reversed so that they can be used in the order they were defined in URL
 			$dynamicUrl=array_reverse($dynamicUrl);
-		} else {
-			// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
-			if(isset($siteMapInfo['temporary-redirect']) && $siteMapInfo['temporary-redirect']!=''){
-				// Query string is also sent, if it has been defined
-				if(isset($requestNodesRaw[1]) && strpos($siteMapInfo['temporary-redirect'],'?')===false){
-					return array('www-temporary-redirect'=>$siteMapInfo['temporary-redirect'].'?'.$requestNodesRaw[1]);
-				} else {
-					return array('www-temporary-redirect'=>$siteMapInfo['temporary-redirect']);
-				}
-			} elseif(isset($siteMapInfo['permanent-redirect']) && $siteMapInfo['permanent-redirect']!=''){
-				// Query string is also sent, if it has been defined
-				if(isset($requestNodesRaw[1]) && strpos($siteMapInfo['permanent-redirect'],'?')===false){
-					return array('www-permanent-redirect'=>$siteMapInfo['permanent-redirect'].'?'.$requestNodesRaw[1]);
-				} else {
-					return array('www-permanent-redirect'=>$siteMapInfo['permanent-redirect']);
+		}
+		
+		// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
+		if(isset($siteMapInfo['temporary-redirect']) && $siteMapInfo['temporary-redirect']!=''){
+		
+			// Dynamic parts of the URL can also be redirected
+			if(!empty($dynamicUrl)){
+				foreach($dynamicUrl as $key=>$bit){
+					$siteMapInfo['temporary-redirect']=str_replace(':'.$key.':',$bit,$siteMapInfo['temporary-redirect']);
 				}
 			}
+			
+			// Query string is also sent, if it has been defined
+			if(isset($requestNodesRaw[1]) && strpos($siteMapInfo['temporary-redirect'],'?')===false){
+				return array('www-temporary-redirect'=>$siteMapInfo['temporary-redirect'].'?'.$requestNodesRaw[1]);
+			} else {
+				return array('www-temporary-redirect'=>$siteMapInfo['temporary-redirect']);
+			}
+			
+		} elseif(isset($siteMapInfo['permanent-redirect']) && $siteMapInfo['permanent-redirect']!=''){
+		
+			// Dynamic parts of the URL can also be redirected
+			if(!empty($dynamicUrl)){
+				foreach($dynamicUrl as $key=>$bit){
+					$siteMapInfo['permanent-redirect']=str_replace(':'.$key.':',$bit,$siteMapInfo['permanent-redirect']);
+				}
+			}
+		
+			// Query string is also sent, if it has been defined
+			if(isset($requestNodesRaw[1]) && strpos($siteMapInfo['permanent-redirect'],'?')===false){
+				return array('www-permanent-redirect'=>$siteMapInfo['permanent-redirect'].'?'.$requestNodesRaw[1]);
+			} else {
+				return array('www-permanent-redirect'=>$siteMapInfo['permanent-redirect']);
+			}
+			
 		}
 		
 		// Populating sitemap info with additional details

@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.2.6
  */
  
  /**
@@ -48,7 +48,7 @@
   */
  
 	// Main configuration file is included
-	$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
+	$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini',false,INI_SCANNER_RAW);
 
 	// Configuration is required because of trusted proxies setting
 	if($config){

@@ -44,6 +44,8 @@
 
 				<p>This example means that if 'hello-world' is referred to in a view, then it will be rendered as 'Hello Wave' as per translation. If there was another translation file with a different value to that same keyword - and that language was shown on the web page - then the other value would be shown instead.</p>
 				
+				<p>Please note that INI files have certain reserved words which throw an error if they are used as keywords for translations. To make sure that you do not encounter these errors, do not use the following as translation keys: null, yes, no, true, false, on, off, none.</p>
+		
 			<h2>View Controller</h2>
 			
 				<p>Wave Framework comes with a single View Controller by default and this View Controller is used to generate the HTML frame and load specific view or number of views within that frame.</p>

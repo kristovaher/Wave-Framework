@@ -192,6 +192,7 @@
 						<li><b>session-regenerate</b> - The amount of seconds after which session ID is regenerated automatically.</li>
 						<li><b>session-secure</b> - Whether session cookie is only usable over HTTPS.</li>
 						<li><b>session-timestamp-key</b> - Keyword in sessions that stores session timestamp.</li>
+						<li><b>session-token-key</b> - Keyword in sessions that store public request token.</li>
 						<li><b>session-user-key</b> - Keyword that is used for storing user account data.</li>
 						<li><b>sitemap</b> - Array of current language sitemap data.</li>
 						<li><b>sitemap-cache-timeout</b> - Cache lifetime of sitemap.xml files.</li>
@@ -328,9 +329,13 @@
 				
 					<p>This unsets permissions data from session similarly to how unsetUser() method unsets user data from session.</p>
 				
-				<h3>final public function getPublicToken($regenerate=false)</h3>
+				<h3>final public function getPublicToken($regenerate=false,$forced=false)</h3>
 				
-					<p>This method returns the currently active public token that is used to increase security against cross-site-request-forgery attacks. This method returns false if user session is not populated, in which case public token is not needed. $regenerate sets if the token should be regenerated if it already exists, this invalidates forms when Back button is used after submitting data, but is more secure.</p>
+					<p>This method returns the currently active public token that is used to increase security against cross-site-request-forgery attacks. This method returns false if user session is not populated, in which case public token is not needed. $regenerate sets if the token should be regenerated if it already exists, this invalidates forms when Back button is used after submitting data, but is more secure. $forced is used to force token generation even if no user session is active.</p>
+				
+				<h3>final public function checkPublicToken()</h3>
+				
+					<p>This method is useful when 'api-public-token' setting is off in configuration, but you still want to protect your API method from public API requests from XSS and other attacks. This returns false if the provided public API token is incorrect.</p>
 				
 				<h3>final public function startSession()</h3>
 				

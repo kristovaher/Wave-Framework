@@ -56,6 +56,8 @@
 					<li><b>:alphanumeric:</b> - This allows numbers and letters both, as well as underscores and dashes.</li>
 					<li><b>:alphanumeric:1-10</b> - Same as above, except for length between 1 and 10 characters.</li>
 					<li><b>:fixed:a,b,c</b> - This means that the URL is a fixed value, either 'a', 'b', or 'c'.</li>
+					<li><b>:any:</b> - Allows for any character string, except '/' which is the node separator.</li>
+					<li><b>:any:a-zA-Z0-9</b> - After ':any:' key you can write a regular expression for matched characters.</li>
 				</ul>
 					
 				<p>Also note that 'alpha' and 'alphanumeric' matches also allow dashes and underscores in the URL's. This is because both are accepted URL-friendly characters and used often in variety of projects as part of clean URL's. Additionally, you can define lengths with aterisk, such as ':numeric:1-*', which means that all numbers are allowed that are greater than 1.</p>
@@ -121,6 +123,34 @@
 				</ul>
 				
 				<p>URL Controller also has a commented-out section for user accounts and permission checks, which allows to check for user sessions and user permissions and redirect the user to log-in page if this is not present. Wave Framework comes with a framework for users and permission management, but does not come with a system where users and their permissions are created. Latter you would have to develop yourself. But URL Controller has an example of how to test existence of users and their permissions and this topic is covered further in Users and Permissions Guide.</p>
+			
+			<h2>Dynamic URL Examples</h2>
+			
+				<p>Wave Framework allows you to define dynamic URL's. Dynamic URL's are URL's that are not matched exactly and are instead matched based on very simple rules. All the rule options are defined in the Sitemap section of this documentation page, but below are a couple of examples where a dynamic URL could be useful.</p>
+				
+				<p>If you make an e-shop and you want to show product information on some specific View and under some specific URL, then it is not useful to define all of those URL's in the sitemap file itself. This would make the sitemap file very large and possibly slow down the lookup times whenever a user makes a request. But you can define a URL like this:</p>
+				
+<pre>
+	<code>
+	[products/:numeric:]
+	view="products"
+	</code>
+</pre>
+
+				<p>The above example works so that if a user makes a request to address 'http://www.example.com/products/123', then that URL would be matched against your sitemap. Since the second URL node after 'products' is declared with a ':numeric:' rule, then that 123 would also match, thus the 'products' view would be loaded.</p>
+				
+				<p>You can also use dynamic URL's for redirects. The following example redirects all requests to Facebook based on the second URL node:</p>
+				
+<pre>
+	<code>
+	[facebook/:alphanumeric:]
+	temporary-redirect="http://www.facebook.com/:0:"
+	</code>
+</pre>
+
+				<p>This means that if a user makes a request like 'http://www.example.com/facebook/johndoe', then they would be redirected to 'http://www.facebook.com/johndoe'. You can also use multiple dynamic variables there and define them as :1:, :2: and so on.</p>
+				
+				<p>This can be very useful if you wish to redirect old URL's to a new one or do some other form of redirection.</p>
 			
 	</body>
 </html>

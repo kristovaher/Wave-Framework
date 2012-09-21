@@ -100,7 +100,7 @@
 	</code>
 </pre>
 
-				<p>This dbQuote() method has multiple options available, examples are below:</p>
+				<p>This dbQuote() method has multiple other options also available, examples are below:</p>
 				
 <pre>
 	<code>
@@ -108,16 +108,6 @@
 	$var=$db-&gt;dbQuote($var,'escape');
 	// This makes the variable database-safe, but also removes the quotes placed around the variable
 	$var=$db-&gt;dbQuote($var,'escape',true);
-	// This converts the variable to an integer through typecasting
-	$var=$db-&gt;dbQuote($var,'integer');
-	// This converts the variable to a float through typecasting
-	$var=$db-&gt;dbQuote($var,'float');
-	// This converts the variable to an acceptable numeric value that also can include spaces, plus, minus and brackets characters
-	$var=$db-&gt;dbQuote($var,'numeric');
-	// This removes all non-letter characters from the variable
-	$var=$db-&gt;dbQuote($var,'alphanumeric');
-	// This removes all characters from the variable that are not suitable for a database table or column name
-	$var=$db-&gt;dbQuote($var,'field');
 	</code>
 </pre>
 

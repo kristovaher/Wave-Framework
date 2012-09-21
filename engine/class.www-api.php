@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.2.5
+ * @version    3.2.6
  */
 
 final class WWW_API {
@@ -218,7 +218,7 @@ final class WWW_API {
 			// If source file has been modified since cache creation
 			if(!$cacheTime || filemtime($sourceUrl)>$cacheTime){
 				// Profiles are parsed from INI file in the resources folder
-				$apiProfiles=parse_ini_file($sourceUrl,true);
+				$apiProfiles=parse_ini_file($sourceUrl,true,INI_SCANNER_RAW);
 				$this->setCache($cacheUrl,$apiProfiles);
 			} else {
 				// Returning data from cache
@@ -245,7 +245,7 @@ final class WWW_API {
 		// If source file has been modified since cache creation
 		if(!$cacheTime || filemtime($sourceUrl)>$cacheTime){
 			// Profiles are parsed from INI file in the resources folder
-			$this->apiObservers=parse_ini_file($sourceUrl,true);
+			$this->apiObservers=parse_ini_file($sourceUrl,true,INI_SCANNER_RAW);
 			$this->setCache($cacheUrl,$this->apiObservers);
 		} else {
 			// Returning data from cache
@@ -322,7 +322,6 @@ final class WWW_API {
 					'disable-callbacks'=>(isset($apiInputData['www-disable-callbacks']))?$apiInputData['www-disable-callbacks']:false,
 					'crypt-output'=>false,
 					'profile'=>$this->state->data['api-public-profile'],
-					'public-token'=>$this->state->data['api-public-token'],
 					'push-output'=>(isset($apiInputData['www-output']))?$apiInputData['www-output']:true,
 					'return-hash'=>(isset($apiInputData['www-return-hash']))?$apiInputData['www-return-hash']:false,
 					'return-timestamp'=>(isset($apiInputData['www-return-timestamp']))?$apiInputData['www-return-timestamp']:false,
@@ -407,11 +406,18 @@ final class WWW_API {
 					} else {
 						// Public profile is assigned
 						$apiState['profile']=$this->state->data['api-public-profile'];
-						// If public request token is required, but is not provided or is incorrect
-						if($apiState['public-token'] && $this->state->getUser() && (!isset($apiInputData['www-public-token']) || $this->state->getPublicToken()!=$apiInputData['www-public-token'])){
-							// If profile is set to be disabled
-							return $this->output(array('www-message'=>'API public requests require a public request token','www-response-code'=>102),$apiState);
+						
+						// If public request token is sent with the request
+						if(isset($apiInputData[$this->state->data['session-token-key']]) && $apiInputData[$this->state->data['session-token-key']]!=''){
+							$this->state->data['api-public-token']=$apiInputData[$this->state->data['session-token-key']];
 						}
+						
+						// Testing if public request token is required and that it matches the one stored in sessions
+						if($this->state->data['api-public-token'] && $this->state->getUser() && $this->state->getSession($this->data['session-token-key'])!=$this->state->data['api-public-token']){
+							// If profile is set to be disabled
+							return $this->output(array('www-message'=>'API public requests require a correct public request token','www-response-code'=>102),$apiState);
+						}
+						
 					}
 					
 					// This checks whether API profile information is defined in /resources/api.profiles.php file
@@ -699,7 +705,7 @@ final class WWW_API {
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator['www-public-token']);
+					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator[$this->state->data['session-token-key']]);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);
@@ -1952,6 +1958,47 @@ final class WWW_API {
 		}
 		
 	// DATA HANDLING
+		
+		/**
+		 * This method simply filters a string and returns the filtered string. Various exception 
+		 * characters can be set in $exceptions string and these will not be filtered. You can set
+		 * the type to 'integer', 'float', 'numeric', 'alpha' or 'alphanumeric'.
+		 *
+		 * @param string $string value to be filtered
+		 * @param string $type filtering type, can be 'integer', 'float', 'numeric', 'alpha' or 'alphanumeric'
+		 * @param string $exceptions is a regular expression character string of all characters used as additional exceptions
+		 * @return string
+		 */
+		final public function filter($string,$type,$exceptions=false){
+		
+			// If exceptions are set, then we escape any non alphanumeric character in the exception string
+			if($exceptions){
+				$exceptions=preg_replace('/[^[:alnum:]]/ui','\\\\\0',$exceptions);
+			}
+			
+			// Filtering is done based on filter type
+			switch($type){
+				case 'integer':
+					return preg_replace('/[^0-9'.$exceptions.']/','',$string);
+					break;
+				case 'float':
+					return preg_replace('/[^0-9\.\,'.$exceptions.']/','',$string);
+					break;
+				case 'numeric':
+					return preg_replace('/[^0-9\.\,\-\+\ \(\)'.$exceptions.']/','',$string);
+					break;
+				case 'alpha':
+					return preg_replace('/[^[:alpha:]'.$exceptions.']/ui','',$string);
+					break;
+				case 'alphanumeric':
+					return preg_replace('/[^[:alnum:]'.$exceptions.']/ui','',$string);
+					break;
+				default:
+					return $string;
+					break;
+			}
+			
+		}
 	
 		/**
 		 * This helper method is used to sort an array (and sub-arrays) based on keys. It 

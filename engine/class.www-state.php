@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.2.5
+ * @version    3.2.6
  */
 
 class WWW_State	{
@@ -198,6 +198,7 @@ class WWW_State	{
 				'session-regenerate'=>0,
 				'session-secure'=>false,
 				'session-timestamp-key'=>'www-timestamp',
+				'session-token-key'=>'www-public-token',
 				'session-user-key'=>'www-user',
 				'sitemap'=>array(),
 				'sitemap-cache-timeout'=>14400,
@@ -322,7 +323,7 @@ class WWW_State	{
 			// If configuration has not sent a request string then State solves it using request-uri
 			if(!$this->data['true-request']){
 				// If install is at www.example.com/w/ subfolder and user requests www.example.com/w/en/page/ then this would be parsed to 'en/page/'
-				$this->data['true-request']=preg_replace('/(^'.preg_quote($this->data['web-root'],'/').')/i','',$this->data['request-uri']);
+				$this->data['true-request']=preg_replace('/(^'.preg_quote($this->data['web-root'],'/').')/ui','',$this->data['request-uri']);
 			}
 		
 		// FINGERPRINTING
@@ -645,7 +646,7 @@ class WWW_State	{
 				// Including the translations file
 				if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
 					// Translations are parsed from INI file in the resources folder
-					$this->data['translations'][$language]=parse_ini_file($sourceUrl);
+					$this->data['translations'][$language]=parse_ini_file($sourceUrl,false,INI_SCANNER_RAW);
 					if(!$this->data['translations'][$language]){
 						trigger_error('Cannot parse INI file: '.$sourceUrl,E_USER_ERROR);
 					}
@@ -702,7 +703,7 @@ class WWW_State	{
 				// Including the sitemap file
 				if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
 					// Sitemap is parsed from INI file in the resources folder
-					$this->data['sitemap-raw'][$language]=parse_ini_file($sourceUrl,true);
+					$this->data['sitemap-raw'][$language]=parse_ini_file($sourceUrl,true,INI_SCANNER_RAW);
 					if(!$this->data['sitemap-raw'][$language]){
 						trigger_error('Cannot parse INI file: '.$sourceUrl,E_USER_ERROR);
 					}
@@ -1093,26 +1094,52 @@ class WWW_State	{
 		 * against cross-site-request-forgery attacks. This method returns false if user session 
 		 * is not populated, in which case public token is not needed. $regenerate sets if the token 
 		 * should be regenerated if it already exists, this invalidates forms when Back button is 
-		 * used after submitting data, but is more secure.
+		 * used after submitting data, but is more secure. $forced is used to force token generation 
+		 * even if no user session is active.
 		 *
 		 * @param boolean $regenerate if public token should be regenerated
+		 * @param boolean $forced if token is generated even when there is no actual user session active
 		 * @return string or boolean if no user session active
 		 */
-		final public function getPublicToken($regenerate=false){
+		final public function getPublicToken($regenerate=false,$forced=false){
 			// This is only required to protect users with active sessions
-			if($this->getUser()){
+			if($forced || $this->getUser()){
 				// Public token is stored in the session
 				$token=$this->getSession('www-public-token');
 				if($token && $token!='' && !$regenerate){
+					// Returning a token
 					return $token;
 				} else {
 					// Generating a new token
 					$token=sha1($this->data['client-ip'].$this->data['request-id'].microtime().rand(1,1000000));
-					$this->setSession('www-public-token',$token);
+					$this->setSession($this->data['session-token-key'],$token);
+					// Setting it also in sessions
+					$this->data['api-public-token']=$token;
+					// Returning a token
 					return $token;
 				}
 			} else {
 				return false;
+			}
+		}
+		
+		/**
+		 * This method is useful when 'api-public-token' setting is off in configuration, but you
+		 * still want to protect your API method from public API requests from XSS and other attacks.
+		 * This returns false if the provided public API token is incorrect.
+		 *
+		 * @return boolean
+		 */
+		final public function checkPublicToken(){
+			// This is only checked if the token actually exists and public API profile is used
+			if($this->data['api-public-token'] && $this->data['api-public-profile']==$this->data['api-profile']){
+				if($this->data['api-public-token']==$this->getSession($this->data['session-token-key'])){
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return true;
 			}
 		}
 		

@@ -167,11 +167,6 @@
 					
 					<ul>
 						<li><b>escape</b> - This casts the PDO's own quote() method around the variable provided in the method. By default this will also add quotes around the variable, but they can be removed if quotes are assigned to be stripped.</li>
-						<li><b>integer</b> - This converts the variable to an integer through typecasting.</li>
-						<li><b>float</b> - This converts the variable to a float through typecasting.</li>
-						<li><b>numeric</b> - This uses regular expression to strip all characters from a string that are not used for any type of numbers. It does allow spaces as well as these characters in addition to numbers: +-.,()</li>
-						<li><b>alphanumeric</b> - This uses regular expression to strip all characters that are not letters or numbers from the string.</li>
-						<li><b>field</b> - This converts the string to a database-friendly column name string. It removes all characters that are not latin letters, numbers or - or _ symbols.</li>
 						<li><b>like</b> - This will apply both PDO's quote() method as well as escape LIKE conditions wildcards: % and _ characters.</li>
 					</ul>
 					

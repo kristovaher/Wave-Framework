@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/database.htm
  * @since      1.1.2
- * @version    3.2.0
+ * @version    3.2.6
  */
 
 class WWW_Database {
@@ -588,17 +588,11 @@ class WWW_Database {
 	 * that variable is not sent with as part of variables array and is written in the 
 	 * query string instead. $value is the variable value that will be escaped or modified. 
 	 * $type is the type of escaping and modifying that takes place. This can be 'escape' 
-	 * (which just applies regular PDO quote to the variable), 'integer' which converts the 
-	 * value to an integer through typecasting, 'float' which converts the value to a float 
-	 * through typecasting, 'numeric' which converts the value to a numeric value that also 
-	 * allows spaces and plus and minus symbols and brackets (such as for phone numbers), 
-	 * 'alphanumeric' which converts the value to just have letters and numbers, 'field' 
-	 * which converts the value to be a database-appropriate table field and 'like' which 
-	 * escapes the value to be suitable when used inside a LIKE match. If $stripQuotes is set, 
-	 * then the value will also strip any quotes, if they happen to be added to the value.
+	 * (which just applies regular PDO quote to the variable) or 'like', which does the same
+	 * as escape, but also escapes wildcard characters '_' and '%'.
 	 *
 	 * @param string $value input value
-	 * @param string $type Mmthod of quoting, either 'escape', 'integer', 'alpha', 'field' or 'like'
+	 * @param string $type Mmthod of quoting, either 'escape' or 'like'
 	 * @param boolean $stripQuotes whether the resulting quotes will be stripped from the string, if they get set
 	 * @return string
 	 */
@@ -612,21 +606,6 @@ class WWW_Database {
 				} else {
 					return $this->pdo->quote($value,PDO::PARAM_STR);
 				}
-				break;
-			case 'integer':
-				return (int)$value;
-				break;
-			case 'float':
-				return (float)$value;
-				break;
-			case 'numeric':
-				return trim(preg_replace('/[^0-9\-\+\ \(\)\.\,]/i','',$value));
-				break;
-			case 'alphanumeric':
-				return preg_replace('/[^a-z0-9]/i','',$value);
-				break;
-			case 'field':
-				return preg_replace('/[^a-z0-9\-\_]/i','',$value);
 				break;
 			case 'like':
 				if($stripQuotes){

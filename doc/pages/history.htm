@@ -24,6 +24,7 @@
 			<h2>3.x.x</h2>
 			
 				<ul>
+					<li><b>3.2.6</b> - It is now possible to redirect dynamic parts of the URL through Sitemap. Dynamic parts are ordered as :0:, :1: and so on. Also changed the order in which the URL's are matched in the Sitemap file, first-found first-serve order is now used. Sitemaps are now also completely UTF-8 compatible for dynamic variables as well as URL matches themselves. dbQuote() method has now also been split to dbQuote() and filter() methods, since filtering is sometimes needed even without database connection. New ':any:' match can be used for sitemaps as well as for test suite. Added an additional public request token check that can be used with requests that are not just user-session specific. Improved parsing of INI files for configuration and translations.</li>
 					<li><b>3.2.5</b> - Private API profiles can now have permissions settings, thus making them submit to the same checkPermissions() calls from Controllers.</li>
 					<li><b>3.2.4</b> - Added access-control settings to API profiles as well, so they can be individually defined per profile. Removed 'X-' prefix from custom headers as they are deprecated as of June.</li>
 					<li><b>3.2.3</b> - Added access and security-related headers: the Access-Control, Frame and Content-Security-Policy headers, some can also be URL specific. Removed 'www-files' and 'www-cookie' and merged the contents of these variables with regular input arrays.</li>

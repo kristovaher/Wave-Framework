@@ -13,7 +13,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.2
+ * @version    3.2.6
  */
 
 // Main configuration file is included from initialized temporary file if it exists
@@ -21,7 +21,7 @@ if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'
 	$config=unserialize(file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'config.tmp'));
 } else {
 	// If temporary configuration file does not exist, then configuration is load from INI file
-	$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini');
+	$config=parse_ini_file('..'.DIRECTORY_SEPARATOR.'config.ini',false,INI_SCANNER_RAW);
 }
 
 // Configuration is required

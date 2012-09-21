@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.2.5
+ * @version    3.2.6
  */
 
 class WWW_Factory {
@@ -950,7 +950,7 @@ class WWW_Factory {
 		 * @param array $data data array set to user
 		 * @return boolean
 		 */
-		final public function setUser($data){
+		final protected function setUser($data){
 			return $this->WWW_API->state->setUser($data);
 		}
 		
@@ -961,7 +961,7 @@ class WWW_Factory {
 		 * @param string $key element returned from user data, if not set then returns the entire user data
 		 * @return mixed
 		 */
-		final public function getUser($key=false){
+		final protected function getUser($key=false){
 			return $this->WWW_API->state->getUser($key);
 		}
 		
@@ -970,7 +970,7 @@ class WWW_Factory {
 		 *
 		 * @return boolean
 		 */
-		final public function unsetUser(){
+		final protected function unsetUser(){
 			return $this->WWW_API->state->unsetUser();
 		}
 	
@@ -1016,7 +1016,7 @@ class WWW_Factory {
 		 *
 		 * @return boolean
 		 */
-		final public function unsetPermissions(){
+		final protected function unsetPermissions(){
 			return $this->WWW_API->state->unsetPermissions();
 		}
 		
@@ -1025,13 +1025,26 @@ class WWW_Factory {
 		 * against cross-site-request-forgery attacks. This method returns false if user session 
 		 * is not populated, in which case public token is not needed. $regenerate sets if the token 
 		 * should be regenerated if it already exists, this invalidates forms when Back button is 
-		 * used after submitting data, but is more secure.
+		 * used after submitting data, but is more secure. $forced is used to force token generation 
+		 * even if no user session is active.
 		 *
 		 * @param boolean $regenerate if public token should be regenerated
+		 * @param boolean $forced if token is generated even when there is no actual user session active
 		 * @return string or boolean if no user session active
 		 */
-		final public function getPublicToken($regenerate=false){
-			return $this->WWW_API->state->getPublicToken($regenerate);
+		final protected function getPublicToken($regenerate=false,$forced=false){
+			return $this->WWW_API->state->getPublicToken($regenerate,$forced);
+		}
+		
+		/**
+		 * This method is useful when 'api-public-token' setting is off in configuration, but you
+		 * still want to protect your API method from public API requests from XSS and other attacks.
+		 * This returns false if the provided public API token is incorrect.
+		 *
+		 * @return boolean
+		 */
+		final protected function checkPublicToken(){
+			return $this->WWW_API->state->checkPublicToken();
 		}
 		
 	// DATABASE WRAPPERS
@@ -1156,14 +1169,8 @@ class WWW_Factory {
 		 * that variable is not sent with as part of variables array and is written in the 
 		 * query string instead. $value is the variable value that will be escaped or modified. 
 		 * $type is the type of escaping and modifying that takes place. This can be 'escape' 
-		 * (which just applies regular PDO quote to the variable), 'integer' which converts the 
-		 * value to an integer through typecasting, 'float' which converts the value to a float 
-		 * through typecasting, 'numeric' which converts the value to a numeric value that also 
-		 * allows spaces and plus and minus symbols and brackets (such as for phone numbers), 
-		 * 'alphanumeric' which converts the value to just have letters and numbers, 'field' 
-		 * which converts the value to be a database-appropriate table field and 'like' which 
-		 * escapes the value to be suitable when used inside a LIKE match. If $stripQuotes is set, 
-		 * then the value will also strip any quotes, if they happen to be added to the value.
+		 * (which just applies regular PDO quote to the variable) or 'like', which does the same
+		 * as escape, but also escapes wildcard characters '_' and '%'.
 		 *
 		 * @param string $value input value
 		 * @param string $type Method of quoting, either 'escape', 'integer', 'alpha', 'field' or 'like'
@@ -1185,7 +1192,7 @@ class WWW_Factory {
 		 * @param boolean $unique if returned array should only have only unique values
 		 * @return array or mixed if source is not an array
 		 */
-		final public function dbArray($array,$key,$unique=false){
+		final protected function dbArray($array,$key,$unique=false){
 			return $this->WWW_API->state->databaseConnection->dbArray($array,$key,$unique);
 		}
 		
@@ -1199,7 +1206,7 @@ class WWW_Factory {
 		 * @param string $variables values sent to PDO
 		 * @return string
 		 */
-		final public function dbDebug($query,$variables=array()){
+		final protected function dbDebug($query,$variables=array()){
 			return $this->WWW_API->state->databaseConnection->dbDebug($query,$variables);
 		}
 		
@@ -1223,7 +1230,7 @@ class WWW_Factory {
 		 * @param boolean $replace whether the header should be replaced, if previously set
 		 * @return boolean
 		 */
-		final public function setHeader($header,$replace=true){
+		final protected function setHeader($header,$replace=true){
 			return $this->WWW_API->state->setHeader($header,$replace);
 		}
 	
@@ -1234,7 +1241,7 @@ class WWW_Factory {
 		 * @param string|array $header header string to add or an array of header strings
 		 * @return boolean
 		 */
-		final public function unsetHeader($header){
+		final protected function unsetHeader($header){
 			return $this->WWW_API->state->unsetHeader($header);
 		}
 		
@@ -1250,6 +1257,22 @@ class WWW_Factory {
 		 */
 		final protected function terminal($command){
 			return $this->WWW_API->state->terminal($command);			
+		}
+		
+	// DATA HANDLING
+	
+		/**
+		 * This method simply filters a string and returns the filtered string. Various exception 
+		 * characters can be set in $exceptions string and these will not be filtered. You can set
+		 * the type to 'integer', 'float', 'numeric', 'alpha' or 'alphanumeric'.
+		 *
+		 * @param string $string value to be filtered
+		 * @param string $type filtering type, can be 'integer', 'float', 'numeric', 'alpha' or 'alphanumeric'
+		 * @param string $exceptions is a string of all characters used as exceptions
+		 * @return string
+		 */
+		final protected function filter($string,$type,$exceptions=false){
+			return $this->WWW_API->filter($string,$type,$exceptions);
 		}
 
 }

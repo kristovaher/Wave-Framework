@@ -175,7 +175,7 @@ class WWW_State	{
 				'memory-limit'=>false,
 				'output-compression'=>'deflate',
 				'project-title'=>'',
-				'request-id'=>((isset($_SERVER['UNIQUE_ID']))?$_SERVER['UNIQUE_ID']:''),
+				'request-id'=>((isset($_SERVER['UNIQUE_ID']))?$_SERVER['UNIQUE_ID']:false),
 				'request-limiter'=>false,
 				'request-time'=>$_SERVER['REQUEST_TIME'],
 				'request-uri'=>$_SERVER['REQUEST_URI'],
@@ -241,6 +241,11 @@ class WWW_State	{
 			// Removing full stop from the beginning of both directory URL's
 			if($this->data['web-root'][0]=='.'){
 				$this->data['web-root'][0]='';
+			}
+			
+			// If request ID is not set
+			if(!$this->data['request-id']){
+				$this->data['request-id']=md5(uniqid('www',true).microtime().$this->data['request-uri'].$this->data['request-time'].$this->data['client-user-agent'].$this->data['client-ip']);
 			}
 			
 			// If default session cookie domain is not set
@@ -1111,7 +1116,7 @@ class WWW_State	{
 					return $token;
 				} else {
 					// Generating a new token
-					$token=sha1($this->data['client-ip'].$this->data['request-id'].microtime().rand(1,1000000));
+					$token=sha1($this->data['client-ip'].$this->data['client-user-agent'].$this->data['request-id'].microtime());
 					$this->setSession($this->data['session-token-key'],$token);
 					// Setting it also in sessions
 					$this->data['api-public-token']=$token;

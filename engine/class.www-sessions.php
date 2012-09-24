@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/sessions.htm
  * @since      3.2.0
- * @version    3.2.2
+ * @version    3.2.7
  */
  
 final class WWW_Sessions {
@@ -289,7 +289,7 @@ final class WWW_Sessions {
 	private function generateSessionId($salt=''){
 	
 		// Salt is not sent by default in Wave Framework
-		return sha1(__IP__.$_SERVER['HTTP_HOST'].$_SERVER['UNIQUE_ID'].microtime().$salt);
+		return sha1(__IP__.$_SERVER['HTTP_HOST'].(isset($_SERVER['UNIQUE_ID'])?$_SERVER['UNIQUE_ID']:uniqid('www',true)).microtime().$salt);
 		
 	}
 

@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.2.6
+ * @version    3.2.7
  */
 
 final class WWW_API {
@@ -651,7 +651,7 @@ final class WWW_API {
 								}
 							}
 							// Token for API access is generated simply from current profile name and request time
-							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time'].$this->state->data['server-ip'].$this->state->data['request-id'].microtime().rand(1,1000000));
+							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time'].$this->state->data['server-ip'].$this->state->data['request-id'].microtime());
 							// Session token file is created and token itself is returned to the user agent as a successful request
 							if(file_put_contents($apiState['token-directory'].$apiState['token-file'],$apiState['token'])){
 								// Token is returned to user agent together with current token timeout setting

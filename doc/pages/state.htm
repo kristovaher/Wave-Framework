@@ -22,7 +22,7 @@
 				
 				<p>State object is also used by Wave Framework to load configuration - from '/config.ini' file - to State data variable, so that it can be used and accessed by Wave Framework <a href="guide_mvc.htm">MVC</a> classes. By default State class has a number of data variables loaded by default, to make sure that State can work even when no configuration file is loaded.</p>
 				
-				<p>State carries additional functionality: it includes a <a href="guide_messenger.htm">State Messenger</a> Class as well as wrappers for creating and destroying sessions and cookies, returning translations and sitemap information and more. To learn more about specific functionality of State when used through <a href="guide_mvc.htm">MVC</a> objects of Wave Framework, you should look into "State and <a href="configuration.htm">Configuration</a>" feature guide</p>
+				<p>State carries additional functionality: it includes a <a href="guide_messenger.htm">State Messenger</a>  as well as wrappers for creating and destroying sessions and cookies, returning translations and sitemap information and more. To learn more about specific functionality of State when used through <a href="guide_mvc.htm">MVC</a> objects of Wave Framework, you should look into "State and <a href="configuration.htm">Configuration</a>" feature guide</p>
 				
 				<p>The rest of this document details the use of <a href="logger.htm">Logger</a> class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
 				
@@ -132,7 +132,7 @@
 						<li><b>frame-permissions</b> - This is used for the header that states if a URL can be used from a frame or not.</li>
 						<li><b>headers-set</b> - This is the list of headers to be set. Value assigns whether it should replace previously set header like that or not.</li>
 						<li><b>headers-unset</b> - This is the list of headers that should be moved.</li>
-						<li><b>home-view</b> - View keyword that is considered for 'home' or 'root' pages.</li>
+						<li><b>home-view</b> - View keyword that is considered for 'home' or 'root' pages. This is the URL that is considered the home view from Sitemap file.</li>
 						<li><b>http-accept</b> - Array of types user agent accepts as the response.</li>
 						<li><b>http-accept-charset</b> - Array of charsets accepted by the user agent.</li>
 						<li><b>http-accept-encoding</b> - Array of character encodings accepted by the user agent.</li>
@@ -239,11 +239,11 @@
 			
 				<h3>private $messenger=false</h3>
 				
-					<p>This holds the 'keyword' or 'passkey' of currently used <a href="guide_messenger.htm">State Messenger</a> Class.</p>
+					<p>This holds the 'keyword' or 'passkey' of currently used <a href="guide_messenger.htm">State Messenger</a> .</p>
 			
 				<h3>private $messengerData=array()</h3>
 				
-					<p>This holds <a href="guide_messenger.htm">State Messenger</a> Class data as an array.</p>
+					<p>This holds <a href="guide_messenger.htm">State Messenger</a>  data as an array.</p>
 					
 			<h2>Logger Class Methods</h2>
 			
@@ -255,7 +255,7 @@
 				
 				<h3>final public function __destruct()</h3>
 				
-					<p>When State class is not used anymore, then <a href="guide_messenger.htm">State Messenger</a> Class data - if set - is written to <a href="filesystem.htm">Filesystem</a> based on the <a href="guide_messenger.htm">State Messenger</a> Class key. This method also calls the commit-session method, if it has not been called yet.</p>
+					<p>When State class is not used anymore, then <a href="guide_messenger.htm">State Messenger</a> data - if set - is written to <a href="filesystem.htm">Filesystem</a> based on the <a href="guide_messenger.htm">State Messenger</a> key. This method also calls the commit-session method, if it has not been called yet.</p>
 				
 				<h3>final public function getState($variable=false,$subvariable=false)</h3>
 				
@@ -287,19 +287,19 @@
 				
 				<h3>final public function stateMessenger($address,$overwrite=false)</h3>
 				
-					<p>This method initializes <a href="guide_messenger.htm">State Messenger</a> Class by giving it an address and assigning the file that <a href="guide_messenger.htm">State Messenger</a> Class will be stored under. If the file already exists and $overwrite is not turned on, then it automatically loads contents of that file from <a href="filesystem.htm">Filesystem</a>.</p>
+					<p>This method initializes <a href="guide_messenger.htm">State Messenger</a>  by giving it an address and assigning the file that <a href="guide_messenger.htm">State Messenger</a>  will be stored under. If the file already exists and $overwrite is not turned on, then it automatically loads contents of that file from <a href="filesystem.htm">Filesystem</a>.</p>
 				
 				<h3>final public function setMessengerData($data,$value=false)</h3>
 				
-					<p>This writes data to <a href="guide_messenger.htm">State Messenger</a> Class. $data is the key and $value is the value of the key. $data can also be an array of keys and values, in which case multiple values are set at the same time.</p>
+					<p>This writes data to <a href="guide_messenger.htm">State Messenger</a> . $data is the key and $value is the value of the key. $data can also be an array of keys and values, in which case multiple values are set at the same time.</p>
 				
 				<h3>final public function unsetMessengerData($key=false)</h3>
 				
-					<p>This method removes key from <a href="guide_messenger.htm">State Messenger</a> Class based on value of $key. If $key is not set, then the entire <a href="guide_messenger.htm">State Messenger</a> Class data is cleared.</p>
+					<p>This method removes key from <a href="guide_messenger.htm">State Messenger</a>  based on value of $key. If $key is not set, then the entire <a href="guide_messenger.htm">State Messenger</a>  data is cleared.</p>
 				
-				<h3>final public function getMessengerData($address=false,$remove=true)</h3>
+				<h3>final public function getMessengerData($key=false,$remove=true)</h3>
 				
-					<p>This method returns data from <a href="guide_messenger.htm">State Messenger</a> Class. It returns the entire <a href="guide_messenger.htm">State Messenger</a> Class data as an array based on $address keyword that is used as the fingerprint for data. If $remove is set, then <a href="guide_messenger.htm">State Messenger</a> Class data is removed from <a href="filesystem.htm">Filesystem</a> or State object after being called.</p>
+					<p>This method returns data from State messenger. It either returns all the data from initialized state messenger, or just a $key from it. If $remove is set, then data is also set for deletion after it has been accessed.</p>
 				
 				<h3>final public function setUser($data)</h3>
 				

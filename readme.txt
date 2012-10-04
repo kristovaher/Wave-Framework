@@ -38,6 +38,7 @@ FEATURES
  * Caching system with tagging support for dynamic and static requests
  * View and URL Controllers that support multiple languages and clean URL's
  * Simple users and permissions control layer
+ * PHP and JavaScript library loading on-demand through Factory
  * jQuery JavaScript framework supported
  * On-demand dynamic image resizer and editor
  * On-demand resource compression, unifying and minifying

@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_url.htm
  * @since      1.0.0
- * @version    3.2.6
+ * @version    3.4.0
  */
 
 class WWW_controller_url extends WWW_Factory {
@@ -181,7 +181,11 @@ class WWW_controller_url extends WWW_Factory {
 		}
 		
 		// Array that stores information from sitemap file
-		$siteMapInfo=$siteMap[$viewHome];
+		if(isset($siteMap[$viewHome])){
+			$siteMapInfo=$siteMap[$viewHome];
+		} else {
+			trigger_error('Configuration is incorrect, cannot find Home view sitemap data',E_USER_ERROR);
+		}
 		
 		// If home is not expected to be returned
 		if(!$returnHome){
@@ -380,6 +384,11 @@ class WWW_controller_url extends WWW_Factory {
 		
 		// Populating sitemap info with additional details
 		$siteMapInfo['dynamic-url']=$dynamicUrl;
+		
+		// Returning a 404 if no view was defined
+		if(!isset($siteMapInfo['view'])){
+			return $this->returnViewData(array('view'=>$view404,'language'=>$language,'header'=>'HTTP/1.1 404 Not Found'));
+		}
 			
 		// Formatting and returning the expected result array
 		return $this->returnViewData($siteMapInfo);

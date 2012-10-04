@@ -102,11 +102,9 @@ class WWW_Limiter {
 					// Limit is checked by counting the most recent requests stored in the file					
 					$data=explode("\n",$data);
 					if(count($data)>=$limit){
-					
 						// Limited amount of rows is taken from the file before data is flipped, minimizing the timestamps for check
 						$data=array_slice($data,-$limit); 
 						$checkData=array_flip($data);
-						
 						// Limit has been reached by all of the requests happening in the same minute
 						if(count($checkData)==1){
 							// Request is logged and can be used for performance review later
@@ -124,7 +122,6 @@ class WWW_Limiter {
 							echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">YOUR IP HAS MADE TOO MANY REQUESTS TO THIS SERVER, TRY AGAIN IN '.$duration.' SECONDS</div>';
 							die();
 						}
-						
 					}
 					
 					// When limit was not exceeded, file is stored again with new data

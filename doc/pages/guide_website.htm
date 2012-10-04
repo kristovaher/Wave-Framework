@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Website Workflow - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Website Workflow</h1>
+		
+			<h2>Introduction</h2>
+			
+				<p>Wave Framework itself is simple to get a hold on, but when it comes to building a website on it, there are a number of things that you should know when it comes to URL requests sent to Wave. This document is a general overview about how Wave Framework handles the whole website architecture and design.</p>
+				
+				<p>Wave Framework comes by default with a URL and View controllers that are used to build a functioning website. URL Controller interprets the URL that user entered and finds a matching View and the View Controller then loads that View. There are also other things that have to be kept in mind. Sitemap file can carry a lot of configuration settings that can affect how your website works. You can define both static and dynamic URL's in Sitemap, do redirects and more. It is also possible to load classes, libraries and additional functionality based on Sitemap configuration even before Views and other MVC objects are loaded.</p>
+				
+			<h2>URL Request Workflow</h2>
+			
+				<p>Here is an overview of what happens, if user enters a URL to their browser and is sent to the server that uses Wave Framework. For example, if you are currently running the base unmodified version of Wave and enter the URL 'http://www.example.com/example', then a number of things will happen:</p>
+				
+				<ul>
+					<li>Index Gateway handles every HTTP request, so the request is sent to /index.php</li>
+					<li>Index Gateway looks at the URL and determines what type of request it is: either resource file request, HTTP API request or regular page request. It loads a handler from /engines/ folder based on each request. Handlers are in '/engine/handler.{type}.php files'. Data handler is used for regular web page requests from the 'handler.data.php' file.</li>
+					<li>Data Handler is essentially a small software that is built on Wave Framework and makes API requests to Wave Framework over PHP API. Data Handler initializes database requests (if set) and State object from WWW_State class.</li>
+					<li>Data Handler makes two API requests. First API request is made for URL Controller (with the API command value of 'url-solve'), which gets the user-entered URL. URL Controller is stored in '/controllers/controller.url.php' file.</li>
+					<li>URL Controller first validates the URL itself. If the setting 'enforce-first-language-url' is set to 1 in configuration, then URL Controller forces a redirect that will add language node to the URL, so that our entered URL becomes 'http://www.example.com/en/example'. If another configuration setting 'enforce-url-end-slash' is set, then a slash is added in the end of URL if it is not set. Slashes at the end of URL's are a recommended standard in web development.</li>
+					<li>URL Controller uses Sitemap file, based on detected language from URL, to seek out what View the user is requesting.</li>
+					<li>Once the View is found and data returned, then Data Handler sends this data to View Controller (by default API command value of 'view-load'). View controller is stored in '/controllers/controller.view.php' file.</li>
+					<li>View Controller builds the HTML frame and loads and executes View objects based on data from URL Controller and Sitemap. It also loads various JavaScript resources, PHP libraries and more. If View was not found, then a 404 page will be returned.</li>
+				</ul>
+				
+				<p>Anything in this workflow can be changed by you as a developer, if you edit URL Controller, View Controller or Data Handler files.</p>
+			
+				<p>Building websites is a multi-layered process. Wave Framework has a lot of features that are tied to this workflow. Topics such as cache, testing, API calls and more can enhance the way you build your websites or web-based software. I suggest you go through other feature guides in order to learn more about both the topics covered in this document and those that were not. It is also recommended that you learn more about the API itself as well as API wrappers, that help you use full range of functionality of Wave Framework.</p>
+			
+	</body>
+</html>

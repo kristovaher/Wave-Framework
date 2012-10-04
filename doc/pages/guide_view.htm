@@ -26,6 +26,16 @@
 				
 				<p>You can edit Translations file and View Controller file according to your needs. While default View Controller can easily work for majority of websites, it is recommended to do your tweaks to View Controller HTML template and include your CSS files, JavaScript libraries and set up your basic HTML frame within that Controller.</p>
 				
+			<h2>Dynamic Loading</h2>
+			
+				<p>View Controller generates a basic HTML frame for a View entirely based on what data is returned from Sitemap. Sitemap files include multiple configuration options, among which is the 'view' name as well as two variables 'php-libraries' and 'js-libraries'. If any of the latter two settings were set in Sitemap file for the View that is currently being loaded, then these values - which can be comma-separated - are loaded dynamically by View Controller as libraries.</p>
+				
+				<p>If you have set 'php-libraries' setting to 'example', then View Controller loads '/resources/libraries/example.php' file. If 'js-libraries' setting is set to 'example', then the script '/resources/libraries/example.js' is also loaded.</p>
+				
+				<p>On top of loading the dynamic library is that you can also load view-specific JavaScript or PHP scripts. So if you are currently in the view of 'example', then View Controller will also load scripts '/resources/scripts/example.script.php' and '/resources/scripts/example.script.js'. It is also smart enough to unify HTTP requests for such a loading.</p>
+				
+				<p>If this dynamic-loading behavior needs to be changed by you in any way, then you have the entire access to it in View Controller file itself.</p>
+				
 			<h2>Translations</h2>
 			
 				<p>Translations file is an easy-to-edit file that defines all translation keywords and their values. Since Wave Framework is built upon UTF-8 through and through, it is recommended to make sure your translations file is also in UTF-8 encoding, otherwise various foreign characters will show up wrong on the website.</p>
@@ -54,7 +64,7 @@
 				
 				<ul>
 					<li>Generates meta title for the page based on system configuration, Sitemap settings and view itself.</li>
-					<li>Generates unified CSS and unified JavaScript links that utilize Wave Framework <a href="handler_resource.htm">Resource Handler</a> to load multiple resources with a single HTTP request. It is also possible to load view specific CSS and JavaScript. View Controller will load CSS and JavaScript files from /resources/ folder if their file format is [view].style.css or [view].script.js. This allows you to include specific functionality or CSS only on some views, instead of adding weight to the main JavaScript or stylesheet file.</li>
+					<li>Generates unified CSS and unified JavaScript links that utilize Wave Framework <a href="handler_resource.htm">Resource Handler</a> to load multiple resources with a single HTTP request. It is also possible to load view specific CSS and JavaScript. View Controller will load CSS and JavaScript files from /resources/ subfolders if their file format is [view].style.css or [view].script.js. This allows you to include specific functionality or CSS only on some views, instead of adding weight to the main JavaScript or stylesheet file.</li>
 					<li>Generates HTML header (by default following HTML5 standard) with all the meta information that is needed, together with base URL - which simplifies referencing resources in views - as well as Favicon file and all resources.</li>
 					<li>Loads the defined View method and renders the page.</li>
 				</ul>

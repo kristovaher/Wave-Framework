@@ -100,13 +100,10 @@ final class WWW_Sessions {
 		// the settings are used in Configuration file. Database is not used by Session Handler
 		// by default, but it can be used for distributed database sessions.
 		$this->databaseConnection=$databaseConnection;
-		
 		// Session name is what will be set as cookie name
 		$this->sessionName=$sessionName;
-		
 		// Session name is what will be set as cookie name
 		$this->noCommit=$noCommit;
-	
 		// Handler will attempt to load session data if session cookie is sent by the user agent
 		if(isset($_COOKIE[$this->sessionName])){
 			$this->sessionOpen($this->sessionName,$sessionLifetime);
@@ -144,34 +141,26 @@ final class WWW_Sessions {
 		
 		// If session cookie exists, then session data will be loaded
 		if(isset($_COOKIE[$this->sessionName])){
-		
 			// Making sure that the session does not include any dangerous characters before it is used to load session data
 			$this->sessionId=preg_replace('/[^0-9a-z]/i','',$_COOKIE[$this->sessionName]);
-			
 			// Session storage address is based on session ID name in the filesystem
 			$this->cookieFolder=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($this->sessionId,0,2).DIRECTORY_SEPARATOR;
-			
 			// If file exists and is not older than the maximum allowed age for a session storage file, then session data is loaded from that file
 			if(file_exists($this->cookieFolder.$this->sessionId.'.tmp') && ($sessionLifetime==0 || filemtime($this->cookieFolder.$this->sessionId.'.tmp')>($_SERVER['REQUEST_TIME']-$sessionLifetime))){
-					
 				// Loading actual session data and casting the data to array
 				$this->sessionData=json_decode(file_get_contents($this->cookieFolder.$this->sessionId.'.tmp'),true);
 				// Updating the last-modified time of the session storage file
 				if(!$this->noCommit){
 					touch($this->cookieFolder.$this->sessionId.'.tmp');
 				}
-				
 			} else {
-			
 				// Since session cookie was found, but there was no session storage anymore, 
 				// the session cookie is assigned to be regenerated
 				$this->regenerateId=true;
 				$this->regenerateRemoveOld=true;
 				// Data array is also emptied
 				$this->sessionData=array();
-				
 			}
-			
 		}
 		
 		// Sessions are started
@@ -196,60 +185,49 @@ final class WWW_Sessions {
 		
 			// This is only done if sessions are actually commited and not just simulated
 			if(!$this->noCommit){
-			
 				// Removing the session storage file
 				if(file_exists($this->cookieFolder.$this->sessionId.'.tmp')){
 					unlink($this->cookieFolder.$this->sessionId.'.tmp');
 				}
-				
 				// Removing session cookie
 				if(isset($_COOKIE[$this->sessionName])){
 					setcookie($this->sessionName,false,1,$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
 				}
-				
 			}
 			
 		} else {
 		
 			// This is only done if sessions are actually commited and not just simulated
 			if(!$this->noCommit){
-		
 				// If there is no session cookie from the user agent or it is set to be regenerated
 				if(!isset($_COOKIE[$this->sessionName]) || $this->regenerateId){
-				
 					// If the old storage is assigned to be deleted
 					if($this->regenerateRemoveOld){
 						if(file_exists($this->cookieFolder.$this->sessionId.'.tmp')){
 							unlink($this->cookieFolder.$this->sessionId.'.tmp');
 						}
 					}
-					
 					// Generating a new session ID
 					$this->sessionId=$this->generateSessionId();
 					// Session storage address is based on session ID name in the filesystem
 					$this->cookieFolder=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'sessions'.DIRECTORY_SEPARATOR.substr($this->sessionId,0,2).DIRECTORY_SEPARATOR;
-					
 					// If lifetime is set to 0, then cookie will last as long as session lasts in browser
 					if($this->sessionCookie['lifetime']==0){
 						setcookie($this->sessionName,$this->sessionId,0,$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
 					} else {
 						setcookie($this->sessionName,$this->sessionId,(time()+$this->sessionCookie['lifetime']),$this->sessionCookie['path'],$this->sessionCookie['domain'],$this->sessionCookie['secure'],$this->sessionCookie['http-only']);
 					}
-					
 				}
-				
 				// If session cookie storage subfolder does not exist, then the handler creates it
 				if(!is_dir($this->cookieFolder)){
 					if(!mkdir($this->cookieFolder,0755)){
 						trigger_error('Cannot create session folder in '.$this->cookieFolder,E_USER_ERROR);
 					}
 				}
-				
 				// Session data is stored in session storage
 				if(!file_put_contents($this->cookieFolder.$this->sessionId.'.tmp',json_encode($this->sessionData))){
 					trigger_error('Cannot write session data to /filesystem/sessions/',E_USER_ERROR);
 				}	
-			
 			}
 			
 		}
@@ -287,10 +265,8 @@ final class WWW_Sessions {
 	 * @return string
 	 */
 	private function generateSessionId($salt=''){
-	
 		// Salt is not sent by default in Wave Framework
 		return sha1(__IP__.$_SERVER['HTTP_HOST'].(isset($_SERVER['UNIQUE_ID'])?$_SERVER['UNIQUE_ID']:uniqid('www',true)).microtime().$salt);
-		
 	}
 
 }

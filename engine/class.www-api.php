@@ -180,7 +180,6 @@ final class WWW_API {
 		
 			// Checking if database configuration is valid
 			if(isset($this->state->data['cache-database-name'],$this->state->data['cache-database-type'],$this->state->data['cache-database-host'],$this->state->data['cache-database-username'],$this->state->data['cache-database-password'])){
-			
 				// If database object is already used by State and it is exactly the same as the one assigned for caching, then that same link will be used
 				if($this->state->databaseConnection && $this->state->data['cache-database-host']==$this->state->data['database-host'] && $this->state->data['cache-database-username']==$this->state->data['database-username'] && $this->state->data['cache-database-password']==$this->state->data['database-password'] && $this->state->data['cache-database-name']==$this->state->data['database-name']){
 					// State file has the correct cache if the Configuration options were loaded
@@ -193,7 +192,6 @@ final class WWW_API {
 					// This object will be used for caching functions later on
 					$this->databaseCache=new WWW_Database($this->state->data['cache-database-type'],$this->state->data['cache-database-host'],$this->state->data['cache-database-name'],$this->state->data['cache-database-username'],$this->state->data['cache-database-password'],((isset($this->state->data['cache-database-errors']))?$this->state->data['cache-database-errors']:false),((isset($this->state->data['cache-database-persistent']))?$this->state->data['cache-database-persistent']:false));
 				}
-			
 			} else {
 				// Some of the settings were incorrect or missing, so database caching won't be used
 				trigger_error('Database caching configuration incorrect, reverting to other caching methods',E_USER_WARNING);
@@ -237,9 +235,9 @@ final class WWW_API {
 		} else {
 			return false;
 		}
+		
 		// This data can also be stored in cache
 		$cacheUrl=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'api.observers.tmp';
-
 		// Testing if cache for observers already exists
 		$cacheTime=$this->cacheTime($cacheUrl);
 		// If source file has been modified since cache creation
@@ -263,14 +261,17 @@ final class WWW_API {
 	 * @return null
 	 */
 	final public function __destruct(){
+	
 		// Storing internal logging data
 		if($this->internalLogging && !empty($this->internalLog)){
 			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.tmp',json_encode($this->internalLog)."\n",FILE_APPEND);
 		}
+
 		// Closing Memcache connection
 		if($this->memcache){
 			$this->memcache->close();
 		}
+		
 	}
 	
 	// API COMMAND
@@ -907,16 +908,6 @@ final class WWW_API {
 			if($this->internalLogging){
 				$this->logEntry('output-data',$apiResult);
 			}
-			
-			// This filters the result through various PHP and header specific commands
-			if($apiState['disable-callbacks']==false && (!isset($apiResult['www-disable-callbacks']) || $apiResult['www-disable-callbacks']==false)){
-				$this->apiCallbacks($apiResult,$useLogger);
-				// Unsetting the callback variables
-				unset($apiResult['www-set-header'],$apiResult['www-unset-header'],$apiResult['www-set-cookie'],$apiResult['www-unset-cookie'],$apiResult['www-set-session'],$apiResult['www-unset-session'],$apiResult['www-temporary-redirect'],$apiResult['www-permanent-redirect']);
-			}
-			
-			// Unsetting various output variables that are not needed
-			unset($apiResult['www-disable-callbacks']);
 					
 			// Simple flag for error check, this is used for output encryption
 			$errorFound=false;
@@ -934,6 +925,14 @@ final class WWW_API {
 				}
 				$errorFound=true;
 			}
+			
+			// This filters the result through various PHP and header specific commands
+			if($apiState['disable-callbacks']==false && (!isset($apiResult['www-disable-callbacks']) || $apiResult['www-disable-callbacks']==false)){
+				$this->apiCallbacks($apiResult,$useLogger);
+			}
+			
+			// Unsetting various output variables that are not needed
+			unset($apiResult['www-disable-callbacks']);
 			
 			// DATA CONVERSION FROM RESULT TO REQUESTED FORMAT
 			
@@ -1444,11 +1443,13 @@ final class WWW_API {
 		 * @return string
 		 */
 		final private function toXMLnode($data,$numeric='node'){
+		
 			// By default the result is empty
 			$return='';
 			foreach($data as $key=>$val){
 				// Keys that start with @ symbol are considered attribute containers
 				if($key[0]!='@'){
+				
 					// Attributes gatherer
 					$attributes='';
 					// If attributes are set
@@ -1457,6 +1458,7 @@ final class WWW_API {
 							$attributes.=' '.$attKey.'="'.htmlspecialchars($attVal).'"';
 						}
 					}
+					
 					// If element is an array then this function is called again recursively
 					if(is_array($val)){
 						// XML does not allow numeric nodes, so generic $numeric value is used
@@ -1481,10 +1483,13 @@ final class WWW_API {
 							$return.='<'.$key.$attributes.'>'.htmlspecialchars($val).'</'.$key.'>';
 						}
 					}
+					
 				}
 			}
+			
 			// Returning the snippet
 			return $return;
+			
 		}
 		
 		/**
@@ -1506,10 +1511,8 @@ final class WWW_API {
 			
 			// If the first array element is also an array then multidimensional CSV will be output
 			if(is_array($first)){
-			
 				// System assumes that in a multidimensional array the keys are the column names
 				$result[]=implode("\t",array_keys($first));
-				
 				// Rows will be processed as a result
 				foreach($apiResult as $subResult){		
 					foreach($subResult as $key=>$subSubResult){
@@ -1523,9 +1526,7 @@ final class WWW_API {
 					// Rows are separated with a tab character
 					$result[]=implode("\t",$subResult);
 				}
-				
 			} else {
-			
 				// Since first element was not an array, it is assumed that other rows are not either
 				foreach($apiResult as $subResult){
 					// If other rows are an array, then the result is imploded with a comma
@@ -1535,7 +1536,6 @@ final class WWW_API {
 						$result[]=str_replace(array("\n","\t","\r"),array('\n','\t',''),$subResult);
 					}
 				}
-				
 			}
 			
 			// Result is imploded and returned
@@ -1652,6 +1652,7 @@ final class WWW_API {
 		 * @return boolean
 		 */
 		final public function unsetTaggedCache($tags){
+		
 			// Multiple tags can be removed at the same time
 			if(!is_array($tags)){
 				$tags=explode(',',$tags);
@@ -1670,6 +1671,7 @@ final class WWW_API {
 				}
 			}
 			return true;
+			
 		}
 		
 		/**
@@ -1695,6 +1697,7 @@ final class WWW_API {
 		 * @return mixed depending if cache is found, false if failed
 		 */
 		final public function getExistingCache($key){
+			// Returns cache based on cache key
 			if(isset($this->cacheIndex[$key])){
 				return $this->getCache($this->cacheIndex[$key]);
 			} else {
@@ -1711,6 +1714,7 @@ final class WWW_API {
 		 * @return integer or false, if timestamp does not exist
 		 */
 		final public function getExistingCacheTime($key){
+			// Returns cache time based on cache key
 			if(isset($this->cacheIndex[$key])){
 				return $this->cacheTime($this->cacheIndex[$key]);
 			} else {
@@ -1730,6 +1734,7 @@ final class WWW_API {
 		 * @return boolean
 		 */
 		final public function setCache($keyAddress,$value,$tags=false,$custom=false){
+		
 			// User cache does not have an address
 			if($custom){
 				// User cache location
@@ -1746,6 +1751,7 @@ final class WWW_API {
 					}
 				}
 			}
+			
 			// Storing variable to cache
 			if($this->memcache){
 				// Storing the variable in Memcache
@@ -1779,6 +1785,7 @@ final class WWW_API {
 				}
 			}
 			return true;
+			
 		}
 		
 		/**
@@ -1793,14 +1800,17 @@ final class WWW_API {
 		 * @return mixed or false if cache is not found
 		 */
 		final public function getCache($keyAddress,$limit=false,$custom=false){
+		
 			// User cache does not have an address
 			if($custom){
 				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
 			}
+			
 			// If limit is used
 			if($limit && ($this->state->data['request-time']-$limit)>$this->cacheTime($keyAddress)){
 				return false;
 			}
+			
 			// Accessing cache
 			if($this->memcache){
 				return $this->memcache->get($this->state->data['session-name'].$keyAddress);
@@ -1823,6 +1833,7 @@ final class WWW_API {
 			}
 			// Cache was not found
 			return false;
+			
 		}
 		
 		/**
@@ -1834,10 +1845,12 @@ final class WWW_API {
 		 * @return integer or false if cache is not found
 		 */
 		final public function cacheTime($keyAddress,$custom=false){
+		
 			// User cache does not have an address
 			if($custom){
 				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
 			}
+			
 			// Accessing cache
 			if($this->memcache){
 				return $this->memcache->get($this->state->data['session-name'].$keyAddress.'-time');
@@ -1862,6 +1875,7 @@ final class WWW_API {
 			}
 			// Cache was not found
 			return false;
+			
 		}
 		
 		/**
@@ -1872,10 +1886,12 @@ final class WWW_API {
 		 * @return boolean
 		 */
 		final public function unsetCache($keyAddress,$custom=false){
+		
 			// User cache does not have an address
 			if($custom){
 				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
 			}
+			
 			// Accessing cache
 			if($this->memcache){
 				$this->memcache->delete($this->state->data['session-name'].$keyAddress);
@@ -1904,6 +1920,7 @@ final class WWW_API {
 			}
 			// Deleting cache has failed
 			return false;
+			
 		}
 	
 	// INTERNAL LOGGING
@@ -1918,6 +1935,7 @@ final class WWW_API {
 		 * @return boolean
 		 */
 		final public function logEntry($key,$data=false){
+		
 			// Only applies if internal logging is turned on
 			if($this->internalLogging && ((in_array('*',$this->internalLogging) && !in_array('!'.$key,$this->internalLogging)) || in_array($key,$this->internalLogging))){
 				// Preparing a log entry object
@@ -1930,6 +1948,7 @@ final class WWW_API {
 			} else {
 				return false;
 			}
+			
 		}
 		
 	// PERFORMANCE LOGGING
@@ -1945,16 +1964,20 @@ final class WWW_API {
 		 * @return float 
 		 */
 		final public function splitTime($key='api'){
+		
 			// Checking if split time exists
 			if(isset($this->splitTimes[$key])){
 				$this->logEntry('splitTime for ['.$key.']','Seconds since last call: '.number_format((microtime(true)-$this->splitTimes[$key]),6));
 			} else {
 				$this->logEntry('splitTime for ['.$key.']','Seconds since last call: 0.000000 seconds');
 			}
+			
 			// Setting new microtime
 			$this->splitTimes[$key]=microtime(true);
+			
 			// Returning current microtime
 			return $this->splitTimes[$key];
+			
 		}
 		
 	// DATA HANDLING
@@ -2008,6 +2031,7 @@ final class WWW_API {
 		 * @return array
 		 */
 		final private function ksortArray($data){
+		
 			// Method is based on the current data type
 			if(is_array($data)){
 				// Sorting the current array
@@ -2019,7 +2043,9 @@ final class WWW_API {
 					$data[$keys[$i]]=$this->ksortArray($data[$keys[$i]]);
 				}
 			}
+			// Returning sorted array
 			return $data;
+			
 		}
 	
 }

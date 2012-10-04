@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.2.3
+ * @version    3.4.0
  */
 
 class WWW_controller_view extends WWW_Factory {
@@ -36,6 +36,27 @@ class WWW_controller_view extends WWW_Factory {
 		// Getting view information
 		$view=$this->getState('view');
 		$systemRoot=$this->getState('system-root');
+		
+		// If PHP libraries are set to be loaded, then loading them through Factory
+		if(isset($view['additional-php']) && $view['additional-php']!=''){
+			// Libraries are in a comma-separated list
+			$libraries=explode(',',$view['additional-php']);
+			foreach($libraries as $l){
+				// This will throw an error, if the library is not found
+				$this->loadLibrary($l);
+			}
+		}
+		
+		// Checking for view-specific PHP script
+		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$view['view'].'.script.php')){
+			if(file_exists($systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$view['view'].'.script.php')){
+				// Requiring override file
+				require($systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$view['view'].'.script.php');
+			} else {
+				// Requiring original file
+				require($systemRoot.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$view['view'].'.script.php');
+			}
+		}
 	
 		// Getting current view and creating view object
 		$viewObject=$this->getView($view['view']);
@@ -74,8 +95,16 @@ class WWW_controller_view extends WWW_Factory {
 		$coreStyleSheet[]='reset.css';
 		$coreStyleSheet[]='style.css';
 		
+		// If Sitemap file has defined additional CSS files
+		if(isset($view['additional-css']) && $view['additional-css']!=''){
+			$additionalStylesheet=explode(',',$view['additional-css']);
+			foreach($additionalStylesheet as $key=>$file){
+				$additionalStylesheet[$key]=$file.'.css';
+			}
+		}
+		
 		// Module-specific Stylesheets is can also be loaded
-		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$view['view'].'.style.css')){
+		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.'styles'.DIRECTORY_SEPARATOR.$view['view'].'.style.css')){
 			$moduleStylesheet=$view['view'].'.style.css';
 		}
 		
@@ -84,9 +113,20 @@ class WWW_controller_view extends WWW_Factory {
 		$coreJavaScript=array();
 		$coreJavaScript[]='jquery.js';
 		$coreJavaScript[]='script.js';
+		// These files do not have to be in /resources/ folder and are loaded from engine folder instead
+		$coreJavaScript[]='class.www-wrapper.js';
+		$coreJavaScript[]='class.www-factory.js';
+		
+		// If Sitemap file has defined additional JavaScript libraries
+		if(isset($view['additional-js']) && $view['additional-js']!=''){
+			$additionalJavaScript=explode(',',$view['additional-js']);
+			foreach($additionalJavaScript as $key=>$library){
+				$additionalJavaScript[$key]=$library.'.js';
+			}
+		}
 		
 		// Module-specific JavaScript is can also be loaded
-		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.$view['view'].'.script.js')){
+		if(file_exists($systemRoot.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$view['view'].'.script.js')){
 			$moduleJavaScript=$view['view'].'.script.js';
 		}
 		
@@ -120,18 +160,23 @@ class WWW_controller_view extends WWW_Factory {
 						<meta name="Copyright" content="<?=$copyright?>"/>
 					<?php } ?>
 					<!-- Stylesheets -->
-					<link type="text/css" href="resources/<?=implode('&',$coreStyleSheet)?>" rel="stylesheet" media="all"/>
+					<link type="text/css" href="resources/styles/<?=implode('&',$coreStyleSheet)?>" rel="stylesheet" media="all"/>
+					<?php if(isset($additionalStylesheet)){ ?>
+						<link type="text/css" href="resources/styles/<?=implode('&',$additionalStylesheet)?>" rel="stylesheet" media="all"/>
+					<?php } ?>
 					<?php if(isset($moduleStylesheet)){ ?>
-						<link type="text/css" href="resources/<?=$moduleStylesheet?>" rel="stylesheet" media="all"/>
+						<link type="text/css" href="resources/styles/<?=$moduleStylesheet?>" rel="stylesheet" media="all"/>
 					<?php } ?>
 					<!-- Favicons -->
 					<link rel="icon" href="favicon.ico" type="image/x-icon"/>
 					<link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon"/>
 					<!-- JavaScript -->
-					<script type="text/javascript" src="engine/class.www-wrapper.js"></script>
-					<script type="text/javascript" src="resources/<?=implode('&',$coreJavaScript)?>"></script>
+					<script type="text/javascript" src="resources/scripts/<?=implode('&',$coreJavaScript)?>"></script>
+					<?php if(isset($additionalJavaScript)){ ?>
+						<script type="text/javascript" src="resources/libraries/<?=implode('&',$additionalJavaScript)?>"></script>
+					<?php } ?>
 					<?php if(isset($moduleJavaScript)){ ?>
-						<script type="text/javascript" src="resources/<?=$moduleJavaScript?>"></script>
+						<script type="text/javascript" src="resources/scripts/<?=$moduleJavaScript?>"></script>
 					<?php } ?>
 				</head>
 				<body>

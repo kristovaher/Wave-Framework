@@ -204,6 +204,8 @@ class WWW_Wrapper {
          * @return array/string depending if imploded
 		 */
 		public function returnLog($implode=false){
+		
+			// Log entry for log access
 			$this->log[]='Returning log';
 			// Imploding, if requested
 			if(!$implode){
@@ -211,6 +213,7 @@ class WWW_Wrapper {
 			} else {
 				return implode($implode,$this->log);
 			}
+			
 		}
 		
 		/**
@@ -234,6 +237,7 @@ class WWW_Wrapper {
 		 * @return boolean
 		 */
 		public function setCookieContainer($location=false){
+		
 			// If value is anything but false
 			if($location){
 				// Testing if file exists or attempting to create that file
@@ -256,6 +260,7 @@ class WWW_Wrapper {
 				$this->log[]='Cookies are turned off';
 				return true;
 			}
+			
 		}
 		
 		/**
@@ -267,6 +272,7 @@ class WWW_Wrapper {
 		 * @return boolean
 		 */
 		public function setCertificateContainer($location=false){
+		
 			// If value is anything but false
 			if($location){
 				// Testing if file exists or attempting to create that file
@@ -285,6 +291,7 @@ class WWW_Wrapper {
 				$this->log[]='Certificate container is not used';
 				return true;
 			}
+			
 		}
 		
 		/**
@@ -297,6 +304,8 @@ class WWW_Wrapper {
 		 * @return boolean
 		 */
 		public function clearCookieContainer($location=false){
+		
+			// If location was not sent with the request, then using the existing one
 			if(!$location){
 				$location=$this->cookieContainer;
 			}
@@ -311,6 +320,7 @@ class WWW_Wrapper {
 			} else {
 				return false;
 			}
+			
 		}
 		
 		/**
@@ -338,6 +348,7 @@ class WWW_Wrapper {
 		 * @return boolean
 		 */
 		public function setInput($input,$value=false){
+		
 			// If this is an array then it populates input array recursively
 			if(is_array($input)){
 				foreach($input as $key=>$val){
@@ -349,6 +360,7 @@ class WWW_Wrapper {
 				$this->inputSetter($input,$value);
 			}
 			return true;
+			
 		}
 		
 		/**
@@ -362,6 +374,8 @@ class WWW_Wrapper {
 		 * @return boolean
 		 */
 		private function inputSetter($input,$value){
+		
+			// Different input keys carry additional functionality
 			switch($input){
 				case 'www-api':
 					$this->apiAddress=$value;
@@ -518,6 +532,7 @@ class WWW_Wrapper {
 					break;				
 			}
 			return true;
+			
 		}
 		
 		/**
@@ -533,6 +548,7 @@ class WWW_Wrapper {
 		 * @return boolean
 		 */
 		public function setCryptedInput($input,$value=false){
+		
 			// If this is an array then it populates input array recursively
 			if(is_array($input)){
 				foreach($input as $key=>$val){
@@ -546,6 +562,7 @@ class WWW_Wrapper {
 				$this->log[]='Crypted input value of "'.$input.'" set to: '.$value;
 			}
 			return true;
+			
 		}
 		
 		/**
@@ -559,6 +576,7 @@ class WWW_Wrapper {
 		 * @return boolean/error depending on whether file exists or not
 		 */
 		public function setFile($file,$location=false){
+		
 			// If this is an array then it populates input array recursively
 			if(is_array($file)){
 				foreach($file as $key=>$loc){
@@ -580,6 +598,7 @@ class WWW_Wrapper {
 				}
 			}
 			return true;
+			
 		}
 		
 		/**
@@ -591,6 +610,7 @@ class WWW_Wrapper {
 		 * @return boolean
 		 */
 		public function clearInput($clearAuth=false){
+		
 			// If authentication should also be cleared
 			if($clearAuth){
 				$this->apiState['apiProfile']=false;
@@ -620,6 +640,7 @@ class WWW_Wrapper {
 			// Log entry
 			$this->log[]='Input data, crypted input and file data is unset';
 			return true;
+			
 		}
 		
 	// SENDING REQUEST
@@ -777,28 +798,22 @@ class WWW_Wrapper {
 				
 				// If API hash validation is used
 				if($thisApiState['apiHashValidation']){
-				
 					// Validation hash is generated based on current serialization option
 					if(!isset($thisInputData['www-hash'])){
-						
 						// Calculating validation hash
 						if($thisApiState['apiToken'] && $thisInputData['www-command']!='www-create-session'){
 							$thisInputData['www-hash']=$this->validationHash($thisInputData,$thisApiState['apiToken'].$thisApiState['apiSecretKey']);
 						} else {
 							$thisInputData['www-hash']=$this->validationHash($thisInputData,$thisApiState['apiSecretKey']);
 						}
-						
 					}
-
 					// Log entry
 					if($thisApiState['apiToken']){
 						$this->log[]='Validation hash created using JSON encoded input data, API token and secret key';
 					} else {
 						$this->log[]='Validation hash created using JSON encoded input data and secret key';
 					}
-				
 				} else {
-				
 					// Attaching secret key or token to the request
 					if($thisInputData['www-command']=='www-create-session' && $thisApiState['apiSecretKey']){
 						$thisInputData['www-secret-key']=$thisApiState['apiSecretKey'];
@@ -807,7 +822,6 @@ class WWW_Wrapper {
 						$thisInputData['www-token']=$thisApiState['apiToken'];
 						$this->log[]='Validation will be session token based';
 					}
-				
 				}
 				
 			} else {
@@ -904,7 +918,6 @@ class WWW_Wrapper {
 					
 						// Log entry
 						$this->log[]='Making GET request to API using file-get-contents to URL: '.$requestURL;
-					
 						// GET request an also be made by file_get_contents()
 						if(!$resultData=file_get_contents($requestURL.'?'.$requestData)){
 							return $this->errorHandler($thisInputData,204,'GET request failed: file_get_contents() failed',$thisApiState['errorCallback']);
@@ -924,19 +937,14 @@ class WWW_Wrapper {
 						
 							// This is the variable that carries POST variables that will be sent to cURL
 							$postData=$thisInputData;
-							
 							// Regular input variables can be sent over GET if they are not too long
 							if($getRequestLength<=$this->getLimit){
-							
 								// Changes the request URL and clears input array from data
 								$requestURL=$this->apiAddress.'?'.$requestData;
 								$postData=array();
-								
 							} else {
-								
 								// This stores input variables that include @ symbol that cURL interprets for file upload
 								$securityInput=array();
-								
 								// Escaping possible security hole in cURL by escaping the @ sign
 								foreach($postData as $key=>$val){
 									// If the first character is @
@@ -951,13 +959,11 @@ class WWW_Wrapper {
 										$this->log[]='Attaching variable to request: '.$key.'='.$val;
 									}
 								}
-								
 								// If unsecure variables are part of the POST request
 								// Please note that if this data is too long for GET then the request will fail entirely
 								if(!empty($securityInput)){
 									$requestURL=$requestURL.'?'.http_build_query($securityInput);
 								}
-							
 							}
 							
 							// Attaching files to the request
@@ -1170,29 +1176,24 @@ class WWW_Wrapper {
 						if($thisApiState['returnHash']){
 							// Hash and timestamp have to be defined in response
 							if(isset($resultData['www-hash'])){
-							
 								// Assigning returned array to hash validation array
 								$validationData=$resultData;
 								// Hash itself is removed from validation
 								unset($validationData['www-hash']);
-								
 								// Validation depends on whether session creation or destruction commands were called
 								if($thisInputData['www-command']=='www-create-session'){
 									$hash=$this->validationHash($validationData,$thisApiState['apiSecretKey']);
 								} else {
 									$hash=$this->validationHash($validationData,$thisApiState['apiToken'].$thisApiState['apiSecretKey']);
 								}
-								
 								// Unsetting the validation hash since it is not used
 								unset($validationData);
-								
 								// If sent hash is the same as calculated hash
 								if($hash==$resultData['www-hash']){
 									$this->log[]='Hash validation successful';
 								} else {
 									return $this->errorHandler($thisInputData,210,'Hash validation failed',$thisApiState['errorCallback']);
 								}
-								
 							} else {
 								return $this->errorHandler($thisInputData,208,'Validation data missing: Hash was not returned',$thisApiState['errorCallback']);
 							}
@@ -1266,10 +1267,12 @@ class WWW_Wrapper {
 		 * @return string
 		 */
 		private function validationHash($validationData,$postFix){
+		
 			// Sorting and encoding the output data
 			$validationData=$this->ksortArray($validationData);
 			// Returning validation hash
 			return sha1(http_build_query($validationData).$postFix);
+			
 		}
 		
 		/**
@@ -1281,6 +1284,7 @@ class WWW_Wrapper {
 		 * @return array/mixed
 		 */
 		private function ksortArray($data){
+		
 			// Method is based on the current data type
 			if(is_array($data)){
 				// Sorting the current array
@@ -1293,6 +1297,7 @@ class WWW_Wrapper {
 				}
 			}
 			return $data;
+			
 		}
 		
 		/**
@@ -1306,6 +1311,7 @@ class WWW_Wrapper {
 		 * @return boolean/mixed depending on if callback function was used
 		 */
 		private function errorHandler($inputData,$responseCode,$errorMessage,$errorCallback){
+		
 			// Assigning error details to object state
 			$this->responseCode=$responseCode;
 			$this->errorMessage=$errorMessage;
@@ -1332,8 +1338,8 @@ class WWW_Wrapper {
 			} else {
 				return false;
 			}
+			
 		}
-
 
 }
 

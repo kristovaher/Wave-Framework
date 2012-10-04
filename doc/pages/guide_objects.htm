@@ -22,6 +22,35 @@
 				
 				<p>Dynamic loading of objects is useful for one big reason: this means that your system only loads the resources and classes that it actually needs and actually uses. This lowers the amount of memory your system takes during a request as well as increases the processing speed of your requests.</p>
 				
+			<h2>Loading Libraries</h2>
+			
+				<p>Function libraries should never be declared global and accessible all over the software, since if most of your software never uses these functions, then such a functionality only adds weight to your software and how quickly it can respond to requests.</p>
+				
+				<p>Factory class allows you to easily load libraries dynamically. Dynamically loaded libraries need to follow these rules:</p>
+				
+					<ul>
+						<li>Libraries have to be stored in /resources/libraries/ folder</li>
+						<li>Library filename has to be [name].php</li>
+					</ul>
+					
+				<p>You can then load libraries like this:</p>
+				
+<pre>
+	<code>
+	$model=$this->loadLibrary('example');
+	</code>
+</pre>
+
+				<p>You can also dynamically call one of the functions from that library in the same call and return results from that call:</p>	
+				
+<pre>
+	<code>
+	$model=$this->loadLibrary('example','myfunction');
+	</code>
+</pre>
+
+				<p>Note that the callback function does not have to be from within the library itself, it can be a function that is already defined elsewhere previously.</p>
+				
 			<h2>Loading Objects</h2>
 			
 				<p>Wave Framework groups classes in four: Models, Views, Controllers and Objects. You can read more about the purpose of each of those classes in <a href="guide_mvc.htm">MVC</a> Pattern documentation page. But in order for these objects to be loaded dynamically, there are a couple of rules that have to be followed.</p>
@@ -133,6 +162,34 @@
 				<p>PHP has a magic method called '__construct()' that is called whenever an object is created. This can be used to load additional functionality to an object when it is created, like create some <a href="guide_database.htm">Database</a> connections or initialize configuration.</p>
 				
 				<p>In Wave Framework, if your object is created from a class that is extended from WWW_Factory, then you cannot define a '__construct()' method for that object as it is not possible to overwrite the method from WWW_Factory. Instead you should define '__initialize()' method instead, as Factory's own construction will also make a call for that method, if it is defined.</p>
+				
+			<h2>JavaScript Factory</h2>
+			
+				<p>Wave Framework also includes a JavaScript Factory that is more limited, than PHP Factory. But it still allows you to dynamically load Objects as well as Libraries. This is done exactly the same way. For example:</p>
+				
+<pre>
+	<code>
+	// Create a new Factory class
+	var Factory=new WWW_Factory();
+	// Get new instance of the 'example' class
+	var myExample=Factory.getObject('example');
+	// And now you can use that object like any other
+	myExample.doSomething();
+	</code>
+</pre>
+
+				<p>And you can also load libraries:</p>
+				
+<pre>
+	<code>
+	// Factory class is required
+	var Factory=new WWW_Factory();
+	// Load the library
+	Factory.loadLibrary('example');
+	// Use some function from that library
+	doSomething();
+	</code>
+</pre>
 			
 	</body>
 </html>

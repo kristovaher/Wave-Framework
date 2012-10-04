@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.2.6
+ * @version    3.4.0
  */
 
 class WWW_Factory {
@@ -33,6 +33,11 @@ class WWW_Factory {
 	 * layers and other internal functionality in API class.
 	 */
 	private $WWW_API_callIndex=0;
+	
+	/**
+	 * This variable stores information about dynamically loaded libraries, if they are loaded.
+	 */
+	private $WWW_Libraries=array();
 
 	/**
 	 * Construction method of Factory class initializes currently used API and API call index
@@ -45,6 +50,7 @@ class WWW_Factory {
 	 * @return object
 	 */
 	final public function __construct($api=false,$callIndex=0){
+	
 		// API is passed to the object, if defined
 		if($api){ 
 			$this->WWW_API=$api; 
@@ -55,6 +61,7 @@ class WWW_Factory {
 		if(method_exists($this,'__initialize')){
 			$this->__initialize();
 		}
+		
 	}
 	
 	// API CALLS
@@ -74,6 +81,7 @@ class WWW_Factory {
 		 * @return array/string based on request
 		 */
 		final protected function api($command,$inputData=array(),$useBuffer=true){
+		
 			// Input data has to be an array
 			if(!is_array($inputData)){
 				trigger_error('API input data is not an array',E_USER_ERROR);
@@ -90,6 +98,7 @@ class WWW_Factory {
 			}
 			// Returning the result from API
 			return $this->WWW_API->command($inputData,$useBuffer,false);
+			
 		}
 		
 		/**
@@ -102,6 +111,7 @@ class WWW_Factory {
 		 * @return object or false if failed
 		 */
 		final protected function apiConnection($address){
+		
 			// Address is required
 			if($address && $address!=''){
 				if(!class_exists('WWW_Wrapper') && file_exists(__DIR__.DIRECTORY_SEPARATOR.'class.www-factory.php')){
@@ -112,6 +122,7 @@ class WWW_Factory {
 			} else {
 				return false;
 			}
+			
 		}
 	
 		/**
@@ -330,7 +341,7 @@ class WWW_Factory {
 		 * @param string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
-		final protected function getView($view,$methodName=false,$methodData=array()){
+		final protected function getView($view,$methodName=false,$methodData=false){
 		
 			// Dynamically creating class name
 			$className='WWW_view_'.str_replace('-','_',$view);
@@ -383,7 +394,7 @@ class WWW_Factory {
 		 * @param string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
-		final protected function getObject($className,$methodName=false,$methodData=array()){
+		final protected function getObject($className,$methodName=false,$methodData=false){
 		
 			// Replacing dashes with underscores
 			$className=str_replace('-','_',$className);
@@ -393,7 +404,7 @@ class WWW_Factory {
 				// Class file can be loaded from /overrides/ directories, if set
 				if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
 					// Requiring override file
-					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$className.'.php');
+					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
 				} elseif(file_exists($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
 					// Requiring original file
 					require($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
@@ -405,7 +416,7 @@ class WWW_Factory {
 			
 			// Object is returned if no specific method name is called
 			if(!$methodName){
-				// Returning object
+				// Returning object and also sending method data to the constructor
 				return new $className();
 			} else {
 				// Replacing dashes with underscores
@@ -419,6 +430,48 @@ class WWW_Factory {
 					// Error is thrown if method was not found
 					trigger_error('Object ['.$className.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
 				}
+			}
+			
+		}
+		
+		/**
+		 * This method is used to dynamically load a library from /resources/libaries/ subfolder. 
+		 * If additional parameters are set, then this method can also automatically call one 
+		 * of the functions in the file.
+		 *
+		 * @param string $libraryName this is the library identifying name
+		 * @param string $functionName this is the name of the function that can be called after libary is loaded
+		 * @param mixed $methodData this is the optional data that can be sent to the method
+		 */
+		final protected function loadLibrary($libraryName,$functionName=false,$functionData=false){
+		
+			// Making sure that the library is not already loaded
+			if(!isset($WWW_Libraries[$libraryName])){
+				// Library can be loaded from /overrides/ directories, if set
+				if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+					// Requiring override file
+					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+					// Requiring original file
+					require($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php');
+				} else {
+					// Error is thrown if class was not found
+					trigger_error('Library ['.$libraryName.'] does not exist',E_USER_ERROR);
+				}
+				// Setting a flag to make sure that the library is not loaded again
+				$WWW_Libraries[$libraryName]=true;
+			}
+			
+			// If function name is set to be loaded
+			if($functionName){
+				// Making sure that the function is actually declared
+				if(function_exists($functionName)){
+					return $functionName($functionData);
+				} else {
+					trigger_error('Library ['.$libraryName.'] function ['.$functionName.'] does not exist',E_USER_ERROR);
+				}
+			} else {
+				return true;
 			}
 			
 		}
@@ -533,11 +586,14 @@ class WWW_Factory {
 		 * @return array
 		 */
 		final protected function resultError($message='Error',$customData=false,$responseCode=300){
+		
+			// Custom data is merged to the results array, if sent
 			if(is_array($customData)){
 				return array('www-message'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
 				return array('www-message'=>$message,'www-response-code'=>$responseCode);
 			}
+			
 		}
 		
 		/**
@@ -555,11 +611,14 @@ class WWW_Factory {
 		 * @return array
 		 */
 		final protected function resultFalse($message='OK',$customData=false,$responseCode=400){
+		
+			// Custom data is merged to the results array, if sent
 			if(is_array($customData)){
 				return array('www-message'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
 				return array('www-message'=>$message,'www-response-code'=>$responseCode);
 			}
+			
 		}
 		
 		/**
@@ -576,11 +635,14 @@ class WWW_Factory {
 		 * @return array
 		 */
 		final protected function resultTrue($message='OK',$customData=false,$responseCode=500){
+		
+			// Custom data is merged to the results array, if sent
 			if(is_array($customData)){
 				return array('www-message'=>$message,'www-response-code'=>$responseCode)+$customData;
 			} else {
 				return array('www-message'=>$message,'www-response-code'=>$responseCode);
 			}
+			
 		}
 		
 		/**
@@ -592,6 +654,7 @@ class WWW_Factory {
 		 * @return boolean or mixed if non-standard array
 		 */
 		final protected function checkTrueFalse($data){
+		
 			// These values are only checked from an array
 			if(is_array($data)){
 				// 4XX response code namespace is for 'false' results, 5XX namespace is for true results
@@ -607,6 +670,7 @@ class WWW_Factory {
 				// Since result was not an array, system returns the input data instead, whatever the value is
 				return $data;
 			}
+			
 		}
 		
 		/**
@@ -618,6 +682,7 @@ class WWW_Factory {
 		 * @return boolean
 		 */
 		final protected function checkError($data){
+		
 			// These values are only checked from an array
 			if(is_array($data)){
 				// Error messages have response code namespace of 1XX, 2XX and 3XX (latter is developer defined)
@@ -630,6 +695,7 @@ class WWW_Factory {
 				// Since result was not an array, system returns false, as standardized error was not found
 				return false;
 			}
+			
 		}
 		
 	// CACHE
@@ -643,9 +709,11 @@ class WWW_Factory {
 		 * @return boolean
 		 */
 		final protected function disableCache($state=true){
+		
 			// This is stored as a flag
 			$this->WWW_API->noCache[$this->WWW_API_callIndex]=$state;
 			return true;
+			
 		}
 		
 		/**
@@ -805,13 +873,15 @@ class WWW_Factory {
 		/**
 		 * This writes data to State messenger. $data is the key and $value is the value of the 
 		 * key. $data can also be an array of keys and values, in which case multiple values are 
-		 * set at the same time.
+		 * set at the same time. Additionally using this function also turns off caching of the 
+		 * page which uses it.
 		 *
 		 * @param array|string $key key or data array
 		 * @param mixed $value value, if data is a key
 		 * @return boolean
 		 */
 		final protected function setMessengerData($key,$value=false){
+		
 			// Attempting to get the result
 			$result=$this->WWW_API->state->setMessengerData($key,$value);
 			if($result){
@@ -821,6 +891,7 @@ class WWW_Factory {
 				return $result;
 			}
 			return false;
+			
 		}
 		
 		/**
@@ -835,18 +906,19 @@ class WWW_Factory {
 		}
 		
 		/**
-		 * This method returns data from State messenger. It returns the entire State messenger 
-		 * data as an array based on $address keyword that is used as the fingerprint for data. 
-		 * If $remove is set, then State messenger data is removed from filesystem or State 
-		 * object after being called.
+		 * This method returns data from State messenger. It either returns all the data from 
+		 * initialized state messenger, or just a $key from it. If $remove is set, then data is 
+		 * also set for deletion after it has been accessed. Additionally using this function 
+		 * also turns off caching of the page which uses it.
 		 *
 		 * @param string $address messenger address
 		 * @param boolean $remove true or false flag whether to delete the request data after returning it
 		 * @return mixed or false if failed
 		 */
-		final protected function getMessengerData($address=false,$remove=true){
+		final protected function getMessengerData($key=false,$remove=true){
+		
 			// Attempting to get the result
-			$result=$this->WWW_API->state->getMessengerData($address,$remove);
+			$result=$this->WWW_API->state->getMessengerData($key,$remove);
 			if($result){
 				// Setting no-cache flag to true
 				$this->WWW_API->noCache[$this->WWW_API_callIndex]=true;
@@ -854,6 +926,7 @@ class WWW_Factory {
 				return $result;
 			}
 			return false;
+			
 		}
 	
 	// SESSION AND COOKIE WRAPPERS
@@ -1066,6 +1139,7 @@ class WWW_Factory {
 		 * @return object
 		 */
 		final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$persistentConnection=false){
+		
 			// Requiring database class files, if class has not been defined
 			if(!class_exists('WWW_Database')){
 				// Including the required class and creating the object
@@ -1074,6 +1148,7 @@ class WWW_Factory {
 			$databaseConnection=new WWW_Database($type,$host,$database,$username,$password,$showErrors,$persistentConnection);
 			// Passing the database to State object
 			return $databaseConnection;
+			
 		}
 			
 		/**

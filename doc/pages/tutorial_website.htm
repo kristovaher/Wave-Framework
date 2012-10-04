@@ -22,7 +22,7 @@
 			
 				<p>Wave Framework comes with a View and <a href="guide_url.htm">URL Controllers</a> to build websites with. These two Controllers can be edited by you at any time - they are stored in '/controllers/' subfolder. You can read more about tweaking the URL and <a href="guide_view.htm">View Controllers</a> in documentation about those Controllers as this tutorial will use the default URL and <a href="guide_view.htm">View Controllers</a>.</p>
 				
-				<p>Complete files of this tutorial are available in '/doc/examples/website/' subfolder in the archive. If you wish to test the example without writing the tutorial code yourself, then you should copy these files to root folder of your Wave Framework. Note that this will overwrite your default '/resources/api.profiles.ini' as well as '/resources/en.sitemap.ini' and '/resources/style.css' files. You should make a backup of these files in case you have modified these files yourself for some reason.</p>
+				<p>Complete files of this tutorial are available in '/doc/examples/website/' subfolder in the archive. If you wish to test the example without writing the tutorial code yourself, then you should copy these files to root folder of your Wave Framework. Note that this will overwrite your default '/resources/api.profiles.ini' as well as '/resources/en.sitemap.ini' and '/resources/styles/style.css' files. You should make a backup of these files in case you have modified these files yourself for some reason.</p>
 				
 			<h2>Planning</h2>
 				
@@ -91,7 +91,9 @@
 					
 					<p>Wave Framework <a href="configuration.htm">Configuration</a> also has two Sitemap-related settings that are used in Wave Framework for situations when the URL is not set (which is considered the Home page) or when a match is not found (which would be the 404 Not Found page). By default the Home page will call a view named 'home' and 404 page will call a view named '404'. You can edit these values in <a href="configuration.htm">Configuration</a>: they are the 'home-view' and '404-view' settings.</p>
 					
-					<p>404 View and Home View are stored in these two files by default:</p>
+					<p>These two settings tell Wave Framework which keywords in Sitemap files are considered for 'home' View. So if home-view is set in Configuration file to 'home', then Wave Framework looks for settings from Sitemap file under [home] keyword. This home-view URL node should be defined in all Sitemap files for all languages as the same one, as this URL (/home/) is never actually shown in the browser. Note that whenever Wave Framework finds a URL that has 'view' value set to the same as 'home-view', then it redirects the user to home URL of the website.</p>
+					
+					<p>404 View and Home View are stored in these two files by default configuration (as per 'home-view' and '404-view' settings):</p>
 				
 					<ul>
 						<li><b>/views/home.view.php</b> - We will be editing this View to suit our needs later on.</li>
@@ -182,9 +184,9 @@
 				
 					<p>Websites also implement stylesheets and JavaScript. While this tutorial does not cover the topic of JavaScript integration and AJAX calls with Wave Framework, both of these topics are available and documented in other parts of the documentation extensively.</p>
 					
-					<p>The main CSS stylesheet and JavaScript files are stored in '/resources/style.css' '/resources/script.js' respectively. These files, together with jQuery, are loaded automatically by the default <a href="guide_view.htm">View Controller</a>. If you wish to alter this behavior in any way, then you can edit the <a href="guide_view.htm">View Controller</a> file in '/controllers/controller.view.php'.</p>
+					<p>The main CSS stylesheet and JavaScript files are stored in '/resources/styles/style.css' '/resources/script.js' respectively. These files, together with jQuery, are loaded automatically by the default <a href="guide_view.htm">View Controller</a>. If you wish to alter this behavior in any way, then you can edit the <a href="guide_view.htm">View Controller</a> file in '/controllers/controller.view.php'.</p>
 					
-					<p>As an addition, Wave Framework also supports view-specific on-demand stylesheets and scripts. This means that if the <a href="guide_view.htm">View Controller</a> is loading a view for 'home', for example, then it would also load the Stylesheet file from '/resources/home.style.css' and JavaScript from '/resources/home.script.js' if they are available. This is very useful since it allows you to not have to load all the JavaScript or CSS for all of the pages of your website. If one page requires to use JavaScript and CSS files that are very large, then there is no reason to load them for every other page of your website or infosystem.</p>
+					<p>As an addition, Wave Framework also supports view-specific on-demand stylesheets and scripts. This means that if the <a href="guide_view.htm">View Controller</a> is loading a view for 'home', for example, then it would also load the Stylesheet file from '/resources/styles/home.style.css' and JavaScript from '/resources/home.script.js' if they are available. This is very useful since it allows you to not have to load all the JavaScript or CSS for all of the pages of your website. If one page requires to use JavaScript and CSS files that are very large, then there is no reason to load them for every other page of your website or infosystem.</p>
 					
 					<p><a href="guide_view.htm">View Controller</a> also does other things when loading resources, such as reducing the number of HTTP request by unifying or even minifying some script resources. You can read about these features in other parts of the documentation.</p>
 					
@@ -793,7 +795,7 @@
 					
 					<p>In this tutorial we will be dealing with errors the 'old school' way. This means that we will simply return a GET variable to the redirected pages and detect their presence in the Views when generating the page.</p>
 
-					<p>This is not the best way of doing such a functionality. Wave Framework actually includes a <a href="guide_messenger.htm">State Messenger</a> Class, as well as session and cookie managers, which can be used for these situations. But to keep this tutorial as simple as possible, then the 'old school' is the quickest and easiest way to accomplish this.</p>
+					<p>This is not the best way of doing such a functionality. Wave Framework actually includes a <a href="guide_messenger.htm">State Messenger</a> , as well as session and cookie managers, which can be used for these situations. But to keep this tutorial as simple as possible, then the 'old school' is the quickest and easiest way to accomplish this.</p>
 					
 					<p>We will be changing our 'success-url' and 'failure-url' by appending GET variables to both. These are the variables that we then check for in the Views. Modify your hidden form fields to the following:</p>
 					

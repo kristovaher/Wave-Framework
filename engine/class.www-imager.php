@@ -133,7 +133,6 @@ class WWW_Imager {
 		
 		// It output location is set, then file is stored in filesystem. If not set, then output is sent to user agent.
 		if($location){
-		
 			// Different file types have different compression levels for quality
 			switch($format){
 				case 'jpg':
@@ -149,9 +148,7 @@ class WWW_Imager {
 					trigger_error('This output format is not supported',E_USER_ERROR);
 					break;
 			}
-			
 		} else {
-		
 			// Different file types have different compression levels for quality
 			switch($format){
 				case 'jpg':
@@ -194,7 +191,6 @@ class WWW_Imager {
 					trigger_error('This output format is not supported',E_USER_ERROR);
 					break;
 			}
-			
 		}
 
         // Something must have gone wrong
@@ -493,7 +489,6 @@ class WWW_Imager {
 		
 		// Left position is calculated, if value is a string instead of a number
 		switch($left){
-		
 			case 'center':
 				// Calculating image left position based on positioning difference with new dimensions
 				$left=-(round(($this->width-$width)/2));
@@ -516,7 +511,6 @@ class WWW_Imager {
 		
 		// Top position is calculated, if value is a string instead of a number
 		switch($top){
-		
 			case 'center':
 				// Calculating image top position based on positioning difference with new dimensions
 				$top=-(round(($this->height-$height)/2));
@@ -582,7 +576,6 @@ class WWW_Imager {
 		
 		// PNG images do not require a background
 		if($this->type!=IMAGETYPE_PNG){
-	
 			// If red color is out of allowed range it is defaulted to 0
 			if($red<0 || $red>255){ 
 				$red=0; 
@@ -595,7 +588,6 @@ class WWW_Imager {
 			if($blue<0 || $blue>255){ 
 				$blue=0; 
 			}
-			
 		}
 	
 		// Left position is calculated, if value is a string instead of a number
@@ -697,7 +689,6 @@ class WWW_Imager {
 	
 		// PNG images do not require a background
 		if($this->type!=IMAGETYPE_PNG){
-		
 			// If red color is out of allowed range it is defaulted to 0
 			if($red<0 || $red>255){ 
 				$red=0; 
@@ -710,7 +701,6 @@ class WWW_Imager {
 			if($blue<0 || $blue>255){ 
 				$blue=0; 
 			}
-			
 		}
 	
 		// System resizes source image based on which side of the image would be left 'outside' of the frame		
@@ -1027,10 +1017,8 @@ class WWW_Imager {
 		
 		// If alpha setting is used, then the resulting image will be 'merged'
 		if($alpha!=100){
-		
 			// Temporary image is created for the output
 			$tmpImage=imagecreatetruecolor($this->width,$this->height);
-			
 			// This preserves alpha maps, if it exists (such as for PNG)
 			imagealphablending($tmpImage,false);
 			imagesavealpha($tmpImage,true);
@@ -1038,22 +1026,17 @@ class WWW_Imager {
 			if(!imagecopyresampled($tmpImage,$this->resource,0,0,0,0,$this->width,$this->height,$this->width,$this->height)){
 				return false;
 			}
-			
 		}
 		
 		// Convulation is a complicated function
 		if($type=='convulate'){
-		
 			// Convulation matrix is 3x3 array of floats
 			$matrix=array(array($settings[0],$settings[1],$settings[2]),array($settings[3],$settings[4],$settings[5]),array($settings[6],$settings[7],$settings[8]));
-			
 			// Convulation applied
 			if(!imageconvolution($this->resource, $matrix, $settings[9], $settings[10])){
 				return false;
 			}
-		
 		} else {
-			
 			// This applies the requested filter
 			// imagefilter() expects different amount of parameters, this takes all conditions into account
 			switch (count($settings)){
@@ -1083,7 +1066,6 @@ class WWW_Imager {
 					}
 					break;
 			}
-		
 		}
 		
 		// Filtered image is layered on top of the original, if alpha is not 100%

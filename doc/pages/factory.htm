@@ -68,6 +68,10 @@
 				
 					<p>This method loads and returns a new object for a class $className. Factory attempts to load this class definition from a file in /resources/classes/ or /overrides/resources/classes/ folder and file name should be written in format class.[$className].php in that folder. If $methodName is set, then this method will also automatically call that method and return result of that method instead of the view object itself. If $methodData is also set, then this is the input variable sent to $methodName.</p>
 			
+				<h3>final protected function loadLibrary($libraryName,$functionName=false,$methodData=false)</h3>
+				
+					<p>This method is used to dynamically load a library in /resources/libaries/ subfolder. If additional parameters are set, then this method can also automatically call one of the methods in the file.</p>
+			
 				<h3>final protected function getImager($source=false)</h3>
 				
 					<p>This method loads <a href="imager.htm">Imager</a> class that is used for image editing. If $source is set, then it also automatically assigns a source image file for that <a href="imager.htm">Imager</a>.</p>
@@ -134,13 +138,13 @@
 			
 				<h3>final protected function setMessengerData($key,$value=false)</h3>
 				
-					<p>This method stores data $value under key of $key. It also turns off caching of the current <a href="guide_api.htm">API</a> call as a result, since <a href="guide_messenger.htm">State Messenger</a> Class is outside the scope of caching.</p>
+					<p>This method stores data $value under key of $key. It also turns off caching of the current <a href="guide_api.htm">API</a> call as a result, since <a href="guide_messenger.htm">State Messenger</a> is outside the scope of caching. Additionally using this function also turns off caching of the page which uses it.</p>
 			
 				<h3>final protected function unsetMessengerData($key=false)</h3>
 			
-				<h3>final protected function getMessengerData($address=false,$remove=true)</h3>
+				<h3>final protected function getMessengerData($key=false,$remove=true)</h3>
 				
-					<p>This method returns data from <a href="guide_messenger.htm">State Messenger</a> Class with an address of $address. If $remove is set - as it is by default - then <a href="guide_messenger.htm">State Messenger</a> Class of this $address is also deleted and cannot be accessed again.</p>
+					<p>This method returns data from State messenger. It either returns all the data from initialized state messenger, or just a $key from it. If $remove is set, then data is also set for deletion after it has been accessed. Additionally using this function also turns off caching of the page which uses it.</p>
 			
 				<h3>final protected function regenerateSession($deleteOld=true)</h3>
 			

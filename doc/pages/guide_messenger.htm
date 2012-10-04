@@ -44,7 +44,7 @@
 	</code>
 </pre>
 
-				<p>Please note that if State Messenger already exists, then it is loaded instead. This means that it is possible to pile up content for a State Messenger if needed.</p>
+				<p>Please note that if State Messenger already exists with that key or address, then the contents of existing messenger are loaded to messenger and can be accessed already. This means that it is possible to pile up content for a State Messenger if needed.</p>
 				
 				<p>In order to add data to State Messenger, you can send a key and a value for that key to the State Messenger. You can also send a single array of keys and values. Here are the examples:</p>
 				
@@ -64,9 +64,9 @@
 	
 <pre>
 	<code>
-	// This returns data with address 'my-shared-data' and removes it from filesystem (default behavior)
+	// This returns data with key 'my-shared-data' and removes it from filesystem (default behavior)
 	$messengerData=$this->getMessengerData('my-shared-data');
-	// This returns data with address 'my-shared-data' and keeps it after use
+	// This returns data with key 'my-shared-data' and keeps it after use
 	$messengerData=$this->getMessengerData('my-shared-data',false);
 	// This returns state messenger data from current message container (current request session)
 	$messengerData=$this->getMessengerData();

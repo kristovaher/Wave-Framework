@@ -182,6 +182,7 @@ function WWW_Wrapper(address,language){
 		 * @return boolean
 		 */
 		this.setInput=function(input,value){
+		
 			//Default value
 			if(value==null || value==false){
 				value=0;
@@ -195,6 +196,7 @@ function WWW_Wrapper(address,language){
 				inputSetter(input,value);
 			}
 			return true;
+			
 		}
 		
 		/*
@@ -208,6 +210,8 @@ function WWW_Wrapper(address,language){
 		 * @return boolean
 		 */
 		var inputSetter=function(input,value){
+		
+			// Input is set based on key, as some keys have additional functionality
 			switch(input){
 				case 'www-api':
 					apiState.apiAddress=value;
@@ -359,6 +363,7 @@ function WWW_Wrapper(address,language){
 					break;				
 			}
 			return true;
+			
 		}
 		
 		/*
@@ -370,12 +375,14 @@ function WWW_Wrapper(address,language){
 		 * @return boolean
 		 */
 		this.setForm=function(formId){
+		
 			// Sets the form handler
 			apiState.apiSubmitFormId=formId;
 			// This forces another content type to stop browsers from pre-formatting the hidden iFrame content
 			inputData['www-content-type']='text/html';
 			log.push('Form ID set: '+formId);
 			return true;
+			
 		}
 		
 		/*
@@ -384,11 +391,14 @@ function WWW_Wrapper(address,language){
 		 * @return boolean
 		 */
 		this.clearForm=function(){
+		
+			// Resetting content type
 			if(inputData['www-content-type']!=null){
 				delete inputData['www-content-type'];
 			}
 			apiState.apiSubmitFormId=false;
 			return true;
+			
 		}
 		
 		/*
@@ -398,6 +408,8 @@ function WWW_Wrapper(address,language){
 		 * @return boolean
 		 */
 		this.clearInput=function(clearAuth){
+		
+			// If authentication was also set for deletion
 			if(clearAuth!=null && clearAuth==true){
 				// Settings
 				apiState.apiProfile=false;
@@ -409,6 +421,7 @@ function WWW_Wrapper(address,language){
 				apiState.returnTimestamp=false;
 				apiState.timestampDuration=60;
 			}
+			
 			// Resetting the API state test key
 			apiState.apiStateKey=false;
 			// Neutralizing state settings
@@ -424,6 +437,7 @@ function WWW_Wrapper(address,language){
 			// Log entry
 			log.push('Input data, crypted input and file data is unset');
 			return true;
+			
 		}
 		
 	// SENDING REQUEST		
@@ -460,7 +474,6 @@ function WWW_Wrapper(address,language){
 			
 			// Storing input data
 			var thisInputData=clone(inputData);
-			
 			// Current state settings
 			var thisApiState=clone(apiState);
 			
@@ -484,7 +497,6 @@ function WWW_Wrapper(address,language){
 			if(thisApiState.apiPublicToken){
 				thisInputData['www-public-token']=thisApiState.apiPublicToken;
 			}
-
 			// If language is set
 			if(apiLanguage!=null && apiLanguage!=false){
 				thisInputData['www-language']=apiLanguage;
@@ -506,7 +518,6 @@ function WWW_Wrapper(address,language){
 				log.push('Since www-return-type is set to default value, it is removed from input data');
 				delete thisInputData['www-return-type'];
 			}
-			
 			// If default value is set, then it is removed
 			if(thisInputData['www-cache-timeout']!=null && thisInputData['www-cache-timeout']==0){
 				log.push('Since www-cache-timeout is set to default value, it is removed from input data');
@@ -537,7 +548,6 @@ function WWW_Wrapper(address,language){
 				
 					// Validation hash is generated based on current serialization option
 					if(thisInputData['www-hash']==null){
-					
 						// Validation requires a different hash
 						var validationData=clone(thisInputData);
 						// Calculating validation hash
@@ -546,7 +556,6 @@ function WWW_Wrapper(address,language){
 						} else {
 							thisInputData['www-hash']=validationHash(validationData,thisApiState.apiSecretKey);
 						}
-						
 					}
 
 					// Log entry
@@ -589,10 +598,8 @@ function WWW_Wrapper(address,language){
 				
 					// Default method
 					var method='GET';
-				
 					// Getting input variables
 					var requestData=buildRequestData(thisInputData);
-				
 					// Creating request handler
 					var XMLHttp=new XMLHttpRequest();
 				
@@ -611,7 +618,6 @@ function WWW_Wrapper(address,language){
 						
 						// Log entry
 						log.push('Making '+method+' request to URL: '+apiAddress);
-						
 						// AJAX states
 						XMLHttp.onreadystatechange=function(){
 							if(XMLHttp.readyState===4){
@@ -628,7 +634,6 @@ function WWW_Wrapper(address,language){
 								}  
 							}  
 						};
-						
 						// Sending the request
 						if(method=='POST'){
 							XMLHttp.open(method,apiAddress,true);
@@ -642,7 +647,6 @@ function WWW_Wrapper(address,language){
 					
 						// Log entry
 						log.push('Making '+method+' request to URL: '+apiAddress);
-						
 						// Sending the request
 						if(method=='POST'){
 							XMLHttp.open(method,apiAddress,false);
@@ -651,7 +655,6 @@ function WWW_Wrapper(address,language){
 							XMLHttp.open(method,apiAddress+'?'+requestData,false);
 							XMLHttp.send(null);
 						}
-						
 						// Result based on status
 						if(XMLHttp.status===200 || XMLHttp.status===304){  
 							log.push('Result of the request: '+XMLHttp.responseText);
@@ -947,10 +950,12 @@ function WWW_Wrapper(address,language){
 		 * @return boolean/mixed depending on whether callback function is called or not
 		 */
 		var errorHandler=function(thisInputData,thisResponseCode,thisErrorMessage,thisErrorCallback){
+		
 			// Assigning error details to object state
 			responseCode=thisResponseCode;
 			errorMessage=thisErrorMessage;
 			log.push(errorMessage);
+			
 			// If failure callback has been defined
 			if(thisErrorCallback){
 				// If the callback is a function name and not a function itself
@@ -974,6 +979,7 @@ function WWW_Wrapper(address,language){
 			} else {
 				return false;
 			}
+			
 		}
 		
 		/*
@@ -984,6 +990,8 @@ function WWW_Wrapper(address,language){
 		 * @return object
 		 */
 		var clone=function(object){
+		
+			// Cloning based on type
 			if(object==null || typeof(object)!=='object'){
 				return object;
 			}
@@ -992,6 +1000,7 @@ function WWW_Wrapper(address,language){
 				tmp[key]=clone(object[key]);
 			}
 			return tmp;
+			
 		}
 		
 		/*
@@ -1005,10 +1014,12 @@ function WWW_Wrapper(address,language){
 		 * @return string
 		 */
 		var validationHash=function(validationData,postFix){
+		
 			// Sorting and encoding the output data
 			validationData=ksortArray(validationData);
 			// Returning validation hash		
 			return sha1(buildRequestData(validationData)+postFix);
+			
 		}
 		
 		/*
@@ -1020,6 +1031,7 @@ function WWW_Wrapper(address,language){
 		 * @return mixed
 		 */
 		var ksortArray=function(data){
+		
 			// Method is based on the current data type
 			if(typeof(data)==='array' || typeof(data)==='object'){
 				// Sorting the current array
@@ -1030,6 +1042,7 @@ function WWW_Wrapper(address,language){
 				}
 			}
 			return data;
+			
 		}
 		
 		/*
@@ -1040,6 +1053,8 @@ function WWW_Wrapper(address,language){
 		 * @return string
 		 */
 		var buildRequestData=function(data){
+		
+			// variables are stored in array
 			var variables=new Array();
 			for(var i in data){
 				// Using the helper function
@@ -1049,6 +1064,7 @@ function WWW_Wrapper(address,language){
 				}
 			}
 			return variables.join('&');
+			
 		}
 		
 		/* 
@@ -1060,6 +1076,8 @@ function WWW_Wrapper(address,language){
 		 * @return string 
 		 */
 		var subRequestData=function(key,value){
+		
+			// variables are stored in array
 			var variables=new Array();
 			if(value!=null){
 				// Converting true/false to numeric
@@ -1082,7 +1100,8 @@ function WWW_Wrapper(address,language){
 			} else {
 				return '';
 			}
-		};
+			
+		}
 		
 		/*
 		 * This helper method converts certain characters into their suitable form that would 
@@ -1093,6 +1112,8 @@ function WWW_Wrapper(address,language){
 		 * @return string
 		 */
 		var encodeValue=function(data){
+		
+			// Series of filters applied to the value
 			data=encodeURIComponent(data);
 			data=data.replace('\'','%27');
 			data=data.replace('!','%21');
@@ -1101,6 +1122,7 @@ function WWW_Wrapper(address,language){
 			data=data.replace('*','%2A');
 			data=data.replace('%20','+');
 			return data;
+			
 		}
 	
 		/*
@@ -1111,6 +1133,7 @@ function WWW_Wrapper(address,language){
 		 * @return object
 		 */
 		var ksort=function(object){
+		
 			// Result will be gathered here
 			var keys=new Array();
 			var sorted=new Object();
@@ -1125,6 +1148,7 @@ function WWW_Wrapper(address,language){
 				sorted[keys[i]]=object[keys[i]];
 			}
 			return sorted;
+			
 		}
 	
 		/*

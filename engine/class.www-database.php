@@ -91,6 +91,7 @@ class WWW_Database {
 	 * @return object
 	 */
 	public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=true,$persistent=false){
+	
 		// Assigning construct elements to object parameters
 		$this->type=$type;
 		$this->host=$host;
@@ -99,6 +100,7 @@ class WWW_Database {
 		$this->password=$password;
 		$this->showErrors=$showErrors;
 		$this->persistent=$persistent;
+		
 	}
 	
 	/**
@@ -138,6 +140,7 @@ class WWW_Database {
 				$connectLine.='host='.$this->host.';';
 			}
 		}
+		
 		// If database name is set
 		if($this->database){
 			$connectLine.='dbname='.$this->database.';';
@@ -392,7 +395,10 @@ class WWW_Database {
 	 * @return array or mixed if source is not an array
 	 */
 	public function dbArray($array,$key,$unique=true){
+	
+		// Result will be an array
 		$result=array();
+		
 		// This method only works on an array
 		if(is_array($array)){
 			foreach($array as $ar){
@@ -415,6 +421,7 @@ class WWW_Database {
 			}
 		}
 		return $result;
+		
 	}
 	
 	/**
@@ -428,16 +435,19 @@ class WWW_Database {
 	 * @return string
 	 */
 	public function dbDebug($query,$variables=array()){
+	
 		// Attempting to connect to database, if not connected
 		if($this->connected!=1){
 			$this->dbConnect();
 		}
+		
 		// Attempt to simulate PDO query-building
 		$keys=array();
 		$values=array();
-		// Type is either 1 for positioned variables or 2 for name based tokens
-		// 0 means that it is undefined
+		
+		// Type is either 1 for positioned variables or 2 for name based tokens, 0 means that it is undefined
 		$type=0;
+		
 		// Making sure that variables are not empty
 		if(!empty($variables)){
 			// This method requires database connection
@@ -471,6 +481,7 @@ class WWW_Database {
 		} else {
 			return $query;
 		}
+		
 	}
 	
 	/**
@@ -483,10 +494,8 @@ class WWW_Database {
 	
 		// This method requires database to be connected
 		if($this->connected==1){
-		
 			// Query total is being counted for performance review
 			$this->queryCounter++;
-
 			// Checks for last existing inserted row's unique ID
 			$lastId=$this->pdo->lastInsertId();
 			// Last ID is found, it is returned, otherwise it returns false
@@ -495,7 +504,6 @@ class WWW_Database {
 			} else {
 				return false;
 			}
-
 		} else {
 			// Cannot find last ID if not connected
 			trigger_error('Database not connected',E_USER_ERROR);
@@ -515,10 +523,8 @@ class WWW_Database {
 		if($this->connected!=1){
 			$this->dbConnect();
 		}
-		
 		// Query total is being counted for performance review
 		$this->queryCounter++;
-		
 		// Begins transaction
 		if($this->pdo->beginTransaction()){
 			return true;
@@ -538,17 +544,14 @@ class WWW_Database {
 	
 		// This method requires database to be connected
 		if($this->connected==1){
-		
 			// Query total is being counted for performance review
 			$this->queryCounter++;
-			
 			// Commits transaction
 			if($this->pdo->commit()){
 				return true;
 			} else {
 				return false;
 			}
-			
 		} else {
 			// Cannot find last ID if not connected
 			trigger_error('Database not connected',E_USER_ERROR);
@@ -566,17 +569,14 @@ class WWW_Database {
 	
 		// This method requires database to be connected
 		if($this->connected==1){
-		
 			// Query total is being counted for performance review
 			$this->queryCounter++;
-			
 			// Rolls back transaction
 			if($this->pdo->rollBack()){
 				return true;
 			} else {
 				return false;
 			}
-			
 		} else {
 			trigger_error('Database not connected',E_USER_ERROR);
 		}

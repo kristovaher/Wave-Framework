@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>JavaScript Factory Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>JavaScript API Wrapper Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-factory.js</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>JavaScript factory has very minimal use compared to the Wave Framework's own internal PHP Factory, but this class is still useful for dynamically loading JavaScript objects from /resources/classes/ folder or libraries from /resources/libraries/ subfolder.</p>
+				
+				<p>Factory class loads class definitions through AJAX and attempts to create an object that is being requested. Libraries can also be loaded dynamically as well as functions called from that library with a single request.</p>
+				
+			<h2>Using JavaScript Factory Class</h2>
+
+				<p>By default the factory class loads scripts from '/resources/' folder and '/classes/' and '/libraries/' subfolders. For the dynamic object loading to work, the class name and filename must include the same keyword. If I create a new JavaScript class 'example', then I need to place a file 'class.example.js' to '/resources/classes/' subfolder and make sure that my class name is 'example'.</p>
+			
+				<p>Once this is done, I can load the class easily with the following:</p>
+				
+<pre>
+	<code>
+	// Create a new Factory class
+	var Factory=new WWW_Factory();
+	// Get new instance of the 'example' class
+	var myExample=Factory.getObject('example');
+	// And now you can use that object like any other
+	myExample.doSomething();
+	</code>
+</pre>
+
+				<p>Same applies to libraries. If I have a library of functions in a script that is situated in '/resources/libraries/my-stuff.php', then I can dynamically load that library and use functions from it like this:</p>
+				
+<pre>
+	<code>
+	// Factory class is required
+	var Factory=new WWW_Factory();
+	// Load the library
+	Factory.loadLibrary('example');
+	// Use some function from that library
+	doSomething();
+	</code>
+</pre>
+
+				<p>Note that you have to be careful when loading functions to global namespace in the browser, such as when loading libraries and classes. It is useful to use some naming standard or prefixes for your classes and functions to reduce possible namespace conflicts.</p>
+
+			<h2>JavaScript Factory Class Parameters</h2>
+			
+				<h3>var classBase=document.baseURI+'resources/classes/'</h3>
+				
+					<p>This is the base URL where class files are loaded from. Factory attempts to load classes from that folder. This value can be overwritten when defining a different URL when initializing Factory class.</p>
+								
+				<h3>var libraryBase=document.baseURI+'resources/libraries/'</h3>
+				
+					<p>This is the base URL where library files are loaded from. Factory attempts to load libraries from that folder. This value can be overwritten when defining a different URL when initializing Factory class.</p>
+					
+				<h3>window['WWW_Factory_loaded']=new Object()</h3>
+				
+					<p>This variable simply holds information about which files have been already loaded to make sure that the same classes and libraries are not loaded multiple times.</p>
+					
+			<h2>JavaScript Factory Class Methods</h2>
+					
+				<h3>function WWW_Factory(base)</h3>
+				
+					<p>Factory class takes only one variable 'base' which defines the root folder where the Factory looks for the script files. Default location is base URI subfolders in /resources/ folder.</p>
+										
+				<h3>this.getObject=function(className,methodName,methodData)</h3>
+				
+					<p>This method loads and returns a new object for a class 'className'. Factory attempts to load this class definition from a file in /resources/classes/ and file name should be written in class.[className].js format in that folder. If 'methodName' is set, then this method will also automatically call that method and return result of that method instead of the view object itself. If 'methodData' is also set, then this is the input variable sent to methodName.</p>
+										
+				<h3>this.loadLibrary=function(libraryName,functionName,functionData)</h3>
+				
+					<p>This method is used to dynamically load a library from /resources/libaries/ subfolder. If additional parameters are set, then this method can also automatically call one of the functions in the library.</p>
+										
+				<h3>var loadFile=function(address)</h3>
+				
+					<p>This private function is used to load contents of a script file and initialize these contents in the browser for use as classes, functions or other scripts.</p>
+					
+	</body>
+</html>

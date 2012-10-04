@@ -57,6 +57,10 @@
 
 			<p>Factory class is required for loading <a href="guide_mvc.htm">MVC</a> objects. Factory is used as a parent class for supporting the <a href="guide_mvc.htm">MVC</a> components of the system, every <a href="guide_mvc.htm">MVC</a> component is (usually) inherited from this class. Factory carries with itself wrappers for <a href="guide_api.htm">API</a> and <a href="guide_state.htm">State</a> functionality.</p>
 
+			<p><b>/engine/class.www-factory.js</b></p>
+			
+			<p>This factory can be used to dynamically load JavaScript objects, libraries and more, that are placed in /resources/classes/ subfolder or in /resources/scripts/ subfolder.</p>
+			
 			<p><b>/engine/class.www-imager.php</b></p>
 
 			<p>This class is used to handle basic image editing, mostly for file resizes and cropping. This is used by default by <a href="gateway.htm">Index Gateway</a> when a PNG or JPEG file is requested with specific parameters, but can also be used for other image editing in the system since it can be loaded independently.</p>
@@ -75,7 +79,7 @@
 
 			<p><b>/engine/class.www-state.php</b></p>
 
-			<p><a href="guide_state.htm">State</a> is always required by Wave Framework. It is used by API and some handlers. <a href="guide_state.htm">State</a> is used to keep track of system state, configuration and its changes, such as relevant PHP settings. It allows changing these settings, and thus affecting API or PHP configuration. <a href="guide_state.htm">State</a> also includes functionality for <a href="guide_messenger.htm">State Messenger</a> Class, sessions, cookies, translations and sitemap data. <a href="guide_state.htm">State</a> is assigned in API and is accessible in <a href="guide_mvc.htm">MVC</a> objects through Factory wrapper methods. Multiple different states can be used by the same request, but usually just one is used per request. <a href="guide_state.htm">State</a> is only kept for the duration of the request processing and is not stored beyond its use in the request.</p>
+			<p><a href="guide_state.htm">State</a> is always required by Wave Framework. It is used by API and some handlers. <a href="guide_state.htm">State</a> is used to keep track of system state, configuration and its changes, such as relevant PHP settings. It allows changing these settings, and thus affecting API or PHP configuration. <a href="guide_state.htm">State</a> also includes functionality for <a href="guide_messenger.htm">State Messenger</a> , sessions, cookies, translations and sitemap data. <a href="guide_state.htm">State</a> is assigned in API and is accessible in <a href="guide_mvc.htm">MVC</a> objects through Factory wrapper methods. Multiple different states can be used by the same request, but usually just one is used per request. <a href="guide_state.htm">State</a> is only kept for the duration of the request processing and is not stored beyond its use in the request.</p>
 
 			<p><b>/engine/class.www-wrapper.php</b></p>
 
@@ -134,7 +138,7 @@
 			/filesystem/updates/<br/>
 			/filesystem/userdata/</b></p>
 
-			<p>All of these folders must be writable by PHP for Wave Framework to properly function. Backups store system backups. Cache stores various caches for images, output and resource loading. Data is used to store databases like SQLite. Errors is used to store error logs. Keys is used to store various cryptography keys. <a href="limiter.htm">Limiter</a> is used to store HTTP request <a href="limiter.htm">Limiter</a> data. Logs is used to store log data. Messenger is used to store <a href="guide_messenger.htm">State Messenger</a> Class data. Sessions are used to store API session token data. Temp folder is used to store various data temporarily. Updates folder stores update archives that have been installed. Userdata can be used for whatever purpose. Cleaner script can be used to automatically clean all of those folders either individually, by defining folder name (like 'backups'), by defining 'maintenance' mode, which cleans only cache and temporary files or 'all', which clears all of the folders.</p>
+			<p>All of these folders must be writable by PHP for Wave Framework to properly function. Backups store system backups. Cache stores various caches for images, output and resource loading. Data is used to store databases like SQLite. Errors is used to store error logs. Keys is used to store various cryptography keys. <a href="limiter.htm">Limiter</a> is used to store HTTP request <a href="limiter.htm">Limiter</a> data. Logs is used to store log data. Messenger is used to store <a href="guide_messenger.htm">State Messenger</a>  data. Sessions are used to store API session token data. Temp folder is used to store various data temporarily. Updates folder stores update archives that have been installed. Userdata can be used for whatever purpose. Cleaner script can be used to automatically clean all of those folders either individually, by defining folder name (like 'backups'), by defining 'maintenance' mode, which cleans only cache and temporary files or 'all', which clears all of the folders.</p>
 
 			<p><b>/models/</b></p>
 
@@ -145,12 +149,14 @@
 			<p>Minimal example model for demonstration purposes.</p>
 
 			<p><b>/overrides/<br/>
-			/overrides/resources/<br/>
 			/overrides/controllers/<br/>
 			/overrides/models/<br/>
 			/overrides/resources/<br/>
 			/overrides/resources/classes/<br/>
 			/overrides/resources/images/<br/>
+			/overrides/resources/libraries/<br/>
+			/overrides/resources/scripts/<br/>
+			/overrides/resources/styles/<br/>
 			/overrides/views/</b></p>
 
 			<p>If there is a file stored in these folders when the system attempts to access a specific static resource file or load a <a href="guide_mvc.htm">MVC</a> object, these folders are checked first. This is not useful for majority of cases, but it can be used to deploy same version of software for different servers and change some functionality on one server without affecting the update cycle (all core files can still be updated without overwriting certain custom features). Images subfolder is meant for storing your image resources for CSS. Classes subfolder is meant for PHP classes that are used in the project (these can also be autoloaded through Factory).</p>
@@ -159,13 +165,40 @@
 
 			<p>Various static resources are stored in this folder, most of these files are not required by the system unless you also intend to use /index.php and WWW_controller_view functionality for building a website with Wave Framework.</p>
 
-			<p><b>/resources/images/</b></p>
+			<p><b>/resources/classes/<br/>
+			/resources/classes/class.{name}.js<br/>
+			/resources/classes/class.{name}.php<br/></b></p>
+			
+			<p>This folder includes all the classes that can be dynamically loaded through Factory method getObject() from either JavaScript or PHP. Filename should be formatted as class.[name].php and class name as [name]. Dynamically loaded JavaScript files should also be stored in these folders and they work the same way. Two example files are provided as a starting point.</p>
+			
+			<p><b>/resources/images/<br/>/resources/images/logo.png</b></p>
 
-			<p>It is recommended to store various image files, such as design files, in this folder. It is not necessary to store image files here, but it is recommended.</p>
+			<p>It is recommended to store various image files, such as design files, in this folder. One image is there by default (logo.png), but this can be removed if not used in any way.</p>
+			
+			<p><b>/resources/libraries/<br/>
+			/resources/libraries/{name}.js<br/>
+			/resources/libraries/{name}.php</b></p>
+			
+			<p>This folder stores various PHP scripts or JavaScript files that can be dynamically loaded within MVC objects through Factory classes. These files can also be automatically loaded by URL controller, if they are set. Two example scripts are provided as a starting point.</p>
+			
+			<p><b>/resources/scripts/<br/>
+			/resources/scripts/script.js<br/>
+			/resources/scripts/jquery.js<br/>
+			/resources/scripts/{view}.script.js<br/>
+			/resources/scripts/{view}.script.php<br/></b></p>
+			
+			<p>This folder includes all the JavaScript files. All of these files are optional, but the View Controller loads the script.js and jquery.js (jQuery framework) file by default. You can also define view-specific scripts here for both JavaScript and PHP, which are loaded by URL and View controllers if detected.</p>
 			
 			<p><b>/resources/static/</b></p>
 			
 			<p>Static folder is used for static files that will never be served through PHP. On-demand dynamic loading of pictures and script files won't affect files in this folder.</p>
+			
+			<p><b>/resources/styles/<br/>
+			/resources/styles/reset.css<br/>
+			/resources/styles/style.css<br/>
+			/resources/styles/{view}.style.css</b></p>
+			
+			<p>This folder includes all the stylesheet files. Reset CSS file (reset.css) defaults all of the styles in the browser so that you can build your own styles on top that will be same across all browsers. Main style file is 'style.css', which is loaded by View Controller by default. You can also define view-specific stylesheets here.</p>
 
 			<p><b>/resources/api.profiles.ini</b></p>
 
@@ -186,24 +219,6 @@
 			<p><b>/resources/{language-code}.translations.ini</b></p>
 
 			<p>This file stores system translations that can be used by <a href="guide_view.htm">View Controller</a>. Translation keyword is used across the system and its value is the translation that will be displayed.</p>
-
-			<p><b>/resources/jquery.js</b></p>
-
-			<p>Optional jQuery library that is loaded by default by WWW_controller_view for use in front-end user interface functionality.</p>
-
-			<p><b>/resources/reset.css</b></p>
-
-			<p>Optional Reset CSS stylesheet that resets and nullifies the styles in the browser so that all defaults in different browsers would be the same. This helps build better user interface consistency across different browsers when adding styles to /style.css file.</p>
-
-			<p><b>/resources/script.js<br/>
-			/resources/{view}.script.js</b></p>
-
-			<p>This is general use JavaScript file. Main JavaScript functionality should go here and this file is loaded by default by <a href="guide_view.htm">View Controller</a>. It is possible to load view specific JavaScript, this file is included among HTML resources by WWW_controller_view if it is detected and found for the view it loads. This file is loaded after other JavaScript files.</p>
-
-			<p><b>/resources/style.css<br/>
-			/resources/{view}.style.css</b></p>
-
-			<p>General use stylesheet that is loaded by WWW_controller_view. All styles can be defined in this file and this file is generally loaded as the first CSS file in the system after reset CSS. It is also possible to load view-specific CSS by having the view name in the script filename.</p>
 
 			<p><b>/resources/placeholder.jpg</b></p>
 

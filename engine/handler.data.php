@@ -83,7 +83,7 @@
 // CALLING DEFAULT VIEW CONTROLLER IF URL DID NOT ORDER A REDIRECTION
 
 	// If view data includes flags for redirection then the view itself will be ignored
-	if($view && !isset($view['www-temporary-redirect']) && !isset($view['www-permanent-redirect'])){
+	if(isset($view['view']) && !isset($view['www-temporary-redirect']) && !isset($view['www-permanent-redirect'])){
 			
 		// Notifying State of View data
 		$state->setState(array('view'=>$view,'language'=>$view['language']));

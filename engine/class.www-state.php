@@ -335,10 +335,12 @@ class WWW_State	{
 		
 			// Fingerprint is created based on data sent by user agent, this can be useful for light detection without cookies
 			$fingerprint='';
+			
 			// If IP is set for session fingerprinting
 			if(in_array('ip',$this->data['session-fingerprint'])){
 				$fingerprint.=$this->data['client-ip'];
 			}
+			
 			// If browser is used for session fingerprinting
 			if(in_array('browser',$this->data['session-fingerprint'])){
 				$fingerprint.=$this->data['client-user-agent'];
@@ -349,6 +351,7 @@ class WWW_State	{
 				$fingerprint.=(isset($_SERVER['HTTP_KEEP_ALIVE']))?$_SERVER['HTTP_KEEP_ALIVE']:'';
 				$fingerprint.=(isset($_SERVER['HTTP_CONNECTION']))?$_SERVER['HTTP_CONNECTION']:'';
 			}
+			
 			// If fingerprint is not an empty string then it overwrites the State value
 			if($fingerprint!=''){
 				// Fingerprint is hashed with MD5 using session name for salt
@@ -359,78 +362,58 @@ class WWW_State	{
 		
 			// PHP Input data is ignored for input if form submit is done
 			if(!in_array($this->data['http-content-type'],array(false,'','application/x-www-form-urlencoded','multipart/form-data'))){
-			
 				// Gather sent input
 				$phpInput=file_get_contents('php://input');
-				
 				// For custom content types, when data is sent as an XML or JSON string
 				if($phpInput!=''){
-						
 					// Parsing method depends on content type header
 					if($this->data['http-content-type']=='application/json'){
-					
 						// JSON string is converted to associative array
 						$this->data['http-input']=json_decode($phpInput,true);
-						
 					} elseif(extension_loaded('SimpleXML') && ($this->data['http-content-type']=='application/xml')){
-					
 						// This is not supported in earlier versions of LibXML
 						if(defined('LIBXML_PARSEHUGE')){
 							$tmp=simplexml_load_string($phpInput,'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE | LIBXML_PARSEHUGE);
 						} else {
 							$tmp=simplexml_load_string($phpInput,'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE);
 						}
-						
 						// Data is converted to array only if an object was created
 						if($tmp){
 							$this->data['http-input']=json_decode(json_encode($tmp),true);
 						}
-						
 					} else {
-					
 						// Storing the entire stream directly
 						$this->data['http-input']=$phpInput;
-						
 					}
-					
 				} 
-			
 			}
 			
 			// If special input file is set as XML
 			if(isset($_FILES['www-xml']) || isset($_REQUEST['www-xml'])){
-			
 				// If this is a file upload or not
 				if(isset($_FILES['www-xml'])){
-			
 					// This is not supported in earlier versions of LibXML
 					if(defined('LIBXML_PARSEHUGE')){
 						$tmp=simplexml_load_file($_FILES['www-xml']['tmp_name'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE | LIBXML_PARSEHUGE);
 					} else {
 						$tmp=simplexml_load_file($_FILES['www-xml']['tmp_name'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE);
 					}
-					
 				} else {
-			
 					// This is not supported in earlier versions of LibXML
 					if(defined('LIBXML_PARSEHUGE')){
 						$tmp=simplexml_load_string($_REQUEST['www-xml'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE | LIBXML_PARSEHUGE);
 					} else {
 						$tmp=simplexml_load_string($_REQUEST['www-xml'],'SimpleXMLElement',LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_ERR_NONE);
 					}
-					
 				}
-				
 				// Data is converted to array only if an object was created
 				if($tmp){
 					$this->data['http-input']=json_decode(json_encode($tmp),true);
 				}
-			
 			} 
 			
 			// If special input file is set as JSON
 			if(isset($_FILES['www-json']) || isset($_REQUEST['www-json'])){
-			
 				if(isset($_FILES['www-json'])){
 					// JSON string is converted to associative array
 					$this->data['http-input']=json_decode(file_get_contents($_FILES['www-json']['tmp_name']),true);
@@ -438,7 +421,6 @@ class WWW_State	{
 					// JSON string is converted to associative array
 					$this->data['http-input']=json_decode($_REQUEST['www-json'],true);
 				}
-			
 			}
 		
 	}
@@ -451,24 +433,18 @@ class WWW_State	{
 	 * @return null
 	 */
 	final public function __destruct(){
+	
 		// Only applies if request messenger actually holds data
-		if($this->messenger && !empty($this->messengerData)){
-			// Finding data folder
-			$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
-			if(!is_dir($dataFolder)){
-				if(!mkdir($dataFolder,0755)){
-					trigger_error('Cannot create messenger folder',E_USER_ERROR);
-				}
-			}
-			// Writing messenger data to file
-			if(!file_put_contents($dataFolder.$this->messenger.'.tmp',serialize($this->messengerData))){
-				trigger_error('Cannot write messenger data',E_USER_ERROR);
-			}
+		if($this->messenger){
+			// This stores messenger data in filesystem
+			$this->storeMessenger();
 		}
+		
 		// This will commit session to the session storage
 		if(!headers_sent()){
 			$this->commitHeaders();
 		}
+		
 	}
 	
 	// STATE MANIPULATION
@@ -530,6 +506,7 @@ class WWW_State	{
 				// Certain variables can affect system behavior and this is checked here
 				$this->stateChanged($variable,$value);
 			}
+			
 			// State has been set
 			return true;
 			
@@ -592,12 +569,14 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function commitHeaders(){
+		
 			// Checking if there are more data in sessions than just internal keys
 			$sessionSize=count($this->data['session-data']);
 			if(empty($this->data['session-data']) || ($sessionSize==1 && isset($this->data['session-data'][$this->data['session-timestamp-key']])) || ($sessionSize==1 && isset($this->data['session-data'][$this->data['session-fingerprint-key']])) || ($sessionSize==2 && isset($this->data['session-data'][$this->data['session-timestamp-key']]) && isset($this->data['session-data'][$this->data['session-fingerprint-key']]))){
 				// This will make the session handler destroy the session
 				$this->data['session-data']=array();
 			}
+			
 			// If session data has changed in any way or session is assigned to be regenerated
 			if($this->sessionHandler->regenerateId || $this->originalSessionData!=$this->data['session-data']){
 				// Sending State session data to session handler
@@ -605,19 +584,24 @@ class WWW_State	{
 				// Closing sessions
 				$this->sessionHandler->sessionCommit();
 			}
-			// Commiting headers
+			
+			// Commiting headers for added headers
 			if(!empty($this->data['headers-set'])){
 				foreach($this->data['headers-set'] as $header=>$replace){
 					header($header,$replace);
 				}
 			}
+			
+			// Removing headers if set for removal
 			if(!empty($this->data['headers-unset'])){
 				foreach($this->data['headers-unset'] as $header){
 					header_remove($header);
 				}
 			}
+			
 			// Headers have been commited
 			return true;
+			
 		}
 		
 	// SITEMAP AND TRANSLATIONS
@@ -632,12 +616,15 @@ class WWW_State	{
 		 * @return array, string or false if failed
 		 */
 		final public function getTranslations($language=false,$keyword=false){
+		
 			// If language is not set, then assuming current language
 			if(!$language){
 				$language=$this->data['language'];
 			}
+			
 			// If translations data is already stored in state
 			if(!isset($this->data['translations'][$language])){
+			
 				// Translations can be loaded from overrides folder as well
 				if(file_exists($this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini')){
 					$sourceUrl=$this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini';
@@ -646,6 +633,7 @@ class WWW_State	{
 				} else {
 					return false;
 				}
+				
 				// This data can also be stored in cache
 				$cacheUrl=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.tmp';
 				// Including the translations file
@@ -663,7 +651,9 @@ class WWW_State	{
 					// Since INI file has not been changed, translations are loaded from cache
 					$this->data['translations'][$language]=unserialize(file_get_contents($cacheUrl));
 				}
+				
 			}
+			
 			// Returning keyword, if it is requested
 			if($keyword){
 				if(isset($this->data['translations'][$language][$keyword])){
@@ -675,6 +665,7 @@ class WWW_State	{
 				// If keyword was not set, then returning entire array
 				return $this->data['translations'][$language];
 			}
+			
 		}
 		
 		/**
@@ -693,8 +684,10 @@ class WWW_State	{
 			if(!$language){
 				$language=$this->data['language'];
 			}
+			
 			// If translations data is already stored in state
 			if(!isset($this->data['sitemap-raw'][$language])){
+			
 				// Translations can be loaded from overrides folder as well
 				if(file_exists($this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini')){
 					$sourceUrl=$this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini';
@@ -703,6 +696,7 @@ class WWW_State	{
 				} else {
 					return false;
 				}
+				
 				// This data can also be stored in cache
 				$cacheUrl=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.tmp';
 				// Including the sitemap file
@@ -720,7 +714,9 @@ class WWW_State	{
 					// Since INI file has not been changed, translations are loaded from cache
 					$this->data['sitemap-raw'][$language]=unserialize(file_get_contents($cacheUrl));
 				}
+				
 			}
+			
 			// Returning keyword, if it is requested
 			if($keyword){
 				if(isset($this->data['sitemap-raw'][$language][$keyword])){
@@ -745,19 +741,24 @@ class WWW_State	{
 		 * @return array or false if failed
 		 */
 		final public function getSitemap($language=false,$keyword=false){
+		
 			// If language is not set, then assuming current language
 			if(!$language){
 				$language=$this->data['language'];
 			}
+			
 			// If translations data is already stored in state
 			if(!isset($this->data['sitemap'][$language])){
+			
 				// Getting raw sitemap data
 				$siteMapRaw=$this->getSitemapRaw($language);
 				if(!$siteMapRaw){
 					return false;
 				}
+				
 				// This is output array
 				$this->data['sitemap'][$language]=array();
+				
 				// System builds usable URL map for views
 				foreach($siteMapRaw as $key=>$node){
 					// Only sitemap nodes with set view will be assigned to reference
@@ -800,7 +801,9 @@ class WWW_State	{
 						}
 					}
 				}
+				
 			}
+			
 			// Returning keyword, if it is requested
 			if($keyword){
 				if(isset($this->data['sitemap'][$language][$keyword])){
@@ -812,6 +815,7 @@ class WWW_State	{
 				// If keyword was not set, then returning entire array
 				return $this->data['sitemap'][$language];
 			}
+			
 		}
 		
 	// STATE MESSENGER
@@ -826,14 +830,27 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function stateMessenger($address,$overwrite=false){
-			// File is stored in file system as hashed
+		
+			// If messenger is already set
+			if($this->messenger){
+				// This stores data to filesystem
+				$this->storeMessenger();
+				// New messenger data will be empty
+				$this->messengerData=array();
+			}
+			
+			// New messenger address is hashed
 			$this->messenger=md5($address);
-			$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
-			// If this state messenger address already stores data, then it is loaded
+			// Messenger data is stored in a filesystem subfolder
+			$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR.$this->messenger.'.tmp';
+			// If this state messenger address already stores data, then it is loaded as the base data
 			if(!$overwrite && file_exists($dataAddress)){
 				$this->messengerData=unserialize(file_get_contents($dataAddress));
 			}
+			
+			// Messenger is always started
 			return true;
+			
 		}
 		
 		/**
@@ -846,6 +863,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function setMessengerData($data,$value=false){
+		
 			// If messenger address is set
 			if($this->messenger){
 				// If data is an array, then it adds data recursively
@@ -862,6 +880,7 @@ class WWW_State	{
 			} else {
 				return false;
 			}
+			
 		}
 		
 		/**
@@ -872,6 +891,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function unsetMessengerData($key=false){
+		
 			// If messenger address is set
 			if($this->messenger && $key){
 				if(isset($this->messengerData[$key])){
@@ -886,52 +906,78 @@ class WWW_State	{
 			} else {
 				return false;
 			}
+			
 		}
 		
 		/**
-		 * This method returns data from State messenger. It returns the entire State messenger 
-		 * data as an array based on $address keyword that is used as the fingerprint for data. 
-		 * If $remove is set, then State messenger data is removed from filesystem or State 
-		 * object after being called.
+		 * This method returns data from State messenger. It either returns all the data from 
+		 * initialized state messenger, or just a $key from it. If $remove is set, then data is 
+		 * also set for deletion after it has been accessed.
 		 *
-		 * @param string $address messenger address
+		 * @param string $key data keyword
 		 * @param boolean $remove true or false flag whether to delete the request data after returning it
 		 * @return mixed or false if failed
 		 */
-		final public function getMessengerData($address=false,$remove=true){
+		final public function getMessengerData($key=false,$remove=true){
+			
 			// If messenger address is set
-			if($address){
-				// File is stored in file system as hashed
-				$address=md5($address);
-				// Solving the address of messenger data
-				$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($address,0,2).DIRECTORY_SEPARATOR.$address.'.tmp';
-				if(file_exists($dataAddress)){
-					// Data is stored as encoded JSON
-					$data=unserialize(file_get_contents($dataAddress));
-					// Removing messenger data, if flag is set
+			if($this->messenger && $key){
+				if(isset($this->messengerData[$key])){
+					$return=$this->messengerData[$key];
+					// If key is set for removal, then unsetting it
 					if($remove){
-						unlink($dataAddress);
+						unset($this->messengerData[$key]);
 					}
-					// Data returned
-					return $data;
+					return $return;
 				} else {
 					return false;
 				}
-			} else {
-				// if there is a messenger active
-				if($this->messenger && $remove){
-					// Resetting state messenger data from the object
-					$tmp=$this->messengerData;
+			} elseif($this->messenger){
+				$return=$this->messengerData;
+				// If data is set for removal, then removing the whole data array
+				if($remove){
 					$this->messengerData=array();
-					// Data returned
-					return $tmp;
-				} elseif($this->messenger){
-					// Data returned
-					return $this->messengerData;
-				} else {
-					return false;
 				}
+				return $return;
+			} else {
+				return false;
 			}
+			
+		}
+		
+		/**
+		 * This method simply stores messenger data in filesystem, if there is data to store.
+		 * 
+		 * @return boolean
+		 */
+		final private function storeMessenger(){
+		
+			// Data is only stored if messenger is set
+			if($this->messenger){
+				// Finding data folder
+				$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
+				// If there is data to store in messenger
+				if(!empty($this->messengerData)){
+					// Testing if state messenger folder exists
+					if(!is_dir($dataFolder)){
+						if(!mkdir($dataFolder,0755)){
+							trigger_error('Cannot create messenger folder',E_USER_ERROR);
+						}
+					}
+					// Writing messenger data to file
+					if(!file_put_contents($dataFolder.$this->messenger.'.tmp',serialize($this->messengerData))){
+						trigger_error('Cannot write messenger data',E_USER_ERROR);
+					}
+				} elseif(file_exists($dataFolder.$this->messenger.'.tmp')){
+					unlink($dataFolder.$this->messenger.'.tmp');
+				}
+				// Processing complete
+				return true;
+			} else {
+				// Messenger was not set
+				return false;
+			}
+			
 		}
 		
 	// SESSION USER AND PERMISSIONS
@@ -944,11 +990,13 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function setUser($data){
+		
 			// Setting the session
 			$this->setSession($this->data['session-user-key'],$data);
 			// Setting the state variable
 			$this->data['user-data']=$data;
 			return true;
+			
 		}
 		
 		/**
@@ -959,6 +1007,7 @@ class WWW_State	{
 		 * @return mixed
 		 */
 		final public function getUser($key=false){
+		
 			// Testing if permissions state has been populated or not
 			if(!$this->data['user-data']){
 				$this->data['user-data']=$this->getSession($this->data['session-user-key']);
@@ -967,6 +1016,7 @@ class WWW_State	{
 					return false;
 				}
 			}
+			
 			// If key is set
 			if($key){
 				if(isset($this->data['user-data'][$key])){
@@ -979,6 +1029,7 @@ class WWW_State	{
 				// Returning entire user array
 				return $this->data['user-data'];
 			}
+			
 		}
 		
 		/**
@@ -987,11 +1038,13 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function unsetUser(){
+		
 			// Unsetting the session
 			$this->unsetSession($this->data['session-user-key']);
 			// Unsetting the state variable
 			$this->data['user-data']=false;
 			return true;
+			
 		}
 		
 		/**
@@ -1002,6 +1055,8 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function setPermissions($permissions){
+		
+			// If permissions were sent as a string
 			if(!is_array($permissions)){
 				$permissions=explode(',',$permissions);
 			}
@@ -1010,6 +1065,7 @@ class WWW_State	{
 			// Setting the state variable
 			$this->data['user-permissions']=$permissions;
 			return true;
+			
 		}
 		
 		/**
@@ -1018,11 +1074,13 @@ class WWW_State	{
 		 * @return array
 		 */
 		final public function getPermissions(){
+		
 			// Testing if permissions state has been populated or not
 			if(!$this->data['user-permissions']){
 				$this->data['user-permissions']=$this->getSession($this->data['session-permissions-key']);
 			}
 			return $this->data['user-permissions'];
+			
 		}
 	
 		/**
@@ -1087,11 +1145,13 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function unsetPermissions(){
+		
 			// Unsetting the session
 			$this->unsetSession($this->data['session-permissions-key']);
 			// Unsetting the state variable
 			$this->data['user-permissions']=false;
 			return true;
+			
 		}
 		
 		/**
@@ -1107,6 +1167,7 @@ class WWW_State	{
 		 * @return string or boolean if no user session active
 		 */
 		final public function getPublicToken($regenerate=false,$forced=false){
+		
 			// This is only required to protect users with active sessions
 			if($forced || $this->getUser()){
 				// Public token is stored in the session
@@ -1126,6 +1187,7 @@ class WWW_State	{
 			} else {
 				return false;
 			}
+			
 		}
 		
 		/**
@@ -1136,6 +1198,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function checkPublicToken(){
+		
 			// This is only checked if the token actually exists and public API profile is used
 			if($this->data['api-public-token'] && $this->data['api-public-profile']==$this->data['api-profile']){
 				if($this->data['api-public-token']==$this->getSession($this->data['session-token-key'])){
@@ -1146,6 +1209,7 @@ class WWW_State	{
 			} else {
 				return true;
 			}
+			
 		}
 		
 	// SESSION AND COOKIES
@@ -1222,6 +1286,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function regenerateSession($regenerate=true,$deleteOld=true){
+		
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
 				$this->startSession();
@@ -1229,6 +1294,7 @@ class WWW_State	{
 			$this->sessionHandler->regenerateId=$regenerate;
 			$this->sessionHandler->regenerateRemoveOld=$deleteOld;
 			return true;
+			
 		}
 		
 		/**
@@ -1240,6 +1306,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function setSession($key=false,$value=false){
+		
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
 				$this->startSession();
@@ -1257,6 +1324,7 @@ class WWW_State	{
 				return false;
 			}
 			return true;
+			
 		}
 		
 		/**
@@ -1268,10 +1336,12 @@ class WWW_State	{
 		 * @return mixed
 		 */
 		final public function getSession($key=false){
+		
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
 				$this->startSession();
 			}
+			
 			// Multiple keys can be returned
 			if(is_array($key)){
 				// This array will hold multiple values
@@ -1297,6 +1367,7 @@ class WWW_State	{
 				// Return entire session data, if key was not set
 				return $this->data['session-data'];
 			}
+			
 		}
 		
 		/**
@@ -1308,10 +1379,12 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function unsetSession($key=false){
+		
 			// Making sure that sessions have been started
 			if(!$this->sessionStarted){
 				$this->startSession();
 			}
+			
 			// Can unset multiple values
 			if(is_array($key)){
 				foreach($key as $value){
@@ -1327,6 +1400,7 @@ class WWW_State	{
 				$this->sessionHandler->regenerateRemoveOld=true;
 			}
 			return true;
+			
 		}
 		
 		/**
@@ -1339,6 +1413,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function setCookie($key,$value,$configuration=array()){
+		
 			// Checking for configuration options
 			if(!isset($configuration['expire'])){
 				if(isset($configuration['timeout'])){
@@ -1359,6 +1434,7 @@ class WWW_State	{
 			if(!isset($configuration['httponly'])){
 				$configuration['httponly']=true;
 			}
+			
 			// Can set multiple values
 			if(is_array($key)){
 				// Value can act as a configuration
@@ -1395,6 +1471,7 @@ class WWW_State	{
 					$_COOKIE[$key]=$value;
 				}
 			}
+			
 		}
 		
 		/**
@@ -1405,6 +1482,7 @@ class WWW_State	{
 		 * @return mixed
 		 */
 		final public function getCookie($key){
+		
 			// Multiple keys can be returned
 			if(is_array($key)){
 				// This array will hold multiple values
@@ -1425,6 +1503,7 @@ class WWW_State	{
 					return false;
 				}
 			}
+			
 		}
 		
 		/**
@@ -1435,6 +1514,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function unsetCookie($key){
+		
 			// Can set multiple values
 			if(is_array($key)){
 				foreach($key as $value){
@@ -1452,6 +1532,7 @@ class WWW_State	{
 				}
 			}
 			return true;
+			
 		}
 		
 	// HEADERS
@@ -1466,6 +1547,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function setHeader($header,$replace=true){
+		
 			// Multiple headers can be set at once
 			if(is_array($header)){
 				foreach($header as $h){
@@ -1481,6 +1563,7 @@ class WWW_State	{
 				$this->data['headers-set'][$header]=$replace;
 			}
 			return true;
+			
 		}
 	
 		/**
@@ -1491,6 +1574,7 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final public function unsetHeader($header){
+		
 			// Multiple headers can be unset at once
 			if(is_array($header)){
 				foreach($header as $h){
@@ -1506,6 +1590,7 @@ class WWW_State	{
 				$this->data['headers-unset'][$header]=true;
 			}
 			return true;
+			
 		}
 	
 	// TERMINAL

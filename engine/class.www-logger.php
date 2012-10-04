@@ -66,6 +66,7 @@ class WWW_Logger {
 		} else {
 			$this->requestMicrotime=$microTime;
 		}
+		
 		// Checking if log directory is valid
 		if(is_dir($logDir)){
 			// Log directory is assigned
@@ -87,12 +88,15 @@ class WWW_Logger {
 	 * @return boolean
 	 */
 	public function setCustomLogData($key,$value=true){
+	
+		// Log data can be sent as an array
 		if(is_array($key)){
 			$this->logData=$key+$this->logData;
 		} else {
 			$this->logData[$key]=$value;
 		}
 		return true;
+		
 	}
 	
 	/**
@@ -111,24 +115,18 @@ class WWW_Logger {
 		
 		// STATIC LOG DATA
 		
-			// Unique request identifier set by the server.
-			if(isset($_SERVER['UNIQUE_ID'])){ $logData['request-id']=$_SERVER['UNIQUE_ID']; } // This is not supported on Windows
-			
+			// Unique request identifier set by the server (this is not supported on Windows and Nginx servers)
+			if(isset($_SERVER['UNIQUE_ID'])){ $logData['request-id']=$_SERVER['UNIQUE_ID']; }
 			// This stores the URI that user agent requested.
 			$logData['request']=$_SERVER['REQUEST_URI'];
-			
 			// Timestamp of the request in milliseconds.
 			$logData['microtime']=$this->requestMicrotime;
-
 			// UNIX timestamp of the request time.
 			$logData['time']=$_SERVER['REQUEST_TIME'];
-			
 			// Stores request datetime in format 'Y-m-d H:i:s'.
 			$logData['datetime']=date('Y-m-d H:i:s').' GMT '.date('P');
-			
 			// Stores IP of the user agent that made the request.
 			$logData['ip']=__IP__;
-			
 			// Additional IP's
 			if(isset($_SERVER['HTTP_CLIENT_IP'])){
 				$logData['forwarded-client-ip']=$_SERVER['HTTP_CLIENT_IP'];
@@ -139,38 +137,30 @@ class WWW_Logger {
 			if(__IP__!=$_SERVER['REMOTE_ADDR']){
 				$logData['remote-addr']=$_SERVER['REMOTE_ADDR'];
 			}
-			
 			// This stores user agent string of the user agent.
 			$logData['user-agent']=(isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:'Unknown';
-
 			// This stores user agent string of the user agent.
 			if(isset($_SERVER['HTTP_REFERER'])){
 				$logData['referrer']=$_SERVER['HTTP_REFERER'];
 			}
-				
 			// GET variables submitted by user agent.
 			if(!empty($_GET)){ 
 				$logData['get']=$_GET;
 			}
-			
 			// POST variables submitted by user agent
 			if(!empty($_POST)){ 
 				$logData['post']=$_POST;
 			}
-			
 			// FILES variables submitted by user agent
 			if(!empty($_FILES)){
 				$logData['files']=$_FILES;
 			}
-			
 			// COOKIE variables submitted by user agent
 			if(!empty($_COOKIE)){ 
 				$logData['cookie']=$_COOKIE;
 			}
-			
 			// This stores how long the request took in seconds.
 			$logData['execution-time']=number_format((microtime(true)-$this->requestMicrotime),6);
-			
 			// This stores the peak usage of memory during the request.
 			$logData['memory-peak-usage']=memory_get_peak_usage(); // In bytes, divide by 1048576 to get megabytes
 
@@ -200,7 +190,6 @@ class WWW_Logger {
 		
 			// Log filename is current time-based with present hour in the end
 			$logFileName=date('Y-m-d-H');
-			
 			// Finding the subfolder of the log file, if subfolder does not exist then it is created
 			$logSubfolder=substr($logFileName,0,10);
 			if(!is_dir($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR)){
@@ -208,7 +197,6 @@ class WWW_Logger {
 					trigger_error('Cannot create log folder',E_USER_ERROR);
 				}
 			}
-			
 			// Appending the log data at the end of log file or creating it if it does not exist
 			if(!file_put_contents($this->logDir.$logSubfolder.DIRECTORY_SEPARATOR.$logFileName.'.tmp',json_encode($logData)."\n",FILE_APPEND)){
 				trigger_error('Cannot write log file',E_USER_ERROR);

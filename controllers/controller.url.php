@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_url.htm
  * @since      1.0.0
- * @version    3.4.0
+ * @version    3.4.1
  */
 
 class WWW_controller_url extends WWW_Factory {
@@ -190,7 +190,9 @@ class WWW_controller_url extends WWW_Factory {
 		// If home is not expected to be returned
 		if(!$returnHome){
 		
+			// This is used for the index of URL node that is being checked
 			$matchKey=0;
+			
 			// System loops through URL nodes and attempts to find a match in URL Map
 			while(!empty($urlNodes) && !empty($siteMap)){
 				foreach($siteMap as $key=>$settings){
@@ -205,6 +207,8 @@ class WWW_controller_url extends WWW_Factory {
 								unset($siteMap[$key]);
 							}
 						} else {
+							// If this is set to non-false, then dynamic URL value will be added
+							$dynamicAdd=false;
 							// Matching the dynamic URL's
 							$matched=explode(':',$settings['nodes'][$matchKey],3);
 							switch($matched[1]){
@@ -213,7 +217,7 @@ class WWW_controller_url extends WWW_Factory {
 										if(!preg_match('/^[0-9]*$/i',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
 										} else {
-											$dynamicUrl[]=$urlNodes[$matchKey];
+											$dynamicAdd=$urlNodes[$matchKey];
 										}
 									} else {
 										// Finding the match parameters
@@ -221,7 +225,7 @@ class WWW_controller_url extends WWW_Factory {
 										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && intval($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && intval($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
-											$dynamicUrl[]=$urlNodes[$matchKey];
+											$dynamicAdd=$urlNodes[$matchKey];
 										}
 									}
 									break;
@@ -230,7 +234,7 @@ class WWW_controller_url extends WWW_Factory {
 										if(!preg_match('/^[[:alpha:]\-\_]*$/ui',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
 										} else {
-											$dynamicUrl[]=$urlNodes[$matchKey];
+											$dynamicAdd=$urlNodes[$matchKey];
 										}
 									} else {
 										// Finding the match parameters
@@ -238,7 +242,7 @@ class WWW_controller_url extends WWW_Factory {
 										if(!preg_match('/^[[:alpha:]\-\_]*$/ui',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
-											$dynamicUrl[]=$urlNodes[$matchKey];
+											$dynamicAdd=$urlNodes[$matchKey];
 										}
 									}
 									break;
@@ -247,7 +251,7 @@ class WWW_controller_url extends WWW_Factory {
 										if(!preg_match('/^[[:alnum:]\-\_]*$/ui',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
 										} else {
-											$dynamicUrl[]=$urlNodes[$matchKey];
+											$dynamicAdd=$urlNodes[$matchKey];
 										}
 									} else {
 										// Finding the match parameters
@@ -255,7 +259,7 @@ class WWW_controller_url extends WWW_Factory {
 										if(!preg_match('/^[[:alnum:]\-\_]*$/ui',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
 											unset($siteMap[$key]);
 										} else {
-											$dynamicUrl[]=$urlNodes[$matchKey];
+											$dynamicAdd=$urlNodes[$matchKey];
 										}
 									}
 									break;
@@ -266,7 +270,7 @@ class WWW_controller_url extends WWW_Factory {
 										if(!in_array($urlNodes[$matchKey],$matches)){
 											unset($siteMap[$key]);
 										} else {
-											$dynamicUrl[]=$urlNodes[$matchKey];
+											$dynamicAdd=$urlNodes[$matchKey];
 										}
 									} else {
 										unset($siteMap[$key]);
@@ -278,18 +282,28 @@ class WWW_controller_url extends WWW_Factory {
 										if(!preg_match('/^['.$matched[2].']*$/u',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
 										} else {
-											$dynamicUrl[]=$urlNodes[$matchKey];
+											$dynamicAdd=$urlNodes[$matchKey];
 										}
 									} else {
-										$dynamicUrl[]=$urlNodes[$matchKey];
+										$dynamicAdd=$urlNodes[$matchKey];
 									}
 									break;
+							}
+							// If a new dynamic node was found
+							if($dynamicAdd){
+								$dynamicUrl[$matchKey]=$dynamicAdd;
 							}
 						}
 					}
 				}
 				unset($urlNodes[$matchKey]);
 				$matchKey++;
+			}
+			
+			// Only set if there were any dynamic URLS found
+			if(!empty($dynamicUrl)){
+				// This resets the dynamic URL values with new indexes in the array
+				$dynamicUrl=array_values($dynamicUrl);
 			}
 			
 			// If all URL nodes have been matched and there's still a URL in the Sitemap array
@@ -340,12 +354,6 @@ class WWW_controller_url extends WWW_Factory {
 		}
 		$siteMapInfo['language']=$language;
 		$siteMapInfo['web-root']=$webRoot;
-		
-		// Array of unsolved URL nodes is reversed if it is not empty
-		if(!empty($dynamicUrl)){
-			// Unsolved URL's are reversed so that they can be used in the order they were defined in URL
-			$dynamicUrl=array_reverse($dynamicUrl);
-		}
 		
 		// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
 		if(isset($siteMapInfo['temporary-redirect']) && $siteMapInfo['temporary-redirect']!=''){

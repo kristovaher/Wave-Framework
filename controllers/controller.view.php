@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.4.0
+ * @version    3.4.1
  */
 
 class WWW_controller_view extends WWW_Factory {
@@ -133,7 +133,7 @@ class WWW_controller_view extends WWW_Factory {
 		// HTML frame is generated with meta data and resource files
 		?>
 			<!DOCTYPE html>
-			<html lang="<?=$this->getState('language')?>">
+			<html lang="<?=$this->getState('language')?>" <?=(isset($view['appcache']) && $view['appcache']==1)?'manifest="'.$this->getState('base-url').'manifest.appcache"':''?>>
 				<head>
 					<title><?=$view['meta-title']?></title>
 					<!-- Base address for relative links -->

@@ -92,6 +92,10 @@
 			<p><b>/engine/handler.api.php</b></p>
 
 			<p><a href="gateway.htm">Index Gateway</a> <a href="handler_api.htm">API Handler</a> takes all the input variables and sends an API command to WWW_API. This class handles caching (APC or filesystem based), buffering, API observers, callbacks, encryption, profile permissions and other API-specific functionality. <a href="guide_api.htm">API</a> calls always return an array, which are then formatted based on requested data type, like JSON, XML, CSV or PHP's own internal variable. This is one of the core files of Wave Framework and should not be modified unless really needed.</p>
+			
+			<p><b>/engine/handler.appcache.php</b></p>
+			
+			<p><a href="handler_appcache.htm">Appcache Handler</a> is used to return an appcache manifest to the browser for pages that use Appcache. If this appcache file already exists in project root folder, then it is returned directly from that source. Otherwise the file will be generated.</p>
 
 			<p><b>/engine/handler.data.php</b></p>
 
@@ -223,6 +227,10 @@
 			<p><b>/resources/placeholder.jpg</b></p>
 
 			<p>If this file exists and system has enabled 404 image placeholders in configuration, then this image is loaded in case actual image is not found. This allows for 'cleaner' 404 image to be shown in case actual image is missing, and also supports the on-demand image editing functionality of Wave Framework.</p>
+			
+			<p><b>/resources/offline.htm</b></p>
+			
+			<p>This is the file that is served when Appcache is not available and no internet is used for the page.</p>
 
 			<p><b>/tools/</b></p>
 

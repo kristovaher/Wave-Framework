@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.2.6
+ * @version    3.4.1
  */
 
 class WWW_State	{
@@ -158,7 +158,7 @@ class WWW_State	{
 				'http-referrer'=>((isset($_SERVER['HTTP_REFERER']))?$_SERVER['HTTP_REFERER']:false),
 				'http-request-method'=>$_SERVER['REQUEST_METHOD'],
 				'https-limiter'=>false,
-				'https-mode'=>((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on'))?true:false),
+				'https-mode'=>(((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on')) || (isset($_SERVER['SCRIPT_URI']) && strpos($_SERVER['SCRIPT_URI'],'https://')!==false))?true:false),
 				'image-extensions'=>array('jpeg','jpg','png'),
 				'image-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'index-url-cache-timeout'=>0,
@@ -222,6 +222,7 @@ class WWW_State	{
 				'user-permissions'=>false,
 				'user-root'=>false,
 				'verbose-errors'=>false,
+				'version'=>'1.0.0',
 				'view'=>array(),
 				'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 				'whitelist-limiter'=>false

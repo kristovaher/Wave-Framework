@@ -28,7 +28,7 @@
 				
 				<ul>
 					<li><b>/controllers/</b> - Your Controller classes are here, as well as default URL and View Controllers</li>
-					<li><b>/resources/</b> - Your JavaScript, CSS, Autoload scripts and images are in this folder</li>
+					<li><b>/resources/</b> - Your JavaScript, CSS, Autoload scripts and images are in this folder and its subfolders</li>
 					<li><b>/models/</b> - Your Model classes are here</li>
 					<li><b>/views/</b> - Your View classes are here</li>
 					<li><b>/config.ini</b> - Your Configuration file</li>
@@ -37,6 +37,13 @@
 				<p>These folders and files are rarely - if ever - updated by Wave Framework. Even if these files are updated then it is unlikely that these changes break any of your software if you do not update these files. These folders and configuration file are considered as 'your software' and if Wave Framework version update or version history shows that these files are updated, then it is most likely a documentation update or some tweak to default View or URL Controllers.</p>
 				
 				<p>This means that when updating, you can safely ignore these folders from update archives and focus on actual core files that might need updating, namely the '/index.php' file and files from '/engine/' folder. Core files of Wave Framework also have version information listed in their file headers as of 3.1.4 and you can refer to this header information to know if your file needs to be updated or not, when comparing it against the latest release.</p>
+				
+			<h3>How to Update to 3.4.1</h3>
+			
+				<ul>
+					<li>It's now possible to refer to Wave Framework Wrapper file by having a link to /resources/ subfolder even though such a file does not exist. If you link in your HTML header to http://www.example.com/resources/scripts/class.www-wrapper.js then it loads the file from /engine/ subfolder where this engine file actually exists. You can also unify this script with your jQuery or other libraries easily.</li>
+					<li>New recommended structure suggests to write scripts to /resources/scripts/, classes to /resources/classes/ and libraries to /resources/libraries/. Difference between them is that classes subfolder includes actual classes that can be dynamically loaded through Factory. Libraries folder includes files that include various scripts that can be dynamically loaded. And scripts folder is for scripts that can be loaded automatically per view. Basically classes and libraries folders are only meant for loading scripts through Factory, either JavaScript or PHP.</li>
+				</ul>
 				
 			<h3>How to Update to 3.3.0</h3>
 			

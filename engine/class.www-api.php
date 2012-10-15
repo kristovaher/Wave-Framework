@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.2.7
+ * @version    3.4.1
  */
 
 final class WWW_API {
@@ -709,7 +709,7 @@ final class WWW_API {
 					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator[$this->state->data['session-token-key']]);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
-					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output']);
+					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output'].$this->state->data['version']);
 					
 					// Cache filename consists of API command, serialized input data, return type and whether API output is used.
 					$cacheFile=$cacheValidator.'.tmp';
@@ -1738,7 +1738,7 @@ final class WWW_API {
 			// User cache does not have an address
 			if($custom){
 				// User cache location
-				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.$this->state->data['version']).'.tmp';
 				// If tag is attached to cache
 				if($tags){
 					if(!is_array($tags)){
@@ -1803,7 +1803,7 @@ final class WWW_API {
 		
 			// User cache does not have an address
 			if($custom){
-				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.$this->state->data['version']).'.tmp';
 			}
 			
 			// If limit is used
@@ -1848,7 +1848,7 @@ final class WWW_API {
 		
 			// User cache does not have an address
 			if($custom){
-				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.$this->state->data['version']).'.tmp';
 			}
 			
 			// Accessing cache
@@ -1889,7 +1889,7 @@ final class WWW_API {
 		
 			// User cache does not have an address
 			if($custom){
-				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress).'.tmp';
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.$this->state->data['version']).'.tmp';
 			}
 			
 			// Accessing cache

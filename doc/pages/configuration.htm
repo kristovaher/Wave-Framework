@@ -29,6 +29,12 @@
 				
 				<p>If http-authentication is set to 1, then HTTP authentication is required before any requests go through. It is also possible to limit the entire access to only a single IP or multiple IP addresses by assigning http-authentication-ip a comma separated list of IP addresses. These settings are also used by developer tools in /tools/ subfolder.</p>
 				
+			<h2>Application Version</h2>
+			
+				<p><b>version</b></p>
+				
+				<p>If this value is changed, then it will load various resources, like robots.txt, sitemap.xml and Appcache files as new ones, without relying on the old versions. This is used to check for cache files and can be used in system checks across your web service. This is not defined by default and is considered to be 1.0.0 if left undefined. Note that this should be the same as the version number for 'system' in '.version' file. That '.version' file is used independently only by the updater script. Changing this number will also invalidate all existing cache.</p>
+			
 			<h2>Logging and Debugging</h2>
 			
 				<p><b>logger<br/>
@@ -230,7 +236,7 @@
 				
 				<p><b>dynamic-max-size</b></p>
 				
-				<p>This is a security setting against potential Denial of Service attacks. This setting is the maximum height or width that system can dynamically serve. This is set to 1000 by default, which disables on-demand resolutions that are bigger than 1000 pixels in width or height.</p>
+				<p>This is a security setting against potential Denial of Service attacks. This setting is the maximum height or width that system can dynamically serve. This is set to 4096 by default, which disables on-demand resolutions that are bigger than 4096 pixels in width or height.</p>
 				
 				<p><b>dynamic-size-whitelist</b></p>
 				

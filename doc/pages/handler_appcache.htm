@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Appcache Handler - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Appcache Handler</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/handler.appcache.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>Appcache Handler is used to return an appcache manifest to the browser for pages that use Appcache. If this appcache file already exists in project root folder, then it is returned directly from that source. Otherwise the file will be generated.</p>
+			
+			<h2>Workflow</h2>
+			
+				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
+				
+				<p>Sets the content type to 'text/cache-manifest', which is the required content type for Appcache manifest files.</p>
+				
+				<p>Returns the content of existing manifest file, if such is present. Otherwise generates new manifest content that is returned to user agent instead. When file is being generated, then it uses the general version number from Configuration file to determine if it should generate a new Appcache file or use the previous one.</p>
+				
+				<p>Handler also includes an optional <a href="database.htm">Database</a> connection, which can be used if it is necessary at some point to load manifest details from <a href="database.htm">Database</a> instead.</p>
+				
+				<p>Appcache Handler returns content with appropriate HTTP response headers, including the last-modified timestamp.</p>
+				
+				<p>Appcache Handler also makes an entry in the log file about the request, if <a href="logger.htm">Logger</a> is used.</p>
+			
+	</body>
+</html>

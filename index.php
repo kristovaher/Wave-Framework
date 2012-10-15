@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.2.6
+ * @version    3.4.1
  */
 
 // SOLVING THE HTTP REQUEST
@@ -99,7 +99,7 @@
 		if(isset($config['resource-extensions'])){
 			$config['resource-extensions']=explode(',',$config['resource-extensions']);
 		} else {
-			$config['resource-extensions']=array('css','js','txt','csv','xml','html','htm','rss','vcard');
+			$config['resource-extensions']=array('css','js','txt','csv','xml','html','htm','rss','vcard','appcache');
 		}
 		if(isset($config['forbidden-extensions'])){
 			$config['forbidden-extensions']=explode(',',$config['forbidden-extensions']);
@@ -111,6 +111,11 @@
 		if(!isset($config['timezone'])){
 			// Setting GMT as the default timezone
 			$config['timezone']='Europe/London';
+		}
+		
+		// If version number is not set
+		if(!isset($config['version'])){
+			$config['version']='1.0.0';
 		}
 	
 		// Trusted proxies and IP address
@@ -335,6 +340,9 @@
 			} elseif($resourceFile=='robots.txt'){
 				// Robots file is dynamically generated based on 'robots' configuration in config.php file
 				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.robots.php');
+			} elseif($resourceExtension=='appcache'){
+				// Appcache settings can be dynamically generated
+				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.appcache.php');
 			} else {
 				// In every other case the system loads text based resources with additional options, such as compressions and minifying, with Resource Handler
 				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.resource.php');

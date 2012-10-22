@@ -22,36 +22,41 @@
 				
 			<h2>Using Tools Class</h2>
 			
-				<p>To use Minifier class, it is recommended to load Minifier class and then call the static methods of that class. For example, to minify JavaScript text content, you can do as follows:</p>
+				<p>It is not recommended to use Tools class outside Wave Framework internal use, but it is certainly possible as long as the filesystem default folder structure is the same. To use the class, it is recommended to load Tools class and then call the methods of that class. For example, to delete all cache filesystem directory, then you can do it like this:</p>
 				
 <pre>
 	<code>
-	require('/engine/class.www-minifier.php');
-	$minifiedJavaScript=WWW_Minifier::minifyJS($originalJavaScript);
+	require('/engine/class.www-tools.php');
+	// Assign the filesystem folder directory with the construction
+	$tool=new WWW_Tools('/filesystem/');
+	// Deleting all cache
+	$tool->cleaner('cache');
 	</code>
 </pre>
 
-			<h2>Minifier Class Parameters</h2>
+			<h2>Tools Class Parameters</h2>
 			
-				<p>Minifier class implements no parameters.</p>
+				<h3>public $filesystemDirectory=false</h3>
 				
-			<h2>Minifier Class Methods</h2>
+					<p>This is the filesystem directory of the project.</p>
+				
+			<h2>Tools Class Methods</h2>
 			
-				<h3>public static function minifyCSS($data)</h3>
+				<h3>public function __construct($filesystemDirectory=false)</h3>
 				
-					<p>This method removes comments, tabs, spaces, new-lines and various other spaces from text. It assumes that text is in a CSS-like format.</p>
+					<p>This creates the Tools object. If the filesystem is not sent during the object creation, then it attempts to find one by default based on requesting script folder. </p>
 			
-				<h3>public static function minifyJS($data)</h3>
+				<h3>public function cleaner($mode='maintenance',$cutoff=false)</h3>
 				
-					<p>This method removes comments, tabs, spaces, new-lines and various other spaces from text. It assumes that text is in a JavaScript-like format.</p>
+					<p>This method cleans certain folders in filesystem. A cut-off timestamp can be set, which tells the cleaner not to delete certain files if their modification timestamp is newer.</p>
 			
-				<h3>public static function minifyHTML($data)</h3>
+				<h3>public function indexer($directory,$mode='both')</h3>
 				
-					<p>This method removes comments, tabs, spaces, new-lines and various other spaces from text. It assumes that text is in a HTML-like format.</p>
+					<p>This function returns an index of files, folders or both recursively from the requested folder.</p>
 			
-				<h3>public static function minifyXML($data)</h3>
+				<h3>public function sizer($directory)</h3>
 				
-					<p>This method removes comments, tabs, spaces, new-lines and various other spaces from text. It assumes that text is in a XML-like format.</p>
+					<p>This function calculates the total file size in a folder and all of its subfolders.</p>
 			
 	</body>
 </html>

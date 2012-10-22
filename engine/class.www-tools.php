@@ -20,13 +20,13 @@
 class WWW_Tools {
 
 	/**
-	 * This is the filesystem directory of the website
+	 * This is the filesystem directory of the project.
 	 */
 	public $filesystemDirectory=false;
 	
 	/**
-	 * During object construction you can set the filesystem directory that the tools can
-	 * operate on.
+	 * This creates the Tools object. If the filesystem is not sent during the object creation 
+	 * then it attempts to find one by default based on requesting script folder. 
 	 *
 	 * @param string $filesystemDirectory optional filesystem directory
 	 * @return object

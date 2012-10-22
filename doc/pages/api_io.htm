@@ -113,6 +113,10 @@
 					
 					<p>This allows for a lot of flexibility as it is an on-demand cache-control that can be used to speed up requests or the same Controller in some parts of the system based on their importance.</p>
 					
+				<h3>www-cache-load-timestamp</h3>
+				
+					<p>This tells the API to accept cache with different timestamp based age than the 'www-cache-timeout' value. This means that you can make a request that only allows 'www-cache-load-timestamp' aged cache, but writes a different cache age to headers and for other methods.</p>
+					
 				<h3>www-profile</h3>
 				
 					<p>This is the API profile name that should also be defined in '/resources/api.profiles.ini' file. This tells API what API profile (and thus what profile settings) the API will use when validating the API request.</p>

@@ -89,9 +89,11 @@
 					<li><b>last-modified</b> - Time in YYYY-MM-DD format for the last time content of this page was modified. This is shown in automatically generated sitemap.xml files.</li>
 					<li><b>frame-permissions</b> - Either 'deny' or 'sameorigin', if this is set then that URL has a different frame-permission rule from configuration file.</li>
 					<li><b>content-security-policy</b> - This is the content security policy rule for loading external content, it overwrites the default configuration.</li>
-					<li><b>additional-php</b> - This is a comma-separated list of Factory loadLibrary() calls that are made when the view is loaded.</li>
-					<li><b>additional-js</b> - This is a comma-separated list of JavaScript Factory loadLibrary() calls that are made when the view is loaded.</li>
+					<li><b>additional-php</b> - This is a comma-separated list of PHP scripts loaded from /resources/scripts/ directory.</li>
+					<li><b>additional-js</b> - This is a comma-separated list of JavaScript files loaded from /resources/scripts/ directory.</li>
 					<li><b>additional-css</b> - This is a comma-separated list of CSS stylesheets (without extensions) that are also loaded when the view is loaded.</li>
+					<li><b>external-js</b> - This is a comma-separated list of URL's where additional JavaScript is loaded from, such as external libraries.</li>
+					<li><b>external-css</b> - This is a comma-separated list of URL's where additional stylesheets are loaded from, such as external libraries.</li>
 					<li><b>appcache</b> - If set to 1, the URL will be served with cache manifest either from root or with Appcache Handler.</li>
 				</ul>
 				

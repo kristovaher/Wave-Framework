@@ -17,13 +17,15 @@
 				<ul>
 					<li><b>Q4 2012</b> - AJAX Tutorial</li>
 					<li><b>Q4 2012</b> - Users/Permissions Tutorial</li>
-					<li><b>Q4 2012</b> - OpenSSL Tools</li>
-					<li><b>Q4 2012</b> - Java API Wrapper</li>
+					<li><b>Q1 2013</b> - WebSockets Integration</li>
+					<li><b>Q1 2013</b> - OpenSSL Tools</li>
+					<li><b>Q1 2013</b> - Java API Wrapper</li>
 				</ul>
 		
 			<h2>3.x.x</h2>
 			
 				<ul>
+					<li><b>3.4.2</b> - Integrated a new method callTool() to Factory and State, which allows you to call system specific functions such as filesystem cleaner or to get an index of files. More tools will be added in the future. The additional JavaScript and PHP loading now targets /scripts/ folder and not /libraries/ folder. Added the option to load external JS and CSS based on sitemap URL. File handler can also use overrides now, if a file is in resources folder. Moved '/resources/autoload.php' to '/resources/scripts/script.php'.</li>
 					<li><b>3.4.1</b> - Added options for serving Appcache manifests. Fixed some dynamic URL routing bugs in URL Controller.</li>
 					<li><b>3.4.0</b> - A new Factory JavaScript class is now available, which allows you to dynamically load classes from /resources/classes/ subfolder (or another folder, since it is configurable within Factory). It is now also possible to dynamically load class.www-wrapper.js and class.www-factory.js together with other main JavaScript files, Resource Handler tests for this internally and loads them from /engine/ folder instead. Also JavaScript and CSS files have a separate folder now under /resources/ subfolder. Added the ability to also dynamically load function libraries from both PHP and JavaScript. Documentation updated. Added options that allow to load a set of libraries as defined in Sitemap as well as allowing View Controller to also load view-specific PHP autoload-style scripts. Updated state messenger and its documentation to work so that it 'makes more sense'.</li>
 					<li><b>3.2.8</b> - Fixed a minor bug in resource file request versioning.</li>

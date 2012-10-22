@@ -71,32 +71,38 @@ header('Content-Type: text/html;charset=utf-8');
 		$log=array();
 
 		// Clears /filesystem/cache/output/
-		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['output'])){
+		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['cache']) || isset($_GET['output'])){
 			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR;
 			$log=array_merge($log,dirCleaner($directory,$cutoff));
 		}
 
 		// Clears images cache
-		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['images'])){
+		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['cache']) || isset($_GET['images'])){
 			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'images'.DIRECTORY_SEPARATOR;
 			$log=array_merge($log,dirCleaner($directory,$cutoff));
 		}
 
 		// Clears cache of JavaScript and CSS
-		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['resources'])){
+		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['cache']) || isset($_GET['resources'])){
 			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR;
 			$log=array_merge($log,dirCleaner($directory,$cutoff));
 		}
 
 		// Clears cache of JavaScript and CSS
-		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['custom'])){
+		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['cache']) || isset($_GET['custom'])){
 			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR;
 			$log=array_merge($log,dirCleaner($directory,$cutoff));
 		}
 
 		// Clears cache tags
-		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['tags'])){
+		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['cache']) || isset($_GET['tags'])){
 			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR;
+			$log=array_merge($log,dirCleaner($directory,$cutoff));
+		}
+
+		// Clears API session tokens
+		if(isset($_GET['all']) || isset($_GET['maintenance']) || isset($_GET['tokens'])){
+			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR;
 			$log=array_merge($log,dirCleaner($directory,$cutoff));
 		}
 
@@ -133,12 +139,6 @@ header('Content-Type: text/html;charset=utf-8');
 		// Clears request data of user agent IP's
 		if(isset($_GET['all']) || isset($_GET['limiter'])){
 			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'limiter'.DIRECTORY_SEPARATOR;
-			$log=array_merge($log,dirCleaner($directory,$cutoff));
-		}
-
-		// Clears API session tokens
-		if(isset($_GET['all']) || isset($_GET['tokens'])){
-			$directory='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR;
 			$log=array_merge($log,dirCleaner($directory,$cutoff));
 		}
 
@@ -190,6 +190,7 @@ header('Content-Type: text/html;charset=utf-8');
 		
 		echo '<h2>Modes</h2>';
 		echo '<p><a href="cleaner.php?maintenance&cutoff='.$cutoff.'">Maintenance</a> - Removes all cache, logs, cookie sessions and temporary files</p>';
+		echo '<p><a href="cleaner.php?cache&cutoff='.$cutoff.'">Cache</a> - Removes all cache files</p>';
 		echo '<p><a href="cleaner.php?output&cutoff='.$cutoff.'">Output</a> - API and web cache</p>';
 		echo '<p><a href="cleaner.php?images&cutoff='.$cutoff.'">Images</a> - On-demand images cache</p>';
 		echo '<p><a href="cleaner.php?resources&cutoff='.$cutoff.'">Resources</a> - Static resources cache</p>';

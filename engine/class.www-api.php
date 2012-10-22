@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.4.1
+ * @version    3.4.2
  */
 
 final class WWW_API {
@@ -310,7 +310,8 @@ final class WWW_API {
 				// Various defaults are loaded from State
 				$apiState=array(
 					'call-index'=>$this->callIndex,
-					'cache-timeout'=>false,
+					'cache-timeout'=>0,
+					'cache-load-timeout'=>0,
 					'command'=>false,
 					'content-type-header'=>(isset($apiInputData['www-content-type']))?$apiInputData['www-content-type']:false,
 					'custom-header'=>false,
@@ -391,8 +392,15 @@ final class WWW_API {
 				}
 				
 				// This tests if cache value sent through input is valid
-				if($apiState['command']!='www-create-session' && isset($apiInputData['www-cache-timeout']) && $apiInputData['www-cache-timeout']>=0){
-					$apiState['cache-timeout']=$apiInputData['www-cache-timeout'];
+				if($apiState['command']!='www-create-session'){
+					if(isset($apiInputData['www-cache-timeout']) && $apiInputData['www-cache-timeout']>=0){
+						$apiState['cache-timeout']=$apiInputData['www-cache-timeout'];
+						$apiState['cache-load-timeout']=$apiInputData['www-cache-timeout'];
+					}
+					// Loading cache timestamp must be less than the actual cache timeout setting that is set
+					if(isset($apiInputData['www-cache-load-timeout']) && $apiInputData['www-cache-load-timeout']>=0 && $apiInputData['www-cache-load-timeout']<=$apiState['cache-timeout']){
+						$apiState['cache-load-timeout']=$apiState['cache-timeout'];
+					}
 				}
 				
 			// VALIDATING PROFILE BASED INPUT DATA
@@ -701,12 +709,12 @@ final class WWW_API {
 			
 				// If cache timeout is set
 				// If this value is 0, then no cache is used for command
-				if($apiState['cache-timeout']){
+				if($apiState['cache-load-timeout']){
 				
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator[$this->state->data['session-token-key']]);
+					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-cache-load-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator[$this->state->data['session-token-key']]);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output'].$this->state->data['version']);
@@ -726,7 +734,7 @@ final class WWW_API {
 						$apiState['last-modified']=$this->cacheTime($cacheFolder.$cacheFile);
 						
 						// If server detects its cache to still within cache limit
-						if($apiState['last-modified']>=($this->state->data['request-time']-$apiState['cache-timeout'])){
+						if($apiState['last-modified']>=($this->state->data['request-time']-$apiState['cache-load-timeout'])){
 							// If this request has already been made and the last-modified timestamp is exactly the same
 							if($apiState['push-output'] && $this->state->data['http-if-modified-since'] && $this->state->data['http-if-modified-since']>=$apiState['last-modified']){
 								// Adding log data
@@ -1125,9 +1133,6 @@ final class WWW_API {
 						if($apiState['custom-header']){
 							header($apiState['custom-header']);
 						}
-						
-						// Removing all Pragma headers if server has set them
-						header_remove('Pragma');
 					
 					// CONTENT TYPE HEADERS
 					
@@ -1993,6 +1998,11 @@ final class WWW_API {
 		 * @return string
 		 */
 		final public function filter($string,$type,$exceptions=false){
+		
+			// If exceptions are set they will be escaped
+			if($exceptions){
+				$exceptions=implode('\\',str_split($exceptions));
+			}
 		
 			// If exceptions are set, then we escape any non alphanumeric character in the exception string
 			if($exceptions){

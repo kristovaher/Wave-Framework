@@ -126,7 +126,7 @@ function fileIndex($directory,$type='all',$files=false){
 }
 
 /**
- * This function clears a folder and all of its subfolders and is run recursively
+ * This function moves files from source folder to target folder.
  *
  * @param resource $ftp FTP connection resource
  * @param string $from source folder

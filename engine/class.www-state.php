@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.4.1
+ * @version    3.4.2
  */
 
 class WWW_State	{
@@ -63,6 +63,11 @@ class WWW_State	{
 	 * This holds state messenger data as an array.
 	 */
 	private $messengerData=array();
+	
+	/**
+	 * This holds system Tool Class object, if it exists.
+	 */
+	private $tools=false;
 	
 	/**
 	 * Construction of State object initializes the defaults for $data variable. A lot of the 
@@ -204,6 +209,7 @@ class WWW_State	{
 				'sitemap-cache-timeout'=>14400,
 				'sitemap-raw'=>array(),
 				'static-root'=>false,
+				'storage'=>array(),
 				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
 				'test-database-host'=>false,
 				'test-database-name'=>false,
@@ -495,7 +501,7 @@ class WWW_State	{
 		 * @param mixed $value value of the new data
 		 * @return boolean
 		 */
-		final public function setState($variable,$value=true){
+		final public function setState($variable,$value=true,$subvalue=false){
 		
 			// If variable is an array with values it assumes that array keys are variables and values are to be set for those variables
 			if(is_array($variable)){
@@ -1592,6 +1598,63 @@ class WWW_State	{
 			}
 			return true;
 			
+		}
+		
+	// TOOLS
+	
+		/**
+		 * This method loads tools object if it doesn't exist yet and then allows to 
+		 * call various methods of the tool. You can call filesystem cleaner, indexer
+		 * or a file-size calculator (and each work recursively).
+		 *
+		 * @param string $type the type of tool to be loaded
+		 * @param mixed $arg1 additional parameter for the tool
+		 * @param mixed $arg2 additional parameter for the tool
+		 * @return mixed based on the tool
+		 */
+		final public function callTool($type,$arg1=false,$arg2=false){
+		
+			// If tool does not exist yet
+			if(!$this->tools){
+		
+				// Loading the Imager class
+				if(!class_exists('WWW_Tools')){
+					require($this->data['system-root'].'engine'.DIRECTORY_SEPARATOR.'class.www-tools.php');
+				}
+				
+				// Creating a new tool object
+				$this->tools=new WWW_Tools();
+				
+			}
+		
+			// Calling the method based on selected tool
+			switch($type){
+				case 'cleaner':
+					// This variable defines the cut-off time of the cleaner
+					if($arg2){
+						return $this->tools->cleaner($arg1,$arg2);
+					} else {
+						return $this->tools->cleaner($arg1);
+					}
+					break;
+				case 'indexer':
+					// This variable defines the mode of the index method
+					if($arg2){
+						return $this->tools->indexer($arg1,$arg2);
+					} else {
+						return $this->tools->indexer($arg1);
+					}
+					break;
+				case 'sizer':
+					// Takes just the directory variable
+					return $this->tools->sizer($arg1);
+					break;
+				default:
+					trigger_error('This tool does not exist: '.$type,E_USER_WARNING);
+					return false;
+					break;
+			}
+		
 		}
 	
 	// TERMINAL

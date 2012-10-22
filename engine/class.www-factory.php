@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.4.0
+ * @version    3.4.2
  */
 
 class WWW_Factory {
@@ -150,6 +150,53 @@ class WWW_Factory {
 		}
 	
 	// STATE DATA SET AND GET
+	
+		/**
+		 * This is just a wrapper function for getting state data for view. This method 
+		 * returns $variable from the current view settings or the entire view data array, 
+		 * if this is not set.
+		 *
+		 * @param string $variable key of view data to get
+		 * @return mixed
+		 */
+		final protected function viewData($variable=false){
+			// If variable is set
+			if($variable){
+				return $this->getState('view',$variable);
+			} else {
+				return $this->getState('view');
+			}
+		}
+		
+		/**
+		 * This is just a wrapper function for getting state from global state storage. This 
+		 * method returns $variable from the storage or the whole storage at once if this is 
+		 * not set.
+		 *
+		 * @param string $key key of view data to get
+		 * @return mixed
+		 */
+		final protected function getStorage($key=false){
+			if(isset($this->WWW_API->state->data['storage'][$key])){
+				return $this->WWW_API->state->data['storage'][$key];
+			} else {
+				return false;
+			}
+		}
+		
+		/**
+		 * This is just a wrapper function for getting state from global state storage. This 
+		 * method returns $variable from the storage or the whole storage at once if this is 
+		 * not set.
+		 *
+		 * @param string $key key of storage data to set
+		 * @param string $value value of the key in storage
+		 * @return mixed
+		 */
+		final protected function setStorage($key,$value=true){
+			$this->WWW_API->state->data['storage'][$key]=$value;
+			return true;
+		}
 	
 		/**
 		 * This is the basic call to return a State variable from the object. When call is made 
@@ -501,6 +548,20 @@ class WWW_Factory {
 			// Returning the new Imager object
 			return $imager;
 			
+		}
+		
+		/**
+		 * This method loads tools object if it doesn't exist yet and then allows to 
+		 * call various methods of the tool. You can call filesystem cleaner, indexer
+		 * or a file-size calculator (and each work recursively).
+		 *
+		 * @param string $type the type of tool to be loaded
+		 * @param mixed $arg1 additional parameter for the tool
+		 * @param mixed $arg2 additional parameter for the tool
+		 * @return mixed based on the tool
+		 */
+		final protected function callTool($type,$arg1=false,$arg2=false){
+			return $this->WWW_API->state->callTool($type,$arg1,$arg2);
 		}
 		
 		/**

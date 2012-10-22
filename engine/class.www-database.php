@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/database.htm
  * @since      1.1.2
- * @version    3.2.6
+ * @version    3.4.2
  */
 
 class WWW_Database {
@@ -394,7 +394,7 @@ class WWW_Database {
 	 * @param boolean $unique if returned array should only have only unique values
 	 * @return array or mixed if source is not an array
 	 */
-	public function dbArray($array,$key,$unique=true){
+	public function dbArray($array,$key,$unique=false){
 	
 		// Result will be an array
 		$result=array();
@@ -420,6 +420,8 @@ class WWW_Database {
 				$result=array_unique($result);
 			}
 		}
+		
+		// Returning all the column values as an array
 		return $result;
 		
 	}

@@ -198,6 +198,7 @@
 						<li><b>sitemap-cache-timeout</b> - Cache lifetime of sitemap.xml files.</li>
 						<li><b>sitemap-raw</b> - Raw sitemap data in an array.</li>
 						<li><b>static-root</b> - <a href="filesystem.htm">Filesystem</a> folder for static files.</li>
+						<li><b>storage</b> - This holds temporary global storage that can be written to and read through Factory.</li>
 						<li><b>system-root</b> - Root folder of the system.</li>
 						<li><b>test-database-host</b> - Test database host name.</li>
 						<li><b>test-database-name</b> - Test database name.</li>
@@ -244,7 +245,11 @@
 			
 				<h3>private $messengerData=array()</h3>
 				
-					<p>This holds <a href="guide_messenger.htm">State Messenger</a>  data as an array.</p>
+					<p>This holds <a href="guide_messenger.htm">State Messenger</a> data as an array.</p>
+					
+				<h3>private $tools=false</h3>
+				
+					<p>This holds system <a href="tool.htm">Tool Class</a> object, if it exists.</p>
 					
 			<h2>Logger Class Methods</h2>
 			
@@ -386,6 +391,10 @@
 				<h3>final public function unsetHeader($header)</h3>
 				
 					<p>This method is a wrapper function for simply removing a previously set header. $header is the header that should be removed.</p>
+					
+				<h3>final public function callTool($type,$arg1=false,$arg2=false)</h3>
+				
+					<p>This method loads tools object if it doesn't exist yet and then allows to call various methods of the tool. You can call filesystem cleaner, indexer or a file-size calculator (and each work recursively).</p>
 				
 				<h3>final public function terminal($command)</h3>
 				

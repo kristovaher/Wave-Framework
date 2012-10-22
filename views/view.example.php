@@ -29,6 +29,15 @@ class WWW_view_example extends WWW_Factory {
 	 * @return null
 	 */
 	public function render($input){
+	
+		// Getting current view data
+		$view=$this->viewData();
+		// Getting translations
+		$translations=$this->getTranslations();
+		// Getting sitemap array
+		$sitemap=$this->getSitemap();
+		// Getting the entire state data
+		$state=$this->getState();
 		
 		?>
 			<div style="padding:30px;width:600px;margin-left:auto;margin-right:auto;">
@@ -37,30 +46,30 @@ class WWW_view_example extends WWW_Factory {
 					<!-- This shows an example API call response -->
 					<?=print_r($this->api('example-get'),true)?>
 				</pre>
-				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Input data sent to view:</h1>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Input:</h1>
 				<pre>
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
 					<?=print_r($input,true)?>
 				</pre>
-				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">View state:</h1>
+				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">View:</h1>
 				<pre>
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
-					<?=print_r($this->getState('view'),true)?>
+					<?=print_r($view,true)?>
 				</pre>
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Sitemap:</h1>
 				<pre>
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
-					<?=print_r($this->getSitemap(),true)?>
+					<?=print_r($sitemap,true)?>
 				</pre>
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">Translations:</h1>
 				<pre>
 					<!-- $input is a variable sent to view that contains all the data that is useful when generating views -->
-					<?=print_r($this->getTranslations(),true)?>
+					<?=print_r($translations,true)?>
 				</pre>
 				<h1 style="font:30px Tahoma; color:##465a9e;padding:30px;">State:</h1>
 				<pre>
 					<!-- This shows an example API call response -->
-					<?=print_r($this->getState(),true)?>
+					<?=print_r($state,true)?>
 				</pre>
 			</div>
 		<?php

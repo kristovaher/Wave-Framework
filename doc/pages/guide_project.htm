@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Project Setup - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Project Setup</h1>
+		
+			<h2>Files and Folders</h2>
+			
+				<h3>/config.ini</h3>
+				<h3>/models/</h3>
+				<h3>/views/</h3>
+				<h3>/controllers/</h3>
+				<h3>/resources/</h3>
+				<h3>/overrides/</h3>
+				<h3>/filesystem/</h3>
+		
+			<h2>Introduction</h2>
+		
+				<p>Wave Framework is a small framework, but it still includes a lot of files that can make it confusing how to set up a project on Wave. The tutorials that are part of this documentation are already very helpful, but this documentation page here gives a detailed overview of what actually consists of a project when it is being set up on Wave Framework.</p>
+				
+				<p>This documentation is also useful for a developer who is not familiar with Wave, but who has to tweak something about a project that is built on Wave. So make sure you read this documentation through when you're either planning a new project or have to work on a project that already exists.</p>
+				
+			<h2>Configuration</h2>
+			
+				<p>Configuration is stored in '/config.ini' file.</p>
+			
+				<p>There is a <a href="configuration.htm">Configuration</a> documentation page that gives a detailed overview about each configuration setting that is set by default in Wave Framework. This configuration file has information about what languages are set up for the system, what database connections, what URL rules, caching settings, robots settings and meta content rules. It is recommended that you take a look at that documentation page or configuration file (which should be documented internally with comments as well, unless it is changed on an existing project) to get a thorough overview of what each setting does.</p>
+				
+				<p>Developers can also write additional configuration options into this Configuration file however. All of these configuration settings are considered as internal state environmental variables and will be loaded to State object (which is accessible with getState() method calls from MVC classes). This means that if you set up custom configuration settings in this file, then you have to make sure you do not accidentally override a setting that otherwise would be automatically set by State itself during project call. There is a complete list of these State variables in the <a href="state.htm">State Class</a> documentation page.</p>
+				
+				<p>It is recommended that if you wish to add your own configuration settings, then you add them either to the top or the bottom of Wave Framework's own configuration settings, so that it is easier for other developers to tell apart which settings are yours and which are not.</p>
+				
+			<h2>Controllers</h2>
+			
+				<p>Controllers are stored in '/controllers/' subfolder. Controller files should be in the format of 'controller.[name].php' in that folder and an example Controller is provided in that folder, but you can design the Controller however you want.</p>
+				
+				<p>Controllers that are extended from WWW_Factory class have the functionality and access methods or the entire Wave Framework system, from classes to State and the API. But this is not required unless your system requires that additional functionality.</p>
+				
+				<p>Controller is the core part of Wave Framework, in that all calls are sent to Controllers by Wave Framework API. All API requests, over HTTP or internally, are directed at these Controllers and their methods. Public methods of Controllers are accessible over API and private methods are considered internal-only.</p>
+				
+				<p>It is recommended to only include one input parameter for Controller methods, since all the data is sent to Controller methods as a single associative array. You can define other parameters for methods as well, but those would only be accessible internally in that case and should never be required.</p>
+				
+				<p>Controllers are generally loaded through API Handler by Index Gateway, but can also be loaded through Factory with 'getController()' method call. They are also accessible through API with 'api()' method call.</p>
+				
+				<h3>URL Controller</h3>
+				
+					<p>URL Controller is stored as '/controllers/controller.url.php' file. This is usually the default URL Controller that comes with Wave Framework, but it could be changed or modified if it is a project you're inheriting from someone else.</p>
+					
+					<p>The default URL Controller is much like any other Controller that you yourself can build. It's main purpose is that Index Gateway - that gets all the URL requests - uses URL Controller in Data Handler (this handler is used whenever a regular URL and not a file is requested from the server) to find out what view the user agent is requesting. It relies on language settings from Configuration, Sitemap file from '/resources/' subfolders, and the URL that the user requested and then returns this data to Data Handler. Data Handler then loads View Controller with the data that it found.</p>
+					
+					<p>In the bottom of URL Controller is also the place where you can validate the request against User permissions and see if they are allowed to access the URL or not. Default archive includes this validation as an example, but it is commented out by default. You can use that commented out section as an example of how to do this in your project.</p>
+				
+				<h3>View Controller</h3>
+				
+					<p>View Controller is stored as '/controllers/controller.view.php' file. If you inherited this project from someone else, then it is very likely that this file has been changed in some way by the developer. The default View Controller is provided in the downloaded archive however, so you can easily see what the file does.</p>
+					
+					<p>Basically the View Controller is loaded by Data Handler after the URL has been solved and the system knows what View it should load. View Controller loads any additional resources that the Sitemap tells it to load, the basic HTML frame for the project as well as calls for the actual view itself in the body part of the view.</p>
+					
+					<p>Note that it can be possible that another View Controller is used instead and that the View Controller can be named differently. This is because it is possible in Sitemap files to define another Controller to act as a View Controller. But in most projects you can expect the default View Controller to be the good starting point.</p>
+					
+					<p>It is generally recommended to add only the HTML that is existing across all URL's that use this Controller in this file.</p>
+				
+			<h2>Models</h2>
+			
+				<p>Models are stored in '/models/' subfolder. Model files should be in the format of 'model.[name].php' in that folder and an example Model is provided in that folder, but you can design the Model however you want.</p>
+				
+				<p>Models that are extended from WWW_Factory class have the functionality and access methods or the entire Wave Framework system, from classes to State and the API. But this is not required unless your system requires that additional functionality.</p>
+				
+				<p>The basic idea of models is to provide a code-representation for data that is stored in database or the filesystem. Models generally should have methods for getting data from database, storing it in database, removing it from database and so on.</p>
+				
+				<p>Models are generally loaded through Factory with 'getModel()' method call.</p>
+				
+			<h2>Views</h2>
+			
+				<p>Views are stored in '/views/' subfolder. View files should be in the format of 'view.{name}.php' in that folder and an example View is provided in that folder, but you can design the View however you want.</p>
+				
+				<p>Views that are extended from WWW_Factory class have the functionality and access methods or the entire Wave Framework system, from classes to State and the API. But this is not required unless your system requires that additional functionality.</p>
+				
+				<p>Views are generally loaded through View Controller by default, or through Factory with 'getView()' method call, which allows you to use nested Views.</p>
+				
+			<h2>Resources</h2>
+			
+				<p>Resources folder should include all the resources - such as JavaScript, CSS stylesheets, translation files and class definitions - that are used by the project. This folder includes multiple sub-folders as well as the files themselves. Here's the list of files:</p>
+				
+				<ul>
+					<li><b>api.observers.ini</b> - This includes all the defined API observers and the API commands they observe.</li>
+					<li><b>api.profiles.ini</b> - This is a configuration file for API profiles, namely all the profiles that require authentication and list of API calls they can make.</li>
+					<li><b>{language}.sitemap.ini</b> - This holds the rules for all URL's and what Views they load in the system, when a regular URL request is made. There can be multiple Sitemap files, one per language defined in Configuration.</li>
+					<li><b>{language}.translations.ini</b> - This should hold all system-specific translations. There can be multiple Sitemap files, one per language defined in Configuration. Note that language-specific content should not be stored in this file and should be loaded either from database or from other files.</li>
+					<li><b>offline.htm</b> - This is only used when AppCache is used in the system, this file can be ignored in most projects.</li>
+					<li><b>placeholder.jpg</b> - This is a file that is returned with a 404 header whenever an image file is requested that is not found on the server. All the dynamic image rules still apply for this picture. This placeholder behavior can be turned off in Configuration.</li>
+				</ul>
+				
+				<p>Note that it is actually possible to unify CSS and JavaScript files that are requested from '/resources/' subfolder. This means that a single HTTP request can load multiple files at once. You can look at View Controller to see how such a request is built.</p>
+			
+				<h3>Files</h3>
+				
+					<p>Resources folder includes '/files/' folder which is considered a general-purpose folder for storing various files that are part of the project from software perspective. Things like manuals or videos can be stored here.</p>
+			
+				<h3>Images</h3>
+				
+					<p>This '/resources/images/' folder is for storing all the design-related picture files.</p>
+			
+				<h3>Classes</h3>
+				
+					<p>It is possible to dynamically load objects with both native PHP Factory and JavaScript Factory through Wave Framework. Classes which are loaded should be stored in this folder and follow the naming standard of 'class.{name}.php' (or 'class.{name}.js' for JavaScript) and have a defined class name the same as the {name} part of the file name. After this, you can dynamically load these classes with 'getObject()' call when passing the name as the parameter.</p>
+					
+					<p>These classes are stored in '/resources/classes/' subfolder.</p>
+			
+				<h3>Libraries</h3>
+				
+					<p>Libraries are similar to classes, except they do not return an object when dynamically loaded. File name of a library should be '{name}.php' (or '{name}.js' for JavaScript) and it can be loaded through 'loadLibrary()' method call by either JavaScript or PHP Factories.</p>
+					
+					<p>These libraries are stored in '/resources/libraries/' subfolder.</p>
+			
+				<h3>Scripts</h3>
+				
+					<p>Scripts folder is for general as well as View-specific PHP and JavaScript files. Files that are stored in this folder can be used in multiple ways.</p>
+					
+					<p>The two main files are 'script.js' and 'script.php' files. If these files are set and exist, then they are loaded for every request. PHP file is loaded by Data and API Handlers and the JavaScript file is loaded by the View Controller.</p>
+					
+					<p>You can also define View-specific PHP and JavaScript files here, if you add files with naming standard '{view}.script.php' or '{view}.script.js' files here. These files are loaded by View Controller only if a View with the {view} value is loaded, so you can make sure that bloated functionality of one View does not affect other Views in the system.</p>
+					
+					<p>Other JavaScript and PHP files can also be stored in this folder. You can add other files by naming them just '{name}.php' or '{name}.js' and these files are loaded if they are defined in the Sitemap file as 'additional-js' or 'additional-php' Sitemap settings for any URL. This allows you to share some functionality across different Views, but without bloating the global namespace for every other request.</p>
+					
+					<p>This folder can also include libraries or frameworks such as jQuery, which are loaded by View Controller too.</p>
+					
+					<p>All of these scripts are stored in '/resources/scripts/' subfolder.</p>
+			
+				<h3>Styles</h3>
+				
+					<p>This folder is similar to JavaScript and PHP scripts folder, except it is for CSS stylesheets only. This folder should include all the files that you wish to include as part of your Views. The file 'style.css' is loaded with every request and by default the 'reset.css' file is also loaded by View Controller. You can change this behavior however if you change the Controller.</p>
+					
+					<p>You can also load View-specific stylesheets when you add a file to this folder with naming standard of '{view}.style.css'. This file is loaded by View Controller if a View by the name of {view} gets loaded. This allows you to separate some stylesheet files from the main file, reducing possible bloat and namespace conflicts.</p>
+					
+					<p>You can store additional stylesheet files here too when you add a file there as '{name}.css'. This file can then be loaded automatically if it is set as part of 'additional-css' value in Sitemap configuration. This allows multiple different Views share some stylesheets.</p>
+					
+					<p>All of these stylesheets are stored in '/resources/styles/' subfolder.</p>
+			
+				<h3>Static</h3>
+				
+					<p>Static folder in '/resources/static/' is meant for storing any and all files that you wish to load as resources, but without using PHP to serve these files. Since Wave Framework serves all files through PHP by default, then this can improve performance in some cases when you have pre-compiled or minified some files and wish to improve their loading speed.</p>
+					
+					<p>But note that the benefits may not outweigh the benefits of serving files through Wave Framework Handlers, since the control over caching and unifying requests may be better for the project in some cases.</p>
+				
+			<h2>Filesystem</h2>
+			
+				<p>There are a multiple folders and subfolders stored in '/filesystem/' folder. This folder is required to be writable by Wave Framework, since this is the place where the system stores cache and other related files.</p>
+				
+				<p>You can add new folders here and do with them whatever you want, the idea of this folder is that you can always know that this is the folder where your software writes or uploads various files to.</p>
+				
+				<p>Some of the folders are used by Wave Framework internally, other folders are assigned for use by software functionality. This is a brief overview of each folder and their purpose:</p>
+				
+				<ul>
+					<li><b>backups</b> - This should be used to store various backups. Developer tool for backups (from '/tools/' folder) stores files in this folder.</li>
+					<li><b>cache</b> - This folder and its subfolders are used to store various cache files. It should be safe to empty these folders every now and then without the software breaking.</li>
+					<li><b>data</b> - This is meant for any filesystem specific databases - such as SQLite - and other data storage.</li>
+					<li><b>errors</b> - Wave Framework stores logs about error messages in this folder.</li>
+					<li><b>keys</b> - Various certificates - such as for SSL - and other security related keys should be stored here.</li>
+					<li><b>limiter</b> - If request limiter is used, then Wave Framework stores request information and blocks in this folder.</li>
+					<li><b>logs</b> - This folder is used for storing various system logs and internal debugging messages and should be safe to delete every now and then.</li>
+					<li><b>messenger</b> - This is a folder for State Messenger storage, which is a special functionality that can be used by Wave Framework across requests.</li>
+					<li><b>sessions</b> - This is custom session storage folder.</li>
+					<li><b>static</b> - Any files that are uploaded to this folder are never served by PHP when a request is made to these files.</li>
+					<li><b>tmp</b> - Any temporary files should be stored here. Files in this folder should not expect to be there the next time a request is made. This is a safe folder for writing anything into that you know you will not use later on.</li>
+					<li><b>tokens</b> - API session tokens are stored in this folder.</li>
+					<li><b>updates</b> - The developer tool for updates from '/tools/' subfolder stores the update archives in this folder.</li>
+					<li><b>userdata</b> - This is a folder that is suitable for various end-user file uploads and file storage.</li>
+				</ul>
+				
+			<h2>Overrides</h2>
+			
+				<p>Overrides are a very useful part of Wave Framework. The idea behind overrides is that you have the ability to override any and every part of your systems functionality except the framework itself. This means that if you place a file with the same name and the same location in '/overrides/' folder or subfolders and a request is made to the original file over HTTP or from within Factory, then the override will be loaded instead.</p>
+				
+				<p>This has two really good benefits. First is that you can deploy beta's to live software in this manner, as the beta updates could simply be deployed in the overrides folders and everything will work as expected. But do remember that framework itself and the Configuration file cannot have overrides.</p>
+				
+				<p>Second benefit is that overrides allow you to have the same software in multiple servers, but with slight changes. For example, if you have built an intranet software on Wave Framework and one client wishes to use some functionality that they custom-ordered, then this can be stored in overrides folder. This is beneficial because the same software itself can still be updated through the core update cycle, since the updates would not overwrite the override.</p>
+				
+			<h2>Summary</h2>
+			
+				<p>As you can see the structure of a project in filesystem follows only a few very easy to follow rules. If you start a new project with Wave Framework or inherit an existing one, then these are the folders that actually affect the software functionality that is built on top of Wave.</p>
+				
+				<p>These details are good to remember, especially when updating the framework itself. The main folder for the framework is the '/engine/' folder and the '.htaccess' file in the root folder (for Apache and if it exists and the rules have not been written to servers own configuration as would be the case with Nginx server).</p>
+				
+				<p>Last but not least, do not forget to pay attention to the 'readme.txt' file that should carry both the license for Wave Framework and the license for whatever project you are building or what you inherited. It is always a good idea to pay attention to the legal aspect of the software that you are building or maintaining.</p>
+			
+	</body>
+</html>

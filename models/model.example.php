@@ -36,8 +36,10 @@ class WWW_model_example extends WWW_Factory {
 	 * @return boolean
 	 */
 	public function __initialize(){
+	
 		// Do something here
 		return true;
+		
 	}
 
 	/**
@@ -47,14 +49,23 @@ class WWW_model_example extends WWW_Factory {
 	 * @return boolean
 	 */
 	public function load($id){
+	
+		// Attempting to find the table row
 		// $data=$this->dbSingle('SELECT * FROM table WHERE id=?',array($id));
 		// if($data){ 
+			// Assigning data to object parameters
+			// $this->id=$data['id'];
+			// $this->name=$data['name'];
+			
+			// This below is just an example without database, used in some tutorials
 			$this->id=$id;
 			$this->name='Lorem Ipsum #'.rand(1,1000); // This is used for simply testing cache
 			return true;
+			
 		// } else {
 			// return false; 
 		// }
+		
 	}
 
 	/**
@@ -63,25 +74,130 @@ class WWW_model_example extends WWW_Factory {
 	 * @return array
 	 */
 	public function get(){
+	
 		// Current Data is returned as an array
 		return array(
-			'id' => $this->id,
+			'id'=>$this->id,
 			'name'=>$this->name
 		);
+
+	}
+	
+	/**
+	 * This returns multiple objects from database as array entries, similar to regular 
+	 * get() method call. It also supports filtering.
+	 *
+	 * @param $config array of configuration data for the call, filters and so on
+	 * @return array
+	 */
+	public function all($config){
+	
+		// If specific fields are requested
+		if(isset($config['fields'])){
+			$this->filter($config['fields'],'alphanumeric','_*');
+		} else {
+			$fields='*';
+		}
+	
+		// Total row calculation is not necessary, but can be sometimes useful
+		$query='SELECT SQL_CALC_FOUND_ROWS '.$fields.' FROM tags ';
+		
+		// Filtering data
+		$filters=array();
+		$filterData=array();
+		
+		// Filtering with a field, if set
+		if(isset($config['filter-name']) && trim($config['filter-name'])!=''){ $filters[]='table.name LIKE ?'; $filterData[]='%'.str_replace(array('%','_'),array('\\%','\\_'),$config['filter-name']).'%'; }
+		
+		// Building filtered query, if filters are set
+		if(!empty($filters)){
+			foreach($filters as $key=>$filter){
+				if($key==0){
+					$query.=' WHERE '.$filter;
+				} else {
+					$query.=' AND '.$filter;
+				}
+			}
+		}
+
+		// If ordering settings are used
+		if(isset($config['order-by'])){
+			if(!isset($config['order'])){ $config['order']='DESC'; }
+			$query.=' ORDER BY '.$this->filter($config['order-by'],'alphanumeric','_').' '.$this->filter($config['order'],'alphanumeric','_');
+		}
+		
+		// If only certain amount of rows are requested
+		if(isset($config['limit'])){
+			// Pre-setting limit from value if it was not sent
+			if(!isset($config['limit-from'])){ $config['limit-from']='0'; }
+			$query.=' LIMIT '.$this->filter($config['limit-from'],'integer').','.$this->filter($config['limit'],'integer');
+		}
+		
+		// Making the request
+		$rows=$this->dbMultiple($query,$filterData);
+		if($rows){
+			// Finding total rows
+			$totalRows=$this->dbSingle('SELECT FOUND_ROWS() as rows;');
+			// Returning entries and the total row count
+			return array('entries'=>$rows,'total'=>$totalRows['rows']);
+		} else {
+			// Returning empty data
+			return array('entries'=>array(),'total'=>0);
+		}
+		
 	}
 
 	/**
 	 * This function is intended to save data to database
 	 *
-	 * @return boolean
+	 * @return integer|boolean
 	 */
 	public function save(){
-		// $update=$this->dbCommand('UPDATE table SET name=? WHERE id=?',array($this->name,$this->id));
-		// if($update){
-			return true;
-		// } else { 
-			// return false;
-		// }
+	
+		// These variables hold the data for prepared statement
+		$query=array();
+		$data=array();
+		
+		// Preparing query command and data value for prepared statement
+		$query[]='name=?';
+		$data[]=$this->name;
+		
+		// Update if ID exists, otherwise insert
+		if($this->id){
+			$data[]=$this->id;
+			$save=$this->dbCommand('UPDATE table SET '.implode(',',$query).' WHERE id=?;',array($data));
+		} else {
+			$save=$this->dbCommand('INSERT INTO table SET '.implode(',',$query).';',array($data));
+			$this->id=$this->dbLastId();
+		}
+		
+		// Returning the ID if the adding was a success
+		if($save){
+			// Returning the ID
+			return $this->id;
+		} else {
+			// Database command failed
+			return false;
+		}
+		
+	}
+	
+	/**
+	 * This function is intended to save data to database
+	 *
+	 * @return boolean
+	 */
+	public function delete($id){
+	
+		// Attempting to delete the row
+		if($this->dbCommand('DELETE FROM table WHERE id=?',array($id))){
+			// Returning the ID of deleted row
+			return $id;
+		} else {
+			// Database command failed
+			return false;
+		}
+		
 	}
 
 }

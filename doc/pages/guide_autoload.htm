@@ -14,17 +14,22 @@
 		
 			<h2>Files</h2>
 			
-				<h3>/resources/autoload.php</h3>
+				<h3>/resources/scripts/script.php</h3>
+				<h3>/resources/scripts/script.js</h3>
 		
 			<h2>Introduction</h2>
 			
-				<p>Autoload script is not necessary on most web projects as long as functionality is built with classes and objects created from those classes that are used by Controllers, Models and Views within Wave Framework. But sometimes it is necessary to load a specific library or libraries or change some PHP configuration setting globally. Autoload script can be used as an option for this.</p>
+				<p>The script.js and script.php files in '/resources/scripts/' folder are automatically loaded scripts. This means that both of these scripts, if they exist, are loaded by the system.</p>
+			
+				<p>Autoloaded scripts is not necessary on most web projects as long as functionality is built with classes and objects created from those classes that are used by Controllers, Models and Views within Wave Framework and in other JavaScript files. But sometimes it is necessary to load a specific library or libraries or change some PHP configuration setting globally. Autoload script can be used as an option for this.</p>
 				
-			<h2>Using Autoload Script</h2>
+			<h2>Using Autoload Script for JavaScript</h2>
+			
+				<p>JavaScript autoloaded 'script.js' file is generally considered the master JavaScript file. Most of the simple applications only store scripts in that file alone. This works similarly to any other script file loaded in the system, you just have to keep in mind that this script is loaded after all the external JavaScript libraries are already loaded (this behavior can be changed by editing View Controller).
 				
-				<p>It is not recommended to edit <a href="gateway.htm">Index Gateway</a> file at '/index.php' or handler files in '/engine/' subfolder when you wish to include libraries or run additional global methods before Wave Framework API is loaded. Editing Index Gateway and Handler files should be the last resort. Data and API Handlers however load a script that is situated in '/resources/autoload.php' file. As a result, everything that is defined in that Autoload script will be included with every HTTP request that is made to Wave Framework.</p>
+			<h2>Using Autoload Script with PHP</h2>
 				
-				<p>For example, if you wish to include a method in your system that is accessible everywhere for checking whether your server environment is 64bit or 32bit, then you can add this to your autoload script:</p>
+				<p>For example, if you wish to include a method in your system that is accessible everywhere for checking whether your server environment is 64bit or 32bit, then you can add this to your 'script.php' file:</p>
 				
 <pre>
 	<code>
@@ -44,7 +49,7 @@
 				
 				<p>By default the Autoload script is entirely empty and nothing is loaded from it by Wave Framework.</p>
 				
-			<h2>Usable Variables and Objects</h2>
+			<h3>Usable Variables and Objects</h3>
 			
 				<p>Autoload is loaded procedurally by Data and API Handlers of Wave Framework. This means that you have access to some of the core aspects of Wave Framework even before API itself is loaded. This also means that you can use the data that is stored by these variables in your Autoload functions, classes or more.</p>
 				

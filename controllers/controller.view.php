@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.4.1
+ * @version    3.4.2
  */
 
 class WWW_controller_view extends WWW_Factory {
@@ -34,7 +34,7 @@ class WWW_controller_view extends WWW_Factory {
 		unset($input['www-command'],$input['www-return-type'],$input['www-cache-timeout'],$input['www-request'],$input['www-session'],$input['www-cache-tags']);
 	
 		// Getting view information
-		$view=$this->getState('view');
+		$view=$this->viewData();
 		$systemRoot=$this->getState('system-root');
 		
 		// If PHP libraries are set to be loaded, then loading them through Factory
@@ -42,8 +42,13 @@ class WWW_controller_view extends WWW_Factory {
 			// Libraries are in a comma-separated list
 			$libraries=explode(',',$view['additional-php']);
 			foreach($libraries as $l){
-				// This will throw an error, if the library is not found
-				$this->loadLibrary($l);
+				if(file_exists($systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$l.'.php')){
+					// Requiring override file
+					require($systemRoot.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$l.'.php');
+				} else {
+					// Requiring original file
+					require($systemRoot.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.$l.'.php');
+				}
 			}
 		}
 		
@@ -95,6 +100,11 @@ class WWW_controller_view extends WWW_Factory {
 		$coreStyleSheet[]='reset.css';
 		$coreStyleSheet[]='style.css';
 		
+		// If Sitemap file has defined additional external CSS stylesheets
+		if(isset($view['external-css']) && $view['external-css']!=''){
+			$externalStylesheet=explode(',',$view['external-css']);
+		}
+		
 		// If Sitemap file has defined additional CSS files
 		if(isset($view['additional-css']) && $view['additional-css']!=''){
 			$additionalStylesheet=explode(',',$view['additional-css']);
@@ -116,6 +126,11 @@ class WWW_controller_view extends WWW_Factory {
 		// These files do not have to be in /resources/ folder and are loaded from engine folder instead
 		$coreJavaScript[]='class.www-wrapper.js';
 		$coreJavaScript[]='class.www-factory.js';
+		
+		// If Sitemap file has defined additional external JavaScript libraries
+		if(isset($view['external-js']) && $view['external-js']!=''){
+			$externalJavaScript=explode(',',$view['external-js']);
+		}
 		
 		// If Sitemap file has defined additional JavaScript libraries
 		if(isset($view['additional-js']) && $view['additional-js']!=''){
@@ -161,6 +176,11 @@ class WWW_controller_view extends WWW_Factory {
 					<?php } ?>
 					<!-- Stylesheets -->
 					<link type="text/css" href="resources/styles/<?=implode('&',$coreStyleSheet)?>" rel="stylesheet" media="all"/>
+					<?php if(isset($externalStylesheet)){ ?>
+						<?php foreach($externalStylesheet as $style){ ?>
+							<link type="text/css" href="<?=implode('&',$style)?>" rel="stylesheet" media="all"/>
+						<?php } ?>
+					<?php } ?>
 					<?php if(isset($additionalStylesheet)){ ?>
 						<link type="text/css" href="resources/styles/<?=implode('&',$additionalStylesheet)?>" rel="stylesheet" media="all"/>
 					<?php } ?>
@@ -172,8 +192,13 @@ class WWW_controller_view extends WWW_Factory {
 					<link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon"/>
 					<!-- JavaScript -->
 					<script type="text/javascript" src="resources/scripts/<?=implode('&',$coreJavaScript)?>"></script>
+					<?php if(isset($externalJavaScript)){ ?>
+						<?php foreach($externalJavaScript as $script){ ?>
+							<script type="text/javascript" src="<?=$script?>"></script>
+						<?php } ?>
+					<?php } ?>
 					<?php if(isset($additionalJavaScript)){ ?>
-						<script type="text/javascript" src="resources/libraries/<?=implode('&',$additionalJavaScript)?>"></script>
+						<script type="text/javascript" src="resources/scripts/<?=implode('&',$additionalJavaScript)?>"></script>
 					<?php } ?>
 					<?php if(isset($moduleJavaScript)){ ?>
 						<script type="text/javascript" src="resources/scripts/<?=$moduleJavaScript?>"></script>

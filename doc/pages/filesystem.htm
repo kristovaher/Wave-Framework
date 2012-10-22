@@ -81,6 +81,10 @@
 
 			<p><a href="guide_state.htm">State</a> is always required by Wave Framework. It is used by API and some handlers. <a href="guide_state.htm">State</a> is used to keep track of system state, configuration and its changes, such as relevant PHP settings. It allows changing these settings, and thus affecting API or PHP configuration. <a href="guide_state.htm">State</a> also includes functionality for <a href="guide_messenger.htm">State Messenger</a> , sessions, cookies, translations and sitemap data. <a href="guide_state.htm">State</a> is assigned in API and is accessible in <a href="guide_mvc.htm">MVC</a> objects through Factory wrapper methods. Multiple different states can be used by the same request, but usually just one is used per request. <a href="guide_state.htm">State</a> is only kept for the duration of the request processing and is not stored beyond its use in the request.</p>
 
+			<p><b>/engine/class.www-tools.php</b></p>
+			
+			<p><a href="tools.htm">Tools Class</a> is used by Wave Framework Factory to allow for system-maintenance related functionality for MVC classes of the system. This allows to use filesystem cleaner, geenrate a file index of files or calculate file size of a folder.</p>
+
 			<p><b>/engine/class.www-wrapper.php</b></p>
 
 			<p>This class should be used when you wish to communicate with Wave Framework that is set up in another server. This class is independent from Wave Framework itself and can be used by other servers alone. This class allows sending and receiving encrypted data as well as sending files and creating session tokens in a system set up with Wave Framework. This class uses cURL (if available) to make advanced requests with file uploads and cookie containers.</p>
@@ -173,6 +177,10 @@
 			/resources/classes/class.{name}.js<br/>
 			/resources/classes/class.{name}.php<br/></b></p>
 			
+			<p><b>/resources/files/</b></p>
+			
+			<p>This folder is for all the various files that are not necessarily images or resources. This folder is used for things like static downloads.</p>
+			
 			<p>This folder includes all the classes that can be dynamically loaded through Factory method getObject() from either JavaScript or PHP. Filename should be formatted as class.[name].php and class name as [name]. Dynamically loaded JavaScript files should also be stored in these folders and they work the same way. Two example files are provided as a starting point.</p>
 			
 			<p><b>/resources/images/<br/>/resources/images/logo.png</b></p>
@@ -186,12 +194,13 @@
 			<p>This folder stores various PHP scripts or JavaScript files that can be dynamically loaded within MVC objects through Factory classes. These files can also be automatically loaded by URL controller, if they are set. Two example scripts are provided as a starting point.</p>
 			
 			<p><b>/resources/scripts/<br/>
+			/resources/scripts/script.php<br/>
 			/resources/scripts/script.js<br/>
 			/resources/scripts/jquery.js<br/>
 			/resources/scripts/{view}.script.js<br/>
 			/resources/scripts/{view}.script.php<br/></b></p>
 			
-			<p>This folder includes all the JavaScript files. All of these files are optional, but the View Controller loads the script.js and jquery.js (jQuery framework) file by default. You can also define view-specific scripts here for both JavaScript and PHP, which are loaded by URL and View controllers if detected.</p>
+			<p>This folder includes all the JavaScript files. All of these files are optional, but the View Controller loads the script.js and jquery.js (jQuery framework) file by default and script.php file is loaded automatically by Data and API Handlers for each request as well. You can also define view-specific scripts here for both JavaScript and PHP, which are loaded by URL and View controllers if detected.</p>
 			
 			<p><b>/resources/static/</b></p>
 			
@@ -211,10 +220,6 @@
 			<p><b>/resources/api.observers.ini</b></p>
 
 			<p>This file defines observers for API. Sections in this file should be API commands, such as 'example-get' under which it is possible to set multiple observer-specific settings. If the set API command is called, then an observer is executed based on settings from this file. Note that the Input observers get the same input data that the API call itself gets, except command related data. Output observers get the data that is returned after API command execution.</p>
-
-			<p><b>/resources/autoload.php</b></p>
-
-			<p>By default, this file is empty as no libraries are used or loaded by Wave Framework. But if you wish to add system-wide functions, then this file can be used for that purpose as it is loaded by <a href="gateway.htm">Index Gateway</a> for all requests. Generally it is useful to not have a general library in a system, as it can make testing more difficult, but it can be useful at times. It is also possible to add other functionality to this file that is not necessarily a function definition. This will make sure that the <a href="gateway.htm">Index Gateway</a> and Handlers themselves are not touched during project development for the same purpose. This file is loaded only by <a href="handler_api.htm">API</a> and <a href="handler_data.htm">Data Handlers</a> and only after configuration and state has been loaded.</p>
 
 			<p><b>/resources/{language-code}.sitemap.ini</b></p>
 
@@ -292,10 +297,6 @@
 			<p><b>/tools/www-updater.php</b></p>
 
 			<p>This is an update script template, if file with this name is added to root archive of update zip files that is given to /tools/updater.php, then this script is also executed (and then removed). This script is useful to store in other update-related commands, such as file permissions, database changes and so on.</p>
-
-			<p><b>/tools/www-cleaner.php</b></p>
-
-			<p>This is a maintenance script template. It works similarly to Cleaner tool, but is intended to be called by the server in order to automatically clean the filesystem folders. The only difference is that the log is shown only if the server itself makes the request and the 'cutoff' value cannot be sent with the request by default. Developer should change this script accordingly to make it suitable for use in whatever system it is implemented on.</p>
 
 			<p><b>/views/</b></p>
 

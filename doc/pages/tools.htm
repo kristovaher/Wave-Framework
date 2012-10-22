@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Tools Class - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>Tools Class</h1>
+		
+			<h2>Files</h2>
+			
+				<h3>/engine/class.www-tools.php</h3>
+		
+			<h2>Introduction</h2>
+			
+				<p>This class holds various functionality that also the /tools/ folder has itself. This allows the system to implement some of the tools functionality within the actual website itself, such as things like clearing cache in bulk, or returning an index of files from a folder.</p>
+				
+			<h2>Using Tools Class</h2>
+			
+				<p>To use Minifier class, it is recommended to load Minifier class and then call the static methods of that class. For example, to minify JavaScript text content, you can do as follows:</p>
+				
+<pre>
+	<code>
+	require('/engine/class.www-minifier.php');
+	$minifiedJavaScript=WWW_Minifier::minifyJS($originalJavaScript);
+	</code>
+</pre>
+
+			<h2>Minifier Class Parameters</h2>
+			
+				<p>Minifier class implements no parameters.</p>
+				
+			<h2>Minifier Class Methods</h2>
+			
+				<h3>public static function minifyCSS($data)</h3>
+				
+					<p>This method removes comments, tabs, spaces, new-lines and various other spaces from text. It assumes that text is in a CSS-like format.</p>
+			
+				<h3>public static function minifyJS($data)</h3>
+				
+					<p>This method removes comments, tabs, spaces, new-lines and various other spaces from text. It assumes that text is in a JavaScript-like format.</p>
+			
+				<h3>public static function minifyHTML($data)</h3>
+				
+					<p>This method removes comments, tabs, spaces, new-lines and various other spaces from text. It assumes that text is in a HTML-like format.</p>
+			
+				<h3>public static function minifyXML($data)</h3>
+				
+					<p>This method removes comments, tabs, spaces, new-lines and various other spaces from text. It assumes that text is in a XML-like format.</p>
+			
+	</body>
+</html>

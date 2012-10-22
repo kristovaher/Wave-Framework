@@ -84,6 +84,18 @@
 				
 					<p>This method is used to apply static Minifier class method to a text string. $data should be the data string to be modified and $type should be the format type (either xml, html, js or css). This method returns modified string that is minified by Minifier class.</p>
 					
+				<h3>final protected viewData($variable=false)</h3>
+				
+					<p>This is just a wrapper function for getting state data for view. This method returns $variable from the current view settings or the entire view data array, if this is not set.</p> 
+					
+				<h3>final protected getStorage($key=false)</h3>
+				
+					<p>This is just a wrapper function for getting state from global state storage. This method returns $variable from the storage or the whole storage at once if this is not set.</p>
+					
+				<h3>final protected setStorage($key,$value)</h3>
+				
+					<p>This is just a wrapper function for getting state from global state storage. This method returns $variable from the storage or the whole storage at once if this is not set.</p> 
+					
 				<h3>final protected function resultError($message='Error',$customData=false,$responseCode=300)</h3>
 				
 					<p>Wave Framework <a href="guide_mvc.htm">MVC</a> object method calls can return their data in whatever format developer finds necessary, but it is recommended to return data in a standardized form. This method returns an array in the format of an error. $message should be the verbose message returned, $customData should be an array of data returned as part of the result and $responseCode should be an response code in 3XX namespace, which is used for errors in Wave Framework.</p>
@@ -139,6 +151,8 @@
 				<h3>final protected function setMessengerData($key,$value=false)</h3>
 				
 					<p>This method stores data $value under key of $key. It also turns off caching of the current <a href="guide_api.htm">API</a> call as a result, since <a href="guide_messenger.htm">State Messenger</a> is outside the scope of caching. Additionally using this function also turns off caching of the page which uses it.</p>
+			
+				<h3>final protected function callTool($type,$arg1=false,$arg2=false)</h3>
 			
 				<h3>final protected function unsetMessengerData($key=false)</h3>
 			

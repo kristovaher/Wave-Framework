@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_data.htm
  * @since      1.5.0
- * @version    3.2.4
+ * @version    3.4.2
  */
 
 // INITIALIZATION
@@ -30,6 +30,22 @@
 	// If access control header is set in configuration
 	if(isset($config['access-control'])){
 		header('Access-Control-Allow-Origin: '.$config['access-control']);
+	}
+	
+	// This stores request header based cache timeout
+	$cacheLoad=-1;
+	
+	// Setting cache timeout for HTTP request, used by Data Handler
+	if(isset($_SERVER['HTTP_CACHE_CONTROL'])){
+		if(trim($_SERVER['HTTP_CACHE_CONTROL'])=='no-cache'){
+			$cacheLoad=0;
+		} else {
+			// Finding the amount of allowed seconds
+			$raw=trim(str_replace('max-age=','',$_SERVER['HTTP_CACHE_CONTROL']));
+			if(is_numeric($raw)){
+				$cacheLoad=$raw;
+			}
+		}
 	}
 
 	// If index URL cache is not configured, it is turned off by default
@@ -64,10 +80,10 @@
 
 	// This functions file is not required, but can be used for system wide functions
 	// If you want to include additional libraries, do so here
-	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php')){
-		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
-	} else {
-		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
+	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php')){
+		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php');
+	} elseif(file_exists(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php')) {
+		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php');
 	}
 	
 // LOADING API AND CALLING URL SOLVING/ROUTING CONTROLLER
@@ -78,7 +94,7 @@
 
 	// This uses current request URI to find out which view should be loaded, by default it uses the request set by State
 	// API check is turned off, since index.php is considered a public gateway
-	$view=$api->command(array('url'=>$state->data['true-request'],'www-command'=>'url-solve','www-output'=>0,'www-return-type'=>'php','www-cache-timeout'=>$config['index-url-cache-timeout']),false,false,true);
+	$view=$api->command(array('url'=>$state->data['true-request'],'www-command'=>'url-solve','www-output'=>0,'www-return-type'=>'php','www-cache-timeout'=>$config['index-url-cache-timeout'],'www-cache-load-timeout'=>$cacheLoad),false,false,true);
 
 // CALLING DEFAULT VIEW CONTROLLER IF URL DID NOT ORDER A REDIRECTION
 
@@ -113,7 +129,7 @@
 		}
 		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command(array('www-command'=>$view['controller'].'-'.$view['controller-method'],'www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-tags'=>((isset($view['cache-tag']))?$view['cache-tag']:''),'www-cache-timeout'=>$config['index-view-cache-timeout'])+$inputData,false,false,true);
+		$api->command(array('www-command'=>$view['controller'].'-'.$view['controller-method'],'www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-tags'=>((isset($view['cache-tag']))?$view['cache-tag']:''),'www-cache-timeout'=>$config['index-view-cache-timeout'],'www-cache-load-timeout'=>$cacheLoad)+$inputData,false,false,true);
 
 	}
 	

@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_api.htm
  * @since      1.5.0
- * @version    3.2.4
+ * @version    3.4.2
  */
 
 //INITIALIZATION
@@ -53,10 +53,10 @@
 
 	// This functions file is not required, but can be used for system wide functions
 	// If you want to include additional libraries, do so here
-	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php')){
-		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
-	} else {
-		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
+	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php')){
+		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php');
+	} elseif(file_exists(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php')){
+		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php');
 	}
 	
 // LOADING API AND GATHERING INPUT DATA

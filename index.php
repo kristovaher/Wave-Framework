@@ -202,6 +202,10 @@
 		if(isset($config['request-limiter']) && $config['request-limiter']){
 			$limiter->limitRequestCount($config['request-limiter']);
 		}
+		// Referrer limiter checks if the Referrer URL is allowed or not
+		if(isset($config['referrer-limiter']) && $config['referrer-limiter']){
+			$limiter->limitReferrer($config['referrer-limiter']);
+		}
 
 	}
 	

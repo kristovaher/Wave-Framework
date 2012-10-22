@@ -358,6 +358,44 @@ class WWW_Limiter {
 		return true;
 		
 	}
+	
+	/**
+	 * This method either throws a 403 Forbidden error if a referrer is used that is not accepted.
+	 *
+	 * @param string $allowed This is comma-separated list of domains that are allowed or not to be the referrer
+	 * @return boolean or exit if limiter hit
+	 */
+	public function limitReferrer($allowed='*'){
+	
+		if(isset($_SERVER['HTTP_REFERER'])){
+			// Allowed setting can be a comma-separated string
+			$allowed=explode(',',$allowed);
+			// Parsing the referrer URL
+			$referrer=parse_url($_SERVER['HTTP_REFERER']);
+			// Checking for domain name existence and returning true, if accepted
+			if(in_array('*',$allowed) && !in_array('!'.$referrer['host'],$allowed)){
+				return true;
+			} elseif(in_array($referrer['host'],$allowed)){
+				return true;
+			}
+			// Request is logged and can be used for performance review later
+			if($this->logger){
+				$this->logger->setCustomLogData(array('response-code'=>401,'category'=>'limiter','reason'=>'Incorrect referrer'));
+				$this->logger->writeLog();
+			}
+			// Returning 401 header
+			header('HTTP/1.1 403 Forbidden');
+			// Response to be displayed in browser
+			echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">HTTP/1.1 403 Forbidden</div>';
+			echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">THIS REFERRER IS NOT ALLOWED</div>';
+			// Script is halted
+			die();
+		}
+		
+		// Referrer check processed
+		return true;
+		
+	}
 
 }
 	

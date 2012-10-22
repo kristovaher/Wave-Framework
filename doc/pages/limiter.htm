@@ -145,6 +145,10 @@
 				<h3>public function limitNonSecureRequests($autoRedirect=true)</h3>
 				
 					<p>This method either throws a 403 Forbidden error if non-HTTPS connection is used to make a request, or redirects the request to HTTPS. If $autoRedirect is set to true, then HTTP requests are automatically redirected.</p>
+					
+				<h3>public function limitReferrer($allowed='*')</h3>
+				
+					<p>This method either throws a 403 Forbidden error if a referrer is used that is not accepted.</p>
 			
 	</body>
 </html>

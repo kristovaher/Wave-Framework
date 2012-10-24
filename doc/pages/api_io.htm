@@ -139,7 +139,7 @@
 					
 				<h3>www-session</h3>
 				
-					<p>This variable holds data from session variable, but not the whole $_SESSION array. Wave Framework namespaces its session data and only the namespaced session data is stored in this 'www-session' array. This variable is automatically defined for API and should not be sent through input variables.</p>
+					<p>This variable tells Wave Framework API to load session data from active session and apply it as input data for any API call. This is set to 1 by default, so session data gets always included, with the exception of Factory api() calls, which disable it by default.</p>
 					
 				<h3>www-crypt-input</h3>
 				

@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_data.htm
  * @since      1.5.0
- * @version    3.4.2
+ * @version    3.4.3
  */
 
 // INITIALIZATION
@@ -75,6 +75,11 @@
 	require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-sessions.php');
 	// Loading sessions class with the session namespace
 	$state->sessionHandler=new WWW_Sessions($state->data['session-name'],$state->data['session-lifetime'],$databaseConnection);
+	// Assigning session data to State
+	if(!empty($state->sessionHandler->sessionData)){
+		$state->data['session-original-data']=$state->sessionHandler->sessionData;
+		$state->data['session-data']=$state->sessionHandler->sessionData;
+	}
 	
 // AUTOLOAD AND SESSIONS FUNCTIONALITY
 
@@ -114,12 +119,14 @@
 		if(!empty($_GET)){ 
 			$inputData+=$_GET; 
 		}
-		if(!empty($_COOKIE)){ 
-			$inputData+=$_COOKIE;
-		}
 		if(!empty($_FILES)){
 			$inputData+=$_FILES;
 		}
+		if(!empty($_COOKIE)){
+			$inputData+=$_COOKIE;
+		}
+		// Removing input stream related data
+		unset($inputData['www-xml'],$inputData['www-json']);
 
 		// If index view cache is not configured, it is turned of by default
 		if(isset($view['cache-timeout'])){

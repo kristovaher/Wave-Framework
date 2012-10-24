@@ -31,7 +31,7 @@ class WWW_controller_view extends WWW_Factory {
 	public function load($input){
 	
 		// Unsetting input data that are only used by API and are accessible elsewhere by the user
-		unset($input['www-command'],$input['www-return-type'],$input['www-cache-timeout'],$input['www-request'],$input['www-session'],$input['www-cache-tags']);
+		unset($input['www-command'],$input['www-return-type'],$input['www-cache-timeout'],$input['www-cache-load-timeout'],$input['www-request'],$input['www-session'],$input['www-cache-tags']);
 	
 		// Getting view information
 		$view=$this->viewData();

@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.4.2
+ * @version    3.4.3
  */
 
 class WWW_State	{
@@ -47,12 +47,6 @@ class WWW_State	{
 	 * or not.
 	 */
 	private $sessionStarted=false;
-	
-	/**
-	 * This carries the session data that was active at the moment sessions were created. It is
-	 * used to compare later on if sessions need to be commited or not.
-	 */
-	private $originalSessionData=array();
 	
 	/**
 	 * This holds the 'keyword' or 'passkey' of currently used State messenger.
@@ -199,6 +193,7 @@ class WWW_State	{
 				'session-id'=>false,
 				'session-lifetime'=>0,
 				'session-name'=>'WWW'.crc32(__ROOT__),
+				'session-original-data'=>array(),
 				'session-path'=>false,
 				'session-permissions-key'=>'www-permissions',
 				'session-regenerate'=>0,
@@ -578,19 +573,23 @@ class WWW_State	{
 		 */
 		final public function commitHeaders(){
 		
-			// Checking if there are more data in sessions than just internal keys
-			$sessionSize=count($this->data['session-data']);
-			if(empty($this->data['session-data']) || ($sessionSize==1 && isset($this->data['session-data'][$this->data['session-timestamp-key']])) || ($sessionSize==1 && isset($this->data['session-data'][$this->data['session-fingerprint-key']])) || ($sessionSize==2 && isset($this->data['session-data'][$this->data['session-timestamp-key']]) && isset($this->data['session-data'][$this->data['session-fingerprint-key']]))){
-				// This will make the session handler destroy the session
-				$this->data['session-data']=array();
-			}
+			// If sessions have been started
+			if($this->sessionStarted){
+				
+				// If session data has changed in any way or session is assigned to be regenerated
+				if($this->sessionHandler->regenerateId || $this->data['session-original-data']!=$this->data['session-data']){
+					// Checking if there are more data in sessions than just internal keys
+					$sessionSize=count($this->data['session-data']);
+					if($sessionSize==0 || ($sessionSize==1 && isset($this->data['session-data'][$this->data['session-timestamp-key']])) || ($sessionSize==1 && isset($this->data['session-data'][$this->data['session-fingerprint-key']])) || ($sessionSize==2 && isset($this->data['session-data'][$this->data['session-timestamp-key']]) && isset($this->data['session-data'][$this->data['session-fingerprint-key']]))){
+						// This will make the session handler destroy the session
+						$this->data['session-data']=array();
+					}
+					// Sending State session data to session handler
+					$this->sessionHandler->sessionData=$this->data['session-data'];
+					// Closing sessions
+					$this->sessionHandler->sessionCommit();
+				}
 			
-			// If session data has changed in any way or session is assigned to be regenerated
-			if($this->sessionHandler->regenerateId || $this->originalSessionData!=$this->data['session-data']){
-				// Sending State session data to session handler
-				$this->sessionHandler->sessionData=$this->data['session-data'];
-				// Closing sessions
-				$this->sessionHandler->sessionCommit();
 			}
 			
 			// Commiting headers for added headers
@@ -997,13 +996,19 @@ class WWW_State	{
 		 * @param array $data data array set to user
 		 * @return boolean
 		 */
-		final public function setUser($data){
-		
-			// Setting the session
-			$this->setSession($this->data['session-user-key'],$data);
-			// Setting the state variable
-			$this->data['user-data']=$data;
-			return true;
+		final public function setUser($data=false){
+			
+			// If user is not being unset
+			if($data){
+				// Setting the session
+				$this->setSession($this->data['session-user-key'],$data);
+				// Setting the state variable
+				$this->data['user-data']=$data;
+				return true;
+			} else {
+				// Unsetting the user
+				return $this->unsetUser();
+			}
 			
 		}
 		
@@ -1049,6 +1054,8 @@ class WWW_State	{
 		
 			// Unsetting the session
 			$this->unsetSession($this->data['session-user-key']);
+			// Regenerating session cookie
+			$this->regenerateSession(true,true);
 			// Unsetting the state variable
 			$this->data['user-data']=false;
 			return true;
@@ -1062,17 +1069,23 @@ class WWW_State	{
 		 * @param array|string $permissions an array or a string of permissions
 		 * @return boolean
 		 */
-		final public function setPermissions($permissions){
+		final public function setPermissions($permissions=false){
 		
-			// If permissions were sent as a string
-			if(!is_array($permissions)){
-				$permissions=explode(',',$permissions);
+			// If permissions are set
+			if($permissions){
+				// If permissions were sent as a string
+				if(!is_array($permissions)){
+					$permissions=explode(',',$permissions);
+				}
+				// Setting the session variable
+				$this->setSession($this->data['session-permissions-key'],$permissions);
+				// Setting the state variable
+				$this->data['user-permissions']=$permissions;
+				return true;
+			} else {
+				// Unsetting permissions
+				return $this->unsetPermissions();
 			}
-			// Setting the session variable
-			$this->setSession($this->data['session-permissions-key'],$permissions);
-			// Setting the state variable
-			$this->data['user-permissions']=$permissions;
-			return true;
 			
 		}
 		
@@ -1156,6 +1169,8 @@ class WWW_State	{
 		
 			// Unsetting the session
 			$this->unsetSession($this->data['session-permissions-key']);
+			// Regenerating session cookie
+			$this->regenerateSession(true,true);
 			// Unsetting the state variable
 			$this->data['user-permissions']=false;
 			return true;
@@ -1244,12 +1259,6 @@ class WWW_State	{
 				'secure'=>$this->data['session-secure'],
 				'http-only'=>$this->data['session-http-only']
 			));
-			
-			// Getting sessions data
-			$this->data['session-data']=$this->sessionHandler->sessionData;
-			
-			// Storing original session data for later comparison
-			$this->originalSessionData=$this->data['session-data'];
 			
 			// This can regenerate the session ID, if enough time has passed
 			if($this->data['session-regenerate']){

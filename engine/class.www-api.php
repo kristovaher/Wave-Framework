@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.4.2
+ * @version    3.4.3
  */
 
 final class WWW_API {
@@ -324,7 +324,7 @@ final class WWW_API {
 					'disable-callbacks'=>(isset($apiInputData['www-disable-callbacks']))?$apiInputData['www-disable-callbacks']:false,
 					'crypt-output'=>false,
 					'profile'=>$this->state->data['api-public-profile'],
-					'push-output'=>(isset($apiInputData['www-output']))?$apiInputData['www-output']:true,
+					'push-output'=>(isset($apiInputData['www-output']))?$apiInputData['www-output']:1,
 					'return-hash'=>(isset($apiInputData['www-return-hash']))?$apiInputData['www-return-hash']:false,
 					'return-timestamp'=>(isset($apiInputData['www-return-timestamp']))?$apiInputData['www-return-timestamp']:false,
 					'return-type'=>(isset($apiInputData['www-return-type']))?$apiInputData['www-return-type']:'json',
@@ -342,7 +342,7 @@ final class WWW_API {
 				
 				// Turning output off if the HTTP HEAD request is made
 				if($this->state->data['http-request-method']=='HEAD'){
-					$apiState['push-output']=false;
+					$apiState['push-output']=0;
 				}
 		
 				// If API command is not set and is not set in input array either, the system will return an error
@@ -360,9 +360,13 @@ final class WWW_API {
 				}
 				
 				// If session data is set
-				if(!empty($this->state->data['session-data'])){
-					$apiInputData['www-session']=$this->state->data['session-data'];
-					unset($apiInputData['www-session'][$this->state->data['session-fingerprint-key']]);
+				if(!isset($apiInputData['www-session']) || $apiInputData['www-session']==1){
+					if(!empty($this->state->data['session-data'])){
+						// Grabbing session data for input
+						$apiInputData['www-session']=$this->state->data['session-data'];
+						// Unsetting the session cookie and other variables from the input data
+						unset($apiInputData['www-session'][$this->state->data['session-fingerprint-key']],$apiInputData['www-session'][$this->state->data['session-timestamp-key']],$apiInputData['www-session'][$this->state->data['session-token-key']]);
+					}
 				}
 				
 				// Sorting the input array
@@ -393,13 +397,14 @@ final class WWW_API {
 				
 				// This tests if cache value sent through input is valid
 				if($apiState['command']!='www-create-session'){
+					// If cache timeout is set then it is also applied as default to load timeout
 					if(isset($apiInputData['www-cache-timeout']) && $apiInputData['www-cache-timeout']>=0){
 						$apiState['cache-timeout']=$apiInputData['www-cache-timeout'];
 						$apiState['cache-load-timeout']=$apiInputData['www-cache-timeout'];
 					}
 					// Loading cache timestamp must be less than the actual cache timeout setting that is set
 					if(isset($apiInputData['www-cache-load-timeout']) && $apiInputData['www-cache-load-timeout']>=0 && $apiInputData['www-cache-load-timeout']<=$apiState['cache-timeout']){
-						$apiState['cache-load-timeout']=$apiState['cache-timeout'];
+						$apiState['cache-load-timeout']=$apiInputData['www-cache-load-timeout'];
 					}
 				}
 				
@@ -574,7 +579,7 @@ final class WWW_API {
 							// Validation hash is calculated from input data
 							$validationData=$apiInputData;
 							// Session input is not considered for validation hash and is unset
-							unset($validationData['www-hash'],$validationData['www-session']);
+							unset($validationData['www-hash'],$validationData['www-session'],$validationData[$this->state->data['session-name']]);
 						
 							// Unsetting any possible exceptions (such as file uploads and cookie input)
 							if(is_array($apiValidation) && !empty($apiValidation)){
@@ -640,10 +645,11 @@ final class WWW_API {
 							} else {
 								return $this->output(array('www-message'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>114),$apiState);
 							}
+							// This variable is not used anymore
+							unset($apiInputData['www-crypt-input']);
 						}
 						
 						// If this is set, then the value of this is used to crypt the output
-						// Please note that while www-crypt-output key can be set outside www-crypt-input data, it is recommended to keep that key within crypted input when making a request
 						if(isset($apiInputData['www-crypt-output'])){
 							$apiState['crypt-output']=$apiInputData['www-crypt-output'];
 						}
@@ -706,15 +712,14 @@ final class WWW_API {
 				// This stores a flag about whether cache is used or not
 				$this->apiLoggerData['cache-used']=false;
 				$this->apiLoggerData['www-command']=$apiState['command'];
-			
-				// If cache timeout is set
-				// If this value is 0, then no cache is used for command
-				if($apiState['cache-load-timeout']){
+				
+				// Calculating cache folder locations, if either load or write cache is used
+				if($apiState['cache-load-timeout'] || $apiState['cache-timeout']){
 				
 					// Calculating cache validation string
 					$cacheValidator=$apiInputData;
 					// If session namespace is defined, it is removed from cookies for cache validation
-					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-cache-load-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-crypt-input'],$cacheValidator['www-xml'],$cacheValidator['www-json'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator[$this->state->data['session-token-key']]);
+					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-cache-load-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator[$this->state->data['session-token-key']]);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
 					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output'].$this->state->data['version']);
@@ -723,6 +728,11 @@ final class WWW_API {
 					$cacheFile=$cacheValidator.'.tmp';
 					// Setting cache folder
 					$cacheFolder=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.substr($cacheFile,0,2).DIRECTORY_SEPARATOR;
+					
+				}
+			
+				// If cache is actually loaded
+				if($apiState['cache-load-timeout']){
 					
 					// If cache file exists, it will be parsed and set as API value
 					if(file_exists($cacheFolder.$cacheFile)){
@@ -735,19 +745,23 @@ final class WWW_API {
 						
 						// If server detects its cache to still within cache limit
 						if($apiState['last-modified']>=($this->state->data['request-time']-$apiState['cache-load-timeout'])){
+						
 							// If this request has already been made and the last-modified timestamp is exactly the same
-							if($apiState['push-output'] && $this->state->data['http-if-modified-since'] && $this->state->data['http-if-modified-since']>=$apiState['last-modified']){
+							if($apiState['push-output'] && $this->state->data['http-if-modified-since'] && $this->state->data['http-if-modified-since']==$apiState['last-modified']){
 								// Adding log data
 								if($useLogger){
 									$this->apiLoggerData['cache-used']=true;
 									$this->apiLoggerData['response-code']=304;
 								}
 								// Cache headers (Last modified is never sent with 304 header)
-								if($this->state->data['http-authentication']==true){
+								if($this->state->data['http-authentication']==true || isset($this->state->data['session-data'][$this->state->data['session-user-key']]) || isset($this->state->data['session-data'][$this->state->data['session-permissions-key']])){
 									header('Cache-Control: private,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 								} else {
 									header('Cache-Control: public,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 								}
+								// This tells caching engine to take cookies and content encoding into account
+								header('Vary: Accept-Encoding,Cookie');
+								// Expires header based on timeout
 								header('Expires: '.gmdate('D, d M Y H:i:s',($apiState['last-modified']+$apiState['cache-timeout'])).' GMT');
 								// Returning 304 header
 								header('HTTP/1.1 304 Not Modified');
@@ -756,23 +770,16 @@ final class WWW_API {
 							
 							// System loads the result from cache file based on return data type
 							$apiResult=$this->getCache($cacheFolder.$cacheFile);
-							
 							// Since cache was used
 							$this->apiLoggerData['cache-used']=true;
 							
 						} else {
-							// Since cache seems to be outdated, a new one will be generated with new request time
+							// Since cache seems to be outdated, last modified time is reset to request time
 							$apiState['last-modified']=$this->state->data['request-time'];
 						}
 						
-					} else {
-						// Current cache timeout is used to return to browser information about how long browser should store this result
-						$apiState['last-modified']=$this->state->data['request-time'];
 					}
 					
-				} else {
-					// Since cache is not used, last modified time is the time of the request
-					$apiState['last-modified']=$this->state->data['request-time'];
 				}
 			
 			// SOLVING API RESULT IF RESULT WAS NOT FOUND IN CACHE
@@ -1042,7 +1049,7 @@ final class WWW_API {
 							break;
 						case 'php':
 							// If PHP is used, then it can not be 'echoed' out due to being a PHP variable, so this is turned off
-							$apiState['push-output']=false;
+							$apiState['push-output']=0;
 							break;
 					}
 				
@@ -1115,7 +1122,7 @@ final class WWW_API {
 						// Cache control settings sent to the user agent depend on cache timeout settings
 						if($apiState['cache-timeout']!=0){
 							// Cache control depends whether HTTP authentication is used or not
-							if($this->state->data['http-authentication']==true){
+							if($this->state->data['http-authentication']==true || isset($this->state->data['session-data'][$this->state->data['session-user-key']]) || isset($this->state->data['session-data'][$this->state->data['session-permissions-key']])){
 								header('Cache-Control: private,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 							} else {
 								header('Cache-Control: public,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
@@ -1124,10 +1131,13 @@ final class WWW_API {
 							header('Last-Modified: '.gmdate('D, d M Y H:i:s',$apiState['last-modified']).' GMT');
 						} else {
 							// When no cache is used, request tells specifically that
-							header('Cache-Control: no-store;');
+							header('Cache-Control: no-cache,no-store;');
 							header('Expires: '.gmdate('D, d M Y H:i:s',$this->state->data['request-time']).' GMT');
-							header('Last-Modified: '.$apiState['last-modified'].' GMT');
+							header('Last-Modified: '.gmdate('D, d M Y H:i:s',$apiState['last-modified']).' GMT');
 						}
+						
+						// This tells caching engine to take cookies and content encoding into account
+						header('Vary: Accept-Encoding,Cookie');
 						
 						// If custom header was assigned, it is added
 						if($apiState['custom-header']){
@@ -1197,8 +1207,6 @@ final class WWW_API {
 								case 'gzip':
 									// Notifying user agent of gzipped output
 									header('Content-Encoding: gzip');
-									// This tells proxies to store both compressed and uncompressed version
-									header('Vary: Accept-Encoding');
 									$apiResult=gzencode(ob_get_clean(),9);
 									break;
 								default:

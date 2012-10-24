@@ -125,5 +125,12 @@
 				
 				<p>Usually this compression error comes as a result of empty space existing after your PHP scripts, so make sure that the scripts you have edited do not have empty space after closing PHP tags. Alternative is to not use closing tags on PHP scripts at all.</p>
 					
+					
+			<h3>I am using page caching and I have a problem caching pages with and without active sessions, what can I do?</h3>
+			
+				<p>There is a little-known bug in both Safari and Opera web browsers that ignore 'Vary' header from response HTTP request headers. 'Vary' header tells caching engines what header components to take into account when writing cache and validating cache in the storage. While Firefox, Chrome and Internet Explorer browsers all listen to this 'Vary' header as expected, Safari and Opera don't which means that sometimes these browsers may display cached content from time when there was no session cookie.</p>
+				
+				<p>What is recommended is to not cache any pages (by setting www-cache-timestamp to 0 in Sitemap file or not defining it at all) that have user-specific information or simply wait until user reloads the page manually.</p>
+			
 	</body>
 </html>

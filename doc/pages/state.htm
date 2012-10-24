@@ -181,6 +181,7 @@
 						<li><b>robots-cache-timeout</b> - Cache lifetime of robots.txt files.</li>
 						<li><b>server-ip</b> - Server IP address.</li>
 						<li><b>session-data</b> - This holds data from session storage or temporary data before it is stored in session storage.</li>
+						<li><b>session-original-data</b> - This is the session data at the start of the request, used for comparing.</li>
 						<li><b>session-domain</b> - Session cookie domain.</li>
 						<li><b>session-fingerprint</b> - True or false flag for whether sessions are tied to IP and browser fingerprint.</li>
 						<li><b>session-fingerprint-key</b> - Key value that the fingerprint will be stored under in sessions.</li>
@@ -236,10 +237,6 @@
 				
 					<p>This is an internal variable that State uses to check if it has already validated sessions or not.</p>
 					
-				<h3>private $originalSessionData=array()</h3>
-				
-					<p>This carries the session data that was active at the moment sessions were created. It is used to compare later on if sessions need to be commited or not.</p>
-			
 				<h3>private $messenger=false</h3>
 				
 					<p>This holds the 'keyword' or 'passkey' of currently used <a href="guide_messenger.htm">State Messenger</a> .</p>

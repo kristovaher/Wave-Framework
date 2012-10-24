@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/sessions.htm
  * @since      3.2.0
- * @version    3.2.7
+ * @version    3.4.3
  */
  
 final class WWW_Sessions {
@@ -52,7 +52,7 @@ final class WWW_Sessions {
 		'http-only'=>true
 	);
 	
-	/*
+	/**
 	 * This is a true-false flag about whether session ID should be regenerated. This can be sent by 
 	 * the system that uses the Session Handler at any time before sessions are commited. Wave 
 	 * Framework uses this to regenerate cookies when it detects the cookie lifetime is about to end.

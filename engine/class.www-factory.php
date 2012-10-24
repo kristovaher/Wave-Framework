@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.4.2
+ * @version    3.4.3
  */
 
 class WWW_Factory {
@@ -95,6 +95,10 @@ class WWW_Factory {
 			// This defaults whether API command is pushed with headers or not
 			if(!isset($inputData['www-output'])){
 				$inputData['www-output']=0;
+			}
+			// This tells API not to include session as input data for the API call
+			if(!isset($inputData['www-session'])){
+				$inputData['www-session']=0;
 			}
 			// Returning the result from API
 			return $this->WWW_API->command($inputData,$useBuffer,false);

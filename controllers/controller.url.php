@@ -175,11 +175,6 @@ class WWW_controller_url extends WWW_Factory {
 			return $this->returnViewData(array('view'=>$view404,'language'=>$language,'header'=>'HTTP/1.1 404 Not Found'));
 		}
 		
-		// Exploding sitemap array variables to nodes to match against
-		foreach($siteMap as $key=>$settings){
-			$siteMap[$key]['nodes']=explode('/',$key);
-		}
-		
 		// Array that stores information from sitemap file
 		if(isset($siteMap[$viewHome])){
 			$siteMapInfo=$siteMap[$viewHome];
@@ -190,21 +185,31 @@ class WWW_controller_url extends WWW_Factory {
 		// If home is not expected to be returned
 		if(!$returnHome){
 		
-			// This is used for the index of URL node that is being checked
-			$matchKey=0;
+			// This will be the actual URL match
+			$match=false;
 			
 			// System loops through URL nodes and attempts to find a match in URL Map
-			while(!empty($urlNodes) && !empty($siteMap)){
-				foreach($siteMap as $key=>$settings){
-					// URL length needs to match the URL declaration in Sitemap
-					if($matchKey==0 && $urlNodeCount!=count($settings['nodes'])){
-						unset($siteMap[$key]);
-					} else {
+			foreach($siteMap as $key=>$settings){
+			
+				// URL length needs to match the URL declaration in Sitemap
+				if($urlNodeCount!=count($settings['nodes'])){
+				
+					// Unsetting incompatible node
+					unset($siteMap[$key]);
+					
+				} else {
+				
+					// Testing every URL node
+					for($i=1;$i<=$urlNodeCount;$i++){
+					
+						// This is the actual URL node value
+						$matchKey=$i-1;
+				
 						// If the node is not dynamic
 						if($settings['nodes'][$matchKey][0]!=':'){
 							if(!preg_match('/^'.preg_quote($settings['nodes'][$matchKey],'/').'$/ui',$urlNodes[$matchKey])){
-							// if($urlNodes[$matchKey]!=$settings['nodes'][$matchKey]){
 								unset($siteMap[$key]);
+								break;
 							}
 						} else {
 							// If this is set to non-false, then dynamic URL value will be added
@@ -216,6 +221,7 @@ class WWW_controller_url extends WWW_Factory {
 									if($matched[2]==''){
 										if(!preg_match('/^[0-9]*$/i',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
+											break;
 										} else {
 											$dynamicAdd=$urlNodes[$matchKey];
 										}
@@ -223,7 +229,7 @@ class WWW_controller_url extends WWW_Factory {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
 										if(!preg_match('/^[0-9\-\_]*$/i',$urlNodes[$matchKey]) || ($parameters[0]!='*' && intval($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && intval($urlNodes[$matchKey])>$parameters[1])){
-											unset($siteMap[$key]);
+											break;
 										} else {
 											$dynamicAdd=$urlNodes[$matchKey];
 										}
@@ -233,6 +239,7 @@ class WWW_controller_url extends WWW_Factory {
 									if($matched[2]==''){
 										if(!preg_match('/^[[:alpha:]\-\_]*$/ui',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
+											break;
 										} else {
 											$dynamicAdd=$urlNodes[$matchKey];
 										}
@@ -240,7 +247,7 @@ class WWW_controller_url extends WWW_Factory {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
 										if(!preg_match('/^[[:alpha:]\-\_]*$/ui',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
-											unset($siteMap[$key]);
+											break;
 										} else {
 											$dynamicAdd=$urlNodes[$matchKey];
 										}
@@ -250,6 +257,7 @@ class WWW_controller_url extends WWW_Factory {
 									if($matched[2]==''){
 										if(!preg_match('/^[[:alnum:]\-\_]*$/ui',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
+											break;
 										} else {
 											$dynamicAdd=$urlNodes[$matchKey];
 										}
@@ -257,7 +265,7 @@ class WWW_controller_url extends WWW_Factory {
 										// Finding the match parameters
 										$parameters=explode('-',$matched[2]);
 										if(!preg_match('/^[[:alnum:]\-\_]*$/ui',$urlNodes[$matchKey]) || ($parameters[0]!='*' && strlen($urlNodes[$matchKey])<$parameters[0]) || ($parameters[1]!='*' && strlen($urlNodes[$matchKey])>$parameters[1])){
-											unset($siteMap[$key]);
+											break;
 										} else {
 											$dynamicAdd=$urlNodes[$matchKey];
 										}
@@ -269,6 +277,7 @@ class WWW_controller_url extends WWW_Factory {
 										$matches=explode(',',$matched[2]);
 										if(!in_array($urlNodes[$matchKey],$matches)){
 											unset($siteMap[$key]);
+											break;
 										} else {
 											$dynamicAdd=$urlNodes[$matchKey];
 										}
@@ -281,6 +290,7 @@ class WWW_controller_url extends WWW_Factory {
 									if($matched[2]!=''){
 										if(!preg_match('/^['.$matched[2].']*$/u',$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
+											break;
 										} else {
 											$dynamicAdd=$urlNodes[$matchKey];
 										}
@@ -290,26 +300,38 @@ class WWW_controller_url extends WWW_Factory {
 									break;
 							}
 							// If a new dynamic node was found
-							if($dynamicAdd){
-								$dynamicUrl[$matchKey]=$dynamicAdd;
+							if($dynamicAdd!==false){
+								$siteMap[$key]['dynamic-url'][$matchKey]=$dynamicAdd;
+							} else {
+								break;
 							}
 						}
+						
+						// If the cycle has not broken, then match has been found
+						if($i==$urlNodeCount){
+							$match=$siteMap[$key];
+							break;
+						}
+						
 					}
+					
 				}
-				unset($urlNodes[$matchKey]);
-				$matchKey++;
-			}
-			
-			// Only set if there were any dynamic URLS found
-			if(!empty($dynamicUrl)){
-				// This resets the dynamic URL values with new indexes in the array
-				$dynamicUrl=array_values($dynamicUrl);
+				
+				// Match has been found
+				if($match){
+					break;
+				}
+				
 			}
 			
 			// If all URL nodes have been matched and there's still a URL in the Sitemap array
-			if(empty($urlNodes) && !empty($siteMap)){
-				// Finding one of the matched URLs from the array
-				$siteMapInfo=array_shift($siteMap);
+			if($match){
+				// Getting sitemap info from matched sitemap node
+				$siteMapInfo=$match;
+				// Resetting the indexes in the dynamic URL array
+				if(isset($siteMapInfo['dynamic-url'])){
+					$siteMapInfo['dynamic-url']=array_values($siteMapInfo['dynamic-url']);
+				}
 				// If sitemap has defined the view
 				if(isset($siteMapInfo['view'])){
 					$view=$siteMapInfo['view'];
@@ -322,7 +344,7 @@ class WWW_controller_url extends WWW_Factory {
 			}
 			
 			// If the found view is home view, then we simply redirect to home view without the long url
-			if(empty($dynamicUrl) && $view==$viewHome){
+			if(empty($siteMapInfo['dynamic-url']) && $view==$viewHome){
 			
 				// If first language is used and it is not needed to use language URL in first language
 				if($enforceLanguageUrl==false && $language==$languages[0]){
@@ -359,8 +381,8 @@ class WWW_controller_url extends WWW_Factory {
 		if(isset($siteMapInfo['temporary-redirect']) && $siteMapInfo['temporary-redirect']!=''){
 		
 			// Dynamic parts of the URL can also be redirected
-			if(!empty($dynamicUrl)){
-				foreach($dynamicUrl as $key=>$bit){
+			if(!empty($siteMapInfo['dynamic-url'])){
+				foreach($siteMapInfo['dynamic-url'] as $key=>$bit){
 					$siteMapInfo['temporary-redirect']=str_replace(':'.$key.':',$bit,$siteMapInfo['temporary-redirect']);
 				}
 			}
@@ -375,8 +397,8 @@ class WWW_controller_url extends WWW_Factory {
 		} elseif(isset($siteMapInfo['permanent-redirect']) && $siteMapInfo['permanent-redirect']!=''){
 		
 			// Dynamic parts of the URL can also be redirected
-			if(!empty($dynamicUrl)){
-				foreach($dynamicUrl as $key=>$bit){
+			if(!empty($siteMapInfo['dynamic-url'])){
+				foreach($siteMapInfo['dynamic-url'] as $key=>$bit){
 					$siteMapInfo['permanent-redirect']=str_replace(':'.$key.':',$bit,$siteMapInfo['permanent-redirect']);
 				}
 			}
@@ -389,9 +411,6 @@ class WWW_controller_url extends WWW_Factory {
 			}
 			
 		}
-		
-		// Populating sitemap info with additional details
-		$siteMapInfo['dynamic-url']=$dynamicUrl;
 		
 		// Returning a 404 if no view was defined
 		if(!isset($siteMapInfo['view'])){

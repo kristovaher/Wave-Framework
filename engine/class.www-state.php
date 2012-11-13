@@ -168,6 +168,7 @@ class WWW_State	{
 				'languages'=>array('en'),
 				'limiter'=>false,
 				'load-limiter'=>false,
+				'locale'=>setlocale(LC_ALL,0),
 				'memcache'=>false,
 				'memcache-host'=>'localhost',
 				'memcache-port'=>11211,
@@ -535,13 +536,13 @@ class WWW_State	{
 			switch ($variable) {
 				case 'timezone':
 					// Attempting to set default timezone
-					date_default_timezone_set($value);
+					if(!date_default_timezone_set($value)){
+						trigger_error('Cannot set timezone to '.$value,E_USER_WARNING);
+					}
 					break;
 				case 'memory-limit':
 					if($value){
-						if(function_exists('ini_set') && ini_set('memory_limit',$value)){
-							$this->data[$variable]=$value;
-						} else {
+						if(!function_exists('ini_set') || !ini_set('memory_limit',$value)){
 							trigger_error('Cannot set memory limit to '.$value,E_USER_WARNING);
 						}
 					}
@@ -549,6 +550,13 @@ class WWW_State	{
 				case 'time-limit':
 					if($value){
 						set_time_limit($value);
+					}
+					break;
+				case 'locale':
+					if($value){
+						if(!setlocale(LC_ALL,$value.'.UTF-8')){
+							trigger_error('Cannot set locale to '.$value.'.UTF-8',E_USER_WARNING);
+						}
 					}
 					break;
 				case 'output-compression':
@@ -646,7 +654,7 @@ class WWW_State	{
 				// Including the translations file
 				if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
 					// Translations are parsed from INI file in the resources folder
-					$this->data['translations'][$language]=parse_ini_file($sourceUrl,false,INI_SCANNER_RAW);
+					$this->data['translations'][$language]=parse_ini_file($sourceUrl,true,INI_SCANNER_RAW);
 					if(!$this->data['translations'][$language]){
 						trigger_error('Cannot parse INI file: '.$sourceUrl,E_USER_ERROR);
 					}
@@ -712,6 +720,10 @@ class WWW_State	{
 					$this->data['sitemap-raw'][$language]=parse_ini_file($sourceUrl,true,INI_SCANNER_RAW);
 					if(!$this->data['sitemap-raw'][$language]){
 						trigger_error('Cannot parse INI file: '.$sourceUrl,E_USER_ERROR);
+					}
+					// Parsing the sitemap
+					foreach($this->data['sitemap-raw'][$language] as $key=>$settings){
+						$this->data['sitemap-raw'][$language][$key]['nodes']=explode('/',$key);
 					}
 					// Cache of parsed INI file is stored for later use
 					if(!file_put_contents($cacheUrl,serialize($this->data['sitemap-raw'][$language]))){

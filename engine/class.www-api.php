@@ -1041,7 +1041,7 @@ final class WWW_API {
 							break;
 						case 'print':
 							// Array is built into serialized query string
-							$apiResult=print_r($apiResult,true);
+							$apiResult='<pre>'.print_r($apiResult,true).'</pre>';
 							break;
 						case 'ini':
 							// This converts result into an INI string
@@ -1131,7 +1131,7 @@ final class WWW_API {
 							header('Last-Modified: '.gmdate('D, d M Y H:i:s',$apiState['last-modified']).' GMT');
 						} else {
 							// When no cache is used, request tells specifically that
-							header('Cache-Control: no-cache,no-store;');
+							header('Cache-Control: no-cache,no-store');
 							header('Expires: '.gmdate('D, d M Y H:i:s',$this->state->data['request-time']).' GMT');
 							header('Last-Modified: '.gmdate('D, d M Y H:i:s',$apiState['last-modified']).' GMT');
 						}
@@ -1179,6 +1179,9 @@ final class WWW_API {
 									break;
 								case 'vcard':
 									header('Content-Type: text/vcard;charset=utf-8');
+									break;
+								case 'print':
+									header('Content-Type: text/html;charset=utf-8');
 									break;
 								default:
 									// Every other case assumes text/plain response from server

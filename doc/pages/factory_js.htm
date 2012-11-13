@@ -18,9 +18,9 @@
 		
 			<h2>Introduction</h2>
 			
-				<p>JavaScript factory has very minimal use compared to the Wave Framework's own internal PHP Factory, but this class is still useful for dynamically loading JavaScript objects from /resources/classes/ folder or libraries from /resources/libraries/ subfolder.</p>
+				<p>JavaScript factory has very minimal use compared to the Wave Framework's own internal PHP Factory, but this class is still useful for dynamically loading JavaScript objects from /resources/classes/ folder or libraries from /resources/libraries/ subfolder and stylesheets from /resources/styles/ subfolder.</p>
 				
-				<p>Factory class loads class definitions through AJAX and attempts to create an object that is being requested. Libraries can also be loaded dynamically as well as functions called from that library with a single request.</p>
+				<p>Factory class loads class definitions through AJAX and attempts to create an object that is being requested. Libraries can also be loaded dynamically as well as functions called from that library with a single request. Stylesheet loading creates a new style resource in HTML head section.</p>
 				
 			<h2>Using JavaScript Factory Class</h2>
 
@@ -78,7 +78,11 @@
 				
 					<p>This method loads and returns a new object for a class 'className'. Factory attempts to load this class definition from a file in /resources/classes/ and file name should be written in class.[className].js format in that folder. If 'methodName' is set, then this method will also automatically call that method and return result of that method instead of the view object itself. If 'methodData' is also set, then this is the input variable sent to methodName.</p>
 										
-				<h3>this.loadLibrary=function(libraryName,functionName,functionData)</h3>
+				<h3>this.loadStyle(styleName)</h3>
+				
+					<p>This method is used to dynamically load a stylesheet from /resources/styles/ subfolder.</p>		
+					
+				<h3>this.loadStylesheet=function(libraryName,functionName,functionData)</h3>
 				
 					<p>This method is used to dynamically load a library from /resources/libaries/ subfolder. If additional parameters are set, then this method can also automatically call one of the functions in the library.</p>
 										

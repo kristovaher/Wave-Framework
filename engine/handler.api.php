@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_api.htm
  * @since      1.5.0
- * @version    3.4.3
+ * @version    3.4.5
  */
 
 //INITIALIZATION
@@ -84,7 +84,7 @@
 	}
 	
 	// This holds information about API validation and its exceptions
-	$apiValidation=array();
+	$validationExceptions=array();
 	
 	// All the data sent by user agent is added here and merged into one array
 	if(!empty($_POST)){
@@ -99,7 +99,7 @@
 			if(!isset($inputData[$key])){
 				$inputData[$key]=$cookie;
 				// Cookies are not part of input data validation, so they are added to exceptions
-				$apiValidation[]=$key;
+				$validationExceptions[]=$key;
 			}
 		}
 	}
@@ -109,7 +109,7 @@
 			if(!isset($inputData[$key])){
 				$inputData[$key]=$file;
 				// File uploads are not part of input data validation, so they are added to exceptions
-				$apiValidation[]=$key;
+				$validationExceptions[]=$key;
 			}
 		}
 	}
@@ -123,14 +123,14 @@
 // SENDING COMMAND TO API
 
 	// Setting current API profile in state
-	if(isset($inputData['www-profile'])){
+	if(isset($inputData['www-profile']) && $inputData['www-profile']!=$state->data['api-public-profile']){
 		$state->data['api-profile']=$inputData['www-profile'];
 	} else {
 		$state->data['api-profile']=$state->data['api-public-profile'];
 	}
 	
 	// API command is executed with all the data that was sent by the user agent, along with other www-* settings
-	$apiResult=$api->command($inputData,false,$apiValidation,true);
+	$apiResult=$api->command($inputData,false,((!empty($validationExceptions))?$validationExceptions:true),true);
 	
 // LOGGER
 	

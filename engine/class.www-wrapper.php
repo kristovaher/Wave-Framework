@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.2.4
+ * @version    3.4.5
  */
 
 class WWW_Wrapper {
@@ -124,7 +124,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.2.4 (PHP)';
+	private $userAgent='WaveFramework/3.4.5 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -828,6 +828,8 @@ class WWW_Wrapper {
 			
 				// Token-only validation means that token will be sent to the server, but data itself will not be hashed. This works like a cookie.
 				if($thisApiState['apiToken']){
+					// Adding token to input if it is set
+					$thisInputData['www-token']=$thisApiState['apiToken'];
 					// Log entry
 					$this->log[]='Using token-only validation';
 				} else {

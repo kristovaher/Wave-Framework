@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.2.1
+ * @version    3.4.5
  */
 
 /*
@@ -107,7 +107,7 @@ function WWW_Wrapper(address,language){
 	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
 	 * defined for future purpose.
 	 */
-	var userAgent='WWWFramework/3.2.1 (JavaScript)';
+	var userAgent='WWWFramework/3.4.5 (JavaScript)';
 	
 	/*
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -582,8 +582,10 @@ function WWW_Wrapper(address,language){
 		
 				// Token-only validation means that token will be sent to the server, but data itself will not be hashed. This works like a cookie.
 				if(thisApiState.apiToken){
+					// Adding token to input if it is set
+					thisInputData['www-token']=thisApiState.apiToken;
 					// Log entry
-					log.push('Using token-only validation');
+					log.push('Validation will be session token based');
 				} else {
 					// Log entry
 					log.push('API secret key is not set, hash validation will not be used');

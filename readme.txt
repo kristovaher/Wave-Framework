@@ -117,6 +117,12 @@ kristo@waher.net
 http://www.waher.net
 http://plus.google.com/102632377636999004385/
 
+THANK YOU
+---------
+
+Allan Davy
+Priit Perna
+
 LICENSE
 -------
 

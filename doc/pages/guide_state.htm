@@ -139,6 +139,23 @@
 </pre>
 
 				<p>These methods - from translations to sitemaps - are both useful when building your views.</p>
+				
+				<p>Another language-specific functionality you can use is static HTML files. Sometimes translations are not enough for language-specific content, especially when the content can be an entire page. While generally it is recommended to use databases to load pages and whatnot, it is also possible to use static HTML files within filesystem for this purpose.</p>
+				
+				<p>Folder that is used for this purpose is /resources/content/ and it stores filenames in the format of [language].[keyword].htm and the contents of this file is returned using getContent() method, like this:</p>
+				
+<pre>
+	<code>
+	// This returns contents from /resources/content/en.example.htm if 'en' is the current language keyword
+	$content=$this->getContent('example');
+	// This returns contents from /resources/content/fi.example.htm if 'fi' is sent as the second parameter
+	$content=$this->getContent('example','fi');
+	// This returns contents from /resources/content/test/en.example.htm if 'en' is the current language keyword
+	$content=$this->getContent('test/example');
+	</code>
+</pre>
+
+				<p>From the point of system design, it is possible to generate these files too if you make this folder writable and for example you let your content management system place files there that you later on load.</p>
 			
 	</body>
 </html>

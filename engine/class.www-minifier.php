@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/minifier.htm
  * @since      1.7.0
- * @version    3.1.4
+ * @version    3.4.8
  */
 
 class WWW_Minifier {
@@ -54,11 +54,11 @@ class WWW_Minifier {
 	public static function minifyJS($data){
 	
 		// Removing comments
-		$data=preg_replace("/((?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:\/\/.*))/","",$data);
-		// Removing tabs, spaces and newlines
-		$data=str_replace(array("\r\n","\r","\t","\n",'  ','    ','     '),'',$data);
-		// Removing other spaces before and after
-		$data=preg_replace(array('(( )+\))','(\)( )+)'), ')',$data);
+		$data=preg_replace('/((?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:\/\/.*))/','',$data);
+		// Removing tabs and newlines
+		$data=str_replace(array("\r\n","\r","\n"),'',$data);
+		// Removing whitespace
+		$data=preg_replace('/\s+/', ' ',$data);
 		//Returning minified string
 		return $data;
 		

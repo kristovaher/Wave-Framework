@@ -181,6 +181,8 @@
 						<li><b>robots</b> - Universal robots command string.</li>
 						<li><b>robots-cache-timeout</b> - Cache lifetime of robots.txt files.</li>
 						<li><b>server-ip</b> - Server IP address.</li>
+						<li><b>server-name</b> - Defined server name.</li>
+						<li><b>server-port</b> - Defined server port.</li>
 						<li><b>session-data</b> - This holds data from session storage or temporary data before it is stored in session storage.</li>
 						<li><b>session-original-data</b> - This is the session data at the start of the request, used for comparing.</li>
 						<li><b>session-domain</b> - Session cookie domain.</li>
@@ -222,6 +224,7 @@
 						<li><b>verbose-errors</b> - Defines whether system prints out full error details for the request</li>
 						<li><b>version</b> - This holds the application version number.</li>
 						<li><b>view</b> - Currently used view.</li>
+						<li><b>view-headers</b> - This holds headers that will be set by View Controller.</li>
 						<li><b>web-root</b> - Web root URL node, in case system is not installed in root of the website.</li>
 						<li><b>whitelist-limiter</b> - Comma-separated list of IP addresses that are allowed to make HTTP requests.</li>
 					</ul>
@@ -278,9 +281,13 @@
 				
 					<p>This function is called before output is pushed to browser by the API or when State object is not used anymore. This method is not accessible to Factory class, but it is not private.</p>
 					
-				<h3>final public function getTranslations($language=false,$keyword=false)</h3>
+				<h3>final public function getTranslations($language=false,$keyword=false,$subkeyword=false)</h3>
 				
-					<p>This method returns an array of currently active translations, or for a language set with $language variable. If $keyword is also set, then it returns a specific translation with that keyword from $language translations.</p>
+					<p>This method returns an array of currently active translations, or for a language set with $language variable. If $keyword is also set, then it returns a specific translation with that keyword from $language translations. If $keyword is an array, then $subkeyword can be used to return specific translation from that keyword.</p>
+				
+				<h3>final public function getContent($name,$language=false)</h3>
+				
+					<p>This method includes or reads in a file from '/resources/content/' folder $name is the modified filename that can also include subfolders, but without the language prefix and without extension in the filename itself. If $language is not defined then currently active language is used.</p>
 				
 				<h3>final public function getSitemapRaw($language=false,$keyword=false)</h3>
 				

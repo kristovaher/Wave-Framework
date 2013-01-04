@@ -50,6 +50,21 @@
 </pre>
 
 				<p>Note that the callback function does not have to be from within the library itself, it can be a function that is already defined elsewhere previously.</p>
+
+				<p>There is also an option to load JavaScript script and library files as well as CSS stylesheets from within Views (but also allowed from Models and Controllers, though this is not recommended). This means that you can tell within a View to load a specific script file and View Controller will take this into account when building the headers. To do this you can call this:</p>
+				
+<pre>
+	<code>
+	// This adds a CSS stylesheet to the request headers (from '/resources/styles/' folder)
+	$this->viewHeader('my-style.css','style');
+	// This adds a JavaScript file to the request headers (from '/resources/scripts/' folder)
+	$this->viewHeader('my-script.js','script');
+	// This adds a JavaScript library file to the request headers (from '/resources/libraries/' folder)
+	$this->viewHeader('my-library.js','library');
+	// This adds the entire string in the end right between HTML head tags
+	$this->viewHeader('&lt;meta name=&quot;test&quot; value=&quot;Lorem Ipsum&quot;/&gt;');
+	</code>
+</pre>
 				
 			<h2>Loading Objects</h2>
 			

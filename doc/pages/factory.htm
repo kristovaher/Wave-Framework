@@ -96,6 +96,10 @@
 				
 					<p>This is just a wrapper function for getting state from global state storage. This method returns $variable from the storage or the whole storage at once if this is not set.</p> 
 					
+				<h3>final protected function viewHeader($content,$type='other')</h3>
+				
+					<p>This method allows you to send View Controller additional headers. This means that your views, models and controllers can all affect additional files that are loaded when View is returned to the browser. This allows for an extensive flexibility when building a dynamic back-end-front-end relations. $type can be 'script', 'library' or 'style' and they are loaded from '/resources/scripts/', '/resources/libraries/' or '/resources/styles/' folders. If type is not assigned or set to 'other', then the entire $content string will be added to the end of the HTML header.</p>
+					
 				<h3>final protected function resultError($message='Error',$customData=false,$responseCode=300)</h3>
 				
 					<p>Wave Framework <a href="guide_mvc.htm">MVC</a> object method calls can return their data in whatever format developer finds necessary, but it is recommended to return data in a standardized form. This method returns an array in the format of an error. $message should be the verbose message returned, $customData should be an array of data returned as part of the result and $responseCode should be an response code in 3XX namespace, which is used for errors in Wave Framework.</p>
@@ -140,7 +144,9 @@
 			
 				<h3>final protected function setState($variable,$value=true)</h3>
 			
-				<h3>final protected function getTranslations($language=false,$keyword=false)</h3>
+				<h3>final protected function getTranslations($language=false,$keyword=false,$subkeyword=false)</h3>
+			
+				<h3>final public function getContent($name,$language=false)</h3>
 			
 				<h3>final protected function getSitemap($language=false,$keyword=false)</h3>
 			

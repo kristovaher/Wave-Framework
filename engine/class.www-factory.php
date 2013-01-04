@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.4.3
+ * @version    3.4.8
  */
 
 class WWW_Factory {
@@ -234,14 +234,30 @@ class WWW_Factory {
 		/**
 		 * This method returns an array of currently active translations, or for a language set 
 		 * with $language variable. If $keyword is also set, then it returns a specific translation 
-		 * with that keyword from $language translations.
+		 * with that keyword from $language translations. If $keyword is an array, then $subkeyword
+		 * can be used to return specific translation from that keyword.
 		 *
 		 * @param string $language language keyword, if this is not set then returns current language translations
 		 * @param string $keyword if only single keyword needs to be returned
+		 * @param string $subkeyword if the $keyword is an array, then $subkeyword is the actual translation that is requested
 		 * @return array, string or false if failed
 		 */
-		final protected function getTranslations($language=false,$keyword=false){
-			return $this->WWW_API->state->getTranslations($language,$keyword);
+		final protected function getTranslations($language=false,$keyword=false,$subkeyword=false){
+			return $this->WWW_API->state->getTranslations($language,$keyword,$subkeyword);
+		}
+		
+		/**
+		 * This method includes or reads in a file from '/resources/content/' folder $name is the 
+		 * modified filename that can also include subfolders, but without the language prefix and 
+		 * without extension in the filename itself. If $language is not defined then currently 
+		 * active language is used.
+		 *
+		 * @param string $name filename without language prefix
+		 * @param string $language language keyword
+		 * @return string
+		 */
+		final public function getContent($name,$language=false){
+			return $this->WWW_API->state->getContent($name,$language);
 		}
 		
 		/**
@@ -269,6 +285,37 @@ class WWW_Factory {
 		 */
 		final protected function getSitemapRaw($language=false,$keyword=false){
 			return $this->WWW_API->state->getSitemapRaw($language,$keyword);
+		}
+		
+		/**
+		 * This method allows you to send View Controller additional headers. This means 
+		 * that your views, models and controllers can all affect additional files that 
+		 * are loaded when View is returned to the browser. This allows for an extensive 
+		 * flexibility when building a dynamic back-end-front-end relations. $type can be 
+		 * 'script', 'library' or 'style' and they are loaded from '/resources/scripts/', 
+		 * '/resources/libraries/' or '/resources/styles/' folders. If type is not assigned 
+		 * or set to 'other', then the entire $content string will be added to the end of 
+		 * the HTML header.
+		 * 
+		 * @param string $content either file name or an entire header string
+		 * @param string $type assigns the type of header to load
+		 * @return true
+		 */
+		final protected function viewHeader($content,$type='other'){
+			
+			// Multiple headers can be sent at once
+			if(!is_array($content)){
+				$this->WWW_API->state->data['view-headers'][$type][]=$content;
+			} else {
+				foreach($content as $c){
+					$this->WWW_API->state->data['view-headers'][$type][]=$c;
+				}
+			}
+			// Making sure that the array is unique
+			$this->WWW_API->state->data['view-headers'][$type]=array_unique($this->WWW_API->state->data['view-headers'][$type]);
+			
+			// Always returns true
+			return true;
 		}
 	
 	// MVC FACTORY

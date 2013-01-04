@@ -91,6 +91,7 @@
 					<li><b>$input</b> - This is an input data of everything that View Controller has sent to the View.</li>
 					<li><b>$this-&gt;getSitemap()</b> - This returns reverse-sitemap array for the current language (you can also define another language by sending language keyword as a variable). This sitemap array has the key of array elements same for all languages, so you can refer to views based on the view name and not directly the URL. This allows you to add a link to 'About' page, for example, without having to include language checks within the view.</li>
 					<li><b>$this-&gt;getTranslations()</b> - This returns a key-value array of current language translations. Another language translations can be returned if you supply a variable with the language keyword to be loaded.</li>
+					<li><b>$this-&gt;getContent('example')</b> - This loads /resources/contents/en.example.htm (prefix is based on what language keyword is active). File contents are returned by the function.</li>
 				</ul>
 				
 				<p>There are other useful methods too and every View has access to entire <a href="guide_state.htm">State</a>, <a href="guide_api.htm">API</a> and <a href="guide_database.htm">Database</a> connections within the system, giving you an entirely free reign. It is also possible for views to load other views and create entire chain of views, which gives you flexibility to design a system in any and every way possible.</p>

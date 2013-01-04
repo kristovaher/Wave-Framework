@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.4.3
+ * @version    3.4.8
  */
 
 class WWW_State	{
@@ -185,7 +185,9 @@ class WWW_State	{
 				'resource-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'robots-cache-timeout'=>14400,
-				'server-ip'=>$_SERVER['SERVER_ADDR'],
+				'server-ip'=>((isset($_SERVER['SERVER_ADDR']))?$_SERVER['SERVER_ADDR']:false),
+				'server-name'=>((isset($_SERVER['SERVER_NAME']))?$_SERVER['SERVER_NAME']:false),
+				'server-port'=>((isset($_SERVER['SERVER_PORT']))?$_SERVER['SERVER_PORT']:false),
 				'session-data'=>array(),
 				'session-domain'=>false,
 				'session-fingerprint'=>array(),
@@ -227,6 +229,7 @@ class WWW_State	{
 				'verbose-errors'=>false,
 				'version'=>'1.0.0',
 				'view'=>array(),
+				'view-headers'=>array(),
 				'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 				'whitelist-limiter'=>false
 			);			
@@ -624,13 +627,15 @@ class WWW_State	{
 		/**
 		 * This method returns an array of currently active translations, or for a language set 
 		 * with $language variable. If $keyword is also set, then it returns a specific translation 
-		 * with that keyword from $language translations.
+		 * with that keyword from $language translations. If $keyword is an array, then $subkeyword
+		 * can be used to return specific translation from that keyword.
 		 *
 		 * @param string $language language keyword, if this is not set then returns current language translations
 		 * @param string $keyword if only single keyword needs to be returned
+		 * @param string $subkeyword if the $keyword is an array, then $subkeyword is the actual translation that is requested
 		 * @return array, string or false if failed
 		 */
-		final public function getTranslations($language=false,$keyword=false){
+		final public function getTranslations($language=false,$keyword=false,$subkeyword=false){
 		
 			// If language is not set, then assuming current language
 			if(!$language){
@@ -671,14 +676,75 @@ class WWW_State	{
 			
 			// Returning keyword, if it is requested
 			if($keyword){
-				if(isset($this->data['translations'][$language][$keyword])){
-					return $this->data['translations'][$language][$keyword];
+				// If $keyword is an array and subkeyword is requested
+				if($subkeyword){
+					if(isset($this->data['translations'][$language][$keyword],$this->data['translations'][$language][$keyword][$subkeyword])){
+						return $this->data['translations'][$language][$keyword][$subkeyword];
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					if(isset($this->data['translations'][$language][$keyword])){
+						return $this->data['translations'][$language][$keyword];
+					} else {
+						return false;
+					}
 				}
 			} else {
 				// If keyword was not set, then returning entire array
 				return $this->data['translations'][$language];
+			}
+			
+		}
+		
+		/**
+		 * This method includes or reads in a file from '/resources/content/' folder $name is the 
+		 * modified filename that can also include subfolders, but without the language prefix and 
+		 * without extension in the filename itself. If $language is not defined then currently 
+		 * active language is used.
+		 *
+		 * @param string $name filename without language prefix
+		 * @param string $language language keyword
+		 * @return string
+		 */
+		final public function getContent($name,$language=false){
+		
+			// If language is not defined then default language is used
+			if(!$language){
+				$language=$this->data['language'];
+			}
+			
+			// Initial content folder
+			$fileDestination='./resources/content/';
+			
+			// Folder can be defined in the name
+			$components=explode('/',$name);
+			$count=count($components);
+			
+			// If a folder is defined
+			if($count>1){
+				for($i=0;$i<$count;$i++){
+					// If the last node is used
+					if($count==($i+1)){
+						$fileDestination.=$language.'.'.$components[$i];
+					} else {
+						$fileDestination.=$components[$i].'/';
+					}
+				}
+			} else {
+				$fileDestination.=$language.'.'.$name;
+			}
+			
+			// Adding the extension
+			$fileDestination.='.htm';
+			
+			// Making sure that the file itself exists
+			if(file_exists($fileDestination)){
+				// Echoing out the contents to output buffer
+				return file_get_contents($fileDestination);
+			} else {
+				trigger_error('Cannot find a file in '.$fileDestination,E_USER_WARNING);
+				return false;
 			}
 			
 		}

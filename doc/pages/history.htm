@@ -25,6 +25,8 @@
 			<h2>3.x.x</h2>
 			
 				<ul>
+					<li><b>3.4.8</b> - Added subkeyword parameter to getTranslations() method in case translations are grouped in translations files. Added getContent() method that can be used to load static language-based HTML within Views from /resources/content/ folder and subfolders. Added 'server-name' and 'server-port' State variables.</li>
+					<li><b>3.4.6</b> - Added a new viewHeader() method that allows to add things to a collector array that default view controller uses to load JavaScript, CSS or other additional header lines from. Fixed JavaScript minifier whitespace problem.</li>
 					<li><b>3.4.5</b> - Fixed a security loophole when using cookies to overwrite API hash validation. Fixed an issue where a predefined session token was used with API wrappers without using hash validation.</li>
 					<li><b>3.4.4</b> - Added the ability to use JavaScript Factory to dynamically load stylesheets. Multiple minor bugfixes related to URL controller and nested dynamic URL's.</li>
 					<li><b>3.4.3</b> - Improved cache handling when sessions and cookies are used. Bug fix in cache handling for the new API setting 'www-cache-load-timestamp'.</li>

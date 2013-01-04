@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.4.2
+ * @version    3.4.8
  */
 
 class WWW_controller_view extends WWW_Factory {
@@ -145,6 +145,14 @@ class WWW_controller_view extends WWW_Factory {
 			$moduleJavaScript=$view['view'].'.script.js';
 		}
 		
+		// Rendering the view object and capturing the output
+		ob_start();
+		$viewObject->$view['view-method']($input);
+		$viewContent=ob_get_clean();
+		
+		// Header collector data for view
+		$viewHeaders=$this->getState('view-headers');
+		
 		// HTML frame is generated with meta data and resource files
 		?>
 			<!DOCTYPE html>
@@ -187,6 +195,9 @@ class WWW_controller_view extends WWW_Factory {
 					<?php if(isset($moduleStylesheet)){ ?>
 						<link type="text/css" href="resources/styles/<?=$moduleStylesheet?>" rel="stylesheet" media="all"/>
 					<?php } ?>
+					<?php if(isset($viewHeaders['style'])){ ?>
+						<link type="text/css" href="resources/styles/<?=implode('&',$viewHeaders['style'])?>" rel="stylesheet" media="all"/>
+					<?php } ?>
 					<!-- Favicons -->
 					<link rel="icon" href="favicon.ico" type="image/x-icon"/>
 					<link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon"/>
@@ -197,18 +208,31 @@ class WWW_controller_view extends WWW_Factory {
 							<script type="text/javascript" src="<?=$script?>"></script>
 						<?php } ?>
 					<?php } ?>
+					<?php if(isset($viewHeaders['library'])){ ?>
+						<?php foreach($viewHeaders['library'] as $library){ ?>
+							<script type="text/javascript" src="resources/libraries/<?=$library?>"></script>
+						<?php } ?>
+					<?php } ?>
 					<?php if(isset($additionalJavaScript)){ ?>
 						<script type="text/javascript" src="resources/scripts/<?=implode('&',$additionalJavaScript)?>"></script>
 					<?php } ?>
 					<?php if(isset($moduleJavaScript)){ ?>
 						<script type="text/javascript" src="resources/scripts/<?=$moduleJavaScript?>"></script>
 					<?php } ?>
+					<?php if(isset($viewHeaders['script'])){ ?>
+						<script type="text/javascript" src="resources/scripts/<?=implode('&',$viewHeaders['script'])?>"></script>
+					<?php } ?>
+					<?php if(isset($viewHeaders['other'])){ ?>
+						<?php foreach($viewHeaders['other'] as $other){ ?>
+							<?=$other?>
+						<?php } ?>
+					<?php } ?>
 				</head>
 				<body>
-				<?php
-					// View object is rendered
-					$viewObject->$view['view-method']($input);
-				?>
+					<?php
+						// View content is rendered
+						echo $viewContent;
+					?>
 				</body>
 			</html>
 		<?php

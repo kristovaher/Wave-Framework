@@ -13,7 +13,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory_js.htm
  * @since      3.3.0
- * @version    3.4.0
+ * @version    3.4.8
  */
 
 /*
@@ -32,8 +32,19 @@ function WWW_Factory(base){
 	 * overwritten when defining a different URL when initializing Factory class.
 	 */
 	if(base==null){
-		var classBase=document.baseURI+'resources/classes/';
-		var libraryBase=document.baseURI+'resources/libraries/';
+		var baseURI='';
+		if('baseURI' in document){
+			baseURI=document.baseURI;
+		} else {
+			var baseTags=document.getElementsByTagName('base');
+			if(baseTags.length>0) {
+				baseURI=baseTags[0].href;
+			} else {
+				baseURI=window.location.href;
+			}
+		}
+		var classBase=baseURI+'resources/classes/';
+		var libraryBase=baseURI+'resources/libraries/';
 	} else {
 		var classBase=base;
 		var libraryBase=base;

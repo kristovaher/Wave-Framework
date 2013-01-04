@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_url.htm
  * @since      1.0.0
- * @version    3.4.1
+ * @version    3.4.8
  */
 
 class WWW_controller_url extends WWW_Factory {

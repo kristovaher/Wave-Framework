@@ -30,6 +30,8 @@
 				
 				<p>Cache is one year by default, this duration can be changed in configuration file. It is also possible to return the file without cache by supplying the 'nocache' request parameter. If this is set then the image files are regenerated with every request.</p>
 				
+				<p>A BASE64 encoded string of the resource is returned if dynamic variable 'base64' is provided in the request. This can be useful in some situations.</p>
+				
 				<p>Handler returns a 304 Not Modified header if it detects that the user agent already has the latest version of that image file.</p>
 				
 				<p>Image Handler takes specific parameters, that are separated by &amp; symbol, in the file name. These parameters are used for on-demand image loading, such as for returning an image in a specific resolution or with a specific filtering. This on-demand image editing can be disabled in configuration.</p>

@@ -15,16 +15,17 @@
 			<h2>Roadmap</h2>
 			
 				<ul>
-					<li><b>Q4 2012</b> - AJAX Tutorial</li>
-					<li><b>Q4 2012</b> - Users/Permissions Tutorial</li>
-					<li><b>Q1 2013</b> - WebSockets Integration</li>
-					<li><b>Q1 2013</b> - OpenSSL Tools</li>
-					<li><b>Q1 2013</b> - Java API Wrapper</li>
+					<li><b>2013</b> - AJAX Tutorial</li>
+					<li><b>2013</b> - Users/Permissions Tutorial</li>
+					<li><b>2013</b> - WebSockets Integration</li>
+					<li><b>2013</b> - OpenSSL Tools</li>
+					<li><b>2013</b> - Java API Wrapper</li>
 				</ul>
 		
 			<h2>3.x.x</h2>
 			
 				<ul>
+					<li><b>3.5.0</b> - It is now possible to return picture files and resource files as BASE64 encoded if you provide 'base64' parameter as a dynamic URL parameter. Added 'url-absolute' and 'url-relative' to the already existing 'request-url' variables that the default URL Controller returns to the View. Added 'output' return type that simply returns the whatever is stored in response arrays 'www-data' key. When using getState() method on a variable that does not exist, then it generates a notice in debugger log. Added an option to restrict URL's based on user agent being matched, this allows to create mobile specific redirects and other user agent specific features. Some State variable names have been changed to clean up the State namespace, this can break backwards compatibility. Chech the full list at update documentation. Updated jQuery to 1.9.0 release. Added isDeveloper() call and developer-ip and developer-user-agent configuration settings. Fixed a bug with Javascript API Wrapper parallel form requests.</li>
 					<li><b>3.4.8</b> - Added subkeyword parameter to getTranslations() method in case translations are grouped in translations files. Added getContent() method that can be used to load static language-based HTML within Views from /resources/content/ folder and subfolders. Added 'server-name' and 'server-port' State variables.</li>
 					<li><b>3.4.6</b> - Added a new viewHeader() method that allows to add things to a collector array that default view controller uses to load JavaScript, CSS or other additional header lines from. Fixed JavaScript minifier whitespace problem.</li>
 					<li><b>3.4.5</b> - Fixed a security loophole when using cookies to overwrite API hash validation. Fixed an issue where a predefined session token was used with API wrappers without using hash validation.</li>
@@ -74,7 +75,7 @@
 					<li><b>2.5.4</b> - Better defaults handling for URL Controller. Added ability to store multiple views - based on methods - in a single View class. API handles View and other echo/print specific output much better and standardizes it with the rest of the API, by returning arrays.</li>
 					<li><b>2.5.2</b> - It is now possible to use cookies with PHP API Wrappers, in case an API is designed that is authorized with cookies and sessions as opposed to more secure methods. While it is not recommended to use API in this manner, the option is there. Fixed bug when returning the last ID from database. Fixed the bug when State messenger data is unset entirely.</li>
 					<li><b>2.5.1</b> - Added initial implementation of cache tagging and API observers. API rights are now called 'permissions' instead in both profiles and sitemap configuration. Added image format conversion options. Renamed functions.php file to autoload.php, since it can carry additional functionality. Added dynamic class loader to Factory.</li>
-					<li><b>2.4.7</b> - Added better default rights example to URL controller. Fixed Internet Explorer specific bug with base tag in View controller. Added 'float' to database dbQuote method. Added 'base-url' to State.</li>
+					<li><b>2.4.7</b> - Added better default rights example to URL controller. Fixed Internet Explorer specific bug with base tag in View controller. Added 'float' to database dbQuote method. Added 'url-base' to State.</li>
 					<li><b>2.4.6</b> - Added internal split time method for debugging execution time. If PHP is used as a content type and an error is found during API execution with response code of 1XX or 2XX, then this results in PHP warning being thrown and logged for Debugger script. Updated database query error logging.</li>
 					<li><b>2.4.5</b> - Fixed undefined error bug for non-HTML API results, fixed last modified check in File Handler.</li>
 					<li><b>2.4.4</b> - Added /resources/static/ subfolder - Files from this folder will never be served through PHP. This can be used for specific static files that might be faster when served without PHP. Unified some isset() calls. Fixed a potential bug with system root folder. Fixed some compatibility tests.</li>

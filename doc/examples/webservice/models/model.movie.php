@@ -61,7 +61,7 @@ class WWW_model_movie extends WWW_Factory {
 	public function loadMovie($id=0){
 		if($id!=0){
 			// Database location
-			$dbLoc=$this->getState('data-root').'movies.db';
+			$dbLoc=$this->getState('directory-data').'movies.db';
 			// Making sure that current database exists
 			if(file_exists($dbLoc)){
 				$curDb=unserialize(file_get_contents($dbLoc));
@@ -97,7 +97,7 @@ class WWW_model_movie extends WWW_Factory {
 	 */
 	public function loadAllMovies(){
 		// Database location
-		$dbLoc=$this->getState('data-root').'movies.db';
+		$dbLoc=$this->getState('directory-data').'movies.db';
 		// Making sure that current database exists
 		if(file_exists($dbLoc)){
 			$curDb=unserialize(file_get_contents($dbLoc));
@@ -129,7 +129,7 @@ class WWW_model_movie extends WWW_Factory {
 		// Making sure that title and year are both set
 		if($this->title!='' && $this->year!=''){
 			// Database location
-			$dbLoc=$this->getState('data-root').'movies.db';
+			$dbLoc=$this->getState('directory-data').'movies.db';
 			// If database file already exists, we simply load the database and unserialize its data to add a new movie to it
 			if(file_exists($dbLoc)){
 				$curDb=unserialize(file_get_contents($dbLoc));
@@ -177,7 +177,7 @@ class WWW_model_movie extends WWW_Factory {
 			return false;
 		}
 		// Database location
-		$dbLoc=$this->getState('data-root').'movies.db';
+		$dbLoc=$this->getState('directory-data').'movies.db';
 		// If database does not exist then we have no movies to delete
 		if(file_exists($dbLoc)){
 			$curDb=unserialize(file_get_contents($dbLoc));

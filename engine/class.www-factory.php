@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.4.8
+ * @version    3.5.0
  */
 
 class WWW_Factory {
@@ -341,12 +341,12 @@ class WWW_Factory {
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
 				// Class file can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
+				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
 					// Requiring override file
-					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['system-root'].'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
 					// Requiring original file
-					require($this->WWW_API->state->data['system-root'].'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
+					require($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
 				} else {
 					// Error is thrown if class was not found
 					trigger_error('Model ['.$model.'] does not exist',E_USER_ERROR);
@@ -394,12 +394,12 @@ class WWW_Factory {
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
 				// Class file can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
+				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
 					// Requiring override file
-					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
 					// Requiring original file
-					require($this->WWW_API->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
+					require($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
 				} else {
 					// Error is thrown if class was not found
 					trigger_error('Controller ['.$controller.'] does not exist',E_USER_ERROR);
@@ -447,12 +447,12 @@ class WWW_Factory {
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
 				// Class file can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
 					// Requiring override file
-					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['system-root'].'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
 					// Requiring original file
-					require($this->WWW_API->state->data['system-root'].'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
+					require($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
 				} else {
 					// Error is thrown if class was not found
 					trigger_error('View ['.$view.'] does not exist',E_USER_ERROR);
@@ -500,12 +500,12 @@ class WWW_Factory {
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
 				// Class file can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
 					// Requiring override file
-					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
 					// Requiring original file
-					require($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
+					require($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
 				} else {
 					// Error is thrown if class was not found
 					trigger_error('Class ['.$className.'] does not exist',E_USER_ERROR);
@@ -546,12 +546,12 @@ class WWW_Factory {
 			// Making sure that the library is not already loaded
 			if(!isset($WWW_Libraries[$libraryName])){
 				// Library can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
 					// Requiring override file
-					require($this->WWW_API->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
 					// Requiring original file
-					require($this->WWW_API->state->data['system-root'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php');
+					require($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php');
 				} else {
 					// Error is thrown if class was not found
 					trigger_error('Library ['.$libraryName.'] does not exist',E_USER_ERROR);
@@ -587,7 +587,7 @@ class WWW_Factory {
 		
 			// Loading the Imager class
 			if(!class_exists('WWW_Imager')){
-				require($this->WWW_API->state->data['system-root'].'engine'.DIRECTORY_SEPARATOR.'class.www-imager.php');
+				require($this->WWW_API->state->data['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-imager.php');
 			}
 			
 			// Applying the image command son the file
@@ -632,7 +632,7 @@ class WWW_Factory {
 		
 			// Loading the Imager class
 			if(!class_exists('WWW_Imager')){
-				require($this->WWW_API->state->data['system-root'].'engine'.DIRECTORY_SEPARATOR.'class.www-imager.php');
+				require($this->WWW_API->state->data['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-imager.php');
 			}
 			
 			// Loading Imager object
@@ -657,7 +657,7 @@ class WWW_Factory {
 		
 			// Loading the Minifier class
 			if(!class_exists('WWW_Minifier')){
-				require($this->WWW_API->state->data['system-root'].'engine'.DIRECTORY_SEPARATOR.'class.www-minifier.php');
+				require($this->WWW_API->state->data['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-minifier.php');
 			}
 			
 			// Applying minifying based on result
@@ -1206,6 +1206,17 @@ class WWW_Factory {
 		}
 		
 		/**
+		 * This checks whether developer IP and user agent access the system. This is a light check 
+		 * that can be used to test out features for developers while other IP's and user agents are 
+		 * not affected. It returns true if developer browser and IP is detected.
+		 *
+		 * @return boolean
+		 */
+		final protected function isDeveloper(){
+			return $this->WWW_API->state->data['developer'];
+		}
+		
+		/**
 		 * This method returns the currently active public token that is used to increase security 
 		 * against cross-site-request-forgery attacks. This method returns false if user session 
 		 * is not populated, in which case public token is not needed. $regenerate sets if the token 
@@ -1255,7 +1266,7 @@ class WWW_Factory {
 			// Requiring database class files, if class has not been defined
 			if(!class_exists('WWW_Database')){
 				// Including the required class and creating the object
-				require($this->WWW_API->state['system-root'].'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
+				require($this->WWW_API->state['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
 			}
 			$databaseConnection=new WWW_Database($type,$host,$database,$username,$password,$showErrors,$persistentConnection);
 			// Passing the database to State object

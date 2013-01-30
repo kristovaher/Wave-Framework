@@ -60,6 +60,7 @@
 						<li><b>query</b> - This returns data the way data is formatted in a GET request string or in (some) POST data. This is similar to serializedarray and is useful in cases where JSON is not supported.</li>
 						<li><b>ini</b> - It is also possible to return data as an INI file. This also supports converting a single value, an array and array of arrays.</li>
 						<li><b>print</b> - This prints out the contents of an array with print_r() function, it is useful for debugging only.</li>
+						<li><b>output</b> - This is a special case content type that takes the response key 'www-data' and simply echos it out as a result. This is useful if you want to have the API echo something entirely custom, like a BASE64 encoded picture directly.</li>
 						<li><b><i>[other]</i></b> - Other return types are set. These return types are returned by default with 'text/plain' content type headers and can be checked for in the controllers.</li>
 					</ul>
 					

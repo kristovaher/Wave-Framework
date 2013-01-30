@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.4.8
+ * @version    3.5.0
  */
 
 final class WWW_API {
@@ -535,8 +535,8 @@ final class WWW_API {
 						$apiState['token-file']=md5($apiState['profile'].$this->apiProfiles[$apiState['profile']]['secret-key']).'.tmp';
 						$apiState['token-file-ip']=md5($this->state->data['client-ip'].$apiState['profile'].$this->apiProfiles[$apiState['profile']]['secret-key']).'.tmp';
 						// Session folder in filesystem
-						$apiState['token-directory']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR.substr($apiState['token-file'],0,2).DIRECTORY_SEPARATOR;
-						$apiState['token-directory-ip']=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR.substr($apiState['token-file-ip'],0,2).DIRECTORY_SEPARATOR;
+						$apiState['token-directory']=$this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR.substr($apiState['token-file'],0,2).DIRECTORY_SEPARATOR;
+						$apiState['token-directory-ip']=$this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'tokens'.DIRECTORY_SEPARATOR.substr($apiState['token-file-ip'],0,2).DIRECTORY_SEPARATOR;
 					
 						// Checking if valid token is active
 						// It is possible that the token was created with linked IP, which is checked here
@@ -727,7 +727,7 @@ final class WWW_API {
 					// Cache filename consists of API command, serialized input data, return type and whether API output is used.
 					$cacheFile=$cacheValidator.'.tmp';
 					// Setting cache folder
-					$cacheFolder=$this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.substr($cacheFile,0,2).DIRECTORY_SEPARATOR;
+					$cacheFolder=$this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'output'.DIRECTORY_SEPARATOR.substr($cacheFile,0,2).DIRECTORY_SEPARATOR;
 					
 				}
 			
@@ -754,7 +754,7 @@ final class WWW_API {
 									$this->apiLoggerData['response-code']=304;
 								}
 								// Cache headers (Last modified is never sent with 304 header)
-								if($this->state->data['http-authentication']==true || isset($this->state->data['session-data'][$this->state->data['session-user-key']]) || isset($this->state->data['session-data'][$this->state->data['session-permissions-key']])){
+								if($this->state->data['limiter-authentication']==true || isset($this->state->data['session-data'][$this->state->data['session-user-key']]) || isset($this->state->data['session-data'][$this->state->data['session-permissions-key']])){
 									header('Cache-Control: private,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 								} else {
 									header('Cache-Control: public,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
@@ -794,10 +794,10 @@ final class WWW_API {
 					// Class is defined and loaded, if it is not already defined
 					if(!class_exists($className)){
 						// Overrides can be used for controllers
-						if(file_exists($this->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
-							require($this->state->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
-						} elseif(file_exists($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
-							require($this->state->data['system-root'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
+						if(file_exists($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+							require($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
+						} elseif(file_exists($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+							require($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
 						} else {
 							// Since an error was detected, system pushes for output immediately
 							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>115),$apiState);
@@ -862,7 +862,7 @@ final class WWW_API {
 							if(isset($apiInputData['www-cache-tags'],$cacheFolder,$cacheFile) && $apiInputData['www-cache-tags']!=''){
 								$cacheTags=explode(',',$apiInputData['www-cache-tags']);
 								foreach($cacheTags as $tag){
-									if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
+									if(!file_put_contents($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
 										return $this->output(array('www-message'=>'Server configuration error: cannot create cache tag index','www-response-code'=>100),$apiState);
 									}
 								}
@@ -1051,6 +1051,13 @@ final class WWW_API {
 							// If PHP is used, then it can not be 'echoed' out due to being a PHP variable, so this is turned off
 							$apiState['push-output']=0;
 							break;
+						case 'output':
+							if(isset($apiResult['www-data'])){
+								$apiResult=$apiResult['www-data'];
+							} else {
+								$apiResult='';
+							}
+							break;
 					}
 				
 				}
@@ -1122,7 +1129,7 @@ final class WWW_API {
 						// Cache control settings sent to the user agent depend on cache timeout settings
 						if($apiState['cache-timeout']!=0){
 							// Cache control depends whether HTTP authentication is used or not
-							if($this->state->data['http-authentication']==true || isset($this->state->data['session-data'][$this->state->data['session-user-key']]) || isset($this->state->data['session-data'][$this->state->data['session-permissions-key']])){
+							if($this->state->data['limiter-authentication']==true || isset($this->state->data['session-data'][$this->state->data['session-user-key']]) || isset($this->state->data['session-data'][$this->state->data['session-permissions-key']])){
 								header('Cache-Control: private,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
 							} else {
 								header('Cache-Control: public,max-age='.($apiState['last-modified']+$apiState['cache-timeout']-$this->state->data['request-time']).'');
@@ -1355,7 +1362,7 @@ final class WWW_API {
 			// REDIRECTS
 				
 				// It is possible to re-direct API after submission
-				if(isset($data['www-temporary-redirect'])){
+				if(isset($data['www-temporary-redirect']) && $data['www-temporary-redirect']!=''){
 					// Adding log entry
 					if($useLogger){
 						$this->apiLoggerData['response-code']=302;
@@ -1363,7 +1370,7 @@ final class WWW_API {
 					}
 					// Redirection header
 					header('Location: '.$data['www-temporary-redirect'],true,302);
-				} elseif(isset($data['www-permanent-redirect'])){
+				} elseif(isset($data['www-permanent-redirect']) && $data['www-permanent-redirect']!=''){
 					// Adding log entry
 					if($useLogger){
 						$this->apiLoggerData['response-code']=301;
@@ -1675,15 +1682,15 @@ final class WWW_API {
 			}
 			foreach($tags as $tag){
 				// If this tag has actually been used, it has a file in the filesystem
-				if(file_exists($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp')){
+				if(file_exists($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp')){
 					// Tag file can have links to multiple cache files
-					$links=explode("\n",file_get_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp'));
+					$links=explode("\n",file_get_contents($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp'));
 					foreach($links as $link){
 						// This deletes cache file or removes if from APC storage
 						$this->unsetCache($link);
 					}
 					// Removing the tag link file itself
-					unlink($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp');
+					unlink($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp');
 				}
 			}
 			return true;
@@ -1761,7 +1768,7 @@ final class WWW_API {
                         $tags=explode(',',$tags);
 					}
 					foreach($tags as $t){
-						if(!file_put_contents($this->state->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($t).'.tmp',$keyAddress."\n",FILE_APPEND)){
+						if(!file_put_contents($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($t).'.tmp',$keyAddress."\n",FILE_APPEND)){
 							trigger_error('Cannot store cache tag at '.$keyAddress,E_USER_ERROR);
 						}
 					}
@@ -1951,6 +1958,12 @@ final class WWW_API {
 		 * @return boolean
 		 */
 		final public function logEntry($key,$data=false){
+		
+			// If data is not set then key will be used as the logger message
+			if(!$data){
+				$data=$key;
+				$key='log';
+			}
 		
 			// Only applies if internal logging is turned on
 			if($this->internalLogging && ((in_array('*',$this->internalLogging) && !in_array('!'.$key,$this->internalLogging)) || in_array($key,$this->internalLogging))){

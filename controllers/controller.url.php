@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_url.htm
  * @since      1.0.0
- * @version    3.4.8
+ * @version    3.5.0
  */
 
 class WWW_controller_url extends WWW_Factory {
@@ -49,7 +49,7 @@ class WWW_controller_url extends WWW_Factory {
 		}
 		
 		// Web root is the base directory of the website
-		$webRoot=$this->getState('web-root');
+		$webRoot=$this->getState('url-web');
 		
 		// This setting will force that even the first language (first in languages array) has to be represented in URL
 		$enforceSlash=$this->getState('enforce-url-end-slash');
@@ -288,7 +288,12 @@ class WWW_controller_url extends WWW_Factory {
 								case 'any':
 									// Any character is accepted
 									if($matched[2]!=''){
-										if(!preg_match('/^['.$matched[2].']*$/u',$urlNodes[$matchKey])){
+										// In case the regular expression includes a colon symbol
+										if(isset($matched[3])){
+											$matched[2].=$matched[3];
+										}
+										// Testing for regular expression match
+										if(!preg_match($matched[2],$urlNodes[$matchKey])){
 											unset($siteMap[$key]);
 											break;
 										} else {
@@ -309,7 +314,17 @@ class WWW_controller_url extends WWW_Factory {
 						
 						// If the cycle has not broken, then match has been found
 						if($i==$urlNodeCount){
-							$match=$siteMap[$key];
+							// If user agent setting is set then this is checked, otherwise match is found
+							if(isset($siteMap[$key]['user-agent'])){
+								if(!preg_match($siteMap[$key]['user-agent'],$this->getState('client-user-agent'))){
+									unset($siteMap[$key]);
+									break;
+								} else {
+									$match=$siteMap[$key];
+								}
+							} else {
+								$match=$siteMap[$key];
+							}
 							break;
 						}
 						
@@ -369,13 +384,16 @@ class WWW_controller_url extends WWW_Factory {
 				
 		// Populating sitemap info with additional details
 		$siteMapInfo['request-url']='/'.$requestNodesRaw[0];
+		$siteMapInfo['url-base']=$this->getState('url-base');
+		$siteMapInfo['url-web']=$webRoot;
+		$siteMapInfo['url-absolute']=$siteMapInfo['url-base'].$requestNodesRaw[0];
+		$siteMapInfo['url-relative']=$webRoot.$requestNodesRaw[0];
 		if(isset($requestNodesRaw[1])){
 			$siteMapInfo['request-parameters']=$requestNodesRaw[1];
 		} else {
 			$siteMapInfo['request-parameters']='';
 		}
 		$siteMapInfo['language']=$language;
-		$siteMapInfo['web-root']=$webRoot;
 		
 		// It is possible to assign temporary or permanent redirection in Sitemap, causing 302 or 301 redirect
 		if(isset($siteMapInfo['temporary-redirect']) && $siteMapInfo['temporary-redirect']!=''){

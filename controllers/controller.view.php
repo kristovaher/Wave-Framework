@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.4.8
+ * @version    3.5.0
  */
 
 class WWW_controller_view extends WWW_Factory {
@@ -35,7 +35,7 @@ class WWW_controller_view extends WWW_Factory {
 	
 		// Getting view information
 		$view=$this->viewData();
-		$systemRoot=$this->getState('system-root');
+		$systemRoot=$this->getState('directory-system');
 		
 		// If PHP libraries are set to be loaded, then loading them through Factory
 		if(isset($view['additional-php']) && $view['additional-php']!=''){
@@ -67,8 +67,8 @@ class WWW_controller_view extends WWW_Factory {
 		$viewObject=$this->getView($view['view']);
 		
 		// Getting author and copyright, if set in configuration
-		$author=$this->getState('author');
-		$copyright=$this->getState('copyright');
+		$author=$this->getState('project-author');
+		$copyright=$this->getState('project-copyright');
 		
 		// Meta title can be set in Sitemap and can also be different based on 
 		if(isset($view['meta-title'])){
@@ -156,11 +156,11 @@ class WWW_controller_view extends WWW_Factory {
 		// HTML frame is generated with meta data and resource files
 		?>
 			<!DOCTYPE html>
-			<html lang="<?=$this->getState('language')?>" <?=(isset($view['appcache']) && $view['appcache']==1)?'manifest="'.$this->getState('base-url').'manifest.appcache"':''?>>
+			<html lang="<?=$this->getState('language')?>" <?=(isset($view['appcache']) && $view['appcache']==1)?'manifest="'.$this->getState('url-base').'manifest.appcache"':''?>>
 				<head>
 					<title><?=$view['meta-title']?></title>
 					<!-- Base address for relative links -->
-					<base href="<?=$this->getState('base-url')?>"/>
+					<base href="<?=$this->getState('url-base')?>"/>
 					<!-- UTF-8 -->
 					<meta charset="utf-8">
 					<!-- Useful for mobile applications -->

@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.4.8
+ * @version    3.5.0
  */
 
 class WWW_State	{
@@ -96,8 +96,6 @@ class WWW_State	{
 				'api-profile'=>'public',
 				'api-public-profile'=>'public',
 				'api-public-token'=>false,
-				'base-url'=>false,
-				'blacklist-limiter'=>false,
 				'cache-database'=>false,
 				'cache-database-address-column'=>'address',
 				'cache-database-data-column'=>'data',
@@ -113,7 +111,6 @@ class WWW_State	{
 				'client-ip'=>__IP__,
 				'client-user-agent'=>((isset($_SERVER['HTTP_USER_AGENT']))?$_SERVER['HTTP_USER_AGENT']:''),
 				'content-security-policy'=>false,
-				'data-root'=>false,
 				'database-errors'=>true,
 				'database-host'=>'localhost',
 				'database-name'=>'',
@@ -121,6 +118,15 @@ class WWW_State	{
 				'database-persistent'=>false,
 				'database-type'=>'mysql',
 				'database-username'=>'',
+				'developer'=>false,
+				'developer-ip'=>'',
+				'developer-user-agent'=>'',
+				'directory-data'=>false,
+				'directory-keys'=>false,
+				'directory-static'=>false,
+				'directory-system'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
+				'directory-tmp'=>false,
+				'directory-user'=>false,
 				'dynamic-color-whitelist'=>'',
 				'dynamic-filter-whitelist'=>'',
 				'dynamic-image-filters'=>true,
@@ -143,9 +149,7 @@ class WWW_State	{
 				'http-accept-charset'=>((isset($_SERVER['HTTP_ACCEPT_CHARSET']))?explode(',',$_SERVER['HTTP_ACCEPT_CHARSET']):array()),
 				'http-accept-encoding'=>((isset($_SERVER['HTTP_ACCEPT_ENCODING']))?explode(',',$_SERVER['HTTP_ACCEPT_ENCODING']):array()),
 				'http-accept-language'=>((isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))?explode(',',$_SERVER['HTTP_ACCEPT_LANGUAGE']):array()),
-				'http-authentication'=>false,
 				'http-authentication-ip'=>'*',
-				'http-authentication-limiter'=>false,
 				'http-authentication-password'=>'',
 				'http-authentication-username'=>'',
 				'http-do-not-track'=>((isset($_SERVER['HTTP_DNT']) && $_SERVER['HTTP_DNT']==1)?true:false),
@@ -156,28 +160,32 @@ class WWW_State	{
 				'http-input'=>false,
 				'http-referrer'=>((isset($_SERVER['HTTP_REFERER']))?$_SERVER['HTTP_REFERER']:false),
 				'http-request-method'=>$_SERVER['REQUEST_METHOD'],
-				'https-limiter'=>false,
 				'https-mode'=>(((isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS']==1 || $_SERVER['HTTPS']=='on')) || (isset($_SERVER['SCRIPT_URI']) && strpos($_SERVER['SCRIPT_URI'],'https://')!==false))?true:false),
 				'image-extensions'=>array('jpeg','jpg','png'),
 				'image-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'index-url-cache-timeout'=>0,
 				'index-view-cache-timeout'=>0,
 				'internal-logging'=>array('*','!input-data','!output-data'),
-				'keys-root'=>false,
 				'language'=>false,
 				'languages'=>array('en'),
 				'limiter'=>false,
-				'load-limiter'=>false,
+				'limiter-authentication'=>false,
+				'limiter-blacklist'=>false,
+				'limiter-https'=>false,
+				'limiter-load'=>false,
+				'limiter-referrer'=>'*',
+				'limiter-request'=>false,
+				'limiter-whitelist'=>false,
 				'locale'=>setlocale(LC_ALL,0),
 				'memcache'=>false,
 				'memcache-host'=>'localhost',
 				'memcache-port'=>11211,
 				'memory-limit'=>false,
 				'output-compression'=>'deflate',
+				'project-author'=>false,
+				'project-copyright'=>false,
 				'project-title'=>false,
-				'referrer-limiter'=>'*',
 				'request-id'=>((isset($_SERVER['UNIQUE_ID']))?$_SERVER['UNIQUE_ID']:false),
-				'request-limiter'=>false,
 				'request-time'=>$_SERVER['REQUEST_TIME'],
 				'request-uri'=>$_SERVER['REQUEST_URI'],
 				'resource-cache-timeout'=>31536000,
@@ -207,9 +215,7 @@ class WWW_State	{
 				'sitemap'=>array(),
 				'sitemap-cache-timeout'=>14400,
 				'sitemap-raw'=>array(),
-				'static-root'=>false,
 				'storage'=>array(),
-				'system-root'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
 				'test-database-host'=>false,
 				'test-database-name'=>false,
 				'test-database-password'=>false,
@@ -218,20 +224,18 @@ class WWW_State	{
 				'testing'=>false,
 				'time-limit'=>false,
 				'timezone'=>false,
-				'tmp-root'=>false,
 				'trace-errors'=>false,
 				'translations'=>array(),
 				'true-request'=>false,
 				'trusted-proxies'=>array('*'),
+				'url-base'=>false,
+				'url-web'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 				'user-data'=>false,
 				'user-permissions'=>false,
-				'user-root'=>false,
 				'verbose-errors'=>false,
 				'version'=>'1.0.0',
 				'view'=>array(),
-				'view-headers'=>array(),
-				'web-root'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
-				'whitelist-limiter'=>false
+				'view-headers'=>array()
 			);			
 			
 		// ASSIGNING STATE FROM CONFIGURATION FILE
@@ -246,8 +250,8 @@ class WWW_State	{
 		// CHECKING FOR SERVER OR PHP SPECIFIC CONFIGURATION OPTIONS AND ASSIGNING UNSET CONFIGURATIONS
 		
 			// Removing full stop from the beginning of both directory URL's
-			if($this->data['web-root'][0]=='.'){
-				$this->data['web-root'][0]='';
+			if($this->data['url-web'][0]=='.'){
+				$this->data['url-web'][0]='';
 			}
 			
 			// If request ID is not set
@@ -262,37 +266,37 @@ class WWW_State	{
 			
 			// If default session cookie path is not set
 			if(!$this->data['session-path']){
-				$this->data['session-path']=$this->data['web-root'];
+				$this->data['session-path']=$this->data['url-web'];
 			}
 			
 			// Finding base URL
-			if(!$this->data['base-url']){
-				$this->data['base-url']=(($this->data['https-mode'])?'https://':'http://').$this->data['http-host'].$this->data['web-root'];
+			if(!$this->data['url-base']){
+				$this->data['url-base']=(($this->data['https-mode'])?'https://':'http://').$this->data['http-host'].$this->data['url-web'];
 			}
 			
 			// Defining default user root folder
-			if(!$this->data['user-root']){
-				$this->data['user-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'userdata'.DIRECTORY_SEPARATOR;
+			if(!$this->data['directory-user']){
+				$this->data['directory-user']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'userdata'.DIRECTORY_SEPARATOR;
 			}
 			
 			// Defining default user root folder
-			if(!$this->data['data-root']){
-				$this->data['data-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR;
+			if(!$this->data['directory-data']){
+				$this->data['directory-data']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR;
 			}
 			
 			// Defining default static folder
-			if(!$this->data['static-root']){
-				$this->data['static-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'static'.DIRECTORY_SEPARATOR;
+			if(!$this->data['directory-static']){
+				$this->data['directory-static']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'static'.DIRECTORY_SEPARATOR;
 			}
 			
 			// Defining temporary files root folder
-			if(!$this->data['tmp-root']){
-				$this->data['tmp-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR;
+			if(!$this->data['directory-tmp']){
+				$this->data['directory-tmp']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR;
 			}
 			
 			// Defining certificates and keys folder
-			if(!$this->data['keys-root']){
-				$this->data['keys-root']=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'keys-'.DIRECTORY_SEPARATOR;
+			if(!$this->data['directory-keys']){
+				$this->data['directory-keys']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'keys-'.DIRECTORY_SEPARATOR;
 			}
 				
 			// If timezone is still set to false, then system attempts to set the currently set timezone
@@ -335,7 +339,17 @@ class WWW_State	{
 			// If configuration has not sent a request string then State solves it using request-uri
 			if(!$this->data['true-request']){
 				// If install is at www.example.com/w/ subfolder and user requests www.example.com/w/en/page/ then this would be parsed to 'en/page/'
-				$this->data['true-request']=preg_replace('/(^'.preg_quote($this->data['web-root'],'/').')/ui','',$this->data['request-uri']);
+				$this->data['true-request']=preg_replace('/(^'.preg_quote($this->data['url-web'],'/').')/ui','',$this->data['request-uri']);
+			}
+			
+			// This sets the developer flag to either true or false depending on configuration
+			if($this->data['developer-ip']!='' && $this->data['developer-user-agent']!=''){
+				// IP addresses can be comma-separated list
+				$developers=explode(',',$this->data['developer-ip']);
+				// User agent is matched by finding user agent string within the configuration
+				if(in_array($this->data['client-ip'],$developers) && strpos(str_replace(';','',$this->data['client-user-agent']),$this->data['developer-user-agent'])!==false){
+					$this->data['developer']=true;
+				} 
 			}
 		
 		// FINGERPRINTING
@@ -475,6 +489,7 @@ class WWW_State	{
 				if(isset($this->data[$variable][$subVariable])){
 					return $this->data[$variable][$subVariable];
 				} else {
+					trigger_error('State variable ['.$variable.']['.$subVariable.'] does not exist',E_USER_NOTICE);
 					return false;
 				}
 			} elseif($variable){
@@ -482,6 +497,7 @@ class WWW_State	{
 				if(isset($this->data[$variable])){
 					return $this->data[$variable];
 				} else {
+					trigger_error('State variable ['.$variable.'] does not exist',E_USER_NOTICE);
 					return false;
 				}
 			} else {
@@ -646,16 +662,16 @@ class WWW_State	{
 			if(!isset($this->data['translations'][$language])){
 			
 				// Translations can be loaded from overrides folder as well
-				if(file_exists($this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini')){
-					$sourceUrl=$this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini';
-				} elseif(file_exists($this->data['system-root'].'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini')){
-					$sourceUrl=$this->data['system-root'].'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini';
+				if(file_exists($this->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini')){
+					$sourceUrl=$this->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini';
+				} elseif(file_exists($this->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini')){
+					$sourceUrl=$this->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.$language.'.translations.ini';
 				} else {
 					return false;
 				}
 				
 				// This data can also be stored in cache
-				$cacheUrl=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.tmp';
+				$cacheUrl=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.translations.tmp';
 				// Including the translations file
 				if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
 					// Translations are parsed from INI file in the resources folder
@@ -770,16 +786,16 @@ class WWW_State	{
 			if(!isset($this->data['sitemap-raw'][$language])){
 			
 				// Translations can be loaded from overrides folder as well
-				if(file_exists($this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini')){
-					$sourceUrl=$this->data['system-root'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini';
-				} elseif(file_exists($this->data['system-root'].'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini')){
-					$sourceUrl=$this->data['system-root'].'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini';
+				if(file_exists($this->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini')){
+					$sourceUrl=$this->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini';
+				} elseif(file_exists($this->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini')){
+					$sourceUrl=$this->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.ini';
 				} else {
 					return false;
 				}
 				
 				// This data can also be stored in cache
-				$cacheUrl=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.tmp';
+				$cacheUrl=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.$language.'.sitemap.tmp';
 				// Including the sitemap file
 				if(!file_exists($cacheUrl) || filemtime($sourceUrl)>filemtime($cacheUrl)){
 					// Sitemap is parsed from INI file in the resources folder
@@ -880,9 +896,9 @@ class WWW_State	{
 						$this->data['sitemap'][$language][$node['view']]=$siteMapRaw[$key];
 						// If first language URL is not enforced, then this is taken into account
 						if($language==$this->data['languages'][0] && $this->data['enforce-first-language-url']==false){
-							$this->data['sitemap'][$language][$node['view']]['url']=$this->data['web-root'].$url;
+							$this->data['sitemap'][$language][$node['view']]['url']=$this->data['url-web'].$url;
 						} else {
-							$this->data['sitemap'][$language][$node['view']]['url']=$this->data['web-root'].$language.'/'.$url;
+							$this->data['sitemap'][$language][$node['view']]['url']=$this->data['url-web'].$language.'/'.$url;
 						}
 					}
 				}
@@ -927,7 +943,7 @@ class WWW_State	{
 			// New messenger address is hashed
 			$this->messenger=md5($address);
 			// Messenger data is stored in a filesystem subfolder
-			$dataAddress=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR.$this->messenger.'.tmp';
+			$dataAddress=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR.$this->messenger.'.tmp';
 			// If this state messenger address already stores data, then it is loaded as the base data
 			if(!$overwrite && file_exists($dataAddress)){
 				$this->messengerData=unserialize(file_get_contents($dataAddress));
@@ -1040,7 +1056,7 @@ class WWW_State	{
 			// Data is only stored if messenger is set
 			if($this->messenger){
 				// Finding data folder
-				$dataFolder=$this->data['system-root'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
+				$dataFolder=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'messenger'.DIRECTORY_SEPARATOR.substr($this->messenger,0,2).DIRECTORY_SEPARATOR;
 				// If there is data to store in messenger
 				if(!empty($this->messengerData)){
 					// Testing if state messenger folder exists
@@ -1518,7 +1534,7 @@ class WWW_State	{
 				}
 			}
 			if(!isset($configuration['path'])){
-				$configuration['path']=$this->data['web-root'];
+				$configuration['path']=$this->data['url-web'];
 			}
 			if(!isset($configuration['domain'])){
 				$configuration['domain']=$this->data['http-host'];
@@ -1646,16 +1662,20 @@ class WWW_State	{
 			// Multiple headers can be set at once
 			if(is_array($header)){
 				foreach($header as $h){
-					// Removing the header from unset array
-					unset($this->data['headers-unset'][$h]);
-					// Assigning the setting to headers array
-					$this->data['headers-set'][$h]=$replace;
+					if($h!=''){
+						// Removing the header from unset array
+						unset($this->data['headers-unset'][$h]);
+						// Assigning the setting to headers array
+						$this->data['headers-set'][$h]=$replace;
+					}
 				}
 			} else {
-				// Removing the header from unset array
-				unset($this->data['headers-unset'][$header]);
-				// Assigning the setting to headers array
-				$this->data['headers-set'][$header]=$replace;
+				if($header!=''){
+					// Removing the header from unset array
+					unset($this->data['headers-unset'][$header]);
+					// Assigning the setting to headers array
+					$this->data['headers-set'][$header]=$replace;
+				}
 			}
 			return true;
 			
@@ -1673,16 +1693,20 @@ class WWW_State	{
 			// Multiple headers can be unset at once
 			if(is_array($header)){
 				foreach($header as $h){
-					// Removing the header from unset array
-					unset($this->data['headers-set'][$h]);
-					// Assigning the setting to headers array
-					$this->data['headers-unset'][$h]=true;
+					if($h!=''){
+						// Removing the header from unset array
+						unset($this->data['headers-set'][$h]);
+						// Assigning the setting to headers array
+						$this->data['headers-unset'][$h]=true;
+					}
 				}
 			} else {
-				// Unsetting the header, if previously set
-				unset($this->data['headers-set'][$header]);
-				// Assigning the setting to headers array
-				$this->data['headers-unset'][$header]=true;
+				if($header!=''){
+					// Unsetting the header, if previously set
+					unset($this->data['headers-set'][$header]);
+					// Assigning the setting to headers array
+					$this->data['headers-unset'][$header]=true;
+				}
 			}
 			return true;
 			
@@ -1707,7 +1731,7 @@ class WWW_State	{
 		
 				// Loading the Imager class
 				if(!class_exists('WWW_Tools')){
-					require($this->data['system-root'].'engine'.DIRECTORY_SEPARATOR.'class.www-tools.php');
+					require($this->data['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-tools.php');
 				}
 				
 				// Creating a new tool object

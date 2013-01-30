@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.4.5
+ * @version    3.5.0
  */
 
 /*
@@ -67,6 +67,7 @@ function WWW_Wrapper(address,language){
 		apiToken:false,
 		apiPublicToken:false,
 		apiHashValidation:true,
+		apiStateKey:false,
 		returnHash:false,
 		headers:false,
 		returnTimestamp:false,
@@ -352,6 +353,13 @@ function WWW_Wrapper(address,language){
 				case 'www-output':
 					log.push('Ignoring www-output setting, wrapper always requires output to be set to true');
 					break;
+				case 'www-form':
+					if(value==true){
+						this.setForm(value);
+					} else if(value==false){
+						this.clearForm();
+					}
+					break;
 				default:
 					if(value==true){
 						value=1;
@@ -396,6 +404,7 @@ function WWW_Wrapper(address,language){
 			if(inputData['www-content-type']!=null){
 				delete inputData['www-content-type'];
 			}
+			log.push('Form ID removed');
 			apiState.apiSubmitFormId=false;
 			return true;
 			
@@ -681,9 +690,9 @@ function WWW_Wrapper(address,language){
 					}
 				
 					// Hidden iFrame
-					thisApiState.hiddenWindowCounter++;
+					apiState.hiddenWindowCounter++;
 					var hiddenWindow=document.createElement('iframe');
-					var hiddenWindowName='WWW_API_Wrapper_Hidden_iFrame_'+thisApiState.hiddenWindowCounter;
+					var hiddenWindowName='WWW_API_Wrapper_Hidden_iFrame_'+apiState.hiddenWindowCounter;
 					hiddenWindow.id=hiddenWindowName;
 					hiddenWindow.name=hiddenWindowName;
 					hiddenWindow.style.display='none';
@@ -905,7 +914,7 @@ function WWW_Wrapper(address,language){
 						// Calling user function
 						var thisCallback=this.window[thisApiState.trueCallback];
 						if(typeof(thisCallback)==='function'){
-							log.push('Sending failure data to callback: '+thisApiState.trueCallback+'()');
+							log.push('Sending data to callback: '+thisApiState.trueCallback+'()');
 							// Callback execution
 							return thisCallback.call(this,resultData);
 						} else {

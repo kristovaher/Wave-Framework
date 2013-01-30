@@ -38,6 +38,28 @@
 				
 				<p>This means that when updating, you can safely ignore these folders from update archives and focus on actual core files that might need updating, namely the '/index.php' file and files from '/engine/' folder. Core files of Wave Framework also have version information listed in their file headers as of 3.1.4 and you can refer to this header information to know if your file needs to be updated or not, when comparing it against the latest release.</p>
 				
+			<h3>How to Update to 3.5.0</h3>
+			
+				<p>This update brings a number of backwards-compatibility breaking minor changes, so be careful when you update. Since the amount of State variables has grown notably, some namespacing adjustments were required. These changes are only minor and only affect the names of State variables, but if you use any of these variables in your project, make sure to change these variable names:</p>
+				
+				<ul>
+					<li>blacklist-limiter => limiter-blacklist</li>
+					<li>load-limiter => limiter-load</li>
+					<li>https-limiter => limiter-https</li>
+					<li>http-authentication-limiter => limiter-authentication</li>
+					<li>referrer-limiter => limiter-referrer</li>
+					<li>request-limiter => limiter-request</li>
+					<li>whitelist-limiter => limiter-whitelist</li>
+					<li>data-root => directory-data</li>
+					<li>user-root => directory-user</li>
+					<li>tmp-root => directory-tmp</li>
+					<li>system-root => directory-system</li>
+					<li>static-root => directory-static</li>
+					<li>keys-root => directory-keys</li>
+					<li>base-url => url-base</li>
+					<li>web-root => url-web</li>
+				</ul>
+				
 			<h3>How to Update to 3.4.4</h3>
 			
 				<ul>

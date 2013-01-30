@@ -19,15 +19,18 @@
 			<h2>Introduction</h2>
 
 				<p>Configuration options from /config.ini file. These configuration options are used by Wave Framework system as well as by developer tools in /tools/ folder.</p>
+				
+				<p>All configuration settings in this file are loaded into State where certain variables, such as error-reporting, can turn on or off certain PHP settings. This configuration script is also used by scripts under /tools/ folder. Note that most settings in this file are commented out since system can function with default values. Uncomment and edit configuration only when wishing to change defaults.</p>
+
+				<p>If your project needs additional configuraton options then you can freely add them here and access them through state-specific methods, but make sure that there is no name conflict with any internal configuration and state variables. Refer to State documentation to know exactly which variables have already been used.</p>
 			
 			<h2>HTTP Authentication</h2>
 		
-				<p><b>http-authentication<br/>
-				http-authentication-username<br/>
+				<p><b>http-authentication-username<br/>
 				http-authentication-password<br/>
 				http-authentication-ip</b></p>
 				
-				<p>If http-authentication is set to 1, then HTTP authentication is required before any requests go through. It is also possible to limit the entire access to only a single IP or multiple IP addresses by assigning http-authentication-ip a comma separated list of IP addresses. These settings are also used by developer tools in /tools/ subfolder.</p>
+				<p>If limiter-authentication setting is set to 1, then HTTP authentication is required before any requests go through. It is also possible to limit the entire access to only a single IP or multiple IP addresses by assigning http-authentication-ip a comma separated list of IP addresses. These settings are also used by developer tools in /tools/ subfolder.</p>
 				
 			<h2>Application Version</h2>
 			
@@ -50,6 +53,11 @@
 				
 				<p>This sets if Wave Framework also writes the entire stack trace to error logs, if errors are encountered. Note that this might make some error log files very large and possibly unreadable by Debugger script with default memory settings. This is set off by default and only the main error message, file location and number are stored.</p>
 				
+				<p><b>developer-ip<br/>
+				developer-user-agent</b></p>
+				
+				<p>If these are set then using isDeveloper() call returns true. This allows you to test various features within the API that only work when requests are made from a specific IP and user agent. If these settings are not set or are empty, then isDeveloper() always returns false. Values can be comma-separated-lists. Note that the user agent string should be written here without semicolon character, which is unsupported in INI files.</p>
+			
 			<h2>Database</h2>
 			
 				<p><b>database-type<br/>
@@ -82,18 +90,18 @@
 				
 				<p>This is the HTTP host address of web service or website, for example 'www.example.com'. This is detected automatically by the system, but in case the same website is accessible from two different URL's, then assigning primary one here is recommended.</p>
 				
-				<p><b>system-root</b></p>
+				<p><b>directory-system</b></p>
 				
 				<p>This is the directory of your website or web service on the server. Wave Framework is able to detect this directory automatically, but in case this detection causes problems, it is recommended to manually assign it here.</p>
 				
-				<p><b>user-root<br/>
-				static-root</b></p>
+				<p><b>directory-user<br/>
+				directory-static</b></p>
 				
-				<p>By default this folder is '/filesystem/userdata/' and it is used for storing various user-specific files. This is detected automatically based on system-root configuration setting. Static root folder is the base root folder for static files and is situated in '/filesystem/static/', similarly to 'user-root', except files uploaded there are never served by Wave Framework.</p>
+				<p>By default this folder is '/filesystem/userdata/' and it is used for storing various user-specific files. This is detected automatically based on directory-system configuration setting. Static root folder is the base root folder for static files and is situated in '/filesystem/static/', similarly to 'directory-user', except files uploaded there are never served by Wave Framework.</p>
 				
 				<p><b>database-root</b></p>
 				
-				<p>By default this folder is '/filesystem/data/' and it is used for storing various filesystem-centric database files, such as for SQLite. If undefined, then this is automatically based on system-root configuration setting and it is not recommended to change this unless necessary.</p>
+				<p>By default this folder is '/filesystem/data/' and it is used for storing various filesystem-centric database files, such as for SQLite. If undefined, then this is automatically based on directory-system configuration setting and it is not recommended to change this unless necessary.</p>
 				
 				<p><b>timezone</b></p>
 				
@@ -103,11 +111,11 @@
 				
 				<p>This setting is a locale setting that is used for locale-related settings, such as for monetary and numeric values and messages. This is not defined by default and is detected by the system automatically.</p>
 				
-				<p><b>tmp-root</b></p>
+				<p><b>directory-tmp</b></p>
 				
 				<p>This is the base root folder for temporary files. Files that are stored here should be considered temporary and used for various custom functionality in the system.</p>
 				
-				<p><b>keys-root</b></p>
+				<p><b>directory-keys</b></p>
 				
 				<p>This is the folder that is used to store various security certificates and OpenSSL keys, such as ones used by various API's or e-payment systems.</p>
 				
@@ -150,13 +158,13 @@
 				
 				<p>These settings are used when using Wave Framework to build a website and not just a web service. Home view defines what view is loaded by View Controller from Sitemap file. This home-view setting is actually the URL keyword from Sitemap file and it should be the same across all different languages. 404 view defines what view from /view/ folder is loaded when no other view is found. 404 View is not set in Sitemap files, though if defined (the same way as Home view), then additional configuration options can be assigned there.</p>
 				
-				<p><b>web-root</b></p>
+				<p><b>url-web</b></p>
 				
 				<p>While most websites are accessible from the domain name and root folder (like http://www.example.com/), then some websites are set up in subfolders (like http://www.example.com/web/). While Wave Framework is able to detect this automatically, should this automatic detection fail, it is recommended to write the web root node here. For 'http://www.example.com/web/' address it would be '/web/'. This value is used when referencing links or loading content in a website.</p>
 				
-				<p><b>base-url</b></p>
+				<p><b>url-base</b></p>
 				
-				<p>This value is usually automatically generated from HTTPS setting, 'http-host' and 'web-root' values. This should only be defined in Configuration should the base URL be somehow detected incorrectly. This is the base URL that is stored in HTML header.</p>
+				<p>This value is usually automatically generated from HTTPS setting, 'http-host' and 'url-web' values. This should only be defined in Configuration should the base URL be somehow detected incorrectly. This is the base URL that is stored in HTML header.</p>
 				
 				<p><b>enforce-url-end-slash</b></p>
 				
@@ -318,27 +326,27 @@
 				
 				<p>This turns on HTTP request <a href="limiter.htm">Limiter</a> if set to 1. This setting is a global flag, if this is not set to 1, then all other flags of this group are ignored. This is set to 0 by default.</p>
 				
-				<p><b>http-authentication-limiter</b></p>
+				<p><b>limiter-authentication</b></p>
 				
 				<p>If this is set to 1, then every HTTP request requires HTTP authentication based on http-* configuration settings. Otherwise all requests are blocked. This is useful to protect website or web service from being accessed during development. This is not used by default.</p>
 				
-				<p><b>https-limiter</b></p>
+				<p><b>limiter-https</b></p>
 				
 				<p>This setting enforces HTTPS connections, when accessing this web service. If this is turned on, then all non-HTTPS requests will be redirected to HTTPS. This is not used by default and both HTTP and HTTPS requests (if supported) are allowed.</p>
 				
-				<p><b>whitelist-limiter</b></p>
+				<p><b>limiter-whitelist</b></p>
 				
 				<p>This setting is a comma-separated list of IP addresses which are allowed to access this website or web service. Requests from any other IP are blocked and not allowed. This is not used by default.</p>
 				
-				<p><b>blacklist-limiter</b></p>
+				<p><b>limiter-blacklist</b></p>
 				
 				<p>If whitelist limiter is not used, then this setting can be a comma-separated list of IP addresses that are not allowed to access this website or web service. This is not used by default.</p>
 				
-				<p><b>request-limiter</b></p>
+				<p><b>limiter-request</b></p>
 				
 				<p>This setting allows to limit the amount of requests per minute that are allowed. This is used to protect the system against Denial of Service attacks. This setting is the maximum amount of requests allowed per IP address. If this limit is exceeded, then that IP is blocked for one hour from accessing the service again. This is not used by default.</p>
 				
-				<p><b>load-limiter</b></p>
+				<p><b>limiter-load</b></p>
 				
 				<p>This setting sets the server load value that when met, will make Wave Framework temporarily block HTTP requests. If server load is too high, then subsequent requests can make problems worse, so this setting allows you to make such requests as short and quick as possible, which helps reduce the load on the server. This setting is undefined by default and this <a href="limiter.htm">Limiter</a> is not used.</p>
 

@@ -29,11 +29,11 @@
 <pre>
 	<code>
 	// This is the root folder where Wave Framework is installed
-	$root=$this->getState('system-root');
+	$root=$this->getState('directory-system');
 	// This is client user agent
 	$userAgent=$this->getState('client-user-agent');
 	// This is root of the writable folder where you can store various file uploads
-	$userData=$this->getState('user-root');
+	$userData=$this->getState('directory-user');
 	// This is assumed as the IP address of the client that is making the request
 	$ip=$this->getState('client-ip');
 	// If the user agent has requested not to be tracked
@@ -41,7 +41,7 @@
 	// Currently detected language
 	$language=$this->getState('language');
 	// Root folder for temporary files
-	$tmp=$this->getState('tmp-root');
+	$tmp=$this->getState('directory-tmp');
 	// Modified request URI and true request URI
 	$requestUri=$this->getState('request-uri');
 	$trueRequest=$this->getState('true-request');

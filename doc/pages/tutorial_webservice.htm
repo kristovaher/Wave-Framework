@@ -109,7 +109,7 @@
 	</code>
 </pre>
 
-				<p>Next I will create a function that allows me to store data in database. I will not be using an actual database for this example, instead data will be written to <a href="filesystem.htm">Filesystem</a> under '/filesystem/data/' folder as a serialized array string, with a filename of movies.db. One of the calls used here is getState('data-root'), which returns a folder of '/filesystem/data/' where <a href="filesystem.htm">Filesystem</a> specific files and folders can be stored safely. This function below implements this call to store the data as a file:</p>
+				<p>Next I will create a function that allows me to store data in database. I will not be using an actual database for this example, instead data will be written to <a href="filesystem.htm">Filesystem</a> under '/filesystem/data/' folder as a serialized array string, with a filename of movies.db. One of the calls used here is getState('directory-data'), which returns a folder of '/filesystem/data/' where <a href="filesystem.htm">Filesystem</a> specific files and folders can be stored safely. This function below implements this call to store the data as a file:</p>
 				
 <pre>
 	<code>
@@ -120,7 +120,7 @@
 		// Making sure that title and year are both set
 		if($this-&gt;title!='' && $this-&gt;year!=''){
 			// Database location
-			$dbLoc=$this-&gt;getState('data-root').'movies.db';
+			$dbLoc=$this-&gt;getState('directory-data').'movies.db';
 			// If database file already exists, we simply load the database and unserialize its data to add a new movie to it
 			if(file_exists($dbLoc)){
 				$curDb=unserialize(file_get_contents($dbLoc));
@@ -168,7 +168,7 @@
 			return false;
 		}
 		// Database location
-		$dbLoc=$this-&gt;getState('data-root').'movies.db';
+		$dbLoc=$this-&gt;getState('directory-data').'movies.db';
 		// If database does not exist then we have no movies to delete
 		if(file_exists($dbLoc)){
 			$curDb=unserialize(file_get_contents($dbLoc));
@@ -200,7 +200,7 @@
 	public function loadMovie($id=0){
 		if($id!=0){
 			// Database location
-			$dbLoc=$this-&gt;getState('data-root').'movies.db';
+			$dbLoc=$this-&gt;getState('directory-data').'movies.db';
 			// Making sure that current database exists
 			if(file_exists($dbLoc)){
 				$curDb=unserialize(file_get_contents($dbLoc));
@@ -236,7 +236,7 @@
 	// This example uses simple serialized database in filesystem, but it could load data from MySQL or other databases
 	public function loadAllMovies(){
 		// Database location
-		$dbLoc=$this-&gt;getState('data-root').'movies.db';
+		$dbLoc=$this-&gt;getState('directory-data').'movies.db';
 		// Making sure that current database exists
 		if(file_exists($dbLoc)){
 			$curDb=unserialize(file_get_contents($dbLoc));

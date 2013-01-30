@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.4.2
+ * @version    3.5.0
  */
 
 // SOLVING THE HTTP REQUEST
@@ -180,31 +180,31 @@
 			$limiter->logger=$logger;
 		}
 		// Load limiter blocks access if server load is detected to be too high at the moment of request
-		if(isset($config['load-limiter']) && $config['load-limiter']){
-			$limiter->limitServerLoad($config['load-limiter']);
+		if(isset($config['limiter-load']) && $config['limiter-load']){
+			$limiter->limitServerLoad($config['limiter-load']);
 		}
 		// Load limiter allows access for certain IP's or blocks access to specific blacklist of IP's
-		if(isset($config['whitelist-limiter']) && $config['whitelist-limiter']){
-			$limiter->limitWhitelisted($config['whitelist-limiter']);
-		} elseif(isset($config['blacklist-limiter']) && $config['blacklist-limiter']){
-			$limiter->limitBlacklisted($config['blacklist-limiter']);
+		if(isset($config['limiter-whitelist']) && $config['limiter-whitelist']){
+			$limiter->limitWhitelisted($config['limiter-whitelist']);
+		} elseif(isset($config['limiter-blacklist']) && $config['limiter-blacklist']){
+			$limiter->limitBlacklisted($config['limiter-blacklist']);
 		}
 		// If HTTPS limiter is used, the ststem returns a 401 error if the user agent attempts to access the site without HTTPS
-		if(isset($config['https-limiter']) && $config['https-limiter']){
+		if(isset($config['limiter-https']) && $config['limiter-https']){
 			$limiter->limitNonSecureRequests(); // By default the user agent is redirected to HTTPS address of the same request
 		}
 		// If HTTP authentication is turned on, the system checks for credentials and returns 401 if failed
-		if(isset($config['http-authentication-limiter']) && $config['http-authentication-limiter']){
+		if(isset($config['limiter-authentication']) && $config['limiter-authentication']){
 			$limiter->limitUnauthorized($config['http-authentication-username'],$config['http-authentication-password'],((isset($config['http-authentication-ip']))?$config['http-authentication-ip']:'*'));
 		}
 		// Request limiter keeps track of how many requests per minute are allowed on IP.
 		// If limit is exceeded, then IP is blocked for an hour.
-		if(isset($config['request-limiter']) && $config['request-limiter']){
-			$limiter->limitRequestCount($config['request-limiter']);
+		if(isset($config['limiter-request']) && $config['limiter-request']){
+			$limiter->limitRequestCount($config['limiter-request']);
 		}
 		// Referrer limiter checks if the Referrer URL is allowed or not
-		if(isset($config['referrer-limiter']) && $config['referrer-limiter']){
-			$limiter->limitReferrer($config['referrer-limiter']);
+		if(isset($config['limiter-referrer']) && $config['limiter-referrer']){
+			$limiter->limitReferrer($config['limiter-referrer']);
 		}
 
 	}

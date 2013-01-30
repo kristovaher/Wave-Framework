@@ -40,6 +40,8 @@
 				
 			<h2>Using JavaScript API Wrapper Class</h2>
 			
+				<p>One of the main things about using JavaScript API Wrapper is to use only one instance of it in your front-end. While you can create two Wrapper objects and use them at the same time, this can cause some parallel processing issues. It is best to use just a single object and send requests through there.</p>
+			
 				<p>It is recommended to go through all of the API Documentation sections before using the API Wrapper. This document here covers details only specific to API Wrapper and not the details about other API keywords themselves.</p>
 			
 				<p>JavaScript API Wrapper is stored as a file in '/engine/class.www-wrapper.js', but it is not dependent on anything else in the <a href="filesystem.htm">Filesystem</a> and can be used independently. API Wrapper works in all modern browsers.</p>
@@ -93,6 +95,7 @@
 					<li><b>www-reset-log</b> - This means that the API will reset the log after each API call is made.</li>
 					<li><b>www-timestamp-duration</b> - This tells API Wrapper the maximum difference in seconds it accepts the timestamp from the response.</li>
 					<li><b>www-secret-key</b></li> - This stores the secret key of the application. This value is used for calculating validation hashes. It is not recommended to use this with JavaScript API Wrapper, but if you want then the option is there.</li>
+					<li><b>www-form</b> - Send this if you want to send an ID of a form on your page that will be submitted. This is the only way to do a file upload with JavaScript and using the API Wrapper, since it will dynamically generate a hidden iFrame for this purpose.</li>
 				</ul>
 				
 				<p>Please refer to Input and Output API Documentation to see the rest of the Wave Framework API flags and their description.</p>

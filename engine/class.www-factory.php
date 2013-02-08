@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.5.0
+ * @version    3.5.1
  */
 
 class WWW_Factory {
@@ -755,6 +755,29 @@ class WWW_Factory {
 				return array('www-message'=>$message,'www-response-code'=>$responseCode);
 			}
 			
+		}
+		
+		/**
+		 * This allows to simply return a string from an API. It sets text headers in the response.
+		 *
+		 * @param $stream text string to be returned
+		 * @return void
+		 */
+		final protected function resultStream($stream){
+			return $this->WWW_API->resultStream($stream);
+		}
+		
+		/**
+		 * This returns contents from a file as a response to API request. This can be used
+		 * for file downloads without revealing the actual file path in filesystem.
+		 *
+		 * @param string $location file location in filesystem
+		 * @param string $name name of the downloadable file, by default the name of the actual file
+		 * @param string $contentType this is set as a content type string in the response
+		 * @return mixed
+		 */
+		final protected function resultFile($location,$name=false,$contentType=false){
+			return $this->WWW_API->resultFile($location,$name,$contentType);
 		}
 		
 		/**

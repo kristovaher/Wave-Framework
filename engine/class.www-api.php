@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.5.0
+ * @version    3.5.1
  */
 
 final class WWW_API {
@@ -116,6 +116,12 @@ final class WWW_API {
 	 * once API class has finished dealing with the request.
 	 */
 	private $internalLog=array();
+	
+	/**
+	 * If this variable is set, then API, when getting a result from the controller, does not process 
+	 * anything any further
+	 */
+	private $closeProcess=false;
 	
 	/**
 	 * API object construction accepts State object in $state and array data of API profiles 
@@ -806,7 +812,6 @@ final class WWW_API {
 					
 					// Second half of the command string is used to solve the function that is called by the command
 					if(isset($commandBits[1])){
-					
 						// Solving method name, dashes are underscored
 						$methodName=str_replace('-','_',$commandBits[1]);
 						// New controller is created based on API call
@@ -841,6 +846,11 @@ final class WWW_API {
 					} else {
 						// Since an error was detected, system pushes for output immediately
 						return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>115),$apiState);
+					}
+					
+					// If process has been set to be closed
+					if($this->closeProcess){
+						return true;
 					}
 					
 					// If cache timeout was set then the result is stored as a cache in the filesystem
@@ -1383,6 +1393,82 @@ final class WWW_API {
 			// Processing complete
 			return true;
 		
+		}
+		
+	// SPECIAL RETURN TYPES
+	
+		/**
+		 * This allows to simply return a string from an API.
+		 *
+		 * @param $stream text string to be returned
+		 * @return void
+		 */
+		final public function resultStream($stream){
+		
+			// If headers should be sent with the file or not
+			if(ob_get_level()==1){
+				// Returning the file contents as a string
+				return array('www-data'=>$stream);
+			} else {
+				// Returning the file contents as a string
+				return $stream;
+			}
+		
+		}
+		
+		/**
+		 * This returns contents from a file as a response to API request. This can be used
+		 * for file downloads without revealing the actual file path in filesystem.
+		 *
+		 * @param string $location file location in filesystem
+		 * @param string $name name of the downloadable file, by default the name of the actual file
+		 * @param string $contentType this is set as a content type string in the response
+		 * @return mixed
+		 */
+		final public function resultFile($location,$name=false,$contentType=false){
+		
+			// If file cannot be found, it cannot be returned
+			if(!file_exists($location)){
+				trigger_error('Cannot find a file at '.$location,E_USER_WARNING);
+				return false;
+			}
+		
+			// If headers should be sent with the file or not
+			if(ob_get_level()==1){
+			
+				// Finding the filename
+				if(!$name){
+					$tempName=explode(DIRECTORY_SEPARATOR,$location);
+					$name=array_pop($tempName);
+				}
+				
+				// Headers
+				header('Cache-Control: no-cache,no-store');
+				header('Expires: '.gmdate('D, d M Y H:i:s',$this->state->data['request-time']).' GMT');
+				header('Last-Modified: '.gmdate('D, d M Y H:i:s',filemtime($location)).' GMT');
+				header('Vary: Accept-Encoding,Cookie');
+				if($contentType){
+					header('Content-Type: '.$contentType);
+					header('Content-Disposition: filename='.$name);
+				} else {
+					header('Content-Type: application/octet-stream;');
+					header('Content-Disposition: attachment; filename='.$name);
+				}
+				header('Content-Length: '.filesize($location)); 
+				
+				// Printing out the file and closing the process
+				readfile($location);
+				
+				// This tells the API not to process results sent from a controller
+				$this->closeProcess=true;
+				
+			} else {
+			
+				// Returning the file contents as a string
+				return file_get_contents($location);
+			
+			}
+			
 		}
 		
 	// RESULT CONVERSIONS

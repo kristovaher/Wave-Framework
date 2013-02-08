@@ -115,6 +115,10 @@
 				
 					<p>This is an array that stores all the internal log entries that will be written to <a href="filesystem.htm">Filesystem</a> once API class has finished dealing with the request.</p>
 					
+				<h3>private $closeProcess=false</h3>
+				
+					<p>This is used only by resultFile() method to close API processing once file download happens.</p>
+					
 			<h2>API Class Methods</h2>
 			
 				<h3>final public function __construct($state=false,$apiProfiles=false)</h3>
@@ -181,6 +185,14 @@
 						<li>Two variables, 'www-set-session' and 'www-unset-session', allow you to set and unset sessions and session variables.</li>
 						<li>It is also possible to redirect the user agent by defining 'www-temporary-redirect' or 'www-permanent-redirect'. User agent will be redirected to the value of that variable.</li>
 					</ul>
+					
+				<h3>final public function resultStream($stream)</h3>
+				
+					<p>This method can be called from controllers to either return a string or print our a string to the browser. This is technically a shorthand to returning 'www-data' array key with a string value. This can be used to build various custom output formats that are not handled by Wave Framework API itself.</p>
+					
+				<h3>final public function resultFile($location,$name=false,$contentType=false)</h3>
+				
+					<p>This method can be called from controllers to either return contents of a file or force a file download in the requesting browser when making HTTP API request.</p>
 					
 				<h3>final private function toXML($apiResult,$type=false)</h3>
 					

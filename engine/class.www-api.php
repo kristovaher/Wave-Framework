@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.5.1
+ * @version    3.5.3
  */
 
 final class WWW_API {
@@ -392,7 +392,7 @@ final class WWW_API {
 					if(in_array($apiInputData['www-language'],$this->state->data['languages'])){
 						$this->state->data['language']=$apiInputData['www-language'];
 					} else {
-						return $this->output(array('www-message'=>'Language cannot be found','www-response-code'=>116),$apiState);
+						return $this->output(array('www-message'=>'Language cannot be found: '.$apiInputData['www-language'],'www-response-code'=>116),$apiState);
 					}
 				}
 				
@@ -446,13 +446,13 @@ final class WWW_API {
 						// Testing if API profile is disabled or not
 						if(isset($this->apiProfiles[$apiState['profile']]['disabled']) && $this->apiProfiles[$apiState['profile']]['disabled']==1){
 							// If profile is set to be disabled
-							return $this->output(array('www-message'=>'API profile is disabled','www-response-code'=>104),$apiState);
+							return $this->output(array('www-message'=>'API profile is disabled: '.$apiState['profile'],'www-response-code'=>104),$apiState);
 						} 
 						
 						// Testing if IP is in valid range
 						if(isset($this->apiProfiles[$apiState['profile']]['ip']) && $this->apiProfiles[$apiState['profile']]['ip']!='*' && !in_array($this->state->data['client-ip'],explode(',',$this->apiProfiles[$apiState['profile']]['ip']))){
 							// If profile has IP set and current IP is not allowed
-							return $this->output(array('www-message'=>'API profile not allowed from this IP','www-response-code'=>105),$apiState);
+							return $this->output(array('www-message'=>'API profile not allowed from this IP: '.$apiState['profile'].' '.$this->state->data['client-ip'],'www-response-code'=>105),$apiState);
 						}
 						
 						// Profile commands are filtered only if they are set
@@ -460,7 +460,7 @@ final class WWW_API {
 							$apiState['commands']=explode(',',$this->apiProfiles[$apiState['profile']]['commands']);
 							if((in_array('*',$apiState['commands']) && in_array('!'.$apiState['command'],$apiState['commands'])) || (!in_array('*',$apiState['commands']) && !in_array($apiState['command'],$apiState['commands']))){
 								// If profile has IP set and current IP is not allowed
-								return $this->output(array('www-message'=>'API command is not allowed for this profile','www-response-code'=>106),$apiState);
+								return $this->output(array('www-message'=>'API command is not allowed for this profile: '.$apiState['command'].' by '.$apiState['profile'],'www-response-code'=>106),$apiState);
 							}
 						}
 						
@@ -473,7 +473,7 @@ final class WWW_API {
 								if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
 									return $this->output(array('www-message'=>'API request validation timestamp is missing','www-response-code'=>107),$apiState);
 								} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
-									return $this->output(array('www-message'=>'API request timestamp is too old','www-response-code'=>108),$apiState);
+									return $this->output(array('www-message'=>'API request timestamp is too old: '.($this->state->data['request-time']-$apiInputData['www-timestamp']).' seconds, '.$this->apiProfiles[$apiState['profile']]['timestamp-timeout'].' allowed','www-response-code'=>108),$apiState);
 								}
 							}
 							
@@ -500,7 +500,7 @@ final class WWW_API {
 								$apiState['secret-key']=$this->apiProfiles[$apiState['profile']]['secret-key'];
 								
 							} else {
-								return $this->output(array('www-message'=>'API profile configuration incorrect: secret key missing from configuration','www-response-code'=>109),$apiState);
+								return $this->output(array('www-message'=>'API profile configuration incorrect: secret key missing from configuration for '.$apiState['profile'],'www-response-code'=>109),$apiState);
 							}
 							
 							// Checks for whether token timeout is set on the API profile					
@@ -525,7 +525,7 @@ final class WWW_API {
 						}
 						
 					} else {
-						return $this->output(array('www-message'=>'API profile not found','www-response-code'=>103),$apiState);
+						return $this->output(array('www-message'=>'API profile not found: '.$apiState['profile'],'www-response-code'=>103),$apiState);
 					}
 
 				}
@@ -643,13 +643,13 @@ final class WWW_API {
 										// Merging crypted input with set input data
 										$apiInputData=$decryptedData+$apiInputData;
 									} else {
-										return $this->output(array('www-message'=>'Problem decrypting encrypted data: Decrypted data is not a JSON encoded array','www-response-code'=>114),$apiState);
+										return $this->output(array('www-message'=>'Problem decrypting encrypted data: decrypted data is not a JSON encoded array','www-response-code'=>114),$apiState);
 									}
 								} else {
-									return $this->output(array('www-message'=>'Problem decrypting encrypted data: Decryption failed','www-response-code'=>114),$apiState);
+									return $this->output(array('www-message'=>'Problem decrypting encrypted data: decryption failed','www-response-code'=>114),$apiState);
 								}	
 							} else {
-								return $this->output(array('www-message'=>'Problem decrypting encrypted data: No tools to decrypt data','www-response-code'=>114),$apiState);
+								return $this->output(array('www-message'=>'Problem decrypting encrypted data: no methods to decrypt data','www-response-code'=>114),$apiState);
 							}
 							// This variable is not used anymore
 							unset($apiInputData['www-crypt-input']);
@@ -668,7 +668,7 @@ final class WWW_API {
 							// If session token subdirectory does not exist, it is created
 							if(!is_dir($apiState['token-directory'])){
 								if(!mkdir($apiState['token-directory'],0755)){
-									return $this->output(array('www-message'=>'Server configuration error: Cannot create session token folder','www-response-code'=>100),$apiState);
+									return $this->output(array('www-message'=>'Server configuration error: cannot create session token folder at '.$apiState['token-directory'],'www-response-code'=>100),$apiState);
 								}
 							}
 							// Token for API access is generated simply from current profile name and request time
@@ -688,7 +688,7 @@ final class WWW_API {
 									return $this->output(array('www-message'=>'API session token created','www-token'=>$apiState['token'],'www-token-timeout'=>'infinite','www-response-code'=>500),$apiState);
 								}
 							} else {
-								return $this->output(array('www-message'=>'Server configuration error: Cannot create session token file','www-response-code'=>100),$apiState);
+								return $this->output(array('www-message'=>'Server configuration error: cannot create session token file at '.$apiState['token-directory'].$apiState['token-file'],'www-response-code'=>100),$apiState);
 							}
 
 						} elseif($apiState['command']=='www-destroy-session'){
@@ -806,7 +806,7 @@ final class WWW_API {
 							require($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
 						} else {
 							// Since an error was detected, system pushes for output immediately
-							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>115),$apiState);
+							return $this->output(array('www-message'=>'API request recognized, but unable to handle: '.$apiState['command'],'www-response-code'=>115),$apiState);
 						}
 					}
 					
@@ -819,7 +819,7 @@ final class WWW_API {
 						// If command method does not exist, 501 page is returned or error triggered
 						if(!method_exists($controller,$methodName) || !is_callable(array($controller,$methodName))){
 							// Since an error was detected, system pushes for output immediately
-							return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>115),$apiState);
+							return $this->output(array('www-message'=>'API request recognized, but unable to handle: '.$apiState['command'],'www-response-code'=>115),$apiState);
 						}
 						// Gathering every possible echoed result from method call
 						ob_start();
@@ -845,7 +845,7 @@ final class WWW_API {
 						}
 					} else {
 						// Since an error was detected, system pushes for output immediately
-						return $this->output(array('www-message'=>'API request recognized, but unable to handle','www-response-code'=>115),$apiState);
+						return $this->output(array('www-message'=>'API request recognized, but unable to handle: '.$apiState['command'],'www-response-code'=>115),$apiState);
 					}
 					
 					// If process has been set to be closed
@@ -862,7 +862,7 @@ final class WWW_API {
 							// If cache subdirectory does not exist, it is created
 							if(!is_dir($cacheFolder)){
 								if(!mkdir($cacheFolder,0755)){
-									return $this->output(array('www-message'=>'Server configuration error: cannot create cache folder','www-response-code'=>100),$apiState);
+									return $this->output(array('www-message'=>'Server configuration error: cannot create cache folder at '.$cacheFolder,'www-response-code'=>100),$apiState);
 								}
 							}
 							// Cache is stored in serialized form
@@ -873,7 +873,7 @@ final class WWW_API {
 								$cacheTags=explode(',',$apiInputData['www-cache-tags']);
 								foreach($cacheTags as $tag){
 									if(!file_put_contents($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
-										return $this->output(array('www-message'=>'Server configuration error: cannot create cache tag index','www-response-code'=>100),$apiState);
+										return $this->output(array('www-message'=>'Server configuration error: cannot create cache tag index at '.$this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp','www-response-code'=>100),$apiState);
 									}
 								}
 							}

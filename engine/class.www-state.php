@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.5.0
+ * @version    3.5.2
  */
 
 class WWW_State	{
@@ -296,7 +296,7 @@ class WWW_State	{
 			
 			// Defining certificates and keys folder
 			if(!$this->data['directory-keys']){
-				$this->data['directory-keys']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'keys-'.DIRECTORY_SEPARATOR;
+				$this->data['directory-keys']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'keys'.DIRECTORY_SEPARATOR;
 			}
 				
 			// If timezone is still set to false, then system attempts to set the currently set timezone

@@ -78,7 +78,7 @@ header('Content-Type: text/html;charset=utf-8');
 			if(function_exists('ini_get') && ini_get('short_open_tag')==1){
 				$log[]='<span class="bold">SUCCESS</span>: PHP setting short_open_tag is enabled';
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: PHP setting short_open_tag is turned off, default View controller requires this to work properly, if this is not possible then edit /controllers/controller.view.php';
+				$log[]='<span class="bold orange">WARNING</span>: PHP setting short_open_tag is turned off, default View controller requires this to work properly, if this is not possible then edit /controllers/controller.view.php and example view files in /views/ folder';
 			}
 
 		// PDO

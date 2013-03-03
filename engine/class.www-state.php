@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.5.2
+ * @version    3.5.4
  */
 
 class WWW_State	{
@@ -122,6 +122,7 @@ class WWW_State	{
 				'developer-ip'=>'',
 				'developer-user-agent'=>'',
 				'directory-data'=>false,
+				'directory-filesystem'=>false,
 				'directory-keys'=>false,
 				'directory-static'=>false,
 				'directory-system'=>str_replace('engine'.DIRECTORY_SEPARATOR.'class.www-state.php','',__FILE__),
@@ -275,28 +276,33 @@ class WWW_State	{
 			}
 			
 			// Defining default user root folder
+			if(!$this->data['directory-filesystem']){
+				$this->data['directory-filesystem']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR;
+			}
+			
+			// Defining default user root folder
 			if(!$this->data['directory-user']){
-				$this->data['directory-user']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'userdata'.DIRECTORY_SEPARATOR;
+				$this->data['directory-user']=$this->data['directory-filesystem'].'userdata'.DIRECTORY_SEPARATOR;
 			}
 			
 			// Defining default user root folder
 			if(!$this->data['directory-data']){
-				$this->data['directory-data']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'data'.DIRECTORY_SEPARATOR;
+				$this->data['directory-data']=$this->data['directory-filesystem'].'data'.DIRECTORY_SEPARATOR;
 			}
 			
 			// Defining default static folder
 			if(!$this->data['directory-static']){
-				$this->data['directory-static']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'static'.DIRECTORY_SEPARATOR;
+				$this->data['directory-static']=$this->data['directory-filesystem'].'static'.DIRECTORY_SEPARATOR;
 			}
 			
 			// Defining temporary files root folder
 			if(!$this->data['directory-tmp']){
-				$this->data['directory-tmp']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR;
+				$this->data['directory-tmp']=$this->data['directory-filesystem'].'tmp'.DIRECTORY_SEPARATOR;
 			}
 			
 			// Defining certificates and keys folder
 			if(!$this->data['directory-keys']){
-				$this->data['directory-keys']=$this->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'keys'.DIRECTORY_SEPARATOR;
+				$this->data['directory-keys']=$this->data['directory-filesystem'].'keys'.DIRECTORY_SEPARATOR;
 			}
 				
 			// If timezone is still set to false, then system attempts to set the currently set timezone

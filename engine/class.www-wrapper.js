@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.5.0
+ * @version    3.5.4
  */
 
 /*
@@ -33,9 +33,17 @@
 function WWW_Wrapper(address,language){
 
 	// Finding a default, if not set
-	if(address==null){
+	if(address==null && document.baseURI!=undefined){
 		address=document.baseURI+'json.api';
-	}
+	} else if(address==null){
+		// This is primarily for Internet Explorer that does not have baseURI
+		var baseTags=document.getElementsByTagName('base');
+		if(baseTags.length > 0) {
+			address=baseTags[0].href+'json.api';
+		} else {
+			address='json.api';
+		}
+	} 
 	
 	// Finding a default, if not set
 	if(language==null && document.documentElement.lang!=null){
@@ -125,6 +133,9 @@ function WWW_Wrapper(address,language){
 		
 	// Log entry
 	log.push('Wave API Wrapper object created with API address: '+address);
+	
+	// This is used to refer to current object
+	var that=this;
 	
 	// SETTINGS
 		
@@ -354,10 +365,10 @@ function WWW_Wrapper(address,language){
 					log.push('Ignoring www-output setting, wrapper always requires output to be set to true');
 					break;
 				case 'www-form':
-					if(value==true){
-						this.setForm(value);
+					if(value){
+						that.setForm(value);
 					} else if(value==false){
-						this.clearForm();
+						that.clearForm();
 					}
 					break;
 				default:
@@ -467,18 +478,20 @@ function WWW_Wrapper(address,language){
 		
 			// If log is assigned to be reset with each new API request
 			if(resetLog){
-				this.clearLog();
+				that.clearLog();
 			}
 		
 			// In case variables have been sent with a single request
 			if(variables!=null && typeof(variables)=='object'){
 				for(var key in variables){
 					// Setting variable through input setter
-					this.setInput(key,variables[key]);
+					that.setInput(key,variables[key]);
 				}
 			}
+			
+			// In case form has been set
 			if(formId!=null){
-				this.setForm(formId);
+				that.setForm(formId);
 			}
 			
 			// Storing input data
@@ -512,7 +525,7 @@ function WWW_Wrapper(address,language){
 			}
 
 			// Clearing input data
-			this.clearInput(false);
+			that.clearInput(false);
 
 			// Log entry
 			log.push('Starting to build request');

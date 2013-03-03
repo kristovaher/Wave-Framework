@@ -122,6 +122,7 @@ THANK YOU
 
 Allan Davy
 Priit Perna
+Ando David Roots
 
 LICENSE
 -------

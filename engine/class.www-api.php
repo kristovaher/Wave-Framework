@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.5.3
+ * @version    3.5.4
  */
 
 final class WWW_API {
@@ -1067,6 +1067,9 @@ final class WWW_API {
 							} else {
 								$apiResult='';
 							}
+							break;
+						default:							
+							trigger_error('Return type not set or incorrect',E_USER_ERROR);
 							break;
 					}
 				

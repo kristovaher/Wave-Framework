@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.5.4
+ * @version    3.5.5
  */
 
 /*
@@ -82,6 +82,8 @@ function WWW_Wrapper(address,language){
 		trueCallback:false,
 		falseCallback:false,
 		errorCallback:false,
+		trueCallbackParameters:false,
+		falseCallbackParameters:false,
 		timestampDuration:60,
 		hiddenWindowCounter:0,
 		apiSubmitFormId:false,
@@ -116,7 +118,7 @@ function WWW_Wrapper(address,language){
 	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
 	 * defined for future purpose.
 	 */
-	var userAgent='WWWFramework/3.4.5 (JavaScript)';
+	var userAgent='WWWFramework/3.5.5 (JS)';
 	
 	/*
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -345,6 +347,18 @@ function WWW_Wrapper(address,language){
 						}
 					}
 					break;
+				case 'www-true-callback-parameters':
+					apiState.trueCallbackParameters=value;
+					if(value){
+						log.push('API return true/success callback parameters set');
+					}
+					break;
+				case 'www-false-callback-parameters':
+					apiState.falseCallbackParameters=value;
+					if(value){
+						log.push('API return false/failure callback parameters set');
+					}
+					break;
 				case 'www-get-limit':
 					getLimit=value;
 					log.push('Maximum GET string length is set to: '+value);
@@ -451,6 +465,8 @@ function WWW_Wrapper(address,language){
 			apiState.trueCallback=false;
 			apiState.falseCallback=false;
 			apiState.errorCallback=false;
+			apiState.trueCallbackParameters=false;
+			apiState.falseCallbackParameters=false;
 			apiState.apiSubmitFormId=false;
 			// Input data
 			inputData=new Object();
@@ -929,13 +945,21 @@ function WWW_Wrapper(address,language){
 						if(typeof(thisCallback)==='function'){
 							log.push('Sending data to callback: '+thisApiState.trueCallback+'()');
 							// Callback execution
-							return thisCallback.call(this,resultData);
+							if(thisApiState.trueCallbackParameters!=false){
+								return thisCallback.call(this,resultData,thisApiState.trueCallbackParameters);
+							} else {
+								return thisCallback.call(this,resultData);
+							}
 						} else {
 							return errorHandler(thisInputData,216,'Callback method not found',thisApiState.errorCallback);
 						}
 					} else {
 						// Returning data from callback
-						thisApiState.trueCallback(resultData);
+						if(thisApiState.trueCallbackParameters!=false){
+							return thisApiState.trueCallback(resultData,thisApiState.trueCallbackParameters);
+						} else {
+							return thisApiState.trueCallback(resultData);
+						}
 					}
 				} else if(thisApiState.falseCallback && resultData['www-response-code']!=null && resultData['www-response-code']<500){
 					// If the callback is a function name and not a function itself
@@ -945,13 +969,21 @@ function WWW_Wrapper(address,language){
 						if(typeof(thisCallback)==='function'){
 							log.push('Sending failure data to callback: '+thisApiState.falseCallback+'()');
 							// Callback execution
-							return thisCallback.call(this,resultData);
+							if(thisApiState.falseCallbackParameters!=false){
+								return thisCallback.call(this,resultData,thisApiState.falseCallbackParameters);
+							} else {
+								return thisCallback.call(this,resultData);
+							}
 						} else {
 							return errorHandler(thisInputData,216,'Callback method not found',thisApiState.errorCallback);
 						}
 					} else {
 						// Returning data from callback
-						thisApiState.falseCallback(resultData);
+						if(thisApiState.falseCallbackParameters!=false){
+							return thisApiState.falseCallback(resultData,thisApiState.falseCallbackParameters);
+						} else {
+							return thisApiState.falseCallback(resultData);
+						}
 					}
 				} else {
 					// Returning request result

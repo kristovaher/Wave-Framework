@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.5.4
+ * @version    3.5.5
  */
 
 class WWW_State	{
@@ -81,7 +81,7 @@ class WWW_State	{
 				define('__IP__',$_SERVER['REMOTE_ADDR']);
 			}
 			if(!defined('__ROOT__')){
-				define('__ROOT__',__DIR__.DIRECTORY_SEPARATOR);
+				define('__ROOT__',__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
 			}
 	
 			// A lot of default State variables are loaded from PHP settings, others are simply pre-defined

@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.4.5
+ * @version    3.5.5
  */
 
 class WWW_Wrapper {
@@ -53,6 +53,8 @@ class WWW_Wrapper {
 		'trueCallback'=>false,
 		'falseCallback'=>false,
 		'errorCallback'=>false,
+		'trueCallbackParameters'=>false,
+		'falseCallbackParameters'=>false,
 		'requestTimeout'=>10,
 		'timestampDuration'=>60,
 		'unserialize'=>true,
@@ -124,7 +126,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.4.5 (PHP)';
+	private $userAgent='WaveFramework/3.5.5 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -483,6 +485,18 @@ class WWW_Wrapper {
 						}
 					}
 					break;
+				case 'www-true-callback-parameters':
+					$this->apiState['trueCallbackParameters']=$value;
+					if($value){
+						$this->log[]='API return true/success callback parameters set';
+					}
+					break;
+				case 'www-false-callback-parameters':
+					$this->apiState['falseCallbackParameters']=$value;
+					if($value){
+						$this->log[]='API return false/failure callback parameters set';
+					}
+					break;
 				case 'www-last-modified':
 					$this->apiState['lastModified']=$value;
 					$this->log[]='API last-modified request time set to: '.$value;
@@ -633,6 +647,8 @@ class WWW_Wrapper {
 			$this->apiState['trueCallback']=false;
 			$this->apiState['falseCallback']=false;
 			$this->apiState['errorCallback']=false;
+			$this->apiState['trueCallbackParameters']=false;
+			$this->apiState['falseCallbackParameters']=false;
 			// Input data
 			$this->inputData=array();
 			$this->cryptedData=array();
@@ -1224,13 +1240,21 @@ class WWW_Wrapper {
 						if(function_exists($thisApiState['trueCallback'])){
 							$this->log[]='Sending data to callback: '.$thisApiState['trueCallback'].'()';
 							// Callback execution
-							return call_user_func($thisApiState['trueCallback'],$resultData);
+							if($thisApiState['trueCallbackParameters']!=false){
+								return call_user_func($thisApiState['trueCallback'],$resultData,$thisApiState['trueCallbackParameters']);
+							} else {
+								return call_user_func($thisApiState['trueCallback'],$resultData);
+							}
 						} else {
 							return $this->errorHandler($thisInputData,216,'Callback method not found',$thisApiState['errorCallback']);
 						}
 					} else {
 						// Returning data from callback
-						return $thisApiState['trueCallback']($resultData);
+						if($thisApiState['trueCallbackParameters']!=false){
+							return $thisApiState['trueCallback']($resultData,$thisApiState['trueCallbackParameters']);
+						} else {
+							return $thisApiState['trueCallback']($resultData);
+						}
 					}
 				} elseif($thisApiState['falseCallback'] && $responseCode<500){
 					// If the callback is a function name and not a function itself
@@ -1239,13 +1263,21 @@ class WWW_Wrapper {
 						if(function_exists($thisApiState['falseCallback'])){
 							$this->log[]='Sending data to callback: '.$thisApiState['falseCallback'].'()';
 							// Callback execution
-							return call_user_func($thisApiState['falseCallback'],$resultData);
+							if($thisApiState['falseCallbackParameters']!=false){
+								return call_user_func($thisApiState['falseCallback'],$resultData,$thisApiState['falseCallbackParameters']);
+							} else {
+								return call_user_func($thisApiState['falseCallback'],$resultData);
+							}
 						} else {
 							return $this->errorHandler($thisInputData,216,'Callback method not found',$thisApiState['falseCallback']);
 						}
 					} else {
 						// Returning data from callback
-						return $thisApiState['falseCallback']($resultData);
+						if($thisApiState['falseCallbackParameters']!=false){
+							return $thisApiState['falseCallback']($resultData,$thisApiState['falseCallbackParameters']);
+						} else {
+							return $thisApiState['falseCallback']($resultData);
+						}
 					}
 				} else {
 					// Returning request result

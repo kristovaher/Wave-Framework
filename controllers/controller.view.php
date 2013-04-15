@@ -227,6 +227,15 @@ class WWW_controller_view extends WWW_Factory {
 							<?=$other?>
 						<?php } ?>
 					<?php } ?>
+					<script type="text/javascript">
+						var WWW=new WWW_Wrapper('json.api');
+						WWW.setInput({
+							'www-command':'example-get'
+						});
+						console.log(WWW.returnLog());
+						console.log(WWW.sendRequest());
+						console.log(WWW.returnLog());
+					</script>
 				</head>
 				<body>
 					<?php

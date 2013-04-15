@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.5.5
+ * @version    3.5.6
  */
 
 /*
@@ -118,7 +118,7 @@ function WWW_Wrapper(address,language){
 	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
 	 * defined for future purpose.
 	 */
-	var userAgent='WWWFramework/3.5.5 (JS)';
+	var userAgent='WWWFramework/3.5.6 (JS)';
 	
 	/*
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -168,6 +168,7 @@ function WWW_Wrapper(address,language){
 		 */
 		this.clearLog=function(){
 			log=new Array();
+			log.push('Log cleared');
 			return true;
 		}
 		
@@ -640,16 +641,16 @@ function WWW_Wrapper(address,language){
 					var method='GET';
 					// Getting input variables
 					var requestData=buildRequestData(thisInputData);
+					// Request string
+					var requestString=apiAddress+'?'+requestData;
 					// Creating request handler
 					var XMLHttp=new XMLHttpRequest();
 				
 					// POST request is made if the URL is longer than 2048 bytes (2KB).
 					// While servers can easily handle 8KB of data, servers are recommended to be vary if the GET request is longer than 2KB
-					if((apiAddress+'?'+requestData)>getLimit){
+					if(requestString.length>getLimit){
 						// Log entries
 						log.push('More than '+getLimit+' bytes would be sent, POST request will be used');
-						// Request header and method for POST
-						XMLHttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 						method='POST';
 					}
 				
@@ -677,9 +678,13 @@ function WWW_Wrapper(address,language){
 						// Sending the request
 						if(method=='POST'){
 							XMLHttp.open(method,apiAddress,true);
+							// Request header and method for POST
+							XMLHttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+							// Making the request
 							XMLHttp.send(requestData);
 						} else {
-							XMLHttp.open(method,apiAddress+'?'+requestData,true);
+							XMLHttp.open(method,requestString,true);
+							// Making the request
 							XMLHttp.send(null);
 						}
 						
@@ -690,9 +695,13 @@ function WWW_Wrapper(address,language){
 						// Sending the request
 						if(method=='POST'){
 							XMLHttp.open(method,apiAddress,false);
+							// Request header and method for POST
+							XMLHttp.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+							// Making the request
 							XMLHttp.send(requestData);
 						} else {
-							XMLHttp.open(method,apiAddress+'?'+requestData,false);
+							XMLHttp.open(method,requestString,false);
+							// Making the request
 							XMLHttp.send(null);
 						}
 						// Result based on status

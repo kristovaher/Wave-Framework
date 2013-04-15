@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.5.5
+ * @version    3.5.6
  */
 
 class WWW_Wrapper {
@@ -126,7 +126,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.5.5 (PHP)';
+	private $userAgent='WaveFramework/3.5.6 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -227,6 +227,7 @@ class WWW_Wrapper {
 		 */
 		public function clearLog(){
 			$this->log=array();
+			$this->log[]='Log cleared';
 			return true;
 		}
 		

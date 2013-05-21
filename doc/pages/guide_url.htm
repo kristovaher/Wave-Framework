@@ -12,12 +12,20 @@
 	
 		<h1>URL Controller and Sitemap</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-sitemap">Sitemap</a></li>
+				<li><a href="#index-url-controller">URL Controller</a></li>
+				<li><a href="#index-dynamic-url-examples">Dynamic URL Examples</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/resources/[language].sitemap.ini</h3>
 				<h3>/controllers/controller.url.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework comes with a URL Controller and a sitemap system that is used to build a website on Wave Framework. This URL controller is entirely optional and can be removed from a system if you plan to implement your own URL Controller or simply use Wave Framework for API, without a website.</p>
 				
@@ -25,7 +33,7 @@
 				
 				<p>You can edit Sitemap file and URL Controller file according to your needs. While default URL Controller can easily work for majority of websites, you would have to do some tweaks to URL Controller if you wish to implement a user and permissions management using the set of methods and functions that already exist in Wave Framework.</p>
 				
-			<h2>Sitemap</h2>
+			<h2 id="index-sitemap">Sitemap</h2>
 			
 				<p>Sitemap file is an easy-to-edit file that defines every base URL per every language on your website that is built on Wave Framework. There is one Sitemap file per language and the name of the Sitemap file must match the language keywords listed in your configuration file. If 'en' is one of your languages, then you need an en.sitemap.ini file in your /resources/ folder.</p>
 				
@@ -100,7 +108,7 @@
 				
 				<p>General rule is to create one Sitemap file for each language that is defined in configuration and then add your basic URL's to your Sitemap file. Please note that you should also add your View files to /views/ folder, that are referenced in Sitemap, otherwise Wave Framework is unable to load the appropriate views.</p>				
 			
-			<h2>URL Controller</h2>
+			<h2 id="URL Controller">URL Controller</h2>
 			
 				<p>Wave Framework comes with a single URL Controller by default and this URL Controller is used to make all decisions about converting requested URL to match languages, sitemaps, views and more. </p>
 				
@@ -131,7 +139,7 @@
 				
 				<p>URL Controller also has a commented-out section for user accounts and permission checks, which allows to check for user sessions and user permissions and redirect the user to log-in page if this is not present. Wave Framework comes with a framework for users and permission management, but does not come with a system where users and their permissions are created. Latter you would have to develop yourself. But URL Controller has an example of how to test existence of users and their permissions and this topic is covered further in Users and Permissions Guide.</p>
 			
-			<h2>Dynamic URL Examples</h2>
+			<h2 id="index-dynamic-url-examples">Dynamic URL Examples</h2>
 			
 				<p>Wave Framework allows you to define dynamic URL's. Dynamic URL's are URL's that are not matched exactly and are instead matched based on very simple rules. All the rule options are defined in the Sitemap section of this documentation page, but below are a couple of examples where a dynamic URL could be useful.</p>
 				

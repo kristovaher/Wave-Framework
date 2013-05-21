@@ -20,7 +20,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.1
+ * @version    3.6.0
  */
 
 /**
@@ -43,7 +43,7 @@ function dirCleaner($directory,$cutoff=0){
 	if($files && !empty($files)){
 		foreach($files as $file){
 			// Testing if file modification date is older than the $cutoff timestamp 
-			if(filemtime($file)<=$cutoff){
+			if($cutoff==0 || filemtime($file)<=$cutoff){
 				// Attempting to remove the file
 				if(unlink($file)){
 					$log[]='DELETED '.$file;
@@ -82,12 +82,13 @@ function dirCleaner($directory,$cutoff=0){
 /**
  * This function lists all files and directories in a specific directory
  *
- * @param string $files location of directory in filesystem
- * @param string $type can be 'all', 'folders', 'files'
+ * @param string $directory location of directory in filesystem
+ * @param string $type can be 'all', 'folders', 'files' or 'filenames'
+ * @param bool $recursive whether folders are parsed recursively
  * @param bool $files whether files are included
  * @return array as file index
  */
-function fileIndex($directory,$type='all',$files=false){
+function fileIndex($directory,$type='all',$recursive=true,$files=false){
 
 	// File names are stored in this array
 	$index=array();
@@ -104,16 +105,23 @@ function fileIndex($directory,$type='all',$files=false){
 			if($f!='.' && $f!='..'){
 				// If file is another directory then this is parsed recursively
 				if(is_dir($directory.$f)){
-					// File data from recursive parsing is merged with current files list
-					$index=array_merge($index,fileIndex($directory.$f.DIRECTORY_SEPARATOR,$type));
+					// Whether the parsing is recursive
+					if($recursive){
+						// File data from recursive parsing is merged with current files list
+						$index=array_merge($index,fileIndex($directory.$f.DIRECTORY_SEPARATOR,$type,true));
+					}
 					// Adding directory to index, if supported
 					if($type=='all' || $type=='folders'){
 						$index[]=$directory.$f.DIRECTORY_SEPARATOR;
 					}
 				} else {
 					// Adding file to index, if supported
-					if($type=='all' || $type=='files'){
-						$index[]=$directory.$f;
+					if($type=='all' || $type=='files' || $type=='filenames'){
+						if($type=='filenames'){
+							$index[]=$f;
+						} else {
+							$index[]=$directory.$f;
+						}
 					}
 				}
 			}
@@ -122,6 +130,37 @@ function fileIndex($directory,$type='all',$files=false){
 	
 	// Index is returned
 	return $index;
+	
+}
+
+/**
+ * This function counts the amount of files in a folder
+ *
+ * @param string $directory location of directory in filesystem
+ */
+function fileCount($directory){
+
+	// Counter for file total
+	$count=0;
+	
+	// Scanning the current directory
+	$files=scandir($directory);
+	
+	// This will loop over all the files if files were found in this directory
+	if(!empty($files)){
+		foreach($files as $f){
+			// As long as the current file is not the current or parent directory
+			if($f!='.' && $f!='..'){
+				// If this is not a folder
+				if(!is_dir($directory.$f)){
+					$count++;
+				}
+			}
+		}
+	}
+	
+	// Total count is returned
+	return $count;
 	
 }
 
@@ -218,7 +257,7 @@ function systemBackup($source,$archive,$filesystemBackup=false){
 	);
 	
 	// This returns all absolute paths of all files in $source directory
-	$files=fileIndex($source,'files',$files);
+	$files=fileIndex($source,'files',true,$files);
 	
 	// If files exist
 	if(!empty($files)){
@@ -314,6 +353,20 @@ function iniSettingToBytes($value) {
             $value *= 1024;
     }
     return $value;
+}
+
+/**
+ * This just prints out a warning about using default HTTP authentication variables.
+ */
+function passwordNotification($password,$echo=true){
+	if($password=='hellowave'){
+		$content='<div style="font:10px Verdana;color:#c00000;border:2px solid #c00000;border-radius:4px;margin:10px auto;padding:10px;background-color:#ffffff;width:500px;"><b>Hi, developer!</b><br/><br/>Please note that you are using default HTTP authentication password for your developer tools. It is highly recommended that you change your http-authentication-password setting in \'config.ini\' file to another password in order to protect your developer tools from potential malicious attacks. This message will display until password has been changed.</div>';
+		if($echo){
+			echo $content;
+		} else {
+			return $content;
+		}
+	}
 }
 
 ?>

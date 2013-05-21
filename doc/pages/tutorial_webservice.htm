@@ -12,7 +12,23 @@
 	
 		<h1>How to Build a Simple Web Service With Wave Framework</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-planning">Planning</a></li>
+				<li><a href="#index-setup-and-configuration">Setup and Configuration</a></li>
+				<li><a href="#index-a-brief-introduction-to-mvc-pattern">A Brief Introduction to MVC Pattern</a></li>
+				<li><a href="#index-a-little-about-factory-pattern">A Little About Factory Pattern</a></li>
+				<li><a href="#index-building-a-model">Building a Model</a></li>
+				<li><a href="#index-building-a-controller">Building a Controller</a></li>
+				<li><a href="#index-api-profile-permissions">API Profile Permissions</a></li>
+				<li><a href="#index-debugging-wave-framework">Debugging Wave Framework</a></li>
+				<li><a href="#index-executing-api-commands-over-http">Executing API Commands Over HTTP</a></li>
+				<li><a href="#index-api-documentation">API Documentation</a></li>
+				<li><a href="#index-where-to-next">Where to Next?</a></li>
+				<li><a href="#index-congratulations">Congratulations!</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave is a PHP micro-framework that is built loosely following model-view-control architecture and factory method design pattern. It is made for web services, websites and info-systems and is built to support a native API (Application Programming Interface) architecture, caching and smart resource management. Wave is a compact framework that does not include bloated libraries and features and is developed keeping lightweight speed and optimizations in mind.</p>
 			
@@ -22,7 +38,7 @@
 				
 				<p>Complete files of this tutorial are available in '/doc/examples/webservice/' subfolder in the archive. If you wish to test the example without writing the tutorial code yourself, then you should copy these files to root folder of your Wave Framework. Note that this will overwrite your default '/resources/api.profiles.ini' file and you may wish to make a backup of that file before doing so. This file contains information on API Profiles and allowed API commands.</p>
 		
-			<h2>Planning</h2>
+			<h2 id="index-planning">Planning</h2>
 			
 				<p>It is always a good idea to first to come up with what you need for your web service to do. For the purpose of this tutorial I wish to create a web service that stores information about my movie collection. I need my system to be able to add new movies, delete movies, see information about movies and fetch a list of my movies. I want to build this because I intend to later on use this web service as a back-end for my website as well as a mobile application.</p>
 				
@@ -30,7 +46,7 @@
 				
 				<p>All of those commands will be executed using native API that is part of Wave Framework and is loaded through <a href="gateway.htm">Index Gateway</a> as an <a href="handler_api.htm">API Handler</a>. <a href="gateway.htm">Index Gateway</a> routes all API-specific HTTP requests to <a href="handler_api.htm">API Handler</a> and executes the calls that I will write below in detail.</p>
 				
-			<h2>Setup and Configuration</h2>
+			<h2 id="index-setup-and-configuration">Setup and Configuration</h2>
 			
 				<p><i>Please note that Wave Framework is recommended to be run on PHP 5.3+ and on Apache or Nginx web server.</i></p>
 				
@@ -40,7 +56,7 @@
 				
 				<p>Once uploaded, go to the website with your browser. If no errors are shown and it simply says 'Hello Wave' with a nice shiny logo of Wave Framework, then installation has been successful.</p>
 				
-			<h2>Brief Introduction to MVC Pattern</h2>
+			<h2 id="index-a-brief-introduction-to-mvc-pattern">A Brief Introduction to MVC Pattern</h2>
 			
 				<p>Model-View-Controller architectural pattern, or simply <a href="guide_mvc.htm">MVC</a> pattern, is a way of separating different parts of your software from one another based on their functionality. This pattern originates from Desktop software development and has been loosely translated over to web. <a href="guide_mvc.htm">MVC</a> has been implemented in web in very many ways, which is why there are a lot of tutorials online about <a href="guide_mvc.htm">MVC</a> that all implement it very differently. Wave Framework technically implements H<a href="guide_mvc.htm">MVC</a> pattern (Hierarchical <a href="guide_mvc.htm">MVC</a>) and to make sure that we are on the same page here, I will briefly go over how Wave Framework integrates this pattern.</p>
 				
@@ -52,7 +68,7 @@
 				
 				<p><b>Views</b> are an optional part of a web service. In fact, in this tutorial, we do not create any views at all. Traditionally a view is simply the HTML logic of a website and includes HTML logic. Back-end that returns views to user agent, such as web browser, can include just HTML or also a UI layer of JavaScript. In Wave Framework the scope of view is left open and it is possible to build different views on top of Wave Framework, from mobile to desktop. Second tutorial, How to Build a Simple Website With Wave Framework, deals with views and it is recommended to take a look at that if you are interested to expand the API further and implement it in a website.</p>
 				
-			<h2>A Little About Factory Pattern</h2>
+			<h2 id="index-a-little-about-factory-pattern">A Little About Factory Pattern</h2>
 			
 				<p>Factory pattern is an efficient object-oriented architectural pattern that basically works in the principle that 'only load things that you need'. Wave Framework uses factory pattern as a core aspect of its functionality for Model, View and Controller objects.</p>
 				
@@ -62,7 +78,7 @@
 				
 				<p>When writing <a href="guide_mvc.htm">MVC</a> classes, then Wave Framework implements Factory method by loading new objects dynamically when calling getModel(), getView() and getController() methods within <a href="guide_mvc.htm">MVC</a> classes. This will be covered within the tutorial, so you can see how to load a model when building controllers.</p>
 				
-			<h2>Building a Model</h2>
+			<h2 id="index-building-a-model">Building a Model</h2>
 			
 				<p>Model is basically an object that carries information about specific data entity that exists in your system. In this tutorial that data entity should hold information about a movie object - its parameters and methods that manipulate its parameters and read it from or store it in the database. In this tutorial we won't be using databases to keep things simple, so our model will simply write movie data to <a href="filesystem.htm">Filesystem</a> as a serialized array.</p>
 				
@@ -260,7 +276,7 @@
 
 				<p>This covers all the model methods we need for our web service. You should upload this file to your server. Model itself is unable to do much in our system, so we need to build a controller for this, which is covered in the next section.</p>
 				
-			<h2>Building a Controller</h2>
+			<h2 id="index-building-a-controller">Building a Controller</h2>
 			
 				<p>API commands are commonly executed through a Controller. Controllers can have different duties in a system and they hold core logic of the system and its functionality. In this tutorial the Controller deals with interpreting the user input and calling the Model objects and methods we created in the previous step. Controller is the most important part of your system.</p>
 				
@@ -382,7 +398,7 @@
 
 				<p>This covers all the controller methods we need for our web service. You should upload this file (and the Model file, if you did not already do so) to your web server. Our API service is basically done and complete now, next up is testing and making sure everything works as expected. If your code does not work, then compare it against the example files included in the tutorial.</p>
 				
-			<h2>API Profile Permissions</h2>
+			<h2 id="index-api-profile-permissions">API Profile Permissions</h2>
 			
 				<p>API does not give access to API commands unless permissions for this are given in API profiles file. This is because every system built on Wave Framework is driven by API and thus API has to be secure by default. By default API profiles are restricted in order to defend your software from potential abuse. As a result, you should set the commands you deem 'allowed' over API connection in profile configuration.</p>
 				
@@ -414,7 +430,7 @@
 
 				<p>Once you have edited API configuration file, upload it to server and proceed to next step.</p>
 				
-			<h2>Debugging Wave Framework</h2>
+			<h2 id="index-debugging-wave-framework">Debugging Wave Framework</h2>
 			
 				<p>Before we continue to actually executing the API commands over HTTP, it is important to know that Wave Framework overrides default PHP error and exception handling. Main reason for this is that quite often the PHP's own errors can cause additional problems and get in the way of execution of the application. This is why Wave Framework does two things: it shows an error message when it encounters a fatal error and it silently writes all warnings and less significant error messages to a debugging log in the background.</p>
 				
@@ -422,7 +438,7 @@
 				
 				<p>Once an error message is removed from debugger, then Debugger will show additional error messages if any. This means that it is recommended to check this script every now and then even if your website or web service does not show any errors and especially before deploying the project live. This script makes sure the developer keeps their code clean and free from errors and if you run into any problems with your web service or website, then this script is the first place to check what happened.</p>
 				
-			<h2>Executing API Commands Over HTTP</h2>
+			<h2 id="index-executing-api-commands-over-http">Executing API Commands Over HTTP</h2>
 			
 				<p>Now that we have basically created our web service, we can test if it works properly by testing it through Wave Framework's API. Wave Framework uses <a href="gateway.htm">Index Gateway</a> to route through all HTTP requests and when a file with the extension *.api is requested, then it attempts to send the request to <a href="handler_api.htm">API Handler</a>, which is stored in /engine/handler.api.php if you are interested in how what user writes into URL bar is converted into data for API. But for the time being, you do not need to know more about specifics of handlers.</p>
 
@@ -566,19 +582,19 @@
 	</code>
 </pre>
 
-			<h2>API Documentation</h2>
+			<h2 id="index-api-documentation">API Documentation</h2>
 			
 				<p>Wave Framework also attempts to help generating documentation for your API based on the comments that have been written in the header of methods as well as the API profiles that are listed in /resources/api.profiles.ini file. This API Documentation generation tool can be accessed by making a request to '/tools/api-info.php' script (it also requires HTTP authentication based on username and password from '/config.ini' file). This script essentially scans the controller files and generates API-appropriate www-command names for all methods that are public (private methods are never accessible over API).</p>
 				
 				<p>As long as you keep your comments accurate and to the point, this tool will make sure you always have an up-to-date documentation for your API.</p>
 					
-			<h2>Where to Next?</h2>
+			<h2 id="index-where-to-next">Where to Next?</h2>
 			
 				<p>I recommend you take a look at the API Documentation section of this documentation, which has multiple documentation pages about all the options that Wave Framework API offers. Some documentation pages under Feature Guides section are also useful for building API's.</p>
 				
 				<p>This tutorial is used as the basis for the next tutorial about how to build a simple website for our movie list. The same models and controllers are used as the base for the <a href="tutorial_website.htm">Website Tutorial</a>. You can continue to those tutorials from the same code you developed in here.</p>
 
-			<h2>Congratulations!</h2>
+			<h2 id="index-congratulations">Congratulations!</h2>
 
 				<p>You have created your first fully functional web service with Wave Framework! If you use different data formats then you can easily integrate this web service with various different user interfaces and not just websites. You can use this web service as part of AJAX calls on your website, but you can also use it as a back-end API for a mobile application that stores data over data connection.</p>
 				

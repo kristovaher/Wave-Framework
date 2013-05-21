@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>API Requests - Wave Framework</title>
+		<title>API HTTP Requests - Wave Framework</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width"/> 
 		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
@@ -10,9 +10,15 @@
 	</head>
 	<body>
 	
-		<h1>API Requests</h1>
+		<h1>API HTTP Requests</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-get-requests">GET Requests</a></li>
+				<li><a href="#index-advanced-post-requests">Advanced POST Requests</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework allows you to connect to the API over HTTP, in fact this is one of the core reasons why the framework is built upon API in the first place. If your entire software runs as an API, then you can tie any type of user interface to this API, from generated HTML to JavaScript to mobile.</p>
 				
@@ -24,7 +30,7 @@
 				
 				<p>Examples shown in this document focus on PHP, but these requests can be made this way from any system that allows to make HTTP requests.</p>
 				
-			<h2>GET Requests</h2>
+			<h2 id="index-get-requests">GET Requests</h2>
 			
 				<p>Easiest way to communicate with Wave Framework API is to make requests over GET, which means that you can test or access an API even over URL bar of any web browser. These API requests are interpreted by <a href="gateway.htm">Index Gateway</a> and loaded through <a href="handler_api.htm">API Handler</a> and you can read more about those two components in other parts of documentation.</p>
 				
@@ -85,7 +91,7 @@
 	</code>
 </pre>
 
-			<h2>Advanced POST Requests</h2>
+			<h2 id="index-advanced-post-requests">Advanced POST Requests</h2>
 				
 				<p>It is also possible to make HTTP POST requests to the API. This means that multiple things are possible that would not be possible with the usual GET request:</p>
 				

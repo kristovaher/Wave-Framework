@@ -12,13 +12,20 @@
 	
 		<h1>API Response Codes</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-1xx-native-api-response-codes">1XX - Native API Response Codes</a></li>
+				<li><a href="#index-2xx-api-wrapper-response-codes">2XX - API Wrapper Response Codes</a></li>
+				<li><a href="#index-custom-error-code-namespaces-3xx-4xx-5xx">Custom Error Code Namespaces 3XX/4XX/5XX</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>There are very few times when using API will cause it to fail with a fatal error. In most cases API commands will return data just like they would when no error is encountered, except it can carry information about the problem encountered or details about what went wrong.</p>
 				
 				<p>For this reason, Wave Framework implements four categories of response codes, 1XX response codes that are for internal errors, 2XX response codes that are reserved for API Wrappers, 3XX which is reserved for custom error response codes and 4XX which is reserved for custom return message response codes defined by the developer.</p>
 				
-			<h2>1XX - Native API Response Codes</h2>
+			<h2 id="index-1xx-native-api-response-codes">1XX - Native API Response Codes</h2>
 			
 				<p>If API runs into an error in its execution, it returns two different values with the result:</p>
 				
@@ -98,7 +105,7 @@
 				
 					<p>If language is sent with the request, then this error message is thrown when the defined language cannot be found in the system.</p>
 				
-			<h2>2XX - API Wrapper Response Codes</h2>
+			<h2 id="index-2xx-api-wrapper-response-codes">2XX - API Wrapper Response Codes</h2>
 			
 				<p>API Wrappers can return all error codes from all namespaces, but if the returned error code is 2XX, then the error message comes internally from API Wrapper, rather than Wave Framework API itself.</p>
 				
@@ -172,7 +179,7 @@
 				
 					<p>This means that callback method was not found after the request, despite being defined.</p>
 					
-			<h2>Custom Error Code Namespaces</h2>
+			<h2 id="index-custom-error-code-namespaces-3xx-4xx-5xx">Custom Error Code Namespaces 3XX/4XX/5XX</h2>
 			
 				<p>It is not necessary to return specific error codes from controllers, but Wave Framework API comes with helper functions to format proper error messages in an array that can be expected as a response by systems that communicate with Wave Framework API.</p>
 				

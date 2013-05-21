@@ -12,7 +12,15 @@
 	
 		<h1>Guide to Using MVC Pattern</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-models">Models</a></li>
+				<li><a href="#index-views">Views</a></li>
+				<li><a href="#index-controllers">Controllers</a></li>
+				<li><a href="#index-comments-and-documenting">Comments and Documenting</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework is loosely based on Hierarchical Model-View-Controller architecture principle that separates three logical components of software. A Model is a data representation object, usually for something like a row object from a <a href="guide_database.htm">Database</a>. A View is a component that is rendered for User Interface. And Controller is the object that receives input, validates input and executes other aspects of software within the system.</p>
 				
@@ -22,7 +30,7 @@
 				
 				<p>It is recommended for MVC Objects to be extended from WWW_Factory class, which adds additional functionality to the objects that can be used to access variety of features of Wave Framework and its API.</p>
 				
-			<h2>Models</h2>
+			<h2 id="index-models">Models</h2>
 			
 				<p>Models are used as data-representation layer in the system. In most cases, a model would be an object representation of <a href="guide_database.htm">Database</a> row and would include methods for editing that information, saving and updating it, deleting it and so on.</p>
 				
@@ -81,7 +89,7 @@
 			
 				<p>Models should be stored in '/models/' subfolder, with a filename of 'model.[name].php' and class name of 'WWW_model_[name]'.</p>
 				
-			<h2>Views</h2>
+			<h2 id="index-views">Views</h2>
 			
 				<p>Views are objects in the system that are used to display HTML or other visuals in the system. By default, Wave Framework expects that Views write to output buffer - technically they don't have to, but it simplifies the production of HTML views in the system.</p>
 				
@@ -119,7 +127,7 @@
 			
 				<p>Views should be stored in '/views/' subfolder, with a filename of 'view.[name].php' and class name of 'WWW_view_[name]'. This same view name should be defined in the Sitemap in /resources/[language].sitemap.ini file, so that the default <a href="guide_view.htm">View Controller</a> could load a View for a requested URL.</p>
 			
-			<h2>Controllers</h2>
+			<h2 id="index-controllers">Controllers</h2>
 			
 				<p>Controllers are the objects in Wave Framework that are the first objects called by API. Any <a href="guide_api.htm">API</a> call - the ones done over HTTP as well as internal calls - load a controller first and foremost and execute a method in that controller.</p>
 				
@@ -233,7 +241,7 @@
 	</code>
 </pre>
 
-			<h2>Comments and Documenting</h2>
+			<h2 id="index-comments-and-documenting">Comments and Documenting</h2>
 			
 				<p>You should always document your variables and methods. There are a number of ways and guidelines how to document your code in PHP and while Wave Framework does not enforce you to use one type of documenting style over another, there are some things that you should keep in mind when documenting your MVC objects.</p>
 				

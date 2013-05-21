@@ -18,7 +18,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/logger.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.6.0
  */
 
 class WWW_Logger {
@@ -150,6 +150,11 @@ class WWW_Logger {
 			// POST variables submitted by user agent
 			if(!empty($_POST)){ 
 				$logData['post']=$_POST;
+			}
+			// Checking for HTTP input
+			$httpInput=file_get_contents('php://input');
+			if($httpInput!=''){
+				$logData['http-input']=$httpInput;
 			}
 			// FILES variables submitted by user agent
 			if(!empty($_FILES)){

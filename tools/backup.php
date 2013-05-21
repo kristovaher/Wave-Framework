@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.6.0
  */
 
 // This initializes tools and authentication
@@ -40,6 +40,9 @@ header('Content-Type: text/html;charset=utf-8');
 	</head>
 	<body>
 		<?php
+		
+		// Pops up an alert about default password
+		passwordNotification($config['http-authentication-password']);
 		
 		// Header
 		echo '<h1>System Backup</h1>';

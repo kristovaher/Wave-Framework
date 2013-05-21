@@ -12,13 +12,19 @@
 	
 		<h1>Performance Testing</h1>
 		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-tracking-http-requests">Tracking HTTP Requests</a></li>
+				<li><a href="#index-using-timer">Using Timer</a></li>
+			</ul>
+		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Performance testing your website or web service functionality is a crucial part of modern software development. Slow web service and website leaves an impression of cheap and sloppy coding and software. This is why Wave Framework comes with a couple of useful features that allows you to see how your web service is performing. First way to test your performance is to track your HTTP requests on your website and see how quickly the result was generated, how many <a href="guide_database.htm">Database</a> requests were made and how much memory the request took. Second way of testing is to time your various function calls and see how long this or that section of your code takes time.</p>
 				
-			<h2>Tracking HTTP Requests</h2>
+			<h2 id="index-tracking-http-requests">Tracking HTTP Requests</h2>
 			
 				<p>Wave Framework has an internal <a href="logger.htm">Logger</a> for tracking HTTP requests. This setting is defined in system <a href="configuration.htm">Configuration</a> in '/config.ini' file. There are two settings in <a href="logger.htm">Logger</a> configuration that affect what HTTP requests are logged by the <a href="logger.htm">Logger</a>:</p>
 				
@@ -31,7 +37,7 @@
 				
 				<p>The exact values that <a href="logger.htm">Logger</a> stores about each request are listed in another documentation page, in <a href="guide_tools.htm">Developer Tools</a> and the Log Reader section there.</p>
 				
-			<h2>Using Timer</h2>
+			<h2 id="index-using-timer">Using Timer</h2>
 			
 				<p>It is possible to do microtime split testing on function calls and functionality of your controllers (even across controllers). This allows you to time any part of your code and see how much this or that part of your code takes to execute a specific function or <a href="guide_database.htm">Database</a> call.</p>
 				

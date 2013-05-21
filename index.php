@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.5.0
+ * @version    3.6.0
  */
 
 // SOLVING THE HTTP REQUEST
@@ -276,9 +276,20 @@
 			$error['message']=$errorCheck['message'];
 			$errorReport[]=$error;
 			
+			// This is the signature used for storing developer sessions
+			$signatureFolder=md5($_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
+			
+			// If error folder does not yet exist
+			if(!is_dir(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR)){
+				if(!mkdir(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR,0755)){
+					trigger_error('Cannot create error folder',E_USER_ERROR);
+				}
+				file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR.'signature.tmp',$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
+			}
+			
 			// Logging the error, the error filename is calculated from current error message (this makes sure there are no duplicates, if the error message is the same).
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.md5($error['file'].$error['message']).'.tmp',json_encode($errorReport)."\n",FILE_APPEND);
-				
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR.md5($error['file'].$error['message']).'.tmp',json_encode($errorReport)."\n",FILE_APPEND);
+
 			// As long as the error level is set to display errors of this type				
 			if($fatalError){
 			

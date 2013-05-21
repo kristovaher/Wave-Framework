@@ -12,13 +12,20 @@
 	
 		<h1>Caching and Cache Calls</h1>
 		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-command-buffer">Command Buffer</a></li>
+				<li><a href="#index-cache-functionality">Cache Functionality</a></li>
+				<li><a href="#index-cache-storage">Cache Storage</a></li>
+			</ul>
+		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework comes with an extensive caching framework that is entwined throughout the system and the API. While cache handling on HTTP page and API requests is one of the core features of Wave Framework, then this functionality is also available for <a href="guide_mvc.htm">MVC</a> objects in one way or another.</p>
 				
-			<h2>Command Buffer</h2>
+			<h2 id="index-command-buffer">Command Buffer</h2>
 			
 				<p>While not directly related to Wave Framework caching, the API also implements API command buffering. This means that the API tracks what API requests are made and with what input within a single HTTP request. Since API requests can be nested in Wave Framework, at times the same <a href="guide_api.htm">API</a> call can be executed multiple times with the exact same input.</p>
 				
@@ -34,7 +41,7 @@
 
 				<p>This call resets the API buffer to the state that it was at the start of the request. In other words: empty.</p>
 				
-			<h2>Cache Functionality</h2>
+			<h2 id="index-cache-functionality">Cache Functionality</h2>
 			
 				<p>Wave Framework has multiple methods that can be called from within the <a href="guide_mvc.htm">MVC</a> objects. This includes methods for saving a custom keyword in cache, tagging cache or removing tagged cache. There's even a function that can return the result from the previously known cache of the current <a href="guide_api.htm">API</a> call.</p>
 				
@@ -144,7 +151,7 @@
 
 					<p>These methods allow you to fine-tune details of your cache and architecture in general in order to build a more optimized and efficient software.</p>
 				
-			<h2>Cache Storage</h2>
+			<h2 id="index-cache-storage">Cache Storage</h2>
 			
 				<p>Wave Framework includes four different ways how cache can be stored on the server: filesystem cache, database cache, APC and Memcache. Caching is an important part of Wave Framework and is one of the better ways to improve the performance of your website.</p>
 		

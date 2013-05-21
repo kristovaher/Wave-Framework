@@ -12,17 +12,25 @@
 	
 		<h1>Minifier Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-minifier-class">Using Minifier Class</a></li>
+				<li><a href="#index-minifier-class-parameters">Minifier Class Parameters</a></li>
+				<li><a href="#index-minifier-class-methods">Minifier Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-minifier.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Minifier is used to minify text data without breaking functionality of that text. This is useful to be applied to JavaScript, CSS Stylesheets, HTML and XML formats for purposes of making the file size smaller, thus increasing the performance when file is transferred over HTTP.</p>
 
 				<p>You should be careful when using minifier however, since it might break functionality under some instances, so it is always good to test before deploying minified resources to live systems.</p>
 				
-			<h2>Using Minifier class</h2>
+			<h2 id="index-using-minifier-class">Using Minifier class</h2>
 			
 				<p>To use Minifier class, it is recommended to load Minifier class and then call the static methods of that class. For example, to minify JavaScript text content, you can do as follows:</p>
 				
@@ -33,11 +41,11 @@
 	</code>
 </pre>
 
-			<h2>Minifier Class Parameters</h2>
+			<h2 id="index-minifier-class-parameters">Minifier Class Parameters</h2>
 			
 				<p>Minifier class implements no parameters.</p>
 				
-			<h2>Minifier Class Methods</h2>
+			<h2 id="index-minifier-class-methods">Minifier Class Methods</h2>
 			
 				<h3>public static function minifyCSS($data)</h3>
 				

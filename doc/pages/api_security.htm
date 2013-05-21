@@ -12,11 +12,24 @@
 	
 		<h1>API Security</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-api-profiles">API Profiles</a></li>
+				<li><a href="#index-basic-request-from-php">Basic Request from PHP</a></li>
+				<li><a href="#index-api-command-method-parameters">API Command Method Parameters</a></li>
+				<li><a href="#index-useful-php-functions">Useful PHP Functions</a></li>
+				<li><a href="#index-hash-based-validation">Hash Based Validation</a></li>
+				<li><a href="#index-secret-key-and-token-based-validation">Secret Key and Token Based Validation</a></li>
+				<li><a href="#index-state-and-timestamp-validation-helpers">State and Timestamp Validation Helpers</a></li>
+				<li><a href="#index-crypted-input-and-output">Crypted Input and Output</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/resources/api.profiles.ini</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework comes with an extensive set of tools for securing your API. Wave Framework has one public API profile as well as configuration options for private API profiles with secret keys, session tokens, timestamp and input hash validations. It also supports encryption of data that is sent as well as received as a response.</p>
 				
@@ -36,7 +49,7 @@
 				
 				<p>It is also recommended to perhaps make yourself somewhat familiar with the documentation about the <a href="api.htm">API</a> Class and <a href="state.htm">State</a> Class of Wave Framework. Both of which are detailed in other documentation pages.</p>
 
-			<h2>API Profiles</h2>
+			<h2 id="index-api-profiles">API Profiles</h2>
 			
 				<p>API Profiles of Wave Framework are stored in '/resources/api.profiles.ini' file. This file stores an array of API profile names and their secret keys and other configuration options. When API is called with an API profile that is from this list and is not set as public in framework <a href="configuration.htm">Configuration</a>, then this API profile has to be authenticated with either a secret key or a session token. Every API profile is a group in this file, its name written in brackets, followed by various settings for the API profile.</p>
 				
@@ -63,7 +76,7 @@
 				
 				<p>You can define as many API profiles as you need in this file, or you can also generate this file yourself from <a href="guide_database.htm">Database</a> or through other methods.</p>
 				
-			<h2>Basic Request from PHP</h2>
+			<h2 id="index-basic-request-from-php">Basic Request from PHP</h2>
 			
 				<p>Before we go and show examples of API authentications and validations, below is a minimalistic example of how to make an API request to Wave Framework API within PHP. This example is used to build upon the other examples shown in this document:</p>
 				
@@ -121,7 +134,7 @@
 	</code>
 </pre>
 			
-			<h2>API Command Method Parameters</h2>
+			<h2 id="index-api-command-method-parameters">API Command Method Parameters</h2>
 			
 				<p>WWW_API->command() method accepts three other parameters after the input array. The first parameter sent to command() method is the input array, but the other three - in sequence - are:</p>
 				
@@ -131,7 +144,7 @@
 					<li><b>$useLogger</b> - This tells API that it can use a <a href="logger.htm">Logger</a>. If this is set to true and <a href="logger.htm">Logger</a> is used by <a href="guide_state.htm">State</a>, then <a href="guide_api.htm">API</a> will also attempt to write into Wave Framework system log. This is false by default.</li>
 				</ul>
 
-			<h2>Useful PHP Functions</h2>
+			<h2 id="index-useful-php-functions">Useful PHP Functions</h2>
 			
 				<p>These functions are useful when dealing with Wave Framework hash validations. These functions show how Wave Framework itself validates its input and you need to do the same when you are using hash-based validations with Wave Framework API.</p>
 				
@@ -166,7 +179,7 @@
 	</code>
 </pre>
 				
-			<h2>Hash Based Validation</h2>
+			<h2 id="index-hash-based-validation">Hash Based Validation</h2>
 			
 				<p>Hash based validation is the most secure method for making API requests to a system built with Wave Framework. This system is similar to that of many payment systems, as the secret key is never sent in direct communication across HTTP between the client making the request and the server.</p>
 				
@@ -295,7 +308,7 @@
 						<li><b>www-destroy-session</b> - This command destroys currently active session for that API profile and returns a 500 API response code if the command was successful.</li>
 					</ul>
 				
-			<h2>Secret Key and Token Based Validation</h2>
+			<h2 id="index-secret-key-and-token-based-validation">Secret Key and Token Based Validation</h2>
 			
 				<p>This is an alternative authentication method for Wave Framework API. This authentication method is similar to how many web services have their authentication. It is less secure than hash based validation because the session token - as well as secret key in the commands that generate session token - is submitted over HTTP and could be stolen with a middle-man attack.</p>
 				
@@ -401,7 +414,7 @@
 						<li><b>www-destroy-session</b> - This command destroys currently active session for that API profile and returns a 500 API response code if the command was successful.</li>
 					</ul>
 				
-			<h2>State and Timestamp Validation Helpers</h2>
+			<h2 id="index-state-and-timestamp-validation-helpers">State and Timestamp Validation Helpers</h2>
 			
 				<p>It is possible to enhance the security of API profiles a little more by providing one of the additional API request validation parameters as part of the request. These variables help to protect the API from middle man requests, repeat attacks and tampering.</p>
 				
@@ -427,7 +440,7 @@
 					
 					<p>This can also protect the system from replay attacks if the state value follows some specific rule that is only known to the two servers, like a set of characters from a hash table.</p>
 				
-			<h2>Crypted Input and Output</h2>
+			<h2 id="index-crypted-input-and-output">Crypted Input and Output</h2>
 			
 				<p>Wave Framework also includes a very modern encryption and decryption model. This allows you to encrypt some input data and send it encrypted to Wave Framework API and have it decrypt that data and use it internally as part of the input data, based on the API profile secret key and session token.</p>
 				

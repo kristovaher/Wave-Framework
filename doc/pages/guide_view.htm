@@ -12,13 +12,22 @@
 	
 		<h1>View Controller and Translations</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-dynamic-loading">Dynamic Loading</a></li>
+				<li><a href="#index-translations">Translations</a></li>
+				<li><a href="#index-view-controller">View Controller</a></li>
+				<li><a href="#index-views">Views</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/resources/[language].translations.ini</h3>
 				<h3>/controllers/controller.view.php</h3>
 				<h3>/views/view.[view].php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework comes with a View Controller and a translations system that is used to build a website on Wave Framework. This View Controller is entirely optional and can be removed from a system if you plan to implement your own View Controller or simply use Wave Framework for API, without a website.</p>
 				
@@ -26,7 +35,7 @@
 				
 				<p>You can edit Translations file and View Controller file according to your needs. While default View Controller can easily work for majority of websites, it is recommended to do your tweaks to View Controller HTML template and include your CSS files, JavaScript libraries and set up your basic HTML frame within that Controller.</p>
 				
-			<h2>Dynamic Loading</h2>
+			<h2 id="index-dynamic-loading">Dynamic Loading</h2>
 			
 				<p>View Controller generates a basic HTML frame for a View entirely based on what data is returned from Sitemap. Sitemap files include multiple configuration options, among which is the 'view' name as well as two variables 'php-libraries' and 'js-libraries'. If any of the latter two settings were set in Sitemap file for the View that is currently being loaded, then these values - which can be comma-separated - are loaded dynamically by View Controller as libraries.</p>
 				
@@ -36,7 +45,7 @@
 				
 				<p>If this dynamic-loading behavior needs to be changed by you in any way, then you have the entire access to it in View Controller file itself.</p>
 				
-			<h2>Translations</h2>
+			<h2 id="index-translations">Translations</h2>
 			
 				<p>Translations file is an easy-to-edit file that defines all translation keywords and their values. Since Wave Framework is built upon UTF-8 through and through, it is recommended to make sure your translations file is also in UTF-8 encoding, otherwise various foreign characters will show up wrong on the website.</p>
 				
@@ -56,7 +65,7 @@
 				
 				<p>Please note that INI files have certain reserved words which throw an error if they are used as keywords for translations. To make sure that you do not encounter these errors, do not use the following as translation keys: null, yes, no, true, false, on, off, none.</p>
 		
-			<h2>View Controller</h2>
+			<h2 id="index-view-controller">View Controller</h2>
 			
 				<p>Wave Framework comes with a single View Controller by default and this View Controller is used to generate the HTML frame and load specific view or number of views within that frame.</p>
 				
@@ -73,7 +82,7 @@
 				
 				<p>View Controller is usually modified for each new project in little ways to include all the required resources and build the HTML frame that other views will use across the system. It is a good idea to modify the default View Controller or create a new one based on that View Controller.</p>
 				
-			<h2>Views</h2>
+			<h2 id="index-views">Views</h2>
 			
 				<p>Views are stored in /views/ folder in Wave Framework. These views are loaded by View Controller based on the URL that was requested and the view that URL Controller found is requested.</p>
 				

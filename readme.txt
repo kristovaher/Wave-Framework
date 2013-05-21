@@ -123,6 +123,7 @@ THANK YOU
 Allan Davy
 Priit Perna
 Ando David Roots
+Jaak Kütt
 
 LICENSE
 -------
@@ -140,12 +141,13 @@ Wave also incorporates the following open source components that are not require
 
 jQuery
 * http://jquery.com/
-* /resources/jquery.js
+* /resources/scripts/jquery.js
+* /resources/scripts/jquery2.js
 * License: Released under either the MIT License or the GNU General Public License Version 2
 
 YUI Reset CSS
 * http://yuilibrary.com/yui/docs/cssreset/
-* /resources/reset.css
+* /resources/śtyles/reset.css
 * License: Released by Yahoo! Inc. under BSD License
 
 Adminer

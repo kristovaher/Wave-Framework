@@ -12,7 +12,23 @@
 	
 		<h1>How to Build a Simple Website With Wave Framework</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-planning">Planning</a></li>
+				<li><a href="#index-configuration-and-set-up">Configuration and Set-Up</a></li>
+				<li><a href="#index-preparing-for-views">Preparing for Views</a></li>
+				<li><a href="#index-home-view">Home View</a></li>
+				<li><a href="#index-about-and-contact-pages">About and Contact Pages</a></li>
+				<li><a href="#index-adding-a-movie-part-i">Adding a Movie - Part I</a></li>
+				<li><a href="#index-movie-list-view">Movie List View</a></li>
+				<li><a href="#index-single-movie-view">Single Movie View</a></li>
+				<li><a href="#index-adding-a-movie-part-ii">Adding a Movie - Part II</a></li>
+				<li><a href="#index-handling-notifications-and-errors">Handling Notifications and Errors</a></li>
+				<li><a href="#index-where-to-next">Where to Next?</a></li>
+				<li><a href="#index-congratulations">Congratulations!</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave is a PHP micro-framework that is built loosely following model-view-control architecture and factory method design pattern. It is made for web services, websites and info-systems and is built to support a native API (Application Programming Interface) architecture, caching and smart resource management. Wave is a compact framework that does not include bloated libraries and features and is developed keeping lightweight speed and optimizations in mind.</p>
 				
@@ -24,7 +40,7 @@
 				
 				<p>Complete files of this tutorial are available in '/doc/examples/website/' subfolder in the archive. If you wish to test the example without writing the tutorial code yourself, then you should copy these files to root folder of your Wave Framework. Note that this will overwrite your default '/resources/api.profiles.ini' as well as '/resources/en.sitemap.ini' and '/resources/styles/style.css' files. You should make a backup of these files in case you have modified these files yourself for some reason.</p>
 				
-			<h2>Planning</h2>
+			<h2 id="index-planning">Planning</h2>
 				
 				<p>The <a href="tutorial_webservice.htm">Web Service Tutorial</a> was about creating a simple Web Service that you can use to store information about your favorite DVD movies and then return information about those movies. In this tutorial we will be using that web service and build a website around it.</p>
 			
@@ -43,7 +59,7 @@
 				
 				<p>We will also not be needing a database for this service, just like we did not need a database in <a href="tutorial_webservice.htm">Web Service Tutorial</a>, as we will be storing movie data in <a href="filesystem.htm">Filesystem</a> as a serialized array. But of course you are free to update the Model file to make database requests for storing and querying movie information and refer to documentation about databases when doing so.</p>
 				
-			<h2>Configuration and Set-Up</h2>
+			<h2 id="index-configuration-and-set-up">Configuration and Set-Up</h2>
 				
 				<p>The first thing that you need to do, when setting up Wave Framework for a website, is to think about the languages that you need to implement and then about the actual pages that your website will have. You can always later on expand the project by including additional languages and pages, but it is always a good to have some general idea when starting up.</p>
 				
@@ -272,29 +288,29 @@
 	</code>
 </pre>
 
-						<p>These styles do very basic things, like assign our web page colors as well as the style the header and menu that will be used as part of the HTML content. If you are not familiar with CSS, then you can find tutorials about CSS styling in various resources across the web. Wave Framework implements stylesheets similarly to how they would be implemented in other web systems.</p>
+					<p>These styles do very basic things, like assign our web page colors as well as the style the header and menu that will be used as part of the HTML content. If you are not familiar with CSS, then you can find tutorials about CSS styling in various resources across the web. Wave Framework implements stylesheets similarly to how they would be implemented in other web systems.</p>
 						
-				<h2>Preparing for Views</h2>
+			<h2 id="index-preparing-for-views">Preparing for Views</h2>
+			
+				<p>Large part of website creation - once you have the Web Service functionality already - is about building Views. Wave Framework loads its Views through <a href="guide_view.htm">View Controller</a>.</p>
 				
-					<p>Large part of website creation - once you have the Web Service functionality already - is about building Views. Wave Framework loads its Views through <a href="guide_view.htm">View Controller</a>.</p>
-					
-					<p><a href="guide_view.htm">View Controller</a> behavior can be altered in any way you find suitable for your project. <a href="guide_view.htm">View Controller</a> can load multiple View components from other Views and return the output to client browser, or it can render and return part of the HTML frame by itself. Default <a href="guide_view.htm">View Controller</a> in Wave Framework renders the main HTML frame by itself, while loading the body content from a View file.</p>
-					
-					<p>While it is recommended to edit <a href="guide_view.htm">View Controller</a> when developing your own project - such as to load website header and footer through that directly - then in this tutorial we will not edit <a href="guide_view.htm">View Controller</a> and instead add menu headers to all of our Views directly. This is because it is easier for you to handle every View as independently as possible in the beginning. This gives a better understanding about how to build views since you can focus on one View at the time.</p>
-					
-					<p>Later on you can take out the duplicated code from the Views and implement it in <a href="guide_view.htm">View Controller</a> or through other <a href="guide_api.htm">API</a> calls, if you wish.</p>
-					
-				<h2>Home View</h2>
+				<p><a href="guide_view.htm">View Controller</a> behavior can be altered in any way you find suitable for your project. <a href="guide_view.htm">View Controller</a> can load multiple View components from other Views and return the output to client browser, or it can render and return part of the HTML frame by itself. Default <a href="guide_view.htm">View Controller</a> in Wave Framework renders the main HTML frame by itself, while loading the body content from a View file.</p>
 				
-					<p>The first View that we will build is the Home View, which is loaded whenever the <a href="guide_url.htm">URL Controller</a> detects that the entered URL should be for the Home page. This is most commonly when no URL - other than website root - is entered or only the language node - like http://www.example.com/en/ - is entered.</p>
+				<p>While it is recommended to edit <a href="guide_view.htm">View Controller</a> when developing your own project - such as to load website header and footer through that directly - then in this tutorial we will not edit <a href="guide_view.htm">View Controller</a> and instead add menu headers to all of our Views directly. This is because it is easier for you to handle every View as independently as possible in the beginning. This gives a better understanding about how to build views since you can focus on one View at the time.</p>
 				
-					<p>The first step should be to create the file for the View. First create a file in '/views/' subfolder and name it 'view.home.php'. This file will contain the View class declaration. View filenames - just like Model and Controller filenames - have to be standardized in the way they are written in order for Wave Framework to be able to load them dynamically.</p>
-					
-					<p>View filenames should always be in 'view.[name].php' format and their class name in 'WWW_view_[name]' format. The 'name' section there is the same name that is referenced in <a href="configuration.htm">Configuration</a> of 'home-view' and '404-view' values, as well as the 'view' setting in Sitemap declarations.</p>
-					
-					<p>It is recommended for the View to be extended from WWW_Factory class and named as 'WWW_view_home'. When rendering the View, the <a href="guide_view.htm">View Controller</a> loads 'render()' method by default from the View with the input data sent to the server, so you should define 'render()' method in the class as well. It is actually possible to define a different method to be loaded, based on Sitemap configuration, but 'render()' is always the default. There are no parameters that are required for the View class.</p>
-					
-					<p>This is a base frame for the home View class, declared according to previous description:</p>
+				<p>Later on you can take out the duplicated code from the Views and implement it in <a href="guide_view.htm">View Controller</a> or through other <a href="guide_api.htm">API</a> calls, if you wish.</p>
+				
+			<h2 id="index-home-view">Home View</h2>
+			
+				<p>The first View that we will build is the Home View, which is loaded whenever the <a href="guide_url.htm">URL Controller</a> detects that the entered URL should be for the Home page. This is most commonly when no URL - other than website root - is entered or only the language node - like http://www.example.com/en/ - is entered.</p>
+			
+				<p>The first step should be to create the file for the View. First create a file in '/views/' subfolder and name it 'view.home.php'. This file will contain the View class declaration. View filenames - just like Model and Controller filenames - have to be standardized in the way they are written in order for Wave Framework to be able to load them dynamically.</p>
+				
+				<p>View filenames should always be in 'view.[name].php' format and their class name in 'WWW_view_[name]' format. The 'name' section there is the same name that is referenced in <a href="configuration.htm">Configuration</a> of 'home-view' and '404-view' values, as well as the 'view' setting in Sitemap declarations.</p>
+				
+				<p>It is recommended for the View to be extended from WWW_Factory class and named as 'WWW_view_home'. When rendering the View, the <a href="guide_view.htm">View Controller</a> loads 'render()' method by default from the View with the input data sent to the server, so you should define 'render()' method in the class as well. It is actually possible to define a different method to be loaded, based on Sitemap configuration, but 'render()' is always the default. There are no parameters that are required for the View class.</p>
+				
+				<p>This is a base frame for the home View class, declared according to previous description:</p>
 						
 <pre>
 	<code>
@@ -311,11 +327,11 @@
 	</code>
 </pre>
 
-					<p>Inside this 'render()' method you should build your HTML Frame. For this tutorial, we will keep the HTML frame as simple as possible, so it will just consist of a header that contains menu links and a body that shows the content.</p>
-					
-					<p>The header will be the same for all of our Views and will be duplicated. It is recommended to either store the header in a different View and load it through <a href="guide_view.htm">View Controller</a>, or declare it in <a href="guide_view.htm">View Controller</a> directly, in order to reduce code-duplication. But in this tutorial we will duplicate the header for all of our Views for simplicity</p>
+				<p>Inside this 'render()' method you should build your HTML Frame. For this tutorial, we will keep the HTML frame as simple as possible, so it will just consist of a header that contains menu links and a body that shows the content.</p>
+				
+				<p>The header will be the same for all of our Views and will be duplicated. It is recommended to either store the header in a different View and load it through <a href="guide_view.htm">View Controller</a>, or declare it in <a href="guide_view.htm">View Controller</a> directly, in order to reduce code-duplication. But in this tutorial we will duplicate the header for all of our Views for simplicity</p>
 
-					<p>So, to start things up, we would be using a HTML body like the one below. Place this HTML to your 'render()' method call, but outside the PHP tags, like this:</p>
+				<p>So, to start things up, we would be using a HTML body like the one below. Place this HTML to your 'render()' method call, but outside the PHP tags, like this:</p>
 
 <pre>
 	<code>
@@ -336,15 +352,15 @@
 	</code>
 </pre>
 
-					<p>If you now upload your edited files and make a request to the root page of your website, then you should see a beige-colored HTML as your new website. If some of the files, such as CSS stylesheet, is in the cache from previous requests that you might have made, then you should refresh your browser again with CTRL+F5 or by clearing cache and loading the page once more.</p>
-					
-					<p>It is also recommended to make a request to '/tools/debugger.php' script every now and then to see if your system is throwing any PHP errors or warnings at any point. This is also the file you should refer to whenever your application throws that critical error message, since this Debugger script gives detailed information about what went wrong. Wave Framework automatically suppresses PHP errors from the User Interface directly in order to make sure no sensitive information about the software is ever shown to the client directly. Note that the Debugger requires an HTTP authentication with the username and password that are stored in your systems <a href="configuration.htm">Configuration</a> file.</p>
-					
-					<p>The HTML frame given above is not really suitable for our website and is merely a starting point. At the moment it does not have the working links that we would expect, nor does it have the content from our Translations files or the movies from our movie database.</p>
-					
-					<p>We will focus on implementing our Translations first. Wave Framework Factory has methods that can return Translations information as an array for you. This array is populated from values of Translations keywords and values from '/resources/[language].translations.ini' file. Wave Framework returns the Translations of currently detected language by default, which in our case is 'en' for English.</p>
-					
-					<p>We have to make the following method call within our View in order to access our translations:</p>
+				<p>If you now upload your edited files and make a request to the root page of your website, then you should see a beige-colored HTML as your new website. If some of the files, such as CSS stylesheet, is in the cache from previous requests that you might have made, then you should refresh your browser again with CTRL+F5 or by clearing cache and loading the page once more.</p>
+				
+				<p>It is also recommended to make a request to '/tools/debugger.php' script every now and then to see if your system is throwing any PHP errors or warnings at any point. This is also the file you should refer to whenever your application throws that critical error message, since this Debugger script gives detailed information about what went wrong. Wave Framework automatically suppresses PHP errors from the User Interface directly in order to make sure no sensitive information about the software is ever shown to the client directly. Note that the Debugger requires an HTTP authentication with the username and password that are stored in your systems <a href="configuration.htm">Configuration</a> file.</p>
+				
+				<p>The HTML frame given above is not really suitable for our website and is merely a starting point. At the moment it does not have the working links that we would expect, nor does it have the content from our Translations files or the movies from our movie database.</p>
+				
+				<p>We will focus on implementing our Translations first. Wave Framework Factory has methods that can return Translations information as an array for you. This array is populated from values of Translations keywords and values from '/resources/[language].translations.ini' file. Wave Framework returns the Translations of currently detected language by default, which in our case is 'en' for English.</p>
+				
+				<p>We have to make the following method call within our View in order to access our translations:</p>
 						
 <pre>
 	<code>
@@ -355,9 +371,9 @@
 	</code>
 </pre>
 
-					<p>Note that this method of 'getTranslations()', as well as various other methods we will be calling, require the classes to be extended from WWW_Factory class. Factory gives us a variety of helper functions that we can use when building our Views, just like it gives us additional tools when building Models and Controllers.</p>
+				<p>Note that this method of 'getTranslations()', as well as various other methods we will be calling, require the classes to be extended from WWW_Factory class. Factory gives us a variety of helper functions that we can use when building our Views, just like it gives us additional tools when building Models and Controllers.</p>
 
-					<p>Since the new $translations variable carries an array of our translations, then we can use those Translations in the page content directly. This is how you should update your View class:</p>	
+				<p>Since the new $translations variable carries an array of our translations, then we can use those Translations in the page content directly. This is how you should update your View class:</p>	
 					
 <pre>
 	<code>
@@ -372,11 +388,11 @@
 	</code>
 </pre>
 						
-					<p>If you upload the files again and test the home page, then you should see that the value from Translations file is used within the content. If this did not work, then look at the example files that are provided for this tutorial, which shows how to implement this in case you ran into a problem.</p>
-						
-					<p>But we are still missing the correct links for our menu in the header. In order to know what the actual URL's are, we need to refer to our current Sitemap. Similarly to Translations, this Sitemap is returned based on what language is used by Wave Framework and with a method call 'getSitemap()'.</p>
-						
-					<p>The returned Sitemap array is not a direct representation of the Sitemap declaration file in '/resources/en.sitemap.ini'. Wave Framework parses through the Sitemap and generates an array that is useful for building a website. This array has keys that refer to 'view' and the 'subview' values from Sitemap file, rather than URL's directly - this allows you to easily create links that work in multiple languages at the same time. To get the Sitemap that is generated from the Sitemap file that we set up earlier, you have to call this method:</p>
+				<p>If you upload the files again and test the home page, then you should see that the value from Translations file is used within the content. If this did not work, then look at the example files that are provided for this tutorial, which shows how to implement this in case you ran into a problem.</p>
+					
+				<p>But we are still missing the correct links for our menu in the header. In order to know what the actual URL's are, we need to refer to our current Sitemap. Similarly to Translations, this Sitemap is returned based on what language is used by Wave Framework and with a method call 'getSitemap()'.</p>
+					
+				<p>The returned Sitemap array is not a direct representation of the Sitemap declaration file in '/resources/en.sitemap.ini'. Wave Framework parses through the Sitemap and generates an array that is useful for building a website. This array has keys that refer to 'view' and the 'subview' values from Sitemap file, rather than URL's directly - this allows you to easily create links that work in multiple languages at the same time. To get the Sitemap that is generated from the Sitemap file that we set up earlier, you have to call this method:</p>
 						
 <pre>
 	<code>
@@ -386,7 +402,7 @@
 	</code>
 </pre>
 
-					<p>And here are some (not all) of the array elements of our returned Sitemap, shown as an example:</p>
+				<p>And here are some (not all) of the array elements of our returned Sitemap, shown as an example:</p>
 						
 <pre>
 	<code>
@@ -414,17 +430,17 @@
 	</code>
 </pre>
 					
-					<p>The way this Sitemap works within Wave Framework is that the keys in that array are not the URL itself anymore (like they were in the Sitemap file) and they are a combination of 'view' and 'subview' settings instead. This is useful, since if you have a website with multiple languages, then you can use that same address for all of your languages and Wave Framework itself will know what language URL to place.</p>
-					
-					<p>In case multiple URL's use the same view, then you can refer to them based on the 'subview' value you set in Sitemap declaration file. This is why the Sitemap array returns 'page/about', since there was a Sitemap URL that used the view of 'page' and had subview of 'about' set for it.</p>
-					
-					<p>Every array element in this Sitemap array includes both the settings that were stored in Sitemap declaration file as well as new generated values, such as the 'url' variable, which is a link to the page from the Sitemap based on currently active language.</p>
-					
-					<p>Note that if this 'url' key might include dynamic URL nodes, which are are set as ':0:', ':1:' and so on in the URL. We defined 'movie' URL in our Sitemap as having a secondary URL that is numeric, so in the returned Sitemap array we have a ':0:' value in the URL. This should be replaced before use by the actual URL you wish to use, which in our case would be the movie ID.</p>
-					
-					<p>It also includes the the meta-title value from our Sitemap delcaration which you can (but don't have to) use as the title for the link. We will use them as the title. You can add more values to Sitemap declaration file - if you wish - and they would be accessible from the same array (so you can create another entry for the link title, if you wish).</p>
-					
-					<p>We will simply use the variables from the array returned by 'getSitemap()' method call and build a header menu from our Sitemap like this:</p>
+				<p>The way this Sitemap works within Wave Framework is that the keys in that array are not the URL itself anymore (like they were in the Sitemap file) and they are a combination of 'view' and 'subview' settings instead. This is useful, since if you have a website with multiple languages, then you can use that same address for all of your languages and Wave Framework itself will know what language URL to place.</p>
+				
+				<p>In case multiple URL's use the same view, then you can refer to them based on the 'subview' value you set in Sitemap declaration file. This is why the Sitemap array returns 'page/about', since there was a Sitemap URL that used the view of 'page' and had subview of 'about' set for it.</p>
+				
+				<p>Every array element in this Sitemap array includes both the settings that were stored in Sitemap declaration file as well as new generated values, such as the 'url' variable, which is a link to the page from the Sitemap based on currently active language.</p>
+				
+				<p>Note that if this 'url' key might include dynamic URL nodes, which are are set as ':0:', ':1:' and so on in the URL. We defined 'movie' URL in our Sitemap as having a secondary URL that is numeric, so in the returned Sitemap array we have a ':0:' value in the URL. This should be replaced before use by the actual URL you wish to use, which in our case would be the movie ID.</p>
+				
+				<p>It also includes the the meta-title value from our Sitemap delcaration which you can (but don't have to) use as the title for the link. We will use them as the title. You can add more values to Sitemap declaration file - if you wish - and they would be accessible from the same array (so you can create another entry for the link title, if you wish).</p>
+				
+				<p>We will simply use the variables from the array returned by 'getSitemap()' method call and build a header menu from our Sitemap like this:</p>
 						
 <pre>
 	<code>
@@ -442,15 +458,15 @@
 	</code>
 </pre>
 
-					<p>Note that we are adding the links in the reverse order to our HTML because our CSS has a rule that floats all of the links to the right. This means that the first element will be the rightmost menu element. You can change this behavior by using different CSS for your menus if you want.</p>
-					
-					<p>If you now upload the project files to the server, then you should see your actual menu in the header. But note that the other links do not work yet and if you click on any of them, then you will get the dreaded 'WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST' message. This error message means that Wave Framework encountered a critical error within the request. System will also write the encountered error to an error log whenever a message like this appears and you can see the detailed description about the error when loading the Debugger script at '/tools/debugger.php'.</p>
-					
-					<p>The reason why this error would be shown - instead of the 404 Not Found page - is because we have defined the URL's in our Sitemap, but Wave Framework is unable to find the View files and class definitions for these Views. This means that the '/views/' folder does not have the Views that are being requested.</p>
-					
-					<p>We should also add a separate method call to getState('view') to our Views 'render()' method. This method call returns information about our currently loaded View and we will use it in the next section. Since we will be duplicating this Home View for our other Views, we won't have to declare this method call again for other Views.</p>
-					
-					<p>This is our finished Home View:</p>
+				<p>Note that we are adding the links in the reverse order to our HTML because our CSS has a rule that floats all of the links to the right. This means that the first element will be the rightmost menu element. You can change this behavior by using different CSS for your menus if you want.</p>
+				
+				<p>If you now upload the project files to the server, then you should see your actual menu in the header. But note that the other links do not work yet and if you click on any of them, then you will get the dreaded 'WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST' message. This error message means that Wave Framework encountered a critical error within the request. System will also write the encountered error to an error log whenever a message like this appears and you can see the detailed description about the error when loading the Debugger script at '/tools/debugger.php'.</p>
+				
+				<p>The reason why this error would be shown - instead of the 404 Not Found page - is because we have defined the URL's in our Sitemap, but Wave Framework is unable to find the View files and class definitions for these Views. This means that the '/views/' folder does not have the Views that are being requested.</p>
+				
+				<p>We should also add a separate method call to getState('view') to our Views 'render()' method. This method call returns information about our currently loaded View and we will use it in the next section. Since we will be duplicating this Home View for our other Views, we won't have to declare this method call again for other Views.</p>
+				
+				<p>This is our finished Home View:</p>
 						
 <pre>
 	<code>
@@ -480,17 +496,17 @@
 	</code>
 </pre>
 					
-				<h2>About and Contact Pages</h2>
+			<h2 id="index-about-and-contact-pages">About and Contact Pages</h2>
+			
+				<p>About and Contact pages are technically similar to our Home View. To start things up, it is recommended to simply copy the 'view.home.php' file in '/views/' folder and rename the file to 'view.page.php'. About and Contact pages referred to 'page' View in the Sitemap declaration file, so both URL's will actually load the same View from the same file.</p>
 				
-					<p>About and Contact pages are technically similar to our Home View. To start things up, it is recommended to simply copy the 'view.home.php' file in '/views/' folder and rename the file to 'view.page.php'. About and Contact pages referred to 'page' View in the Sitemap declaration file, so both URL's will actually load the same View from the same file.</p>
-					
-					<p>You also have to rename the class name to 'WWW_view_page' for the View, otherwise Wave Framework will encounter an error, since it expects to load a class with that exact name.</p>
-					
-					<p>We will be building our About and Contact pages at the same time. The main difference between our previous 'home' View and the new 'page' View is that About and Contact pages are both using the same 'view' setting in the Sitemap declaration. The only difference between these two URL's in our Sitemap was that one had the 'subview' value set to 'about' and the other had the value set to 'contact'. This means that in the body section we need to separate which content is actually loaded in order to separate the two contents.</p>
-					
-					<p>We are loading our page content from translations file, but it could just as easily be loaded from a database or from some content management system or even over API from some other system. In this tutorial, the page content is stored in Translations file for example purposes.</p>
-					
-					<p>In order to learn what 'subview' is currently being used we have to request the currently known View data from our system <a href="guide_state.htm">State</a>. Wave Frameworks <a href="guide_state.htm">State</a> stores information about the entire current system, environment and its <a href="configuration.htm">Configuration</a>. You can make the following call to get the information about the currently loaded View:</p>
+				<p>You also have to rename the class name to 'WWW_view_page' for the View, otherwise Wave Framework will encounter an error, since it expects to load a class with that exact name.</p>
+				
+				<p>We will be building our About and Contact pages at the same time. The main difference between our previous 'home' View and the new 'page' View is that About and Contact pages are both using the same 'view' setting in the Sitemap declaration. The only difference between these two URL's in our Sitemap was that one had the 'subview' value set to 'about' and the other had the value set to 'contact'. This means that in the body section we need to separate which content is actually loaded in order to separate the two contents.</p>
+				
+				<p>We are loading our page content from translations file, but it could just as easily be loaded from a database or from some content management system or even over API from some other system. In this tutorial, the page content is stored in Translations file for example purposes.</p>
+				
+				<p>In order to learn what 'subview' is currently being used we have to request the currently known View data from our system <a href="guide_state.htm">State</a>. Wave Frameworks <a href="guide_state.htm">State</a> stores information about the entire current system, environment and its <a href="configuration.htm">Configuration</a>. You can make the following call to get the information about the currently loaded View:</p>
 						
 <pre>
 	<code>
@@ -500,12 +516,12 @@
 	</code>
 </pre>
 
-					<p>This code snippet was actually added in the end of the previous section, so make sure you don't accidentally declare it twice.</p>
+				<p>This code snippet was actually added in the end of the previous section, so make sure you don't accidentally declare it twice.</p>
 
-					<p>The returned array stores a lot more information about the currently loaded View, most of it is also from the Sitemap file, based on the declaration that we set up. You can preview what this variable contains by printing out the contents of the array, but the only thing we actually want from the array right now is one of the values from view data: 'subview'. This is the key from the array that we will be using to check which of the 'subview' pages is currently loaded: 'about' or 'contact'.</p>
+				<p>The returned array stores a lot more information about the currently loaded View, most of it is also from the Sitemap file, based on the declaration that we set up. You can preview what this variable contains by printing out the contents of the array, but the only thing we actually want from the array right now is one of the values from view data: 'subview'. This is the key from the array that we will be using to check which of the 'subview' pages is currently loaded: 'about' or 'contact'.</p>
+				
+				<p>Our previously built Home View - that we used as a base code for our Page View - populated our main body 'div' tag with just a single translation. For About and Contact pages it should be replaced with a 'switch' statement for both of the 'subview' values, like this:</p>
 					
-					<p>Our previously built Home View - that we used as a base code for our Page View - populated our main body 'div' tag with just a single translation. For About and Contact pages it should be replaced with a 'switch' statement for both of the 'subview' values, like this:</p>
-						
 <pre>
 	<code>
 	// Loading view data
@@ -527,17 +543,17 @@
 	</code>
 </pre>
 
-					<p>If you upload the files to the server now, then your Home, About and Contact pages should all work without any problems when you click on their links in the header menu. If you run into any problems, then please refer to the finished example files or see if Debugger script has logged any errors.</p>
-					
-				<h2>Adding a Movie - Part I</h2>
+				<p>If you upload the files to the server now, then your Home, About and Contact pages should all work without any problems when you click on their links in the header menu. If you run into any problems, then please refer to the finished example files or see if Debugger script has logged any errors.</p>
 				
-					<p>Movie adding page consists of a HTML form that submits form data to Wave Framework API over HTTP. This means that in Wave Framework your data submissions should never be sent to another website page or a View itself. Views should be entirely independent from any form submission logic and related hooks and are intended only to show relevant information to the client browser.</p>
-					
-					<p>We will make a copy of 'view.home.php' and rename it to 'view.add.php' in order to use the Home View as a template for this new View. Also rename the class name to 'WWW_view_home', similarly to how we did in the previous sections.</p>
+			<h2 id="index-adding-a-movie-part-i">Adding a Movie - Part I</h2>
+			
+				<p>Movie adding page consists of a HTML form that submits form data to Wave Framework API over HTTP. This means that in Wave Framework your data submissions should never be sent to another website page or a View itself. Views should be entirely independent from any form submission logic and related hooks and are intended only to show relevant information to the client browser.</p>
+				
+				<p>We will make a copy of 'view.home.php' and rename it to 'view.add.php' in order to use the Home View as a template for this new View. Also rename the class name to 'WWW_view_home', similarly to how we did in the previous sections.</p>
 
-					<p>The reason we make copies of the Home View is because it is the most basic of Views in our system. While it would be useful to actually define the header menu elsewhere, such as in <a href="guide_view.htm">View Controller</a> directly or loaded through <a href="guide_view.htm">View Controller</a>, for the purpose of the tutorial it is better to handle each View as a self-contained and functioning page.</p>
-					
-					<p>You should replace the body content with a simple HTML form that also calls some of our translation values. We will generate just two fields: one for the movie title and another for the year that movie was released. Like this:</p>
+				<p>The reason we make copies of the Home View is because it is the most basic of Views in our system. While it would be useful to actually define the header menu elsewhere, such as in <a href="guide_view.htm">View Controller</a> directly or loaded through <a href="guide_view.htm">View Controller</a>, for the purpose of the tutorial it is better to handle each View as a self-contained and functioning page.</p>
+				
+				<p>You should replace the body content with a simple HTML form that also calls some of our translation values. We will generate just two fields: one for the movie title and another for the year that movie was released. Like this:</p>
 						
 <pre>
 	<code>
@@ -563,17 +579,17 @@
 	</code>
 </pre>
 
-					<p>This is not the final form however. Submitting data right now would attempt to submit the data to the View itself. If the form 'action' parameter is left empty, then forms are submitted to the same page that the client is on. While it is possible for View to detect that input was submitted to itself and then make that View insert data to database and check for errors, this is not recommended. A lot of older websites are built in this manner and even many web programming tutorials have examples of this, but such an approach is old and outdated. A View should primarily only deal with logic and content of the HTML and not with other functionalities of the system.</p>
-					
-					<p>There is also a technical reason why you should never submit data from a form to a View: if you submit data to a View and then click the Back button in your browser, then browsers will throw the 'Re-submit POST' warning to the user. This can be quite an annoyance for the usability of the system and can even cause some data to be submitted unintentionally to the system twice.</p>
-					
-					<p>In order to not run into this Back button problem, as well as to keep the View itself clean from functionality logic of our system, we should make sure that the data is submitted to our API directly. Since we named our form values exactly the same as the values that we use in our Web Service - which was covered in detail in the <a href="tutorial_webservice.htm">Web Service Tutorial</a> - then we can make the client browser submit the data exactly the same way as we manually submitted it in the previous tutorial.</p>
-					
-					<p>Movie adding page is the first View that incorporates the Controllers and Models that were developed in the previous tutorial about the Web Service. If you did not do that tutorial, then you should copy the example files from the <a href="tutorial_webservice.htm">Web Service Tutorial</a> - namely files from '/models/' and '/controllers/' folders as well as '/resources/api.profiles.ini' file - to your current files.</p>
-					
-					<p>We will be editing these files slightly in this tutorial in order to add additional functionality that we need.</p>
-					
-					<p>Once you have implemented the Model and Controller file from the previous tutorial, then you should try it out and change the 'action' parameter in the form tag to submit to the API instead of the page itself. Change your form 'action' parameter to the following:</p>
+				<p>This is not the final form however. Submitting data right now would attempt to submit the data to the View itself. If the form 'action' parameter is left empty, then forms are submitted to the same page that the client is on. While it is possible for View to detect that input was submitted to itself and then make that View insert data to database and check for errors, this is not recommended. A lot of older websites are built in this manner and even many web programming tutorials have examples of this, but such an approach is old and outdated. A View should primarily only deal with logic and content of the HTML and not with other functionalities of the system.</p>
+				
+				<p>There is also a technical reason why you should never submit data from a form to a View: if you submit data to a View and then click the Back button in your browser, then browsers will throw the 'Re-submit POST' warning to the user. This can be quite an annoyance for the usability of the system and can even cause some data to be submitted unintentionally to the system twice.</p>
+				
+				<p>In order to not run into this Back button problem, as well as to keep the View itself clean from functionality logic of our system, we should make sure that the data is submitted to our API directly. Since we named our form values exactly the same as the values that we use in our Web Service - which was covered in detail in the <a href="tutorial_webservice.htm">Web Service Tutorial</a> - then we can make the client browser submit the data exactly the same way as we manually submitted it in the previous tutorial.</p>
+				
+				<p>Movie adding page is the first View that incorporates the Controllers and Models that were developed in the previous tutorial about the Web Service. If you did not do that tutorial, then you should copy the example files from the <a href="tutorial_webservice.htm">Web Service Tutorial</a> - namely files from '/models/' and '/controllers/' folders as well as '/resources/api.profiles.ini' file - to your current files.</p>
+				
+				<p>We will be editing these files slightly in this tutorial in order to add additional functionality that we need.</p>
+				
+				<p>Once you have implemented the Model and Controller file from the previous tutorial, then you should try it out and change the 'action' parameter in the form tag to submit to the API instead of the page itself. Change your form 'action' parameter to the following:</p>
 						
 <pre>
 	<code>
@@ -583,7 +599,7 @@
 	</code>
 </pre>
 
-					<p>After you have uploaded the files to the server, you can try to actually submit data to our Web Service. For example: fill the movie title with 'Brave' and select the year 2012 and click the submit button. After submitting you should be confronted with a white page that says the following:</p>
+				<p>After you have uploaded the files to the server, you can try to actually submit data to our Web Service. For example: fill the movie title with 'Brave' and select the year 2012 and click the submit button. After submitting you should be confronted with a white page that says the following:</p>
 
 <pre>
 	<code>
@@ -591,24 +607,24 @@
 	</code>
 </pre>
 
-					<p>If you did the <a href="tutorial_webservice.htm">Web Service Tutorial</a>, then the above message will seem quite familiar to you.</p>
-					
-					<p>Because we made a request to JSON API file (filename 'json.api') then Wave Framework returned the data to us as a JSON string. We will be changing this later on, but you can always use JSON API (or XML API as 'xml.api') for debugging and see what the response is when you submit data from your forms. We will change this API URL in the Part II of this section later on.</p>
-					
-					<p>If the above JSON string is not the result that you got, then you should take a look at the example files and see if there was anything different in your code that might have caused it to make your code work differently. If you run into any errors, then refer to Debugger script in '/tools/debugger.php'.</p>
-					
-					<p>Of course this API response is not an ideal solution yet, since the user should never see a page like this. Instead we should redirect the user to the movie list View after submitting the movie. But for now, we will leave this page like it is and continue working on it in a later section. This is because the List View is still missing and we cannot redirect our form submission to that page just yet.</p>
-					
-				<h2>Movie List View</h2>
+				<p>If you did the <a href="tutorial_webservice.htm">Web Service Tutorial</a>, then the above message will seem quite familiar to you.</p>
 				
-					<p>It is recommended to start building the 'list' View by first copying the 'view.home.php' file and renaming it to 'view.list.php' file in '/views/' subfolder, similarly to how we did with the previous Views. You should also rename the class name to 'WWW_view_list'. You could also then try and upload the files to the server and click on the List link on your website to make sure that the new View works correctly.</p>
+				<p>Because we made a request to JSON API file (filename 'json.api') then Wave Framework returned the data to us as a JSON string. We will be changing this later on, but you can always use JSON API (or XML API as 'xml.api') for debugging and see what the response is when you submit data from your forms. We will change this API URL in the Part II of this section later on.</p>
+				
+				<p>If the above JSON string is not the result that you got, then you should take a look at the example files and see if there was anything different in your code that might have caused it to make your code work differently. If you run into any errors, then refer to Debugger script in '/tools/debugger.php'.</p>
+				
+				<p>Of course this API response is not an ideal solution yet, since the user should never see a page like this. Instead we should redirect the user to the movie list View after submitting the movie. But for now, we will leave this page like it is and continue working on it in a later section. This is because the List View is still missing and we cannot redirect our form submission to that page just yet.</p>
+				
+			<h2 id="index-movie-list-view">Movie List View</h2>
+			
+				<p>It is recommended to start building the 'list' View by first copying the 'view.home.php' file and renaming it to 'view.list.php' file in '/views/' subfolder, similarly to how we did with the previous Views. You should also rename the class name to 'WWW_view_list'. You could also then try and upload the files to the server and click on the List link on your website to make sure that the new View works correctly.</p>
+				
+				<p>Now we can start implementing the functionality in the View that loads the list of movies and then generates a list table, with links, for the movies in our database. These links would later on redirect to movie information pages where we show information about only a single movie at the time.</p>
+				
+				<p>While it would be possible to load the Controller dynamically from within the View and get the list of movies this way, it is better for this tutorial to show an example of how to use the API internally. internal <a href="guide_api.htm">API</a> calls are very similar to HTTP <a href="guide_api.htm">API</a> calls, except that internal <a href="guide_api.htm">API</a> calls never have to be authenticated with API Profile and internal calls also return a PHP variable by default, so you do not have to unserialize JSON.</p>
+				
+				<p>In our previous tutorial we built a Web Service that had an API command 'movies-all' that returned the list of all of our movies from database. We can now incorporate this <a href="guide_api.htm">API</a> call in our View generation directly and replace the default content from the Home view with the following code:</p>
 					
-					<p>Now we can start implementing the functionality in the View that loads the list of movies and then generates a list table, with links, for the movies in our database. These links would later on redirect to movie information pages where we show information about only a single movie at the time.</p>
-					
-					<p>While it would be possible to load the Controller dynamically from within the View and get the list of movies this way, it is better for this tutorial to show an example of how to use the API internally. internal <a href="guide_api.htm">API</a> calls are very similar to HTTP <a href="guide_api.htm">API</a> calls, except that internal <a href="guide_api.htm">API</a> calls never have to be authenticated with API Profile and internal calls also return a PHP variable by default, so you do not have to unserialize JSON.</p>
-					
-					<p>In our previous tutorial we built a Web Service that had an API command 'movies-all' that returned the list of all of our movies from database. We can now incorporate this <a href="guide_api.htm">API</a> call in our View generation directly and replace the default content from the Home view with the following code:</p>
-						
 <pre>
 	<code>
 	...
@@ -624,13 +640,13 @@
 	</code>
 </pre>
 
-					<p>Note that the $movies['error'] is simply the way we returned the result from our API in the <a href="tutorial_webservice.htm">Web Service Tutorial</a>. You can use whatever returned keys in the array to check if your <a href="guide_api.htm">API</a> call was successful or not. Wave Framework actually also has helper arrays for this purpose, which are recommended over a custom solution like this, but we will stick to the returned 'error' key for now for the sake of keeping things simpler in this tutorial.</p>
-					
-					<p>After you have added the code above, then you should test your page by uploading the files and clicking on the movie list link and seeing if you get a 'Found!' response on your List page or not. You should get a 'Found!' message on the page, since we added a movie through the API in the previous section.</p>
-					
-					<p>This 'Found!' response is obviously not what we actually want and we should generate a table in the page content instead. This table should also include links. In uor Sitemap declaration file, the 'movie' page included a dynamic URL node (declared as ':numeric:'). In the returned Sitemap array from 'getSitemap()' method, this value would be ':0:' in the URL, so we should replace it with the movie ID we are linking to.</p>
-					
-					<p>Here is a simple example of a table that has the list of movies as well as the links to those movies pages. Use this to replace the previous 'Found!' line in the code:</p>
+				<p>Note that the $movies['error'] is simply the way we returned the result from our API in the <a href="tutorial_webservice.htm">Web Service Tutorial</a>. You can use whatever returned keys in the array to check if your <a href="guide_api.htm">API</a> call was successful or not. Wave Framework actually also has helper arrays for this purpose, which are recommended over a custom solution like this, but we will stick to the returned 'error' key for now for the sake of keeping things simpler in this tutorial.</p>
+				
+				<p>After you have added the code above, then you should test your page by uploading the files and clicking on the movie list link and seeing if you get a 'Found!' response on your List page or not. You should get a 'Found!' message on the page, since we added a movie through the API in the previous section.</p>
+				
+				<p>This 'Found!' response is obviously not what we actually want and we should generate a table in the page content instead. This table should also include links. In uor Sitemap declaration file, the 'movie' page included a dynamic URL node (declared as ':numeric:'). In the returned Sitemap array from 'getSitemap()' method, this value would be ':0:' in the URL, so we should replace it with the movie ID we are linking to.</p>
+				
+				<p>Here is a simple example of a table that has the list of movies as well as the links to those movies pages. Use this to replace the previous 'Found!' line in the code:</p>
 						
 <pre>
 	<code>
@@ -651,19 +667,19 @@
 	</code>
 </pre>
 						
-					<p>When you upload the files and run the movie list page again, then you should get a nice list of movies (or a list that only has a single movie, if you have only submitted movies once so far). Links of these movies direct to Movie View that we have not yet made, but will make in the next section.</p>
-					
-				<h2>Single Movie View</h2>
+				<p>When you upload the files and run the movie list page again, then you should get a nice list of movies (or a list that only has a single movie, if you have only submitted movies once so far). Links of these movies direct to Movie View that we have not yet made, but will make in the next section.</p>
 				
-					<p>Movie View is the view that will be used to display information about a single movie. Our Web Service only stores movie title and year, but you can easily extend this to include other information, like a link, description, a picture and more.</p>
-					
-					<p>You should copy your 'view.home.php' file and rename it to 'view.movie.php' file in the '/views/' subfolder. Class name should also be renamed to 'WWW_view_movie'. This is similar to how we did the previous Views.</p>
-					
-					<p>Movie View is the only View that was declared in our Sitemap file with the permission to use dynamic URL nodes. This means that we will be able to use the dynamic part of the URL and use it for loading a movie with that ID from our database.</p>
-					
-					<p>We will be loading data to our View similarly to how we loaded it for the list View: through an <a href="guide_api.htm">API</a> call. This time we will be making a 'movies-get' request to the API that also requires a variable 'id'. This 'id' variable defines what movie ID we are requesting.</p>
+			<h2 id="index-single-movie-view">Single Movie View</h2>
+			
+				<p>Movie View is the view that will be used to display information about a single movie. Our Web Service only stores movie title and year, but you can easily extend this to include other information, like a link, description, a picture and more.</p>
+				
+				<p>You should copy your 'view.home.php' file and rename it to 'view.movie.php' file in the '/views/' subfolder. Class name should also be renamed to 'WWW_view_movie'. This is similar to how we did the previous Views.</p>
+				
+				<p>Movie View is the only View that was declared in our Sitemap file with the permission to use dynamic URL nodes. This means that we will be able to use the dynamic part of the URL and use it for loading a movie with that ID from our database.</p>
+				
+				<p>We will be loading data to our View similarly to how we loaded it for the list View: through an <a href="guide_api.htm">API</a> call. This time we will be making a 'movies-get' request to the API that also requires a variable 'id'. This 'id' variable defines what movie ID we are requesting.</p>
 
-					<p>In Wave Framework, when making internal <a href="guide_api.htm">API</a> calls, the second variable sent to the 'api()' method is an array of all variables that are used as an input to the <a href="guide_api.htm">API</a> call. For example, to make a request to movie that has an ID of 1, then you would make the following request:</p>
+				<p>In Wave Framework, when making internal <a href="guide_api.htm">API</a> calls, the second variable sent to the 'api()' method is an array of all variables that are used as an input to the <a href="guide_api.htm">API</a> call. For example, to make a request to movie that has an ID of 1, then you would make the following request:</p>
 						
 <pre>
 	<code>
@@ -671,10 +687,10 @@
 	</code>
 </pre>
 
-					<p>We want to use the dynamic URL as the ID for our <a href="guide_api.htm">API</a> call. We can fetch this data from the <a href="guide_state.htm">State</a> for the currently loaded View with our 'getState()' call that we already used in the previous sections. This 'dynamic-url' key in that $view variable actually stores an array instead of one single string, since it is possible to have more than one dynamic URL node at the same time.</p>
+				<p>We want to use the dynamic URL as the ID for our <a href="guide_api.htm">API</a> call. We can fetch this data from the <a href="guide_state.htm">State</a> for the currently loaded View with our 'getState()' call that we already used in the previous sections. This 'dynamic-url' key in that $view variable actually stores an array instead of one single string, since it is possible to have more than one dynamic URL node at the same time.</p>
+				
+				<p>To make our system load the information about the specific movie we have listed, then we have to get the first key in that 'dynamic-url' array. You should replace the current page content with the following:</p>
 					
-					<p>To make our system load the information about the specific movie we have listed, then we have to get the first key in that 'dynamic-url' array. You should replace the current page content with the following:</p>
-						
 <pre>
 	<code>
 	...
@@ -696,26 +712,26 @@
 	</code>
 </pre>
 
-					<p>If you visit your List page again and click on one of the movies, then you will see that the page now shows a simple table that includes information about the requested movie. At the same time your URL address is clean and easy to remember, rather than an intimidating URL with appended query variables.</p>
-					
-					<p>If you manually change the URL to have an ID that you know doesn't exist, then the page shows a translation for 'cannot-find-movie' keyword as well. The above code example also incorporates a 'setHeader()' call which makes sure that the page would be served with a 404 Not Found header as a result.</p>
-					
-				<h2>Adding a Movie - Part II</h2>
+				<p>If you visit your List page again and click on one of the movies, then you will see that the page now shows a simple table that includes information about the requested movie. At the same time your URL address is clean and easy to remember, rather than an intimidating URL with appended query variables.</p>
 				
-					<p>Now that we have built all of our Views in the system we can get back to the movie-adding functionality that previously simply produced a JSON string once the form data was submitted. This JSON string was displayed because the HTTP API file that we used was for JSON API - as it had filename 'json.api'.</p>
-					
-					<p>Another problem with the API was that our Controller - that the API loaded - also did not know where to redirect the client browser after the data was submitted. It did not know what page to show after submitting the form. Thus we need a way to define the URL where the client will be redirected to after the movie is submitted. This also means that we have to add some new functionality to our Controller for the purpose of redirecting the client.</p>
-					
-					<p>So these two problems must be solved:</p>
-					
-					<ul>
-						<li>Do not show JSON string or any other output from the API when the data is submitted.</li>
-						<li>Redirect the user to a success or failure page after movie data is submitted.</li>
-					</ul>
-					
-					<p>In order to hide the output we can easily tell Wave Framework API to return data to us in PHP format instead of JSON. If data is submitted to PHP API, then this data is never output - which means that everything works in the API as it would otherwise, but no data is returned to the client browser except HTTP headers.</p>
-					
-					<p>All we have to do is change the file URL that we make the request to. This means that we have to change the 'json.api' to 'www.api' and that change alone will make the Wave Framework API return data in PHP format by default. The 'www' simply tells Wave Framework that API is used without actual output being requested. Change the form action URL to this:</p>
+				<p>If you manually change the URL to have an ID that you know doesn't exist, then the page shows a translation for 'cannot-find-movie' keyword as well. The above code example also incorporates a 'setHeader()' call which makes sure that the page would be served with a 404 Not Found header as a result.</p>
+				
+			<h2 id="index-adding-a-movie-part-ii">Adding a Movie - Part II</h2>
+			
+				<p>Now that we have built all of our Views in the system we can get back to the movie-adding functionality that previously simply produced a JSON string once the form data was submitted. This JSON string was displayed because the HTTP API file that we used was for JSON API - as it had filename 'json.api'.</p>
+				
+				<p>Another problem with the API was that our Controller - that the API loaded - also did not know where to redirect the client browser after the data was submitted. It did not know what page to show after submitting the form. Thus we need a way to define the URL where the client will be redirected to after the movie is submitted. This also means that we have to add some new functionality to our Controller for the purpose of redirecting the client.</p>
+				
+				<p>So these two problems must be solved:</p>
+				
+				<ul>
+					<li>Do not show JSON string or any other output from the API when the data is submitted.</li>
+					<li>Redirect the user to a success or failure page after movie data is submitted.</li>
+				</ul>
+				
+				<p>In order to hide the output we can easily tell Wave Framework API to return data to us in PHP format instead of JSON. If data is submitted to PHP API, then this data is never output - which means that everything works in the API as it would otherwise, but no data is returned to the client browser except HTTP headers.</p>
+				
+				<p>All we have to do is change the file URL that we make the request to. This means that we have to change the 'json.api' to 'www.api' and that change alone will make the Wave Framework API return data in PHP format by default. The 'www' simply tells Wave Framework that API is used without actual output being requested. Change the form action URL to this:</p>
 						
 <pre>
 	<code>
@@ -723,11 +739,11 @@
 	</code>
 </pre>
 
-					<p>Now if you add a new movie then no output is shown anymore - page will be entirely blank - but the movie is actually added to the database, if the title and year input fields were not empty.</p>
-					
-					<p>This still does not solve the problem of how to tell the Controller to redirect us to the 'list' View after movie has been added. Wave Framework has no general rule about how to build such a functionality because there can be so many different use cases that require different URL's, so it entirely depends on how you, as a developer, want to implement such a feature.</p>
-					
-					<p>For the purpose of this tutorial I will be adding two hidden variables to my movie-adding form that will tell the Controller where to redirect the client if the movie adding has failed and where to redirect the client if the movie adding was a success. I will be adding these two hidden input tags inside the HTML form:</p>
+				<p>Now if you add a new movie then no output is shown anymore - page will be entirely blank - but the movie is actually added to the database, if the title and year input fields were not empty.</p>
+				
+				<p>This still does not solve the problem of how to tell the Controller to redirect us to the 'list' View after movie has been added. Wave Framework has no general rule about how to build such a functionality because there can be so many different use cases that require different URL's, so it entirely depends on how you, as a developer, want to implement such a feature.</p>
+				
+				<p>For the purpose of this tutorial I will be adding two hidden variables to my movie-adding form that will tell the Controller where to redirect the client if the movie adding has failed and where to redirect the client if the movie adding was a success. I will be adding these two hidden input tags inside the HTML form:</p>
 						
 <pre>
 	<code>
@@ -738,11 +754,11 @@
 	</code>
 </pre>
 
-					<p>The success URL will redirect the client to the single movie page and failure URL will redirect the client back to the movie-adding page.</p>
-					
-					<p>This alone is not enough however. We also need to change our Controller a little to notify Wave Framework about these redirects and actually set these headers. Wave Framework API has certain callback keywords that can be used to set headers as respone, such as ones that are required for redirecting the client. You can also use the 'setHeader()' method for this in the Controller, but if you use 'setHeader()' method then this will not be shown in the actual output array in the response and sometimes it is useful to see the redirect links in the output array as well.</p>
+				<p>The success URL will redirect the client to the single movie page and failure URL will redirect the client back to the movie-adding page.</p>
+				
+				<p>This alone is not enough however. We also need to change our Controller a little to notify Wave Framework about these redirects and actually set these headers. Wave Framework API has certain callback keywords that can be used to set headers as respone, such as ones that are required for redirecting the client. You can also use the 'setHeader()' method for this in the Controller, but if you use 'setHeader()' method then this will not be shown in the actual output array in the response and sometimes it is useful to see the redirect links in the output array as well.</p>
 
-					<p>Before we add a new feature to our Controller, let's take a look at our current movie-adding Controller method for 'add()', the way we built it in <a href="tutorial_webservice.htm">Web Service Tutorial</a>:</p>
+				<p>Before we add a new feature to our Controller, let's take a look at our current movie-adding Controller method for 'add()', the way we built it in <a href="tutorial_webservice.htm">Web Service Tutorial</a>:</p>
 						
 <pre>
 	<code>
@@ -768,7 +784,7 @@
 	</code>
 </pre>
 
-					<p>As you can see, this method returns an error for cases when the movie title or year are missing or when the movie-saving was not a success in Model and the method call failed. We can use this, together with the input value for success and failure URL's, to detect if the client has to be redirected or not. Add this code snippet right before the method returns value to Wave Framework:</p>
+				<p>As you can see, this method returns an error for cases when the movie title or year are missing or when the movie-saving was not a success in Model and the method call failed. We can use this, together with the input value for success and failure URL's, to detect if the client has to be redirected or not. Add this code snippet right before the method returns value to Wave Framework:</p>
 						
 <pre>
 	<code>
@@ -785,19 +801,19 @@
 	</code>
 </pre>
 
-					<p>Wave Framework has a small number of callback array keywords - like the 'www-temporary-redirect' one - which can be used for setting headers, sessions, cookies or doing redirects. These are detailed in API documentation further, but for now what this code does is very simple: it checks if redirect URL's are set and if they are set, then returns headers with the response that redirect the client to the URL's that we sent to the API with the request.</p>
-					
-					<p>If we upload the files now and try adding a movie again, then we will be successfully redirected to movie list where the new movie is listed. Same applies to when the movie-adding was not a success: we would be redirected back to the form. This technically is all the core functionality we need to make the website work.</p>
-					
-				<h2>Handling Notifications and Errors</h2>
+				<p>Wave Framework has a small number of callback array keywords - like the 'www-temporary-redirect' one - which can be used for setting headers, sessions, cookies or doing redirects. These are detailed in API documentation further, but for now what this code does is very simple: it checks if redirect URL's are set and if they are set, then returns headers with the response that redirect the client to the URL's that we sent to the API with the request.</p>
 				
-					<p>While our website now works and everything seems to be as expected, we still haven't gotten any error handling in our system. This means that we are not actually notifying a user that a movie was added or that adding a movie has failed.</p>
-					
-					<p>In this tutorial we will be dealing with errors the 'old school' way. This means that we will simply return a GET variable to the redirected pages and detect their presence in the Views when generating the page.</p>
+				<p>If we upload the files now and try adding a movie again, then we will be successfully redirected to movie list where the new movie is listed. Same applies to when the movie-adding was not a success: we would be redirected back to the form. This technically is all the core functionality we need to make the website work.</p>
+				
+			<h2 id="index-handling-notifications-and-errors">Handling Notifications and Errors</h2>
+			
+				<p>While our website now works and everything seems to be as expected, we still haven't gotten any error handling in our system. This means that we are not actually notifying a user that a movie was added or that adding a movie has failed.</p>
+				
+				<p>In this tutorial we will be dealing with errors the 'old school' way. This means that we will simply return a GET variable to the redirected pages and detect their presence in the Views when generating the page.</p>
 
-					<p>This is not the best way of doing such a functionality. Wave Framework actually includes a <a href="guide_messenger.htm">State Messenger</a> , as well as session and cookie managers, which can be used for these situations. But to keep this tutorial as simple as possible, then the 'old school' is the quickest and easiest way to accomplish this.</p>
-					
-					<p>We will be changing our 'success-url' and 'failure-url' by appending GET variables to both. These are the variables that we then check for in the Views. Modify your hidden form fields to the following:</p>
+				<p>This is not the best way of doing such a functionality. Wave Framework actually includes a <a href="guide_messenger.htm">State Messenger</a> , as well as session and cookie managers, which can be used for these situations. But to keep this tutorial as simple as possible, then the 'old school' is the quickest and easiest way to accomplish this.</p>
+				
+				<p>We will be changing our 'success-url' and 'failure-url' by appending GET variables to both. These are the variables that we then check for in the Views. Modify your hidden form fields to the following:</p>
 					
 <pre>
 	<code>
@@ -806,7 +822,7 @@
 	</code>
 </pre>
 						
-					<p>The above code includes GET variables in the end of the URL that we now need to detect in our movie list page and form page. Add this to your 'list' View, right after the list table:</p>
+				<p>The above code includes GET variables in the end of the URL that we now need to detect in our movie list page and form page. Add this to your 'list' View, right after the list table:</p>
 						
 <pre>
 	<code>
@@ -817,7 +833,7 @@
 	</code>
 </pre>
 
-					<p>And add this code snippet to the 'add' View, right below the form:</p>
+				<p>And add this code snippet to the 'add' View, right below the form:</p>
 						
 <pre>
 	<code>
@@ -830,9 +846,9 @@
 	</code>
 </pre>
 
-					<p>If you upload the changes and test your website again then you should see that when you add a movie now, then your website will also display notifications about the success (or failure) of your action. If everything works as expected, then this concludes the code-writing part of this tutorial!</p>
+				<p>If you upload the changes and test your website again then you should see that when you add a movie now, then your website will also display notifications about the success (or failure) of your action. If everything works as expected, then this concludes the code-writing part of this tutorial!</p>
 					
-			<h2>Where to Next?</h2>
+			<h2 id="index-where-to-next">Where to Next?</h2>
 			
 				<p>If you already did not do this after the first <a href="tutorial_webservice.htm">Web Service Tutorial</a>, then I recommend you take a look at the API Documentation section of this documentation, which has multiple documentation pages about all of the options that Wave Framework API offers.</p>
 				
@@ -842,7 +858,7 @@
 				
 				<p>This tutorial is also used as the basis for the next tutorial about making AJAX requests with Wave Framework as well as the tutorial about how to set up Users and Permissions for your web system. You can continue to those tutorials from the same code you developed in here.</p>
 
-			<h2>Congratulations!</h2>
+			<h2 id="index-congratulations">Congratulations!</h2>
 
 				<p>You have created your first fully functional website with Wave Framework! It is easy to take what this tutorial has shown and apply it to making other websites and infosystems and benefit from the set of features that Wave Framework offers.</p>
 				

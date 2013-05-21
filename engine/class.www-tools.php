@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/tools.htm
  * @since      3.4.2
- * @version    3.4.2
+ * @version    3.6.0
  */
 
 class WWW_Tools {
@@ -192,8 +192,12 @@ class WWW_Tools {
 						}
 					} else {
 						// Adding file to index, if supported
-						if($mode=='both' || $mode=='files'){
-							$index[]=$directory.$f;
+						if($mode=='both' || $mode=='files' || $mode=='filenames'){
+							if($mode=='filenames'){
+								$index[]=$f;
+							} else {
+								$index[]=$directory.$f;
+							}
 						}
 					}
 				}
@@ -202,6 +206,38 @@ class WWW_Tools {
 		
 		// Index is returned
 		return $index;
+		
+	}
+	
+
+	/**
+	 * This function counts the amount of files in a folder
+	 *
+	 * @param string $directory location of directory in filesystem
+	 */
+	public function counter($directory){
+
+		// Counter for file total
+		$count=0;
+		
+		// Scanning the current directory
+		$files=scandir($directory);
+		
+		// This will loop over all the files if files were found in this directory
+		if(!empty($files)){
+			foreach($files as $f){
+				// As long as the current file is not the current or parent directory
+				if($f!='.' && $f!='..'){
+					// If this is not a folder
+					if(!is_dir($directory.$f)){
+						$count++;
+					}
+				}
+			}
+		}
+		
+		// Total count is returned
+		return $count;
 		
 	}
 	

@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.5.4
+ * @version    3.6.0
  */
 
 final class WWW_API {
@@ -270,7 +270,10 @@ final class WWW_API {
 	
 		// Storing internal logging data
 		if($this->internalLogging && !empty($this->internalLog)){
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.tmp',json_encode($this->internalLog)."\n",FILE_APPEND);
+			// Inserting or appending the log data into internal log file
+			$signature=md5($_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal_'.$signature.'_signature.tmp',$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
+			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal_'.$signature.'_data.tmp',json_encode($this->internalLog)."\n",FILE_APPEND);
 		}
 
 		// Closing Memcache connection
@@ -997,16 +1000,14 @@ final class WWW_API {
 				
 					// If www-* prefix headers were meant for headers-only
 					if($apiState['headers']){
-						if(isset($apiResult['www-response-code'])){
-							header('www-response-code:'.$apiResult['www-response-code']);
-							unset($apiResult['www-response-code']);
+						// Wave Framework specific keys
+						$filter=array('www-response-code','www-message','www-token','www-token-timeout','www-ip-session','www-disable-callbacks','www-data','www-timestamp','www-hash','www-set-header','www-set-cookie','www-unset-cookie','www-set-session','www-unset-session','www-unset-header','www-temporary-redirect','www-permanent-redirect','www-xml-namespace','www-xml-root','www-xml-numeric');
+						foreach($filter as $f){
+							if(isset($apiResult[$f])){
+								header($f.':'.$apiResult[$f]);
+								unset($apiResult[$f]);
+							}
 						}
-						if(isset($apiResult['www-message'])){
-							header('www-message:'.$apiResult['www-message']);
-							unset($apiResult['www-message']);
-						}
-					} elseif(isset($apiResult['www-response-code'])){
-						$responseCode=$apiResult['www-response-code'];
 					}
 		
 					// Data is custom-formatted based on request
@@ -1021,7 +1022,7 @@ final class WWW_API {
 							break;
 						case 'binary':
 							// If the result is empty string or empty array or false, then binary returns a 0, otherwise it returns 1
-							if((isset($responseCode) && $responseCode>=500) || (!isset($responseCode) && !empty($apiResult))){
+							if((isset($apiResult['www-response-code']) && $apiResult['www-response-code']>=500) || (!isset($apiResult['www-response-code']) && !empty($apiResult))){
 								$apiResult=1;
 							} else {
 								$apiResult=0;
@@ -1614,12 +1615,12 @@ final class WWW_API {
 		 */
 		final private function toCSV($apiResult){
 			
-			// Resulting rows are stored in this value
-			$result=array();
-			
 			// First element of the array is output
 			$tmp=array_slice($apiResult,0,1,true);
 			$first=array_shift($tmp);
+			
+			// Resulting rows are stored in this value
+			$result=array();
 			
 			// If the first array element is also an array then multidimensional CSV will be output
 			if(is_array($first)){

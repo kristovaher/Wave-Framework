@@ -12,15 +12,21 @@
 	
 		<h1>Index Gateway</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-workflow">Workflow</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/index.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Index Gateway is an index/bootstrap file of Wave Framework that will serve almost every HTTP request made to the system built on Wave Framework. It analyzes the HTTP request, loads <a href="logger.htm">Logger</a> and configuration as well as HTTP request <a href="limiter.htm">Limiter</a>, overwrites error handler of PHP and then executes the command through one of the request handlers that are stored in /engine/handler.[handler-type].php files.</p>
 				
-			<h2>Workflow</h2>
+			<h2 id="index-workflow">Workflow</h2>
 			
 				<p>Index Gateway records current microtime as a variable and turns off PHP's own error reporting entirely. It also makes sure that the HTTP request is not made to /index.php file directly.</p>
 				

@@ -11,14 +11,28 @@
 	<body>
 	
 		<h1>Frequently Asked Questions</h1>
+		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-why-is-wave-framework-called-micro-framework">Why is Wave Framework called a 'micro-framework'? Do I have to do more work?</a></li>
+				<li><a href="#index-why-is-wave-framework-api-centric">Why is Wave Framework 'API-centric'? What does that mean?</a></li>
+				<li><a href="#index-what-should-i-do-before-deploying-project-live">What should I do before deploying project live?</a></li>
+				<li><a href="#index-index-can-i-build-a-content-management-system-with-wave-framework">Can I build a content management system with Wave Framework?</a></li>
+				<li><a href="#index-why-is-wave-framework-api-not-entirely-restful-or-why-does-it-not-support-soap">Why is Wave Framework API not entirely RESTful or why does it not support SOAP?</a></li>
+				<li><a href="#index-i-have-problems-with-internet-explorer-8-and-javascript-api-wrapper-json-is-not-defined">I have problems with Internet Explorer 8 and JavaScript API Wrapper, JSON is not defined?</a></li>
+				<li><a href="#index-if-i-want-to-return-rss-data-through-api-handler-how-would-i-format-the-data-array">If I want to return RSS data through API Handler, how would I format the data array?</a></li>
+				<li><a href="#index-how-can-i-implement-my-own-session-handler">How Can I Implement My Own Session Handler?</a></li>
+				<li><a href="#index-my-requests-fail-and-decompression-error-is-returned-by-the-browser">My Requests Fail and Decompression Error is Returned By the Browser?</a></li>
+				<li><a href="#index-i-am-using-page-caching-and-i-have-a-problem-caching-pages-with-and-without-active-sessions-what-can-i-do">I am using page caching and I have a problem caching pages with and without active sessions, what can I do?</a></li>
+			</ul>
 			
-			<h3>Why is Wave Framework called a 'micro-framework'? Do I have to do more work?</h3>
+			<h3 id="index-why-is-wave-framework-called-micro-framework">Why is Wave Framework called a 'micro-framework'? Do I have to do more work?</h3>
 			
 				<p>The ideology behind Wave Framework was to give developer al the features of a modern web service and website framework while keeping PHP development itself still plain and simple. Developer should not have to learn about a large number of libraries and architecture design methods before they can implement their project on the framework. Developer should still be able to write their native and comfortable PHP code as much as they want without having to change their workflow too much. Wave Framework has only a few very simple requirements and recommendations for the developer in terms of architecture and code in order to support features from caching to compressions to dynamic loading of objects and more.</p>
 				
 				<p>Wave Framework cannot be really compared against large scale frameworks that require a lot of configuration and planning and going through countless books in order to get up and running. This framework is intended primarily for projects that need to get up and running as fast as possible without compromises in quality or functionalities to do so. This is also why Wave is gaining recognition among some startup projects.</p>
 				
-			<h3>Why is Wave Framework 'API-centric'? What does that mean?</h3>
+			<h3 id="index-why-is-wave-framework-api-centric">Why is Wave Framework 'API-centric'? What does that mean?</h3>
 			
 				<p>Web development has been slow to catch up with desktop programming over the years. Majority of web applications today get the whole <a href="guide_mvc.htm">MVC</a> (Model-View-Controller pattern) wrong for the following reasons: views are tightly integrated and controllers often play a too multi-functional role in the entire system and are too tightly coupled with views. And a lot of web service API's (which allow you to connect different software systems with one another) within the last ten years or so have been developed as an additional plugin or an extension, rather than core part of the main functionality.</p>
 
@@ -32,7 +46,7 @@
 
 				<p>Desktop programming has largely worked this way for many years, but web has not yet caught up. Today - when the ability to quickly create mobile views of web services and/or mobile applications is business critical - this has become more important than ever and Wave Framework keeps that in mind.</p>
 
-			<h3>What should I do before deploying the project live?</h3>
+			<h3 id="index-what-should-i-do-before-deploying-project-live">What should I do before deploying project live?</h3>
 			
 				<p>Wave Framework includes a number of functionality that is useful only for development and is not useful when the project is deployed live. In order to make sure that your project is as secure as possible when deployed live, you should do the following:</p>
 				
@@ -43,13 +57,13 @@
 					<li>Remove '/readme.txt' from the server since it might carry hints about what version of Wave Framework is being used.</li>
 				</ul>
 				
-			<h3>Can I build a content management system with Wave Framework?</h3>
+			<h3 id="index-can-i-build-a-content-management-system-with-wave-framework">Can I build a content management system with Wave Framework?</h3>
 			
 				<p>Yes. While Wave Framework comes with fixed filesystem based Sitemap and Translations - as well as configuration - nothing stops you from building a system that allows you to generate these files. You could build a Content Management System where you can essentially build your website tree of URL's and then just generate a sitemap.ini file that Wave Framework understands.</p>
 				
 				<p>Same applies to translations and configuration. You can essentially generate these files yourself and do with them whatever you want and Wave Framework will be able to function without problems.</p>
 				
-			<h3>Why isn't Wave Framework API entirely RESTful or why does it not support SOAP?</h3>
+			<h3 id="index-why-is-wave-framework-api-not-entirely-restful-or-why-does-it-not-support-soap">Why is Wave Framework API not entirely RESTful or why does it not support SOAP?</h3>
 			
 				<p>Wave Framework has an API that can be used across HTTP very similarly to the principles of REST. But there are a couple of things that RESTful API would require that were considered not to be beneficial to the developer and seemed to be too restrictive. While you can build an API with Wave Framework that is very similar to how REST demands it, there are still some crucial differences:</p>
 				
@@ -71,7 +85,7 @@
 					
 					<p>In Wave Framework, you define your model and controller in the value of 'www-command' and that's it.</p>
 					
-			<h3>I have problems with Internet Explorer 8 and JavaScript API Wrapper, JSON is not defined?</h3>
+			<h3 id="index-i-have-problems-with-internet-explorer-8-and-javascript-api-wrapper-json-is-not-defined">I have problems with Internet Explorer 8 and JavaScript API Wrapper, JSON is not defined?</h3>
 			
 				<p>This can happen mainly because Internet Explorer 8 has triggered your website to work in compatibility mode of Internet Explorer 6/7 that does not support JSON object, thus throwing an error. Internet Explorer 8 often switches to compatibility mode internally (even without user intervention) when it has trouble finding what type of document is used - more specifically the doc-type of your HTML. Wave Framework <a href="guide_view.htm">View Controller</a> has a HTML5 doc-type by default, which is not recognized by older Internet Explorer browsers, thus triggering compatibility mode.</p>
 				
@@ -85,7 +99,7 @@
 
 				<p>Wave Framework JavaScript API Wrapper can also fall back to jQuery, if it detects that jQuery is enabled. If jQuery is defined and JSON object is not available in the browser, then the Wrapper will parse the response with 'parseJSON()' method from jQuery automatically.</p>
 					
-			<h3>If I want to return RSS data through API Handler, how would I format the data array?</h3>
+			<h3 id="index-if-i-want-to-return-rss-data-through-api-handler-how-would-i-format-the-data-array">If I want to return RSS data through API Handler, how would I format the data array?</h3>
 			
 				<p>Wave Framework has simple methods that allow you to convert data to XML (and thus RSS) format from an array. An example array for an RSS feed would be like this:</p>
 				
@@ -111,13 +125,13 @@
 	</code>
 </pre>
 					
-			<h3>How Can I Implement My Own Session Handler?</h3>
+			<h3 id="index-how-can-i-implement-my-own-session-handler">How Can I Implement My Own Session Handler?</h3>
 			
 				<p>Wave Framework uses PHP's own session handling to manipulate with user sessions and detect if sessions are used and what data is stored in $_SESSION. But sometimes it is important to use your own session handling, especially if sessions are stored on another server or through another system.</p>
 				
 				<p>While there is no way to specify how Wave Framework handles sessions directly, it is possible in PHP to rewrite session handling functions that PHP natively uses (the same ones that Wave Framework implements). PHP function that defines all the functions used for session handling is the session_set_save_handler(). You can get more information about this function from PHP's own documentation. You should define the sessions you need in in the <a href="guide_autoload.htm">Autoload</a> script in '/resources/scripts/script.php' file. Read more about <a href="guide_autoload.htm">Autoload</a> scripts in its own documentation.</p>
 					
-			<h3>My Requests Fail and Decompression Error is Returned By the Browser?</h3>
+			<h3 id="index-my-requests-fail-and-decompression-error-is-returned-by-the-browser">My Requests Fail and Decompression Error is Returned By the Browser?</h3>
 			
 				<p>When browsers cannot decompress data that is sent from the server, then they may throw a warning page that says such. Some browsers, like Firefox, tend to fall back to non-compressed output, but Chrome browser (for example) requires the compression algorithms to work and throws a 330 error if it fails.</p>
 				
@@ -126,7 +140,7 @@
 				<p>Usually this compression error comes as a result of empty space existing after your PHP scripts, so make sure that the scripts you have edited do not have empty space after closing PHP tags. Alternative is to not use closing tags on PHP scripts at all.</p>
 					
 					
-			<h3>I am using page caching and I have a problem caching pages with and without active sessions, what can I do?</h3>
+			<h3 id="index-i-am-using-page-caching-and-i-have-a-problem-caching-pages-with-and-without-active-sessions-what-can-i-do">I am using page caching and I have a problem caching pages with and without active sessions, what can I do?</h3>
 			
 				<p>There is a little-known bug in both Safari and Opera web browsers that ignore 'Vary' header from response HTTP request headers. 'Vary' header tells caching engines what header components to take into account when writing cache and validating cache in the storage. While Firefox, Chrome and Internet Explorer browsers all listen to this 'Vary' header as expected, Safari and Opera don't which means that sometimes these browsers may display cached content from time when there was no session cookie.</p>
 				

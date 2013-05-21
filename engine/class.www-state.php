@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.5.5
+ * @version    3.6.0
  */
 
 class WWW_State	{
@@ -245,7 +245,7 @@ class WWW_State	{
 			// This loops over all the configuration options from /config.ini file through setState() function
 			// That function has key-specific functionality that can be tied to some internal commands and PHP functions
 			if(!empty($config)){
-				$this->setState($config);
+				$this->setState(array($config));
 			}
 			
 		// CHECKING FOR SERVER OR PHP SPECIFIC CONFIGURATION OPTIONS AND ASSIGNING UNSET CONFIGURATIONS
@@ -477,66 +477,83 @@ class WWW_State	{
 	// STATE MANIPULATION
 	
 		/**
-		 * This is the basic call to return a State variable from the object. When call is made 
-		 * without any parameters, then the entire State data variable is returned. When 
-		 * $variable is set, then this method returns key of that $variable from $data array. 
-		 * If the returned array is an array as well, then setting $subvariable can set the 
-		 * sub-key of that array and return that instead.
+		 * This is the basic call to return a State variable from the object. If this method is 
+		 * called without any variables, then the entire State array is returned. You can send 
+		 * one or more key variables to this method to return a specific key from State. If you 
+		 * send multiple parameters then this method attempts to find keys of a key in case the 
+		 * State variable is an array itself. $input variable is only used within State class 
+		 * itself.
 		 *
-		 * @param string $variable data array key to be returned
-		 * @param string $subVariable if returned element is an array itself, this returns the value of that key
+		 * @param array $input input variables sent to the function
 		 * @return mixed
 		 */
-		final public function getState($variable=false,$subVariable=false){
-		
-			// Unless variable and subvariable are set, the script returns entire State data array
-			if($subVariable && $variable){
-				// If variable and subvariable are both defined and data exists
-				if(isset($this->data[$variable][$subVariable])){
-					return $this->data[$variable][$subVariable];
-				} else {
-					trigger_error('State variable ['.$variable.']['.$subVariable.'] does not exist',E_USER_NOTICE);
-					return false;
-				}
-			} elseif($variable){
-				// If variable is defined and data exists
-				if(isset($this->data[$variable])){
-					return $this->data[$variable];
-				} else {
-					trigger_error('State variable ['.$variable.'] does not exist',E_USER_NOTICE);
-					return false;
-				}
-			} else {
-				// If no variable was requested the entire data array is returned
+		final public function getState($input){
+			// Returning the entire array, if entire state was requested
+			if(!$input){
 				return $this->data;
 			}
-			
+			// Finding out the specific requested variable
+			$return=&$this->data;
+			// Looping over each of the input parameters sent to the function
+			foreach($input as $key){
+				if(!isset($return[$key])){
+					trigger_error('State variable '.implode(',',$input).' does not exist',E_USER_NOTICE);
+					return false;
+				}
+				$return=&$return[$key];
+			}
+			return $return;
 		}
 		
 		/**
 		 * This method is used to set a $data variable value in State object. $variable can 
 		 * also be an array of keys and values, in which case multiple variables are set at 
 		 * once. This method uses stateChanged() for variables that carry additional 
-		 * functionality, such as setting timezone.
+		 * functionality, such as setting timezone. $input variable is only used within 
+		 * State class itself.
 		 *
-		 * @param string|array $variable data key to be set or an array of keys and values
-		 * @param mixed $value value of the new data
+		 * @param mixed $input input variables sent to the function
 		 * @return boolean
 		 */
-		final public function setState($variable,$value=true,$subvalue=false){
-		
-			// If variable is an array with values it assumes that array keys are variables and values are to be set for those variables
-			if(is_array($variable)){
-				foreach($variable as $key=>$val){
-					// Certain variables can affect system behavior and this is checked here
+		final public function setState($input){
+				
+			// If an array is sent as key-value pair
+			if($input && count($input)==1 && is_array($input[0])){
+			
+				foreach($input[0] as $key=>$val){
+					// Setting the state variable (note that the stateChanged may change this)
+					$this->data[$key]=$val;
+					// Checking for system specific changes due to the changed State
 					$this->stateChanged($key,$val);
 				}
+				
+			} elseif(count($input)>1){
+			
+				// The last element in the sent parameters is the value to be set
+				$value=array_pop($input);
+				// Setting the proper address of State to the newly set variable
+				$pointer=&$this->data;
+				foreach($input as $key){
+					if(!isset($pointer[$key])){
+						$pointer=&$pointer[$key];
+					} else {
+						trigger_error('State variable '.print_r($key,true).' does not exist and cannot be used as an address',E_USER_NOTICE);
+					}
+				}
+				$pointer=$value;
+				
+				// Checking for system specific changes due to the changed State
+				return $this->stateChanged($input[0],$value);
+				
 			} else {
-				// Certain variables can affect system behavior and this is checked here
-				$this->stateChanged($variable,$value);
+			
+				// Only one parameter was sent, meaning that the setting fails
+				trigger_error('setState() method requires two variables if not sending an array',E_USER_NOTICE);
+				return false;
+				
 			}
 			
-			// State has been set
+			// State value has been set
 			return true;
 			
 		}
@@ -553,9 +570,6 @@ class WWW_State	{
 		 * @return boolean
 		 */
 		final private function stateChanged($variable,$value=true){
-		
-			// Value is set instantly
-			$this->data[$variable]=$value;
 			
 			// Certain variables are checked that might change system flags
 			switch ($variable) {
@@ -563,12 +577,14 @@ class WWW_State	{
 					// Attempting to set default timezone
 					if(!date_default_timezone_set($value)){
 						trigger_error('Cannot set timezone to '.$value,E_USER_WARNING);
+						return false;
 					}
 					break;
 				case 'memory-limit':
 					if($value){
 						if(!function_exists('ini_set') || !ini_set('memory_limit',$value)){
 							trigger_error('Cannot set memory limit to '.$value,E_USER_WARNING);
+							return false;
 						}
 					}
 					break;
@@ -581,6 +597,7 @@ class WWW_State	{
 					if($value){
 						if(!setlocale(LC_ALL,$value.'.UTF-8')){
 							trigger_error('Cannot set locale to '.$value.'.UTF-8',E_USER_WARNING);
+							return false;
 						}
 					}
 					break;
@@ -588,6 +605,7 @@ class WWW_State	{
 					// If user agent does not expect compressed data and PHP extension is not loaded, then this value cannot be turned on
 					if($value==false || !in_array($value,$this->data['http-accept-encoding']) || !extension_loaded('Zlib')){
 						$this->data[$variable]=false;
+						return false;
 					}
 					break;
 			}
@@ -1341,14 +1359,38 @@ class WWW_State	{
 		 * This method validates current session data and checks for lifetime as well as 
 		 * session fingerprint. It notifies session handler if any changes have to be made.
 		 *
+		 * @param array $configuration list of session configuration options, keys below
+		 * 'name' - session cookie name
+		 * 'lifetime' - session cookie lifetime
+		 * 'path' - URL path for session cookie
+		 * 'domain' - domain for session cookie
+		 * 'secure' - whether session cookie is for secure connections only
+		 * 'http-only' - whether session cookie is for HTTP requests only and unavailable for scripts
+		 * 'user-key' - session key for storing user data
+		 * 'permissions-key' - session key for storing user permissions
+		 * 'fingerprint-key' - session key for storing session fingerprint
+		 * 'timestamp-key' - session key for storing session timestamp
+		 * 'token-key' - session key for public request tokens for protecting against replay attacks
+		 * 'fingerprint' - session key for session fingerprinting for protecting against replay attacks
 		 * @return boolean
 		 */
-		final public function startSession(){
+		final public function startSession($configuration=false){
+		
+			// If configuration options are sent
+			if($configuration && is_array($configuration) && !empty($configuration)){
+				// Making sure that only session variables are overwritten
+				$sessionConfigurationKeys=array('name','lifetime','path','domain','secure','http-only','user-key','permissions-key','fingerprint-key','timestamp-key','token-key','fingerprint');
+				foreach($sessionConfigurationKeys as $key){
+					if(isset($configuration[$key])){
+						$this->data['session-'.$key]=$configuration[$key];
+					}
+				}
+			}
 		
 			// Starting sessions if session ID does not exist
 			if(!$this->sessionHandler->sessionId){
 				// Opening sessions and initializing session data
-				$this->sessionHandler->sessionOpen($this->data['session-name']);
+				$this->sessionHandler->sessionOpen((isset($configuration['session-name']))?$configuration['session-name']:$this->data['session-name']);
 			}
 			
 			// Setting session cookie variables from Configuration
@@ -1357,7 +1399,7 @@ class WWW_State	{
 				'path'=>$this->data['session-path'],
 				'domain'=>$this->data['session-domain'],
 				'secure'=>$this->data['session-secure'],
-				'http-only'=>$this->data['session-http-only']
+				'http-only'=>$this->data['session-http-only'],
 			));
 			
 			// This can regenerate the session ID, if enough time has passed
@@ -1526,7 +1568,13 @@ class WWW_State	{
 		 *
 		 * @param string|array $key key of the variable, or an array of keys and values
 		 * @param string|array $value value to be set, can also be an array
-		 * @param array $configuration cookie configuration options
+		 * @param array $configuration cookie configuration options, list of keys below
+		 *  'expire' - timestamp when the cookie is set to expire
+		 *  'timeout' - alternative to 'expire', this sets how long the cookie can survive
+		 *  'path' - cookie limited to URL path
+		 *  'domain' - cookie limited to domain
+		 *  'secure' - whether cookie is for secure connections only
+		 *  'http-only' - if the cookie is only available for HTTP requests
 		 * @return boolean
 		 */
 		final public function setCookie($key,$value,$configuration=array()){
@@ -1548,8 +1596,8 @@ class WWW_State	{
 			if(!isset($configuration['secure'])){
 				$configuration['secure']=false;
 			}
-			if(!isset($configuration['httponly'])){
-				$configuration['httponly']=true;
+			if(!isset($configuration['http-only'])){
+				$configuration['http-only']=true;
 			}
 			
 			// Can set multiple values
@@ -1562,13 +1610,13 @@ class WWW_State	{
 					// Value can be an array, in which case the values set will be an array
 					if(is_array($v)){
 						foreach($v as $index=>$val){
-							setcookie($k.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+							setcookie($k.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['http-only']);
 							// Cookie values can be accessed immediately after they are set
 							$_COOKIE[$k][$index]=$val;
 						}
 					} else {
 						// Setting the cookie
-						setcookie($k,$v,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+						setcookie($k,$v,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['http-only']);
 						// Cookie values can be accessed immediately after they are set
 						$_COOKIE[$k]=$v;
 					}
@@ -1577,13 +1625,13 @@ class WWW_State	{
 				// Value can be an array, in which case the values set will be an array
 				if(is_array($value)){
 					foreach($value as $index=>$val){
-						setcookie($key.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+						setcookie($key.'['.$index.']',$val,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['http-only']);
 						// Cookie values can be accessed immediately after they are set
 						$_COOKIE[$key][$index]=$val;
 					}
 				} else {
 					// Setting the cookie
-					setcookie($key,$value,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['httponly']);
+					setcookie($key,$value,$configuration['expire'],$configuration['path'],$configuration['domain'],$configuration['secure'],$configuration['http-only']);
 					// Cookie values can be accessed immediately after they are set
 					$_COOKIE[$key]=$value;
 				}
@@ -1638,12 +1686,16 @@ class WWW_State	{
 					if(isset($_COOKIE[$value])){
 						// Removes cookie by setting its duration to 0
 						setcookie($value,'',($this->data['request-time']-3600));
+						// Unsets the cookie value
+						unset($_COOKIE[$value]);
 					}
 				}
 			} else {
 				if(isset($_COOKIE[$key])){
 					// Removes cookie by setting its duration to 0
 					setcookie($key,'',($this->data['request-time']-3600));
+					// Unsets the cookie value
+					unset($_COOKIE[$value]);
 				} else {
 					return false;
 				}
@@ -1766,6 +1818,10 @@ class WWW_State	{
 				case 'sizer':
 					// Takes just the directory variable
 					return $this->tools->sizer($arg1);
+					break;
+				case 'counter':
+					// Takes just the directory variable
+					return $this->tools->counter($arg1);
 					break;
 				default:
 					trigger_error('This tool does not exist: '.$type,E_USER_WARNING);

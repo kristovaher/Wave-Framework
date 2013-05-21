@@ -12,7 +12,18 @@
 	
 		<h1>Security</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-database-injections">Database Injections</a></li>
+				<li><a href="#index-man-in-the-middle-attacks">Man-in-the-Middle Attacks</a></li>
+				<li><a href="#index-xss-cross-site-scripting">XSS - Cross Site Scripting</a></li>
+				<li><a href="#index-csrf-cross-site-request-forgery">CSRF - Cross Site Request Forgery</a></li>
+				<li><a href="#index-secure-passwords">Secure Passwords</a></li>
+				<li><a href="#index-two-step-authentication">Two-Step Authentication</a></li>
+				<li><a href="#index-dos-denial-of-service-attacks">DoS - Denial of Service Attacks</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Security is often an issue that developers give attention to once something goes wrong and their system is hacked and their users are compromised. This happens very often because creating a secure web system costs more than a non-secure one and even today there are millions of websites with ineffective security model. Wave Framework offers a handful of tools to protect a system that is built on Wave Framework, but the actual implementation of many of these methods remains up to the developer.</p>
 				
@@ -20,7 +31,7 @@
 				
 				<p>There is a separate document about API Security and you should also read through that documentation to learn the full capabilities of Wave Framework and its security model.</p>
 				
-			<h2>Database Injections</h2>
+			<h2 id="index-database-injections">Database Injections</h2>
 			
 				<p>Database injections are the number one security threat in modern web systems. Database injection attack is about sending a malicious string to the web server, which the web server then uses as part of database query. This malicious string would modify the database query string to become different than the developer and system intended. This attack is what is responsible for majority of stolen passwords and hacked systems in modern web.</p>
 				
@@ -80,7 +91,7 @@
 	</code>
 </pre>
 				
-			<h2>Man-in-the-Middle Attacks</h2>
+			<h2 id="index-man-in-the-middle-attacks">Man-in-the-Middle Attacks</h2>
 			
 				<p>Man-in-the-Middle Attacks are attacks that take place by a third party that is between the user that uses your website or web service with a web browser and your web server. This 'middle man' listens to HTTP traffic and attempts to tamper with it in one way or another. Protecting against Man-in-the-Middle attacks can be difficult, depending on how your system is built and what technologies you are using.</p>
 			
@@ -126,7 +137,7 @@
 						<li><b>Request Timestamp</b> - If your system sends 'www-timestamp' - with the current timestamp value set - with the request, then Wave Framework uses this to check if request happened within certain timeframe. If 'www-timestamp' is too old, then the request fails. This applies mostly only to API requests that have been sent with an API Wrapper, it is more difficult to check on a website. It is recommended to use validation hashes with these requests as well.</li>
 					</ul>
 				
-			<h2>XSS - Cross Site Scripting</h2>
+			<h2 id="index-xss-cross-site-scripting">XSS - Cross Site Scripting</h2>
 			
 				<p>Cross Site Scripting is one of the more common web security problems. This type of attack happens when users can enter data to a website that is then shown to other users of that website. For example, if the attacker writes a comment to an article that includes malicious code, then this malicious code would be run on every other user who enters on the website.</p>
 				
@@ -147,7 +158,7 @@
 					<li><b>HTTPOnly Cookies</b> - Make sure that your sensitive cookies - like session cookies - are only accessible over HTTP. This means that 'httponly' is set to true if you use Wave Framework's setCookie() method. This makes sure that JavaScript cannot access your session cookie.</li>
 				</ul>
 				
-			<h2>CSRF - Cross Site Request Forgery</h2>
+			<h2 id="index-csrf-cross-site-request-forgery">CSRF - Cross Site Request Forgery</h2>
 			
 				<p>This type of attack is one of the more complicated attacks that modern websites and web services have to deal with today. CSRF attacks are very dangerous because they only happen to users that are already logged in to your website and to the web server they seem to be entirely authenticated and make valid requests.</p>
 				
@@ -181,7 +192,7 @@
 				
 				<p>Note that this 'www-public-token' would only be required by the public API profile. So this value is not needed for server-to-server communications between validated API sessions that are not subject to Cross Site Request Forgery attacks.</p>
 				
-			<h2>Secure Passwords</h2>
+			<h2 id="index-secure-passwords">Secure Passwords</h2>
 			
 				<p>Whenever you store user passwords in your database (and it is recommended to store user access credentials in your database, rather than <a href="filesystem.htm">Filesystem</a>), then there are a couple of things you should always remember. No matter what, you should never-ever store user password as plain text in your database. This means that you should never be able to tell what password the user has and you should never be able to send user their password when they have forgotten it.</p>
 				
@@ -191,7 +202,7 @@
 				
 				<p>Below are examples of badly or weakly generated passwords:</>
 				
-			<h2>Two-Step Authentication</h2>
+			<h2 id="index-two-step-authentication">Two-Step Authentication</h2>
 			
 				<p>This type of authentication system means that username and password are never 'enough' to authenticate a user to a website. This usually means that once correct username and password has been entered by the user, then the web system sends out an e-mail to the user or a text message that the user has to click or use a code from that message in order to validate their new session. This authentication is often optional, but is becoming increasingly common as a more secure way of protecting your user accounts.</p>
 			
@@ -205,7 +216,7 @@
 					<li>User uses the system as before.</li>
 				</ul>
 				
-			<h2>Denial of Service Attacks</h2>
+			<h2 id="index-dos-denial-of-service-attacks">Denial of Service Attacks</h2>
 			
 				<p>Denial of Service Attacks are attacks that are almost impossible to protect against. DoS attacks essentially mean that your web server gets a lot of requests at the same time and for a long period of time. And if your server gets a lot of requests, then it becomes slow and/or breaks entirely, making the website or service inaccessible to your users.</p>
 				
@@ -213,7 +224,7 @@
 				
 				<p>This however is not good enough against some forms of Denial of Service Attacks. Your server still has to respond to those requests in some form. You can protect your server better by having your web administrator or hosting provider block those requests from those IP addresses through your web server software - like through Apache - directly. This will help minimize the DoS attack even further.</p>
 				
-				<p>Most problematic form of DoS attack is Distributed Denial of Service Attack. This means that multiple IP addresses across the world are pushing for DoS attack at the same time. This type of attacks are near-impossible to protect against and require the administrator and/or developer to take a look at the requests and detect a pattern in those requests that they can then block. Distributed attacks like this take a lot of resources however and most web systems are unlikely to face such attacks.</p>
+				<p>Most problematic form of DoS attack is Distributed Denial of Service Attack (DDoS). This means that multiple IP addresses across the world are pushing for DoS attack at the same time. This type of attacks are near-impossible to protect against and require the administrator and/or developer to take a look at the requests and detect a pattern in those requests that they can then block. Distributed attacks like this take a lot of resources however and most web systems are unlikely to face such attacks.</p>
 			
 	</body>
 </html>

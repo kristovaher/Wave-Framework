@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.5.1
+ * @version    3.6.0
  */
 
 class WWW_Factory {
@@ -203,32 +203,30 @@ class WWW_Factory {
 		}
 	
 		/**
-		 * This is the basic call to return a State variable from the object. When call is made 
-		 * without any parameters, then the entire State data variable is returned. When 
-		 * $variable is set, then this method returns key of that $variable from $data array. 
-		 * If the returned array is an array as well, then setting $subvariable can set the 
-		 * sub-key of that array and return that instead.
-		 *
-		 * @param string $variable data array key to be returned
-		 * @param string $subVariable if returned element is an array itself, this returns the value of that key
+		 * This is the basic call to return a State variable from the object. If this method is 
+		 * called without any variables, then the entire State array is returned. You can send 
+		 * one or more key variables to this method to return a specific key from State. If you 
+		 * send multiple parameters then this method attempts to find keys of a key in case the 
+		 * State variable is an array itself. $input variable is only used within State class 
+		 * itself.
+		 * 
 		 * @return mixed
 		 */
-		final protected function getState($variable=false,$subVariable=false){
-			return $this->WWW_API->state->getState($variable,$subVariable);
+		final protected function getState(){
+			return $this->WWW_API->state->getState(func_get_args());
 		}
 		
 		/**
 		 * This method is used to set a $data variable value in State object. $variable can 
 		 * also be an array of keys and values, in which case multiple variables are set at 
 		 * once. This method uses stateChanged() for variables that carry additional 
-		 * functionality, such as setting timezone.
+		 * functionality, such as setting timezone. $input variable is only used within 
+		 * State class itself.
 		 *
-		 * @param string|array $variable data key to be set or an array of keys and values
-		 * @param mixed $value value of the new data
 		 * @return boolean
 		 */
-		final protected function setState($variable,$value=true){
-			return $this->WWW_API->state->setState($variable,$value);
+		final protected function setState(){
+			return $this->WWW_API->state->setState(func_get_args());
 		}
 		
 		/**
@@ -1067,6 +1065,29 @@ class WWW_Factory {
 	// SESSION AND COOKIE WRAPPERS
 	
 		/**
+		 * This method validates current session data and checks for lifetime as well as 
+		 * session fingerprint. It notifies session handler if any changes have to be made.
+		 *
+		 * @param array $configuration list of session configuration options, keys below
+		 *  'name' - session cookie name
+		 *  'lifetime' - session cookie lifetime
+		 *  'path' - URL path for session cookie
+		 *  'domain' - domain for session cookie
+		 *  'secure' - whether session cookie is for secure connections only
+		 *  'http-only' - whether session cookie is for HTTP requests only and unavailable for scripts
+		 *  'user-key' - session key for storing user data
+		 *  'permissions-key' - session key for storing user permissions
+		 *  'fingerprint-key' - session key for storing session fingerprint
+		 *  'timestamp-key' - session key for storing session timestamp
+		 *  'token-key' - session key for public request tokens for protecting against replay attacks
+		 *  'fingerprint' - session key for session fingerprinting for protecting against replay attacks
+		 * @return boolean
+		 */
+		final protected function startSession($configuration=false){
+			return $this->WWW_API->state->startSession($configuration);
+		}
+	
+		/**
 		 * This method notifies the session handler that the session data should be
 		 * stored under a new ID.
 		 *
@@ -1120,7 +1141,13 @@ class WWW_Factory {
 		 *
 		 * @param string|array $key key of the variable, or an array of keys and values
 		 * @param string|array $value value to be set, can also be an array
-		 * @param array $configuration cookie configuration options
+		 * @param array $configuration cookie configuration options, list of keys below
+		 *  'expire' - timestamp when the cookie is set to expire
+		 *  'timeout' - alternative to 'expire', this sets how long the cookie can survive
+		 *  'path' - cookie limited to URL path
+		 *  'domain' - cookie limited to domain
+		 *  'secure' - whether cookie is for secure connections only
+		 *  'http-only' - if the cookie is only available for HTTP requests
 		 * @return boolean
 		 */
 		final protected function setCookie($key,$value,$configuration=array()){

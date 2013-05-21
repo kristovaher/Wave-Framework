@@ -12,11 +12,19 @@
 	
 		<h1>Imager Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-imager-class">Using Imager Class</a></li>
+				<li><a href="#index-imager-class-parameters">Imager Class Parameters</a></li>
+				<li><a href="#index-imager-class-methods">Imager Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-imager.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Imager is a class that acts as a wrapper to PHP GD library and has a number of methods to resize images with different resize algorithms as well as apply filtering to images and deal with image conversions between different formats. It can load an image resource from server or a URL and either store the edited image in a <a href="filesystem.htm">Filesystem</a> or push it to output buffer.</p>
 			
@@ -24,7 +32,7 @@
 				
 				<p>Imager and on-demand image editing have multiple settings in the Wave Framework configuration file that can protect Imager methods to be used over HTTP requests.</p>
 				
-			<h2>Using Imager class</h2>
+			<h2 id="index-using-imager-class">Using Imager class</h2>
 			
 				<p>To use Imager class, it is recommended to load Imager class and then load an image by supplying an URL to this file. For example, to load an image to Imager, you can do as follows:</p>
 				
@@ -62,7 +70,7 @@
 	</code>
 </pre>	
 
-			<h2>Imager class Parameters</h2>
+			<h2 id="index-imager-class-parameters">Imager class Parameters</h2>
 			
 				<h3>public $resource=false</h3>
 				
@@ -80,7 +88,7 @@
 				
 					<p>This holds the currently known image type (JPEG, PNG or GIF).</p>
 				
-			<h2>Imager Class Methods</h2>
+			<h2 id="index-imager-class-methods">Imager Class Methods</h2>
 			
 				<h3>public function input($location,$extension=false)</h3>
 				
@@ -98,17 +106,17 @@
 				
 					<p>This is a resize-algorithm method that resizes the current image resource to $width and $height. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'.</p>
 					
-				<h3>public function resizeCrop($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0)</h3>
+				<h3>public function resizeCrop($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0,$alpha=true;)</h3>
 				
 					<p>This is a resize-algorithm method that resizes the current image resource to $width and $height without resizing the actual image. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values for background color in case background is required (not used for PNG images).</p>
 					
-				<h3>public function resizeFit($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0)</h3>
+				<h3>public function resizeFit($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0,$alpha=true)</h3>
 				
 					<p>This is a resize-algorithm method that resizes the current image simply by resizing the image to $width and $height and leaves the remaining space for background color. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values for background color in case background is required (not used for PNG images).</p>
 					
-				<h3>public function resizeFitNoBackground($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0)</h3>
+				<h3>public function resizeFitNoBackground($width,$height)</h3>
 				
-					<p>This is a resize-algorithm method that resizes the current image simply by resizing the image to $width and $height and removing the dimensions that would otherwise be left for a background. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values for background color in case background is required (not used for PNG images).</p>
+					<p>This is a resize-algorithm method that resizes the current image simply by resizing the image to $width and $height and removing the dimensions that would otherwise be left for a background.</p>
 					
 				<h3>public function resizeWidth($width)</h3>
 				

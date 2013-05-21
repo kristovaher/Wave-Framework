@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_data.htm
  * @since      1.5.0
- * @version    3.4.3
+ * @version    3.6.0
  */
 
 // INITIALIZATION
@@ -107,7 +107,7 @@
 	if(isset($view['view']) && !isset($view['www-temporary-redirect']) && !isset($view['www-permanent-redirect'])){
 			
 		// Notifying State of View data
-		$state->setState(array('view'=>$view,'language'=>$view['language']));
+		$state->setState(array(array('view'=>$view,'language'=>$view['language'])));
 		
 		// All the data sent by the user agent is stored in this variable
 		$inputData=array();

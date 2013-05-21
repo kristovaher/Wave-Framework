@@ -11,8 +11,14 @@
 	<body>
 	
 		<h1>Update Guide</h1>
+		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-how-updates-affect-your-software">How Updates Affect Your Software</a></li>
+				<li><a href="#index-version-specific-update-changes">Version Specific Update Changes</a></li>
+			</ul>
 			
-			<h3>Introduction</h3>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework is being actively developed with new features being released every month, some smaller and some bigger. Development is always driven by what is best for the framework today, which means that at times there will be new features implemented or existing features changed enough that the software built on previous versions might break. While development of Wave Framework takes backwards compatibility into account as much as possible, sometimes it is necessary to break it.</p>
 				
@@ -22,7 +28,7 @@
 				
 				<p>In order to update your Wave Framework you first have to know what is the current version that you are using. You can find this out by opening '/.version' file in a text editor. This file has two lines, one for 'www' and another for 'system'. The 'www' line states the version of Wave Framework. The second line for 'system' is meant for the developer to keep track of what version of their own software is built on Wave Framework. Both of these values can be used when updating software and making sure that good software does not break badly.</p>
 				
-			<h3>How Updates Affect Your Software</h3>
+			<h2 id="index-how-updates-affect-your-software">How Updates Affect Your Software</h2>
 				
 				<p>Your own software is built on top of Wave Framework and if you do not change Wave Framework's core files itself, then these are the only files and folders you should be 'working on' when developing a website or web service on top of Wave Framework:</p>
 				
@@ -38,87 +44,95 @@
 				
 				<p>This means that when updating, you can safely ignore these folders from update archives and focus on actual core files that might need updating, namely the '/index.php' file and files from '/engine/' folder. Core files of Wave Framework also have version information listed in their file headers as of 3.1.4 and you can refer to this header information to know if your file needs to be updated or not, when comparing it against the latest release.</p>
 				
-			<h3>How to Update to 3.5.0</h3>
+			<h2 id="index-version-specific-update-changes">Version Specific Update Changes</h2>
 			
-				<p>This update brings a number of backwards-compatibility breaking minor changes, so be careful when you update. Since the amount of State variables has grown notably, some namespacing adjustments were required. These changes are only minor and only affect the names of State variables, but if you use any of these variables in your project, make sure to change these variable names:</p>
+				<h3>How to Update to 3.6.0</h3>
 				
-				<ul>
-					<li>blacklist-limiter => limiter-blacklist</li>
-					<li>load-limiter => limiter-load</li>
-					<li>https-limiter => limiter-https</li>
-					<li>http-authentication-limiter => limiter-authentication</li>
-					<li>referrer-limiter => limiter-referrer</li>
-					<li>request-limiter => limiter-request</li>
-					<li>whitelist-limiter => limiter-whitelist</li>
-					<li>data-root => directory-data</li>
-					<li>user-root => directory-user</li>
-					<li>tmp-root => directory-tmp</li>
-					<li>system-root => directory-system</li>
-					<li>static-root => directory-static</li>
-					<li>keys-root => directory-keys</li>
-					<li>base-url => url-base</li>
-					<li>web-root => url-web</li>
-				</ul>
+					<ul>
+						<li>Errors and logs are now stored a little differently, it is recommended to first clear your log and debugger error files.</li>
+					</ul>
 				
-			<h3>How to Update to 3.4.4</h3>
-			
-				<ul>
-					<li>It is recommended that you delete your cache (using Cleaner maintenance script for example) after updating, as some of the pre-caching of configuration, sitemap and translations files have changed a little.</li>
-				</ul>
+				<h3>How to Update to 3.5.0</h3>
 				
-			<h3>How to Update to 3.4.2</h3>
-			
-				<ul>
-					<li>The Autoload script '/resources/autoload.php' has now been moved to '/resources/scripts/script.php' file. This makes it more standard to what 'script.js' file is and does. So please move and rename the file accordingly, the behavior is exactly the same.</li>
-					<li>If you used additional-js and additional-php settings from the 3.4.1 version, then you should move these scripts from '/resources/libraries/' to '/resources/scripts/'. From a logical standpoint the additional files were never meant to be just libraries and can be tightly coupled to the UI and more.</li>
-				</ul>
-				
-			<h3>How to Update to 3.4.1</h3>
-			
-				<ul>
-					<li>It's now possible to refer to Wave Framework Wrapper file by having a link to /resources/ subfolder even though such a file does not exist. If you link in your HTML header to http://www.example.com/resources/scripts/class.www-wrapper.js then it loads the file from /engine/ subfolder where this engine file actually exists. You can also unify this script with your jQuery or other libraries easily.</li>
-					<li>New recommended structure suggests to write scripts to /resources/scripts/, classes to /resources/classes/ and libraries to /resources/libraries/. Difference between them is that classes subfolder includes actual classes that can be dynamically loaded through Factory. Libraries folder includes files that include various scripts that can be dynamically loaded. And scripts folder is for scripts that can be loaded automatically per view. Basically classes and libraries folders are only meant for loading scripts through Factory, either JavaScript or PHP.</li>
-				</ul>
-				
-			<h3>How to Update to 3.3.0</h3>
-			
-				<ul>
-					<li>CSS and script files now have a separate /style/ and /script/ folders under /resources/ folder. You do not have to make any changes (software should still work even if you keep the files in root /resources/ folder), but it would be good to move the files to that folder in the future for easier maintenance.</li>
-				</ul>
-				
-			<h3>How to Update to 3.2.6</h3>
-			
-				<ul>
-					<li>dbQuote() method now only has 'escape' and 'like' types. The 'field' type has been removed entirely and a new method filter() has been introduced that can be used instead. This filter() method has most of the types that dbQuote() had, but were only used for filtering before.</li>
-				</ul>
-			
-			<h3>How to Update to 3.2.3</h3>
-			
-				<ul>
-					<li>The 'www-files' and 'www-cookie' input data is not sent anymore, $_FILES and $_COOKIE arrays are merged like any other variable to the single input data. This is in order to standardize input data even further.</li>
-				</ul>
-				
-			<h3>How to Update to 3.2.1</h3>
-			
-				<ul>
-					<li>The 'serializedarray' output return data type is now just 'serialized'.</li>
-					<li>The 'querystring' output return data type is now just 'query'.</li>
-				</ul>
-				
-			<h3>How to Update to 3.2.0</h3>
-			
-				<ul>
-					<li>MVC Factory method startSession() and destroySession() are not available anymore. These are called automatically by State.</li>
-					<li>Default session handling is now done through '/engine/class.www-sessions.php' file.</li>
-					<li>Configuration setting 'session-namespace' is now 'session-name' due to the different way sessions are handled.</li>
-				</ul>
-				
-			<h3>How to Update to 3.1.8</h3>
-			
-				<ul>
-					<li>MVC Factory method internalLogEntry() is now simply logEntry(). If you use this function, then make sure to replace those method calls.</li>
-					<li>MVC Factory method setStateMessengerData() is now simply setMessengerData(). If you use this function, then make sure to replace those method calls.</li>
-				</ul>
+					<p>This update brings a number of backwards-compatibility breaking minor changes, so be careful when you update. Since the amount of State variables has grown notably, some namespacing adjustments were required. These changes are only minor and only affect the names of State variables, but if you use any of these variables in your project, make sure to change these variable names:</p>
 					
+					<ul>
+						<li>blacklist-limiter => limiter-blacklist</li>
+						<li>load-limiter => limiter-load</li>
+						<li>https-limiter => limiter-https</li>
+						<li>http-authentication-limiter => limiter-authentication</li>
+						<li>referrer-limiter => limiter-referrer</li>
+						<li>request-limiter => limiter-request</li>
+						<li>whitelist-limiter => limiter-whitelist</li>
+						<li>data-root => directory-data</li>
+						<li>user-root => directory-user</li>
+						<li>tmp-root => directory-tmp</li>
+						<li>system-root => directory-system</li>
+						<li>static-root => directory-static</li>
+						<li>keys-root => directory-keys</li>
+						<li>base-url => url-base</li>
+						<li>web-root => url-web</li>
+					</ul>
+					
+				<h3>How to Update to 3.4.4</h3>
+				
+					<ul>
+						<li>It is recommended that you delete your cache (using Cleaner maintenance script for example) after updating, as some of the pre-caching of configuration, sitemap and translations files have changed a little.</li>
+					</ul>
+					
+				<h3>How to Update to 3.4.2</h3>
+				
+					<ul>
+						<li>The Autoload script '/resources/autoload.php' has now been moved to '/resources/scripts/script.php' file. This makes it more standard to what 'script.js' file is and does. So please move and rename the file accordingly, the behavior is exactly the same.</li>
+						<li>If you used additional-js and additional-php settings from the 3.4.1 version, then you should move these scripts from '/resources/libraries/' to '/resources/scripts/'. From a logical standpoint the additional files were never meant to be just libraries and can be tightly coupled to the UI and more.</li>
+					</ul>
+					
+				<h3>How to Update to 3.4.1</h3>
+				
+					<ul>
+						<li>It's now possible to refer to Wave Framework Wrapper file by having a link to /resources/ subfolder even though such a file does not exist. If you link in your HTML header to http://www.example.com/resources/scripts/class.www-wrapper.js then it loads the file from /engine/ subfolder where this engine file actually exists. You can also unify this script with your jQuery or other libraries easily.</li>
+						<li>New recommended structure suggests to write scripts to /resources/scripts/, classes to /resources/classes/ and libraries to /resources/libraries/. Difference between them is that classes subfolder includes actual classes that can be dynamically loaded through Factory. Libraries folder includes files that include various scripts that can be dynamically loaded. And scripts folder is for scripts that can be loaded automatically per view. Basically classes and libraries folders are only meant for loading scripts through Factory, either JavaScript or PHP.</li>
+					</ul>
+					
+				<h3>How to Update to 3.3.0</h3>
+				
+					<ul>
+						<li>CSS and script files now have a separate /style/ and /script/ folders under /resources/ folder. You do not have to make any changes (software should still work even if you keep the files in root /resources/ folder), but it would be good to move the files to that folder in the future for easier maintenance.</li>
+					</ul>
+					
+				<h3>How to Update to 3.2.6</h3>
+				
+					<ul>
+						<li>dbQuote() method now only has 'escape' and 'like' types. The 'field' type has been removed entirely and a new method filter() has been introduced that can be used instead. This filter() method has most of the types that dbQuote() had, but were only used for filtering before.</li>
+					</ul>
+				
+				<h3>How to Update to 3.2.3</h3>
+				
+					<ul>
+						<li>The 'www-files' and 'www-cookie' input data is not sent anymore, $_FILES and $_COOKIE arrays are merged like any other variable to the single input data. This is in order to standardize input data even further.</li>
+					</ul>
+					
+				<h3>How to Update to 3.2.1</h3>
+				
+					<ul>
+						<li>The 'serializedarray' output return data type is now just 'serialized'.</li>
+						<li>The 'querystring' output return data type is now just 'query'.</li>
+					</ul>
+					
+				<h3>How to Update to 3.2.0</h3>
+				
+					<ul>
+						<li>MVC Factory method startSession() and destroySession() are not available anymore. These are called automatically by State.</li>
+						<li>Default session handling is now done through '/engine/class.www-sessions.php' file.</li>
+						<li>Configuration setting 'session-namespace' is now 'session-name' due to the different way sessions are handled.</li>
+					</ul>
+					
+				<h3>How to Update to 3.1.8</h3>
+				
+					<ul>
+						<li>MVC Factory method internalLogEntry() is now simply logEntry(). If you use this function, then make sure to replace those method calls.</li>
+						<li>MVC Factory method setStateMessengerData() is now simply setMessengerData(). If you use this function, then make sure to replace those method calls.</li>
+					</ul>
+						
 	</body>
 </html>

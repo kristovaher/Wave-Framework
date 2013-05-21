@@ -12,13 +12,20 @@
 	
 		<h1>About Users and Permissions</h1>
 		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-users">Users</a></li>
+				<li><a href="#index-user-permissions">User Permissions</a></li>
+				<li><a href="#index-maintaining-user-session-with-cookies">Maintaining User Session with Cookies</a></li>
+			</ul>
+		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Users and permissions systems are always a hassle to set up. Different systems expect different things and with too many details. Wave Framework also implements a system for handling session data and checking for permissions across the system.</p>
 				
-			<h2>Users</h2>
+			<h2 id="index-users">Users</h2>
 				
 				<p>Wave Framework holds user data in sessions. Technically you should build a local <a href="guide_database.htm">Database</a> or load user data from an external database with a Controller that you develop for your system. Wave Framework doesn't come with a user database and login systems from the get go and only has a session storage set up for supporting such systems.</p>
 				
@@ -52,7 +59,7 @@
 
 				<p>It is also possible to develop your own user session storage systems that implement other functionality or features. Wave Framework simply comes with a recommended method for doing this through the framework itself as easily as possible.</p>
 				
-			<h2>User Permissions</h2>
+			<h2 id="index-user-permissions">User Permissions</h2>
 			
 				<p>Permissions are technically separate from user sessions themselves. Wave Framework comes with a very simple keyword-based permissions layer. Permissions - just like user data - is stored in sessions by the framework.</p>
 				
@@ -110,7 +117,7 @@
 				
 				<p>It is recommended to call the latter method whenever user logs out. Users session is not directly connected to permissions session, so it would require two different calls.</p>
 				
-			<h2>Maintaining User Session with Cookies</h2>
+			<h2 id="index-maintaining-user-session-with-cookies">Maintaining User Session with Cookies</h2>
 			
 				<p>Wave Framework uses sessions for storing user and permission data. There is no alternative to store user data and permission data in cookies instead. But sometimes you need to build a system where the user does not log out when their cookies expire in the browser.</p>
 				

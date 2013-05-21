@@ -12,11 +12,17 @@
 	
 		<h1>API Observers</h1>
 		
-			<h2>Files</h2>
-			
-				<h3>/resources/api.observers.php</h3>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-setting-up-observers">Setting Up Observers</a></li>
+			</ul>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-files">Files</h2>
+			
+				<h3>/resources/api.observers.ini</h3>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>API observers allow you to add simple observers to your web system that act like event listeners in your web system. These observers essentially wait for a specific API command - sent as 'www-command' - to be made, in which case these API observers execute a defined API method with the same input or output data that is sent to or returned from the <a href="guide_api.htm">API</a> call.</p>
 				
@@ -26,9 +32,9 @@
 				
 				<p>It is not required to use observers in your web system, but it is one way of separating functionality of one controller from another in your web service.</p>
 				
-			<h2>Observers Definition</h2>
+			<h2 id="index-setting-up-observers">Setting Up Observers</h2>
 			
-				<p>Observers are stored in /resources/api.observers.php file. Each of the 'www-command' calls can have their own Observer configuration set.</p>
+				<p>Observers are stored in /resources/api.observers.ini file. Each of the 'www-command' calls can have their own Observer configuration set.</p>
 				
 				<p>Here is an example of such a configuration:</p>
 				

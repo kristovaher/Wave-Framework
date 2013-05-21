@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Session Handler Class - Wave Framework</title>
+		<title>Sessions Class - Wave Framework</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width"/> 
 		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
@@ -10,13 +10,21 @@
 	</head>
 	<body>
 	
-		<h1>Session Class</h1>
+		<h1>Sessions Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-sessions-class">Using Sessions Class</a></li>
+				<li><a href="#index-sessions-class-parameters">Sessions Class Parameters</a></li>
+				<li><a href="#index-sessions-class-methods">Sessions Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-sessions.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Session Handler class of Wave Framework allows you to have full control over how sessions are loaded and how they are stored. Wave Framework uses filesystem specific session storage by default and this documentation here gives an overview of the WWW_Sessions class that does exactly that.</p>
 				
@@ -24,7 +32,7 @@
 				
 				<p>The rest of this document details the use of Sessions class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
 				
-			<h2>Using Session class</h2>
+			<h2 id="index-using-sessions-class">Using Sessions Class</h2>
 			
 				<p>To use Sessions class, it is recommended to load Sessions class and create a Sessions object as early as possible. The default sessions handler checks if user agent has provided a session cookie or not and if it has, then also automatically starts sessions.</p>
 				
@@ -84,7 +92,7 @@
 				
 				<p>Session Handler itself does not include garbage collection, this means that session files remain on the server until they are removed with the Cleaner script or through some other means.</p>
 
-			<h2>Session Parameters</h2>
+			<h2 id="index-sessions-class-parameters">Sessions Class Parameters</h2>
 			
 				<h3>public $sessionName</h3>
 				
@@ -122,7 +130,7 @@
 				
 					<p>This holds whether sessions are actually commited or not. This is set to true when Test Suite is run.</p>
 				
-			<h2>Session Methods</h2>
+			<h2 id="index-sessions-class-methods">Sessions Class Methods</h2>
 				
 				<h3>public function __construct($sessionName='PHPSESSID',$sessionLifetime=0,$databaseConnection=false,$noCommit=false)</h3>
 				

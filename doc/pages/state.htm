@@ -12,11 +12,19 @@
 	
 		<h1>State Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-state-class">Using State Class</a></li>
+				<li><a href="#index-state-class-parameters">State Class Parameters</a></li>
+				<li><a href="#index-state-class-methods">State Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-state.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>State class is one of the core classes of Wave Framework. State holds a lot of information about the server, configuration as well as current request. State class can be used separately from Wave Framework, but is generally not recommended, since it is tailored for use with Wave Framework.</p>
 				
@@ -26,7 +34,7 @@
 				
 				<p>The rest of this document details the use of <a href="logger.htm">Logger</a> class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
 				
-			<h2>Using State class</h2>
+			<h2 id="index-using-state-class">Using State class</h2>
 			
 				<p>While it is unlikely that State class can be of use outside Wave Framework, below is an example of how to create a new State object. State object is created with a <a href="configuration.htm">Configuration</a> array and some of these <a href="configuration.htm">Configuration</a> keys can affect the functionality of PHP (State will attempt to change PHP settings accordingly).</p>
 				
@@ -72,7 +80,7 @@
 					
 					<p>Rest of the functionality of State class is too specific to Wave Framework API and it will be covered more in the feature guides.</p>
 					
-			<h2>State Class Parameters</h2>
+			<h2 id="index-state-class-parameters">State Class Parameters</h2>
 			
 				<h3>public $data=array()</h3>
 				
@@ -257,7 +265,7 @@
 				
 					<p>This holds system <a href="tool.htm">Tool Class</a> object, if it exists.</p>
 					
-			<h2>Logger Class Methods</h2>
+			<h2 id="index-state-class-methods">State Class Methods</h2>
 			
 				<p>The methods of State class are considered 'final' mainly due to them being core and expected by Wave Framework API and Factory classes.</p>
 			
@@ -269,13 +277,13 @@
 				
 					<p>When State class is not used anymore, then <a href="guide_messenger.htm">State Messenger</a> data - if set - is written to <a href="filesystem.htm">Filesystem</a> based on the <a href="guide_messenger.htm">State Messenger</a> key. This method also calls the commit-session method, if it has not been called yet.</p>
 				
-				<h3>final public function getState($variable=false,$subvariable=false)</h3>
+				<h3>final public function getState($input)</h3>
 				
-					<p>This is the basic call to return a State variable from the object. When call is made without any parameters, then the entire State data variable is returned. When $variable is set, then this method returns key of that $variable from $data array. If the returned array is an array as well, then setting $subvariable can set the sub-key of that array and return that instead.</p>
+					<p>This is the basic call to return a State variable from the object. If this method is called without any variables, then the entire State array is returned. You can send one or more key variables to this method to return a specific key from State. If you send multiple parameters then this method attempts to find keys of a key in case the State variable is an array itself. $input variable is only used within State class itself.</p>
 				
-				<h3>final public function setState($variable,$value=true)</h3>
+				<h3>final public function setState($input)</h3>
 				
-					<p>This method is used to set a $data variable value in State object. $variable can also be an array of keys and values, in which case multiple variables are set at once. This method uses stateChanged() for variables that carry additional functionality, such as setting timezone.</p>
+					<p>This method is used to set a variables in the State object. If an array is passed as the first parameter, then multiple State variables are set at the same time. You can also send multiple parameters with this method to set values of multidimensional arrays stored in State, such as sending two different keys and a value as the third parameter. $input variable is only used within State class itself.</p>
 				
 				<h3>final private function stateChanged($variable,$value=true)</h3>
 				
@@ -353,9 +361,24 @@
 				
 					<p>This method is useful when 'api-public-token' setting is off in configuration, but you still want to protect your API method from public API requests from XSS and other attacks. This returns false if the provided public API token is incorrect.</p>
 				
-				<h3>final public function startSession()</h3>
+				<h3>final public function startSession($configuration=false)</h3>
 				
-					<p>This method validates current session data and checks for lifetime as well as session fingerprint. It notifies session handler if any changes have to be made.</p>
+					<p>This method validates current session data and checks for lifetime as well as session fingerprint. It notifies session handler if any changes have to be made. Custom session configuration can be sent with a variable. Parameters are as follows:</p>
+					
+					<ul>
+						<li><b>name</b> - Session cookie name.</li>
+						<li><b>lifetime</b> - Session cookie lifetime.</li>
+						<li><b>path</b> - URL path for session cookie.</li>
+						<li><b>domain</b> - Domain for session cookie.</li>
+						<li><b>secure</b> - Whether session cookie is for secure connections only.</li>
+						<li><b>http-only</b> - Whether session cookie is for HTTP requests only and unavailable for scripts.</li>
+						<li><b>user-key</b> - Session key for storing user data.</li>
+						<li><b>permissions-key</b> - Session key for storing user permissions.</li>
+						<li><b>fingerprint-key</b> - Session key for storing session fingerprint.</li>
+						<li><b>timestamp-key</b> - Session key for storing session timestamp.</li>
+						<li><b>token-key</b> - Session key for public request tokens for protecting against replay attacks.</li>
+						<li><b>fingerprint</b> - Session key for session fingerprinting for protecting against replay attacks.</li>
+					</ul>
 				
 				<h3>final public function regenerateSession($deleteOld=true)</h3>
 				
@@ -404,7 +427,7 @@
 					
 				<h3>final public function callTool($type,$arg1=false,$arg2=false)</h3>
 				
-					<p>This method loads tools object if it doesn't exist yet and then allows to call various methods of the tool. You can call filesystem cleaner, indexer or a file-size calculator (and each work recursively).</p>
+					<p>This method loads tools object if it doesn't exist yet and then allows to call various methods of the tool. You can call filesystem cleaner, indexer or a file-size calculator (and each work recursively) and counter.</p>
 				
 				<h3>final public function terminal($command)</h3>
 				

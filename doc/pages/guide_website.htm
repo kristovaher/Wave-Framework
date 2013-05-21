@@ -12,13 +12,18 @@
 	
 		<h1>Website Workflow</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-url-request-workflow">URL Request Workflow</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework itself is simple to get a hold on, but when it comes to building a website on it, there are a number of things that you should know when it comes to URL requests sent to Wave. This document is a general overview about how Wave Framework handles the whole website architecture and design.</p>
 				
 				<p>Wave Framework comes by default with a URL and View controllers that are used to build a functioning website. URL Controller interprets the URL that user entered and finds a matching View and the View Controller then loads that View. There are also other things that have to be kept in mind. Sitemap file can carry a lot of configuration settings that can affect how your website works. You can define both static and dynamic URL's in Sitemap, do redirects and more. It is also possible to load classes, libraries and additional functionality based on Sitemap configuration even before Views and other MVC objects are loaded.</p>
 				
-			<h2>URL Request Workflow</h2>
+			<h2 id="index-url-request-workflow">URL Request Workflow</h2>
 			
 				<p>Here is an overview of what happens, if user enters a URL to their browser and is sent to the server that uses Wave Framework. For example, if you are currently running the base unmodified version of Wave and enter the URL 'http://www.example.com/example', then a number of things will happen:</p>
 				

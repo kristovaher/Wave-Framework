@@ -12,7 +12,18 @@
 	
 		<h1>Installation and Setup</h1>
 		
-			<h2>Installing Wave Framework</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-installing-wave-framework">Installing Wave Framework</a></li>
+				<li><a href="#index-server-requirements">Server Requirements</a></li>
+				<li><a href="#index-successful-output-from-compatibility-script">Successful Output from Compatibility Script</a></li>
+			</ul>
+			
+			<h2 id="index-introduction">Introduction</h2>
+			
+				<p>This document gives a complete overview about the installation procedure of Wave Framework to a web server.
+		
+			<h2 id="index-installing-wave-framework">Installing Wave Framework</h2>
 
 				<ul>
 					<li><b>1</b> - Unpack the downloaded archive of Wave Framework or go to the repository folder if you downloaded through Git or Mercurial.</li>
@@ -38,7 +49,7 @@
 							<li>For rewrites to work properly you need to place the configuration settings found in '/nginx.conf' file to your Nginx server configuration. This is more complicated than setting up redirects locally on Apache servers, since a lot of Nginx servers have very different configurations and just a single configuration file (Nginx has no '.htaccess' like functionality) and you need to implement your configuration inside that main configuration. If you know a little about Nginx server configuration, then it should not be a problem.</li>
 						</ul>
 					</li>
-					<li><b>6</b> - Test if server is set up properly by making a request to '/tools/compatibility.php' script and fix any errors that Compatibility script might throw. Warnings can be ignored, but Wave Framework works at its best if it encounters no warnings in Compatibility script.</li>
+					<li><b>6</b> - Test if server is set up properly by making a request to '/tools/compatibility.php' script and fix any errors that Compatibility script might throw. Warnings can be ignored, but Wave Framework works at its best if it encounters no warnings in Compatibility script, so make sure to read the messages next to warnings.</li>
 					<li><b>7</b> -  Access the root file with a web browser. If 'Hello Wave' is shown together with a pretty logo, without any errors, then everything should be up and running! There is no setup script that needs to be run separately and you can start developing your application right away.
 						<ul>
 							<li>If the page shows an error message, then make sure that the '/filesystem/' folders are writable and that the configuration steps above have been followed.</li>
@@ -53,7 +64,7 @@
 				
 					<p>Wave Framework has multiple tutorials you can try out in order to learn how Wave Framework can be used to build various web services and websites. Even if you have not worked with API's and MVC-specific frameworks before, getting a good grip on such a development is not very difficult with Wave. Tutorials are available in the Tutorials section <a href="../index.htm">here</a>.</p>
 
-			<h2>Server Requirements</h2>
+			<h2 id="index-server-requirements">Server Requirements</h2>
 
 				<p>Wave Framework requires a server that allows to route all requests to <a href="gateway.htm">Index Gateway</a> file (/index.php). <a href="gateway.htm">Index Gateway</a> does not work without URL rewriting. It is possible to use Wave Framework's API without <a href="gateway.htm">Index Gateway</a>, but in this case you need to develop your own gateway that does not require such HTTP request URL rewriting.</p>
 
@@ -74,9 +85,10 @@
 
 					<p>It is also required that <b>/filesystem/</b> folder and all of its subfolders are writable by PHP. This is not required on Windows server, since folders are already writable.</p>
 
-				<h2>Successful output from Compatibility Script</h2>
+				<h2 id="index-successful-output-from-compatibility-script">Successful output from Compatibility Script</h2>
 
-					<p>SUCCESS: PHP is running version 5.3 or newer<br/>
+					<p>
+					SUCCESS: PHP is version 5.3.0 or above<br/>
 					SUCCESS: PHP setting short_open_tag is enabled<br/>
 					SUCCESS: PDO is supported<br/>
 					SUCCESS: PDO MySQL is supported<br/>
@@ -116,7 +128,8 @@
 					SUCCESS: /filesystem/backups/ is writable</br>
 					SUCCESS: /filesystem/static/ is writable</br>
 					SUCCESS: /filesystem/updates/ is writable</br>
-					SUCCESS: /filesystem/data/ is writable</p>
+					SUCCESS: /filesystem/data/ is writable
+					</p>
 			
 	</body>
 </html>

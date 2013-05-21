@@ -12,13 +12,19 @@
 	
 		<h1>Overrides</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-overriding-classes">Overriding Classes</a></li>
+				<li><a href="#index-overriding-resources">Overriding Resources</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework includes the ability to have overrides. Overrides are files that override default functionality in some way. This is insignificant for most websites and web services, but if Wave Framework is used to develop a specific info-system that is installed on multiple web servers and it is required to change certain files around (like a logo or some functionality), then overrides make this work easily without making it impossible to later on update the core software.</p>
 				
 				<p>The way overrides work in Wave Framework is that they have to be placed in /overrides/ subfolder in the main archive and system will check whether such override files exist in those folders before serving the file. There are overrides for models, views, controllers as well as static images and resources such as JavaScript.</p>
 				
-			<h2>Overriding Classes</h2>
+			<h2 id="index-overriding-classes">Overriding Classes</h2>
 			
 				<p>Wave Framework stores model classes in /models/ subfolder, views in /views/ subfolder, controllers in /controllers/ subfolder and other, generic use classes, in /resources/classes/ subfolder. It is possible to override those classes by placing files with the exact same filename under /overrides/models/, /overrides/views/, /overrides/controllers/ or /overrides/resources/classes/ subfolders.</p>
 				
@@ -28,7 +34,7 @@
 				
 				<p>Overrides cannot be applied to core Wave Framework classes to make sure the engine is always on the same version.</p>
 				
-			<h2>Overriding Resources</h2>
+			<h2 id="index-overriding-resources">Overriding Resources</h2>
 			
 				<p>It is also possible to override image files, script files and stylesheets. This overriding functionality is only enabled for any image file (*.jpeg, *.jpg, *.png) or resource file (*.css, *.js, *.txt, *.csv, *.xml, *.html, *.htm, *.rss, *.vcard) stored in /resources/ folder and its subfolders. To override a specific script or picture, then you should create a file with the same name and folder structure under /overrides/resources/ subfolder. If this file is found, then override file is loaded instead of the original.</p>
 				

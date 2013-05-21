@@ -12,15 +12,21 @@
 	
 		<h1>About State and Configuration</h1>
 		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-getting-and-setting-state-data">Getting and Setting State Data</a></li>
+				<li><a href="#index-translations-and-sitemap">Translations and Sitemap</a></li>
+			</ul>
+		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework is built around three core components: API that executes all functionality in the system, State that stores configuration and environment state and Factory-enhanced objects that you build as a developer. State and configuration are accessible by both API and <a href="guide_mvc.htm">MVC</a> Objects.</p>
 				
 				<p>State is responsible for two things: it carries system configuration and it has methods that allow you to change this configuration or modify the system state in some way (such as use cookies, sessions or the <a href="guide_messenger.htm">State Messenger</a> ). System configuration is loaded from '/config.ini' file and some of the configuration options - when changed - trigger additional calls in the system. You can read more about this from <a href="configuration.htm">Configuration</a> documentation. The list of all potential variables stored in state is available in <a href="state.htm">State</a> Class documentation.</p>
 				
-			<h2>Getting and Setting State Data</h2>
+			<h2 id="index-getting-and-setting-state-data">Getting and Setting State Data</h2>
 			
 				<p>System configuration and various environment variables are automatically loaded into state as variables. There are two methods that allow you to access configuration and state variables: setState() and getState(). State-setting methods should be used with caution, most of the web services or websites should not have to change anything in State directly.</p>
 				
@@ -69,7 +75,7 @@
 
 				<p>But note that some of these changes might cause the system to run into problems, like if you change the current language and the language translation files don't actually exist and so on. So caution should be there before changing such variables.</p>
 				
-			<h2>Translations and Sitemap</h2>
+			<h2 id="index-translations-and-sitemap">Translations and Sitemap</h2>
 				
 				<p>State also stores information about translations from '/resources/[language].translations.ini' file and from sitemap '/resources/[language].sitemap.ini' file. State also allows to return data about translations and sitemaps of not just currently active language, but also of other languages in the system.</p>
 				

@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.2
+ * @version    3.6.0
  */
 
 // This initializes tools and authentication
@@ -23,46 +23,86 @@ require('.'.DIRECTORY_SEPARATOR.'tools_autoload.php');
 // Log is printed out in plain text format
 header('Content-Type: text/html;charset=utf-8');
 
-// Action is based on GET values
-if(empty($_GET)){
-	// Making sure that the default .empty file is not listed in errors directory
-	if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.'.empty')){
-		unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.'.empty');
-	}
-	$errorLogs=scandir('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR);
-	// If it found error messages of any kind
-	foreach($errorLogs as $error){
-		if($error!='.empty' && is_file('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$error)){
-			header('Location: debugger.php?error='.$error);
-			die();
+// Debugger actions are based on whether signature and error are set
+if(isset($_GET['signature']) && isset($_GET['error'])){
+
+	// Replacing potentially harmful characters
+	$signature=preg_replace('[^a-zA-Z0-9]','',$_GET['signature']);
+	$error=preg_replace('[^a-zA-Z0-9]','',$_GET['error']);
+	$folder='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signature.DIRECTORY_SEPARATOR;
+	
+	// If the entry is marked for removal
+	if(isset($_GET['done'])){
+	
+		// Making sure that the file exists
+		if(file_exists($folder.$error.'.tmp')){
+			unlink($folder.$error.'.tmp');
 		}
-	}
-} elseif(isset($_GET['error'],$_GET['alldone'])){
-	$errorLogs=scandir('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR);
-	// If it found error messages of any kind
-	foreach($errorLogs as $error){
-		if(is_file('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$error)){
-			unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$error);
+		// Redirecting to signature itself, this finds the next error
+		header('Location: debugger.php?signature='.$signature);
+		die();
+		
+	} elseif(isset($_GET['alldone'])){
+	
+		// Making sure that the folder exists
+		if(is_dir($folder)){
+			// Cleaning all the files in the folder
+			dirCleaner($folder);
+			// Removing the directory itself
+			rmdir($folder);
 		}
+	
+		// Redirecting to Debugger main menu
+		header('Location: debugger.php');
+		die();
+		
 	}
-	// User will be redirected back to initial site
-	header('Location: debugger.php');
-	die();
-} elseif(isset($_GET['error'],$_GET['done'])){
-	// If error is considered to be 'fixed' then it will be removed, if it exists
-	if(file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error'])){
-		unlink('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error']);
-	}
-	// User will be redirected back to initial site
-	header('Location: debugger.php');
-	die();
-} elseif(isset($_GET['error'])){
-	// If error is found
-	if(!file_exists('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error'])){
-		// User will be redirected back to initial site
+	
+} elseif(isset($_GET['signature'])){
+
+	// Replacing potentially harmful characters
+	$signature=preg_replace('[^a-zA-Z0-9]','',$_GET['signature']);
+	// This is the folder that should store the error messages
+	$folder='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signature.DIRECTORY_SEPARATOR;
+	// Making sue that the file exists and that there is more than one file in the folder
+	if(file_exists($folder.'signature.tmp') && fileCount($folder)>1){
+		// Finding the first non signature file in the folder
+		$filenames=fileIndex($folder,'filenames');
+		foreach($filenames as $file){
+			if($file!='signature.tmp'){
+				header('Location: debugger.php?signature='.$signature.'&error='.str_replace('.tmp','',$filenames[0]));
+				die();
+			}
+		}
+	} else {
+		// Otherwise redirect to main Debugger page
 		header('Location: debugger.php');
 		die();
 	}
+	
+} else {
+
+	// This array stores all the error developer signatures
+	$signatures=array();
+
+	// This is the list of all errors based on signatures
+	$folders=fileIndex('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR,'folders');
+	
+	// Looping over each folder that includes errors
+	foreach($folders as $f){
+		// Making sure that this is a proper file with errors
+		if(file_exists($f.'signature.tmp')){
+			$fileCount=fileCount($f);
+			if($fileCount==1){
+				// Removing the error signature and folder, since it is empty
+				unlink($f.'signature.tmp');
+				rmdir($f);
+			} else {
+				$signatures[$f]=file_get_contents($f.'signature.tmp');
+			}
+		}
+	}
+	
 }
 
 ?>
@@ -83,6 +123,9 @@ if(empty($_GET)){
 	<body>
 		<?php
 		
+		// Pops up an alert about default password
+		passwordNotification($config['http-authentication-password']);
+		
 		// Header
 		echo '<h1>Debugger</h1>';
 		echo '<h4 class="highlight">';
@@ -92,18 +135,16 @@ if(empty($_GET)){
 		}
 		echo '</h4>';
 		
-		// Subheader
-		echo '<h2>Logged Errors</h2>';
+		if(isset($_GET['signature']) && isset($_GET['error'])){
 		
-		// Action is based on GET values
-		if(empty($_GET)){
-			echo '<p class="bold">There are no outstanding errors</p>';
-		} elseif(isset($_GET['error'])){
-			echo '<h5 onclick="if(confirm(\'Are you sure? This deletes all error log entries!\')){ document.location.href=document.location.href+\'&alldone\'; }" class="red bold" style="cursor:pointer;float:right;">or delete all error logs</h5>';
-			echo '<h3 onclick="if(confirm(\'Are you sure?\')){ document.location.href=document.location.href+\'&done\'; }" class="red bold" style="cursor:pointer;width:400px;">Click to delete this error log</h3>';
+			echo '<h2>Logged Error</h2>';
+			
+			echo '<h5 onclick="if(confirm(\'Are you sure? This deletes all error log entries!\')){ document.location.href=document.location.href+\'&alldone\'; }" class="red bold" style="cursor:pointer;float:right;">or remove all error entries with this signature</h5>';
+			echo '<h3 onclick="if(confirm(\'Are you sure?\')){ document.location.href=document.location.href+\'&done\'; }" class="red bold" style="cursor:pointer;width:400px;">Click to remove this entry</h3>';
+				
 			
 			// Getting error file size
-			$filesize=filesize('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error']);
+			$filesize=filesize('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$error);
 			
 			// Attempting to get memory limit
 			$memory=ini_get('memory_limit');
@@ -117,7 +158,7 @@ if(empty($_GET)){
 			
 			// Error is only shown if memory limit could not be gotten or is less than the file size
 			if(!$memory || $filesize<$memory){
-				$errorData=file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$_GET['error']);
+				$errorData=file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signature.DIRECTORY_SEPARATOR.$error.'.tmp');
 				$errorData=explode("\n",$errorData);
 				foreach($errorData as $nr=>$d){
 					if(trim($d)!=''){
@@ -139,11 +180,31 @@ if(empty($_GET)){
 						echo '</div>';
 					}
 				}
+				echo '<a href="debugger.php">Back to Debugger menu</a>';
 			} else {
-				echo '<p class="bold">This error log is too large for PHP to handle. Are you using error tracing in your configuration file? If so, then it is recommended to turn that setting off as that will generate smaller error log files.</p>';
+				echo '<p class="bold">This error log is too large for PHP to handle. Are you using \'trace-errors\' setting in your configuration file? If so, then it is recommended to turn that off. This will generate smaller error log files.</p>';
 			}
-		}
 		
+		} else {
+		
+			echo '<h3>Available Signatures</h3>';
+			echo '<h4>Signature is a pair of IP address and user agent string that generated the error. This helps you keep different log entries separate from one another based on client. Click on signature to see relevant error messages.</h4>';
+			
+			// If there are error signatures found
+			if(!empty($signatures)){
+				foreach($signatures as $folder=>$signature){
+					if($signature==$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']){
+						echo '<a href="debugger.php?signature='.md5($signature).'"><span class="red bold">'.($fileCount-1).'</span> - '.$signature.' <span class="orange">(this matches your signature)</span></a><br/>';
+					} else {
+						echo '<a href="debugger.php?signature='.md5($signature).'"><span class="red bold">'.($fileCount-1).'</span> - '.$signature.'</a><br/>';
+					}
+				}
+			} else {
+				echo '<p class="bold">There are no logged errors</p>';
+			}
+		
+		}
+				
 		// Footer
 		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' GMT '.date('P').' for '.$_SERVER['HTTP_HOST'].'</p>';
 	

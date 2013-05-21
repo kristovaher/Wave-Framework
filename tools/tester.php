@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.6
+ * @version    3.6.0
  */
 
 // This initializes tools and authentication
@@ -79,10 +79,10 @@ if(isset($_POST['tests']) && !empty($_POST['tests']) && isset($_POST['count']) &
 	
 	// This functions file is not required, but can be used for system wide functions
 	// If you want to include additional libraries, do so here
-	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php')){
-		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
-	} else {
-		require(__ROOT__.'resources'.DIRECTORY_SEPARATOR.'autoload.php');
+	if(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php')){
+		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php');
+	} elseif(file_exists(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php')) {
+		require(__ROOT__.'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'scripts'.DIRECTORY_SEPARATOR.'script.php');
 	}
 	
 	// API is used to process all requests and it handles caching and API validations
@@ -399,6 +399,9 @@ foreach($testFiles as $test){
 	</head>
 	<body>
 		<?php
+		
+		// Pops up an alert about default password
+		passwordNotification($config['http-authentication-password']);
 		
 		// Header
 		echo '<h1>Test Suite</h1>';

@@ -12,13 +12,19 @@
 	
 		<h1>Dynamic Loading of Resources</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-making-requests-to-resource-files">Making Requests to Resource Files</a></li>
+				<li><a href="#index-handling-version-updates">Handling Version Updates</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework allows loading of resource files, JavaScript and CSS stylesheets, with various additional on-demand options. The way this works is that all HTTP requests are redirected to Wave Framework <a href="gateway.htm">Index Gateway</a> which then loads <a href="handler_resource.htm">Resource Handler</a> for serving these resource files. By default the file extensions, that are served by <a href="handler_resource.htm">Resource Handler</a>, are: *.css, *.js, *.txt, *.csv, *.xml, *.html, *.htm, *.rss, *.vcard.</p>
 				
 				<p>In order for dynamic loading of resources to work properly, URL rewriting must be supported by the server, otherwise Wave Framework <a href="handler_resource.htm">Resource Handler</a> will never get the request. If in doubt, you can check the /tools/compatibility.php script to see if URL rewriting is supported or not.</p>
 				
-			<h2>Making Requests to Resource Files</h2>
+			<h2 id="index-making-requests-to-resource-files">Making Requests to Resource Files</h2>
 
 				<p>Wave Framework <a href="handler_resource.htm">Resource Handler</a> will attempt to compress the file as well as return proper cache headers based on configuration settings in /config.ini file. Wave Framework builds internal cache and makes sure that the requested resource is returned to the requesting user agent as efficiently as possible.</p>
 			
@@ -81,7 +87,7 @@
 	</code>
 </pre>
 
-			<h2>Dealing With Version Updates</h2>
+			<h2 id="index-handling-version-updates">Handling Version Updates</h2>
 			
 				<p>Wave Framework tells user agents - browsers - in the response headers to cache the resource file for one full year. This is recommended practice in modern web development, as static-like resources should not be requested more than once from the server. But what happens if one of the scripts does indeed change?</p>
 				

@@ -12,15 +12,22 @@
 	
 		<h1>Using Sessions, Cookies and Headers</h1>
 		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-cookies">Cookies</a></li>
+				<li><a href="#index-sessions">Sessions</a></li>
+				<li><a href="#index-headers">Headers</a></li>
+			</ul>
+		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework includes a number of wrapper methods which can be used to set cookies and session variables, get data from cookies and sessions as well as unset cookies and sessions. Wave Framework also detects if session variables are unset and if nothing is stored in sessions anymore, then removing the entire session together with session cookie. Wave Framework also deals with session namespacing, which makes sure that the cookies set by Wave Framework are not easily edited by other systems that run on the same server.</p>
 				
 				<p>Wave Framework also has simple wrapper methods for setting and unsetting HTTP headers.</p>
 				
-			<h2>Cookies</h2>
+			<h2 id="index-cookies">Cookies</h2>
 			
 				<p>Cookies are an important part in most websites, as it is possible to store various temporary data with cookies that other HTTP requests can use. Cookies work like a browser-side sessions and cookies also store the key to sessions, which are technically server-side cookies.</p>
 				
@@ -70,7 +77,7 @@
 
 				<p>Differently from default behavior in PHP, where you need to make a new HTTP request before you can access cookies, Wave Framework allows you to access cookies immediately after setting them.</p>
 				
-			<h2>Sessions</h2>
+			<h2 id="index-sessions">Sessions</h2>
 			
 				<p>Sessions are used as the most common method for doing user sessions in modern websites. Sessions hold a cookie in users computer, value of which is used to define a session variable on the web server. This variable can store any kind of information.</p>
 				
@@ -116,7 +123,7 @@
 
 				<p>It can be useful to destroy sessions when a user logs out, but if other parts of the system also use sessions, then it might destroy some sessions that were not meant to be destroyed. One way or another, the tools are there and can be used for whatever purpose deemed necessary.</p>
 				
-			<h2>Headers</h2>
+			<h2 id="index-headers">Headers</h2>
 			
 				<p>Wave Framework also includes two wrapper methods for setting and unsetting headers. These are technically the exact same methods you could call with 'header()' and 'header_remove()' methods directly, but are included for possibility of adding additional functionality later on.</p>
 				

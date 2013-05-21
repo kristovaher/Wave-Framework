@@ -12,11 +12,28 @@
 	
 		<h1>Configuration</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-http-authentication">HTTP Authentication</a></li>
+				<li><a href="#index-application-version">Application Version</a></li>
+				<li><a href="#index-logging-and-debugging">Logging and Debugging</a></li>
+				<li><a href="#index-database">Database</a></li>
+				<li><a href="#index-server">Server</a></li>
+				<li><a href="#index-handler-extensions">Handler Extensions</a></li>
+				<li><a href="#index-content">Content</a></li>
+				<li><a href="#index-optimizations-and-cache">Optimizations and Cache</a></li>
+				<li><a href="#index-dynamic-resources">Dynamic Resources</a></li>
+				<li><a href="#index-api-settings">API Settings</a></li>
+				<li><a href="#index-sessions">Sessions</a></li>
+				<li><a href="#index-request-limiter">Request Limiter</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/config.ini</h3>
 				
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 
 				<p>Configuration options from /config.ini file. These configuration options are used by Wave Framework system as well as by developer tools in /tools/ folder.</p>
 				
@@ -24,7 +41,7 @@
 
 				<p>If your project needs additional configuraton options then you can freely add them here and access them through state-specific methods, but make sure that there is no name conflict with any internal configuration and state variables. Refer to State documentation to know exactly which variables have already been used.</p>
 			
-			<h2>HTTP Authentication</h2>
+			<h2 id="index-http-authentication">HTTP Authentication</h2>
 		
 				<p><b>http-authentication-username<br/>
 				http-authentication-password<br/>
@@ -32,13 +49,13 @@
 				
 				<p>If limiter-authentication setting is set to 1, then HTTP authentication is required before any requests go through. It is also possible to limit the entire access to only a single IP or multiple IP addresses by assigning http-authentication-ip a comma separated list of IP addresses. These settings are also used by developer tools in /tools/ subfolder.</p>
 				
-			<h2>Application Version</h2>
+			<h2 id="index-application-version">Application Version</h2>
 			
 				<p><b>version</b></p>
 				
 				<p>If this value is changed, then it will load various resources, like robots.txt, sitemap.xml and Appcache files as new ones, without relying on the old versions. This is used to check for cache files and can be used in system checks across your web service. This is not defined by default and is considered to be 1.0.0 if left undefined. Note that this should be the same as the version number for 'system' in '.version' file. That '.version' file is used independently only by the updater script. Changing this number will also invalidate all existing cache.</p>
 			
-			<h2>Logging and Debugging</h2>
+			<h2 id="index-logging-and-debugging">Logging and Debugging</h2>
 			
 				<p><b>logger<br/>
 				logger-ip</b></p>
@@ -58,7 +75,7 @@
 				
 				<p>If these are set then using isDeveloper() call returns true. This allows you to test various features within the API that only work when requests are made from a specific IP and user agent. If these settings are not set or are empty, then isDeveloper() always returns false. Values can be comma-separated-lists. Note that the user agent string should be written here without semicolon character, which is unsupported in INI files.</p>
 			
-			<h2>Database</h2>
+			<h2 id="index-database">Database</h2>
 			
 				<p><b>database-type<br/>
 				database-host<br/>
@@ -80,7 +97,7 @@
 				
 				<p>These are database credentials for the Test Suite that is run by the test script and tests stored at '/tools/' subfolder. It is recommended that the test database is identical in structure to live database, otherwise the tests can affect actual database in negative ways.</p>
 				
-			<h2>Server</h2>
+			<h2 id="index-server">Server</h2>
 			
 				<p><b>trusted-proxies</b></p>
 				
@@ -127,7 +144,7 @@
 				
 				<p>This sets the time limit for the Wave Framework requests. Setting this value does not guarantee that it will be success, as certain servers disable setting time limit with PHP. This setting is undefined by default, thus Wave Framework uses the internal time limit that is set in the server. This value is in seconds.</p>
 				
-			<h2>Handler Extensions</h2>
+			<h2 id="index-handler-extensions">Handler Extensions</h2>
 
 				<p><b>image-extensions</b></p>
 				
@@ -141,7 +158,7 @@
 				
 				<p>This is a comma-separated list of file extensions that cannot be requested over HTTP. Caution! Please note that some of these extensions, like 'ini', 'htaccess', 'version' should never be removed from here, since they can otherwise pose a security risk - it would be possible to see configuration file contents over HTTP request. Default extensions are tmp, log, ht, htaccess, pem, crt, db, sql, version, conf, ini.</p>
 			
-			<h2>Content</h2>
+			<h2 id="index-content">Content</h2>
 			
 				<p><b>project-title<br/>
 				author<br/>
@@ -193,7 +210,7 @@
 				
 				<p>This sets what domains are allowed to access the API or load resources from this installation. This sets an 'Access-Control-Allow-Origin' header to all of the HTTP requests. This is not set by default, thus disallowing cross-domain requests to this system. This allows you to make cross-domain requests to this resource if '*' is set or another domain.</p>
 				
-			<h2>Optimizations and Cache</h2>
+			<h2 id="index-optimizations-and-cache">Optimizations and Cache</h2>
 				
 				<p><b>output-compression</b></p>
 				
@@ -238,7 +255,7 @@
 				
 				<p>Memcache can be used to improve caching speeds noticeably in Wave Framework and speed up your website or web service considerably. If host and port are not set, then localhost and 11211 port is used for the connection.</p>
 				
-			<h2>Dynamic Resources</h2>
+			<h2 id="index-dynamic-resources">Dynamic Resources</h2>
 				
 				<p><b>404-image-placeholder</b></p>
 				
@@ -280,7 +297,7 @@
 				
 				<p>This is a security setting against potential Denial of Service attacks. This setting, if set to 1, allows to load scripts and CSS files in unified form from /resources/ folder. Multiple scripts can be loaded by separating their filenames with &amp; symbol and 'minify' flag can also be used to load the resource in minified form. This setting is 1 by default.</p>
 				
-			<h2>API Settings</h2>
+			<h2 id="index-api-settings">API Settings</h2>
 				
 				<p><b>api-public-profile</b></p>
 				
@@ -298,7 +315,7 @@
 				
 				<p>It is possible to keep a simplified log of API requests that are sent to <a href="handler_api.htm">API Handler</a>. This setting is a comma-separated list of API profiles that will be tracked or will not be tracked. This allows for keeping track of how actively this or that API Profile is used in the system and gives a good overview of what commands have been used the most and how frequently. Setting it to '*' will mean that every API Profile will be logged, except profiles listed with '!' in front of their name. The default setting, if used, will track all API profiles except the public profile.</p>
 				
-			<h2>Sessions</h2>
+			<h2 id="index-sessions">Sessions</h2>
 			
 				<p><b>session-name</b></p>
 				
@@ -320,7 +337,7 @@
 				
 				<p>This setting allows you to tie your sessions to the specific web browser and IP address. This setting is 0 by default, but if set to 1, then Wave Framework will compare the fingerprint that was generated during session creation against current fingerprint and if they are different, then the session is removed immediately.</p>
 			
-			<h2>Request Limiter</h2>
+			<h2 id="index-request-limiter">Request Limiter</h2>
 				
 				<p><b>limiter</b></p>
 				

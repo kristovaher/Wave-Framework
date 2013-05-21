@@ -12,13 +12,21 @@
 	
 		<h1>Making Database Requests</h1>
 		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-connecting-to-database">Connecting to Database</a></li>
+				<li><a href="#index-database-requests">Database Requests</a></li>
+				<li><a href="#index-transactions">Transactions</a></li>
+				<li><a href="#index-helpers-and-debugging">Helpers and Debugging</a></li>
+			</ul>
+		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework also implements a wrapper class for PDO. This means that it is possible to use Wave Framework to connect to MySQL, PostgreSQL, SQLite, Oracle and MSSQL databases. Wave Framework also has multiple helper functions that can assist developer when dealing with database related filtering and other features.</p>
 				
-			<h2>Connecting to Database</h2>
+			<h2 id="index-connecting-to-database">Connecting to Database</h2>
 			
 				<p>There are two ways for Wave Framework to connect to database. The first is to set up Wave Framework to have a single database link that it will connect with through Wave Framework and the <a href="guide_state.htm">State</a> itself.</p>
 				
@@ -58,7 +66,7 @@
 				
 				<p>Methods used in this new database object are also the same as the ones shown below, in other sections of this document.</p>
 				
-			<h2>Database Requests</h2>
+			<h2 id="index-database-requests">Database Requests</h2>
 			
 				<p>Wave Framework <a href="guide_database.htm">Database</a> Class has three methods for making database requests and one method for returning the last inserted ID. The three methods serve a slightly different purpose. Wave Framework is built around PDO class, so it supports prepared statements, which means that the query string and variables should be sent separately. It is recommended to learn more about PDO in PHP official documentation, if you are not familiar with prepared statements.</p>
 				
@@ -115,7 +123,7 @@
 
 				<p>This is useful for situations where you inserted a new object in database, but do not know what primary key was assigned to this new row.</p>
 				
-			<h2>Transactions</h2>
+			<h2 id="index-transactions">Transactions</h2>
 			
 				<p>PDO supports transactions on database types that support transactions. Transactions are essentially ways to make multiple database requests and then roll them back, should something go wrong.</p>
 				
@@ -153,7 +161,7 @@
 				
 				<p>Transactions are very useful in a modern database design that help to protect the system from database corruption that might result in broken scripts or processing that went wrong half way through and would otherwise require some manual work to restore.</p>
 			
-			<h2>Helpers and Debugging</h2>
+			<h2 id="index-helpers-and-debugging">Helpers and Debugging</h2>
 			
 				<p>There are a few more methods that can be used through the <a href="guide_database.htm">Database</a> Class and wrapper in Wave Framework. These methods do not make an actual database request themselves, but can be used to deal with input or output from database or for debugging.</p>
 				

@@ -12,9 +12,16 @@
 	
 		<h1>Making API Calls</h1>
 		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-internal-api-calls">Internal API Calls</a></li>
+				<li><a href="#index-checking-the-result-of-an-api-call">Checking the Result of an API Call</a></li>
+				<li><a href="#index-making-api-requests-over-http">Making API Requests Over HTTP</a></li>
+			</ul>
+		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework is built around the internal API. Every <a href="guide_mvc.htm">MVC</a> Object built on Wave Framework can make API calls, which means that most web services and websites could incorporate nested API calls across the system.</p>
 				
@@ -22,7 +29,7 @@
 				
 				<p>This document here doesn't cover the HTTP API use, nor does it go into detail about all the options and configuration flags of the API. It is recommended to consult with the API Documentation section that gives extensive insight about all the features within the API</p>
 				
-			<h2>Internal API Calls</h2>
+			<h2 id="index-internal-api-calls">Internal API Calls</h2>
 			
 				<p>While a lot of functionality can be built within Wave Framework Models, Views and Controllers by loading other <a href="guide_mvc.htm">MVC</a> objects dynamically through the getModel(), getView() and getController() methods that are detailed in Creating Objects documentation, quite often it is useful to just make an API call to the system.</p>
 				
@@ -60,7 +67,7 @@
 
 				<p>The input data accepts all the API configuration and settings that HTTP API and the core API would accept. It is recommended to take a look at API Documentation to get more information about the API, caching, encryptions and other features.</p>		
 
-			<h2>Checking the Result of an API Call</h2>
+			<h2 id="index-checking-the-result-of-an-api-call">Checking the Result of an API Call</h2>
 			
 				<p>If your controllers are built by taking into account the standardized response arrays that includes www-response-code value in the array - topic which is covered in <a href="guide_mvc.htm">MVC</a> documentation - then there is a simple helper function that you can use to check if the API call was successful or not. This method simply returns false if the response error code below 500 was sent as response and it returns 'true' if response code of 500 or later was the response.</p>
 				
@@ -96,7 +103,7 @@
 
 				<p>Standardized array responses - which have 'www-response-code' - can be very useful in a system built on Wave Framework, but they are not required. You can implement your own system and array keys which you then check when validating responses.</p>
 
-			<h2>Making API Requests Over HTTP</h2>
+			<h2 id="index-making-api-requests-over-http">Making API Requests Over HTTP</h2>
 			
 				<p>Wave Framework also comes with an API Wrapper for both PHP and JavaScript, which other web servers can use to communicate with Wave Framework even when these systems themselves do not use Wave Framework. These classes are independent and standalone.</p>
 				

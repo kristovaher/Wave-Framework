@@ -12,15 +12,21 @@
 	
 		<h1>File Handler</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-workflow">Workflow</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/handler.file.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>File Handler is used for returning a file from web server. It is loaded by Index Controller when a request is made to a file that has an extension that has not already been served by another Handler (such as Resource and <a href="handler_image.htm">Image Handler</a>). File Handler is usually considered for returning documents, videos and audio from the web server. It also allows to return a file within a byte range, like in the case of file streams.</p>
 			
-			<h2>Workflow</h2>
+			<h2 id="index-workflow">Workflow</h2>
 			
 				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
 				

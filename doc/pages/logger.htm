@@ -12,11 +12,19 @@
 	
 		<h1>Logger Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-logger-class">Using Logger Class</a></li>
+				<li><a href="#index-logger-class-parameters">Logger Class Parameters</a></li>
+				<li><a href="#index-logger-class-methods">Logger Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-logger.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>This is an optional class that is used to log requests on system by <a href="gateway.htm">Index Gateway</a>. Logger is used to keep track of performance of requests made to <a href="gateway.htm">Index Gateway</a> files, it keeps track of how long the request took, what data it included, how high was the memory use, server load, CPU usage and so on. If this logger is used, then every single request is logged as serialized arrays in <a href="filesystem.htm">Filesystem</a> in '/filesystem/log/' subfolders. It is a good idea to clean that folder every now and then. There is a separate log-reader.php script for reading those log files situated in '/tools/' subfolder.</p>
 			
@@ -26,7 +34,7 @@
 				
 				<p>The rest of this document details the use of Logger class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
 				
-			<h2>Using Logger Class</h2>
+			<h2 id="index-using-logger-class">Using Logger Class</h2>
 			
 				<p>To use Logger class, it is recommended to load Logger class and create a Logger object as early as possible. Microtime that is defined with Logger will be used for execution time calculations.</p>
 				
@@ -60,7 +68,7 @@
 
 				<p>This attempts to create a log with a filename in the format of 'Y-m-d-H' and in a subfolder 'Y-m-d' in log folder directory. Log data is stored as serialized array and if multiple entries are stored in the same log file, then they are separated by a new line.</p>
 			
-			<h2>Logger Class Parameters</h2>
+			<h2 id="index-logger-class-parameters">Logger Class Parameters</h2>
 			
 				<h3>private $requestMicrotime=false</h3>
 				
@@ -74,7 +82,7 @@
 				
 					<p>This array variable stores custom data sent to logger. Keys of this array will be stored as keys in the log entry.</p>
 			
-			<h2>Logger Class Methods</h2>
+			<h2 id="index-logger-class-methods">Logger Class Methods</h2>
 			
 				<h3>public function __construct($logDir='./',$microTime=false)</h3>
 				

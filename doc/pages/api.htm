@@ -12,7 +12,19 @@
 	
 		<h1>API Class</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-api-class">Using API Class</a></li>
+				<li><a href="#index-api-class-parameters">API Class Parameters</a></li>
+				<li><a href="#index-api-class-methods">API Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
+			
+				<h3>/engine/class.www-api.php</h3>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>API class is one of the core classes of Wave Framework. Every command and function in Wave Framework is executed through API object. API class implements <a href="state.htm">State</a> Class - which stores configuration - and executes any and all functionality that is built within Wave Framework. It is not recommended to modify this class, in fact this class is defined as final. Methods of this class take user input, load <a href="guide_mvc.htm">MVC</a> objects and execute their methods and return data in the appropriate format.</p>
 				
@@ -20,7 +32,7 @@
 				
 				<p>API takes any type of input data as an array, but considers input data that has 'www-' prefix (called the 'wave prefix') as Wave Framework specific and this can carry additional functionality. More details about Wave Framework API related calls is detailed in API feature guide.</p>
 				
-			<h2>Using API class</h2>
+			<h2 id="index-using-api-class">Using API Class</h2>
 			
 				<p>API class is an internal Wave Framework class and should not be used outside the context of Wave Framework. API and <a href="handler_data.htm">Data Handlers</a> use the API in the following way, for example:</p>
 				
@@ -53,7 +65,7 @@
 
 				<p>You can take a look at the <a href="handler_api.htm">API Handler</a> code to see how additional data is configured about API class.</p>
 
-			<h2>API Class Parameters</h2>
+			<h2 id="index-api-class-parameters">API Class Parameters</h2>
 
 				<h3>private $commandBuffer=array()</h3>
 				
@@ -119,7 +131,7 @@
 				
 					<p>This is used only by resultFile() method to close API processing once file download happens.</p>
 					
-			<h2>API Class Methods</h2>
+			<h2 id="index-api-class-methods">API Class Methods</h2>
 			
 				<h3>final public function __construct($state=false,$apiProfiles=false)</h3>
 				

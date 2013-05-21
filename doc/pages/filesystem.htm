@@ -11,16 +11,25 @@
 	<body>
 	
 		<h1>Filesystem Overview</h1>
+		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-listing">Listing</a></li>
+			</ul>
 
-			<p>General overview of the files included in the setup archive of Wave Framework in alphabetical order.</p>
+		<h2 id="index-introduction">Introduction</h2>
+		
+			<p>This document lists all the files included in the setup archive of Wave Framework, in alphabetical order.</p>
+
+		<h2 id="index-listing">Listing</h2>
 
 			<p><b>/controllers/</b></p>
 
 			<p>Includes all controllers used by the system. Controllers are built with the following standard, where controllers name is written in filename as controller.{name}.php, class itself is defined as WWW_controller_{name} and when this controller is called with API, the command is $API-&gt;command({name}-{method}), where method is a method of that class. When this controller is created through WWW_Factory (within one of the <a href="guide_mvc.htm">MVC</a> objects), the command is $this-&gt;getController({name},{method},{data}), where method is a method of that class and {data} is input data to that method. If method and data are not defined, then object itself is returned instead of the function result.</p>
 
-			<p><b>/controllers/controller.example.php</b></p>
+			<p><b>/controllers/controller.{name}.php</b></p>
 
-			<p>Minimal example controller for demonstration purposes.</p>
+			<p>This folder stores Controllers and the 'name' is the name of the Controller in the system.</p>
 
 			<p><b>/controllers/controller.url.php</b></p>
 
@@ -53,14 +62,14 @@
 
 			<p>Simple database class that acts as a wrapper to PDO. It is not required to use <a href="database.htm">Database</a> with Wave Framework at all, but should it be required, it is available. This class uses PDO database class to simplify some of the database commands. It includes functions for returning data from database as a single row or multiple rows as associative arrays as well as get information about last inserted ID and number of rows affected by last query.</p>
 
-			<p><b>/engine/class.www-factory.php</b></p>
-
-			<p>Factory class is required for loading <a href="guide_mvc.htm">MVC</a> objects. Factory is used as a parent class for supporting the <a href="guide_mvc.htm">MVC</a> components of the system, every <a href="guide_mvc.htm">MVC</a> component is (usually) inherited from this class. Factory carries with itself wrappers for <a href="guide_api.htm">API</a> and <a href="guide_state.htm">State</a> functionality.</p>
-
 			<p><b>/engine/class.www-factory.js</b></p>
 			
 			<p>This factory can be used to dynamically load JavaScript objects, libraries and more, that are placed in /resources/classes/ subfolder or in /resources/scripts/ subfolder.</p>
 			
+			<p><b>/engine/class.www-factory.php</b></p>
+
+			<p>Factory class is required for loading <a href="guide_mvc.htm">MVC</a> objects. Factory is used as a parent class for supporting the <a href="guide_mvc.htm">MVC</a> components of the system, every <a href="guide_mvc.htm">MVC</a> component is (usually) inherited from this class. Factory carries with itself wrappers for <a href="guide_api.htm">API</a> and <a href="guide_state.htm">State</a> functionality.</p>
+
 			<p><b>/engine/class.www-imager.php</b></p>
 
 			<p>This class is used to handle basic image editing, mostly for file resizes and cropping. This is used by default by <a href="gateway.htm">Index Gateway</a> when a PNG or JPEG file is requested with specific parameters, but can also be used for other image editing in the system since it can be loaded independently.</p>
@@ -77,6 +86,10 @@
 
 			<p>Minifier is used to minify text data without breaking functionality of that text. This is useful to be applied to JavaScript, CSS Stylesheets, HTML and XML formats for purposes of making the file size smaller, thus increasing the performance when file is transferred over HTTP. You should be careful when using minifier however, since it might break functionality under some instances, so it is always good to test before deploying minified resources to live systems.</p>
 
+			<p><b>/engine/class.www-sessions.php</b></p>
+			
+			<p>This is the Wave Framework session handler that is used instead of default session handling of PHP.</p>
+			
 			<p><b>/engine/class.www-state.php</b></p>
 
 			<p><a href="guide_state.htm">State</a> is always required by Wave Framework. It is used by API and some handlers. <a href="guide_state.htm">State</a> is used to keep track of system state, configuration and its changes, such as relevant PHP settings. It allows changing these settings, and thus affecting API or PHP configuration. <a href="guide_state.htm">State</a> also includes functionality for <a href="guide_messenger.htm">State Messenger</a> , sessions, cookies, translations and sitemap data. <a href="guide_state.htm">State</a> is assigned in API and is accessible in <a href="guide_mvc.htm">MVC</a> objects through Factory wrapper methods. Multiple different states can be used by the same request, but usually just one is used per request. <a href="guide_state.htm">State</a> is only kept for the duration of the request processing and is not stored beyond its use in the request.</p>
@@ -84,14 +97,14 @@
 			<p><b>/engine/class.www-tools.php</b></p>
 			
 			<p><a href="tools.htm">Tools Class</a> is used by Wave Framework Factory to allow for system-maintenance related functionality for MVC classes of the system. This allows to use filesystem cleaner, geenrate a file index of files or calculate file size of a folder.</p>
+			
+			<p><b>engine/class.www-wrapper.js</b></p>
+
+			<p>This class should be used when you wish to communicate with Wave Framework that is set up in another server. This class is independent from Wave Framework itself and can be used by other servers alone. Differently from PHP API Wrapper, JavaScript API Wrapper does not support sending and receiving encrypted data.</p>
 
 			<p><b>/engine/class.www-wrapper.php</b></p>
 
 			<p>This class should be used when you wish to communicate with Wave Framework that is set up in another server. This class is independent from Wave Framework itself and can be used by other servers alone. This class allows sending and receiving encrypted data as well as sending files and creating session tokens in a system set up with Wave Framework. This class uses cURL (if available) to make advanced requests with file uploads and cookie containers.</p>
-
-			<p><b>engine/class.www-wrapper.js</b></p>
-
-			<p>This class should be used when you wish to communicate with Wave Framework that is set up in another server. This class is independent from Wave Framework itself and can be used by other servers alone. Differently from PHP API Wrapper, JavaScript API Wrapper does not support sending and receiving encrypted data.</p>
 
 			<p><b>/engine/handler.api.php</b></p>
 
@@ -141,8 +154,8 @@
 			/filesystem/messenger/<br/>
 			/filesystem/sessions/<br/>
 			/filesystem/static/<br/>
-			/filesystem/tokens/<br/>
 			/filesystem/tmp/<br/>
+			/filesystem/tokens/<br/>
 			/filesystem/updates/<br/>
 			/filesystem/userdata/</b></p>
 
@@ -152,15 +165,16 @@
 
 			<p>Includes all models used by the system. Models are built with the following standard, where model name is written in filename as model.{name}.php, class itself is defined as WWW_model_{name} and when this model is created through WWW_Factory (when within one of the <a href="guide_mvc.htm">MVC</a> objects), the command is $this-&gt;getModel({name},{function},{data}), where function is a method of that class and {data} is input data to that method. If function and data are not defined, then object itself is returned instead of the function result.</p>
 
-			<p><b>/models/model.example.php</b></p>
+			<p><b>/models/model.{name}.php</b></p>
 
-			<p>Minimal example model for demonstration purposes.</p>
+			<p>This folder stores Model files where the 'name' is the Model name.</p>
 
 			<p><b>/overrides/<br/>
 			/overrides/controllers/<br/>
 			/overrides/models/<br/>
 			/overrides/resources/<br/>
 			/overrides/resources/classes/<br/>
+			/overrides/resources/files/<br/>
 			/overrides/resources/images/<br/>
 			/overrides/resources/libraries/<br/>
 			/overrides/resources/scripts/<br/>
@@ -188,7 +202,8 @@
 			
 			<p>This folder includes all the classes that can be dynamically loaded through Factory method getObject() from either JavaScript or PHP. Filename should be formatted as class.[name].php and class name as [name]. Dynamically loaded JavaScript files should also be stored in these folders and they work the same way. Two example files are provided as a starting point.</p>
 			
-			<p><b>/resources/images/<br/>/resources/images/logo.png</b></p>
+			<p><b>/resources/images/<br/>
+			/resources/images/logo.png</b></p>
 
 			<p>It is recommended to store various image files, such as design files, in this folder. One image is there by default (logo.png), but this can be removed if not used in any way.</p>
 			
@@ -202,10 +217,11 @@
 			/resources/scripts/script.php<br/>
 			/resources/scripts/script.js<br/>
 			/resources/scripts/jquery.js<br/>
+			/resources/scripts/jquery2.js<br/>
 			/resources/scripts/{view}.script.js<br/>
 			/resources/scripts/{view}.script.php<br/></b></p>
 			
-			<p>This folder includes all the JavaScript files. All of these files are optional, but the View Controller loads the script.js and jquery.js (jQuery framework) file by default and script.php file is loaded automatically by Data and API Handlers for each request as well. You can also define view-specific scripts here for both JavaScript and PHP, which are loaded by URL and View controllers if detected.</p>
+			<p>This folder includes all the JavaScript files. All of these files are optional, but the View Controller loads the script.js and jquery.js (jQuery framework) file by default and script.php file is loaded automatically by Data and API Handlers for each request as well. You can also define view-specific scripts here for both JavaScript and PHP, which are loaded by URL and View controllers if detected. Note that jQuery 2.0 and above is not loaded unless you manually make changes to the View Controller.</p>
 			
 			<p><b>/resources/static/</b></p>
 			
@@ -246,6 +262,10 @@
 
 			<p>Tools is a folder meant only for maintenance and development purposes and for a developer. Most of the <a href="guide_tools.htm">Developer Tools</a> in this folder require HTTP authentication or a user due to sensitive nature of the tools. It is recommended to remove this folder entirely before deploying a project live, or limit access to it with an IP.</p>
 
+			<p><b>/tools/tests/</b></p>
+			
+			<p>This folder stores the test case descriptions as INI files.</p>
+			
 			<p><b>/tools/.htaccess</b></p>
 
 			<p>This Apache-specific file is used to test whether mod_rewrite works for compatibility script.</p>
@@ -287,6 +307,10 @@
 			
 			<p>Stylesheet for majority of developer tools scripts.</p>
 			
+			<p><b>/tools/tester.php</b>
+			
+			<p>This is the developer tool for running test cases that are stored in /tests/ folder.</p>
+			
 			<p><b>/tools/tools_autoload.php</b></p>
 
 			<p>This script includes authentication, timezone detection and software version detection and other functionality that is useful for developer tools scripts.</p>
@@ -307,13 +331,13 @@
 
 			<p>Includes all views used by the system. Views are built with the following standard, where view name is written in filename as view.{name}.php, class itself is defined as WWW_view_{name} and when this view is created through WWW_Factory (when within one of the <a href="guide_mvc.htm">MVC</a> objects), the command is $this-&gt;getView({name},{function},{data}), where function is a method of that class and {data} is input data to that method. If function and data are not defined, then object itself is returned instead of the function result.</p>
 
+			<p><b>/views/view.{name}.php</b></p>
+
+			<p>This folder stores Views in the system, 'name' is the name of the View.</p>
+			
 			<p><b>/views/view.404.php</b></p>
 
 			<p>This view is called by WWW_controller_view if WWW_controller_url could not find a matching view for current request. This can be used to customize page-specific page-not-found pages, however this view is not used for missing files and other static resources.</p>
-
-			<p><b>/views/view.example.php</b></p>
-
-			<p>Minimal example view for demonstration purposes.</p>
 
 			<p><b>/views/view.home.php</b></p>
 

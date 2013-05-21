@@ -23,7 +23,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.4.9
- * @version    3.2.0
+ * @version    3.6.0
  */
 
 // This initializes tools and authentication
@@ -49,6 +49,9 @@ header('Content-Type: text/html;charset=utf-8');
 	</head>
 	<body>
 		<?php
+		
+		// Pops up an alert about default password
+		passwordNotification($config['http-authentication-password']);
 		
 		if(isset($_GET['cutoff'])){
 			$cutoff=$_GET['cutoff'];
@@ -209,7 +212,7 @@ header('Content-Type: text/html;charset=utf-8');
 		echo '<p><a href="cleaner.php?userdata&cutoff='.$cutoff.'">User Data</a> - Custom files folder for project use</p>';
 		echo '<p><a href="cleaner.php?keys&cutoff='.$cutoff.'">Keys</a> - Various cryptography keys</p>';
 		echo '<p><a href="cleaner.php?static&cutoff='.$cutoff.'">Static</a> - Custom static files</p>';
-		echo '<p><a href="cleaner.php?all&cutoff='.$cutoff.'">All</a> - <b>Caution!</b> Removes all created files, including potentially sensitive files</p>';
+		echo '<p><a href="cleaner.php?all&cutoff='.$cutoff.'">All</a> - <b>Caution!</b> Removes all created files and resets entire filesystem folder</p>';
 		
 		// Footer
 		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' GMT '.date('P').' for '.$_SERVER['HTTP_HOST'].'</p>';

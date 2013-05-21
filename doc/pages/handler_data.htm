@@ -12,15 +12,21 @@
 	
 		<h1>Data Handler</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-workflow">Workflow</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/handler.data.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Data Handler is loaded in situations when other handlers were not used, which is most commonly for regular web page requests. Data Handler takes all the input from GET, POST, FILES; SESSION and COOKIE variables, loads Wave Framework API and sends all the input to the API. It first uses <a href="guide_url.htm">URL Controller</a> to find out what page the user agent is looking for and then a <a href="guide_view.htm">View Controller</a> to generate that requested page.</p>
 			
-			<h2>Workflow</h2>
+			<h2 id="index-workflow">Workflow</h2>
 			
 				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
 				

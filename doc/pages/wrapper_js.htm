@@ -12,11 +12,19 @@
 	
 		<h1>JavaScript API Wrapper Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-javascript-api-wrapper-class">Using JavaScript API Wrapper Class</a></li>
+				<li><a href="#index-javascript-api-wrapper-class-parameters">JavaScript API Wrapper Class Parameters</a></li>
+				<li><a href="#index-javascript-api-wrapper-class-methods">JavaScript API Wrapper Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-wrapper.js</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Main purpose of an API Wrapper is to make it easier to make API requests over HTTP to a system built on Wave Framework. API Wrapper class does everything for the developer without requiring the developer to learn the ins and outs of technical details about how to build an API request. Wave Framework comes with two separate API authentication methods, one more secure than the other, both which are handled by this Wrapper class. JavaScript API Wrapper does not support sending data in encrypted form or decrypting encrypted data from a response.</p>
 				
@@ -38,7 +46,7 @@
 				
 				<p>API Wrapper offers as much functionality as you would get over making API requests manually yourself, so it is recommended - in most cases - to make the API requests through the Wrapper. Though the API is simple enough that you can also make the requests without the Wrapper, but this is covered in API Documentation section.</p>
 				
-			<h2>Using JavaScript API Wrapper Class</h2>
+			<h2 id="index-using-javascript-api-wrapper-class">Using JavaScript API Wrapper Class</h2>
 			
 				<p>One of the main things about using JavaScript API Wrapper is to use only one instance of it in your front-end. While you can create two Wrapper objects and use them at the same time, this can cause some parallel processing issues. It is best to use just a single object and send requests through there.</p>
 			
@@ -228,7 +236,7 @@
 	</code>
 </pre>
 			
-			<h2>JavaScript API Wrapper Class Parameters</h2>
+			<h2 id="index-javascript-api-wrapper-class-parameters">JavaScript API Wrapper Class Parameters</h2>
 			
 				<h3>var apiAddress=document.baseURI+'json.api'</h3>
 				
@@ -270,7 +278,7 @@
 				
 					<p>If this value is set, then API log will be reset after each API request. This value can be sent with 'www-reset-log' keyword sent to Wrapper.</p>
 				
-			<h2>JavaScript API Wrapper Class Methods</h2>
+			<h2 id="index-javascript-api-wrapper-class-methods">JavaScript API Wrapper Class Methods</h2>
 					
 				<h3>function WWW_Wrapper(address,language)</h3>
 				

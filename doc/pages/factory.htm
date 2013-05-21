@@ -12,11 +12,22 @@
 	
 		<h1>Factory Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-factory-class">Using Factory Class</a></li>
+				<li><a href="#index-factory-class-parameters">Factory Class Parameters</a></li>
+				<li><a href="#index-factory-class-methods">Factory Class Methods</a></li>
+				<li><a href="#index-factory-class-wrapper-methods-for-state-class">Factory Class Wrapper Methods for State Class</a></li>
+				<li><a href="#index-factory-class-wrapper-methods-for-api-class">Factory Class Wrapper Methods for API Class</a></li>
+				<li><a href="#index-factory-class-wrapper-methods-for-database-class">Factory Class Wrapper Methods for Database Class</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-factory.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Factory class is the base class for a lot of Wave Framework dynamically loaded model, view and controller objects. It is not required to build your <a href="guide_mvc.htm">MVC</a> objects by extending Factory class, but doing so can make the development of these objects easier, as Factory also has wrappers to <a href="guide_state.htm">State</a>, Wave Framework <a href="guide_api.htm">API</a> and other functionality.</p>
 				
@@ -24,11 +35,11 @@
 				
 				<p>A lot of the methods defined in Factory class are wrappers. These wrapper methods are documented further in their own class-specific documentation files and are listed in this documentation here only for reference.</p>
 				
-			<h2>Using Factory class</h2>
+			<h2 id="index-using-factory-class">Using Factory class</h2>
 			
 				<p>Factory class is an internal Wave Framework class and should not be used outside the context of Wave Framework.</p>
 				
-			<h2>Factory Class Parameters</h2>
+			<h2 id="index-factory-class-parameters">Factory Class Parameters</h2>
 			
 				<h3>private $WWW_API=false</h3>
 				
@@ -38,7 +49,7 @@
 				
 					<p>This is an internal variable that holds a counter of how many times the API has been called.  It is possible to call <a href="guide_api.htm">API</a> calls within other <a href="guide_api.htm">API</a> calls, so this is used to keep track of how deep the current <a href="guide_api.htm">API</a> call is, which is used to calculate buffering layers and other internal functionality in <a href="api.htm">API</a> Class.
 					
-			<h2>Factory Class Methods</h2>
+			<h2 id="index-factory-class-methods">Factory Class Methods</h2>
 			
 				<h3>final public function __construct($api=false,$callIndex=0)</h3>
 				
@@ -140,13 +151,13 @@
 				
 					<p>This checks whether developer IP and user agent access the system. This is a light check that can be used to test out features for developers while other IP's and user agents are not affected. It returns true if developer browser and IP is detected.</p>
 			
-			<h2>Factory Class Wrapper Methods for State Class</h2>
+			<h2 id="index-factory-class-wrapper-methods-for-state-class">Factory Class Wrapper Methods for State Class</h2>
 			
 				<p>Descriptions of these methods are detailed in <a href="state.htm">State</a> Class documentation.</p>
 				
-				<h3>final protected function getState($variable=false,$subVariable=false)</h3>
+				<h3>final protected function getState(*)</h3>
 			
-				<h3>final protected function setState($variable,$value=true)</h3>
+				<h3>final protected function setState(*)</h3>
 			
 				<h3>final protected function getTranslations($language=false,$keyword=false,$subkeyword=false)</h3>
 			
@@ -169,6 +180,8 @@
 				<h3>final protected function getMessengerData($key=false,$remove=true)</h3>
 				
 					<p>This method returns data from State messenger. It either returns all the data from initialized state messenger, or just a $key from it. If $remove is set, then data is also set for deletion after it has been accessed. Additionally using this function also turns off caching of the page which uses it.</p>
+			
+				<h3>final protected function startSession($configuration=false)</h3>
 			
 				<h3>final protected function regenerateSession($deleteOld=true)</h3>
 			
@@ -208,7 +221,7 @@
 				
 				<h3>final protected function terminal($command)</h3>
 			
-			<h2>Factory Class Wrapper Methods for API Class</h2>
+			<h2 id="index-factory-class-wrapper-methods-for-api-class">Factory Class Wrapper Methods for API Class</h2>
 			
 				<p>Descriptions of these methods are detailed in <a href="api.htm">API</a> class documentation.</p>
 			
@@ -242,7 +255,7 @@
 				
 				<h3>final protected function resultFile($location,$name=false,$contentType=false)</h3>
 			
-			<h2>Factory Class Wrapper Methods for Database Class</h2>
+			<h2 id="index-factory-class-wrapper-methods-for-database-class">Factory Class Wrapper Methods for Database Class</h2>
 			
 				<p>Descriptions of these methods are detailed in <a href="database.htm">Database</a> class documentation.</p>
 				

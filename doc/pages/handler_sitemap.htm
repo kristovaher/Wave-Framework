@@ -12,15 +12,21 @@
 	
 		<h1>Sitemap Handler</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-workflow">Workflow</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/handler.sitemap.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Sitemap Handler is used to return sitemap.xml files, if a request is made to such a file. This handler either returns the existing /sitemap.xml file, or generates a new one based on sitemap files in /resources/ folder and the languages defined in configuration.</p>
 			
-			<h2>Workflow</h2>
+			<h2 id="index-workflow">Workflow</h2>
 			
 				<p>This script can only be executed through <a href="gateway.htm">Index Gateway</a> and it throws a 403 Forbidden message if accessed directly.</p>
 				

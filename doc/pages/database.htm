@@ -12,11 +12,19 @@
 	
 		<h1>Database Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-database-class">Using Database Class</a></li>
+				<li><a href="#index-database-class-parameters">Database Class Parameters</a></li>
+				<li><a href="#index-database-class-methods">Database Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-database.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Simple database class that acts as a wrapper to PDO. It is not required to use WWW_Database with Wave Framework at all, but should it be required, it is available. This class uses PDO database class to simplify some of the database commands. It includes functions for returning data from database as a single row or multiple rows as associative arrays as well as get information about last inserted ID and number of rows affected by last query.</p>
 			
@@ -24,7 +32,7 @@
 				
 				<p>The rest of this document details the use of Database class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
 				
-			<h2>Using Database class</h2>
+			<h2 id="index-using-database-class">Using Database class</h2>
 			
 				<p>To use Database class, you have to load the class definition and create a new database object. You can assign database credentials during object creation or later on separately with object properties. For example, this is the easiest way to connect to a MySQL database:</p>
 				
@@ -154,7 +162,7 @@
 	</code>
 </pre>
 	
-			<h2>Database Class Parameters</h2>
+			<h2 id="index-database-class-parameters">Database Class Parameters</h2>
 			
 				<h3>public $pdo=false</h3>
 				
@@ -192,7 +200,7 @@
 				
 					<p>This is used for logging or otherwise performance tracking. This variable is a simple counter about the amount of requests made during this database connection.</p>
 			
-			<h2>Database Class Methods</h2>
+			<h2 id="index-database-class-methods">Database Class Methods</h2>
 			
 				<h3>public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=true,$persistent=false)</h3>
 				

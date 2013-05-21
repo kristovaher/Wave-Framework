@@ -12,31 +12,46 @@
 	
 		<h1>About Developer Tools</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-adminer">Adminer</a></li>
+				<li><a href="#index-php-information">PHP Information</a></li>
+				<li><a href="#index-api-information">API Information</a></li>
+				<li><a href="#index-log-reader">Log Reader</a></li>
+				<li><a href="#index-filesystem-cleaner">Filesystem Cleaner</a></li>
+				<li><a href="#index-backup">Backup</a></li>
+				<li><a href="#index-debugger">Debugger</a></li>
+				<li><a href="#index-compatibility-test">Compatibility Test</a></li>
+				<li><a href="#index-updater">Updater</a></li>
+				<li><a href="#index-test-suite">Test Suite</a></li>
+				<li><a href="#index-calling-tools-through-factory">Calling Tools Through Factory</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Wave Framework comes with a suite of administrative tools that are useful for debugging, maintenance, compatibility testing and more. These scripts are all stored in /tools/ subfolder and every script is protected with a username and password. Username and password of most of those tools are stored in main /config.ini file and are used regardless whether limiter-authentication is turned on or off in configuration. Despite being protected by username and password, it is highly recommended to remove developer tools subfolder entirely before deploying project live.</p>
 				
 				<p>Some developer tools are also integrated in Wave Framework Factory and can be called using that factory. For example, you can return an index of files recursively from a folder or delete all files from a specific folder, as long as PHP has rights to this activity. Details about such functionality called through Wave Framework API are in the very bottom of this document.</p>
 				
-			<h2>Adminer</h2>
+			<h2 id="index-adminer">Adminer</h2>
 			
 				<p><b>Location: /tools/adminer.php</b></p>
 				
 				<p>Adminer is an open-source database administration tool that runs from a single script. This is useful for production servers that do not have PHPMyAdmin or other similar environments installed and it doesn't require a set-up or anything of the sort. Adminer is not protected by http-authentication-username and http-authentication-password and instead asks for database host, username and password. It is highly recommended to remove this script before deploying the project live.</p>
 				
-			<h2>PHP Information</h2>
+			<h2 id="index-php-information">PHP Information</h2>
 			
 				<p><b>Location: /tools/php-info.php</b></p>
 				
 				<p>This script is essentially a password-protected wrapper for phpinfo() function and it displays information about extensions, PHP settings, server variables and setup in general. It is highly recommended to remove this script before deploying the project live.</p>
 				
-			<h2>API Information</h2>
+			<h2 id="index-api-information">API Information</h2>
 			
 				<p><b>Location: /tools/api-info.php</b></p>
 			
 				<p>This script lists all controllers and their methods, as well as all API profiles that can use these methods. This is meant for an overview of API commands for documentation purposes or otherwise. It shows all API commands based on what their 'www-command' value should be as well as displays comments that have been written in the header of these methods. It is possible to also show API commands per API profile.</p>
 				
-			<h2>Log Reader</h2>
+			<h2 id="index-log-reader">Log Reader</h2>
 			
 				<p><b>Location: /tools/log-reader.php</b></p>
 				
@@ -79,7 +94,7 @@
 				
 				<p>Log Reader is also used to display log of <a href="guide_api.htm">API</a> calls made over HTTP. API Log is a custom log that is populated if 'api-logging' is allowed from <a href="configuration.htm">Configuration</a>. Compared to Internal Log and HTTP request Log, API log is not a serialized array and simply carries three files in '/filesystem/log/api.log' file: Timestamp when the request was made, API Profile that made the request and the 'www-command' that was sent. This log can be used to easily calculate statistics and traffic for API profiles.</p>
 				
-			<h2>Filesystem Cleaner</h2>
+			<h2 id="index-filesystem-cleaner">Filesystem Cleaner</h2>
 			
 				<p><b>Location: /tools/cleaner.php</b></p>
 				
@@ -113,7 +128,7 @@
 				
 				<p>It is also possible to send a cut-off timestamp, by assigning a 'cutoff' GET variable to the request. This Unix timestamp will be compared against every file in those assigned folders and if the file is newer or has been modified since that timestamp, then the file is not deleted.</p>
 
-			<h2>Backup</h2>
+			<h2 id="index-backup">Backup</h2>
 			
 				<p><b>Location: /tools/backup.php</b></p>
 				
@@ -121,11 +136,13 @@
 				
 				<p>Backup creates a Zip archive with a date-specific filename of {Y-m-d-H-i-s}.zip.tmp and to open this archive you have to download it over FTP and rename it to .zip extension, since HTTP requests to *.tmp files are blocked by default.</p>
 				
-			<h2>Debugger</h2>
+			<h2 id="index-debugger">Debugger</h2>
 			
 				<p><b>Location: /tools/debugger.php</b></p>
 				
 				<p>This is a script that collects error messages that have been written to <a href="filesystem.htm">Filesystem</a>. It also provides method to easily delete the error log about a specific error message, once it is considered 'fixed'. This script should be checked every now and then to test and make sure that there are no outstanding problems in the system.</p>
+				
+				<p>Each error message is categorized based on IP and user agent string signature, which allows to separate errors generated by different systems, users or developers.</p>
 				
 				<p>Wave Framework logs all PHP error messages. When Wave Framework encounters a fatal error, then it displays an error message specifying such to the user. Wave Framework suppresses warnings and lesser error messages, but still logs them so that they are visible with this Debugger script. It is a good development practice to make sure all error messages and warnings are fixed so none of the errors are thrown when web service or website is used.</p>
 				
@@ -135,7 +152,7 @@
 				
 				<p>When accessing this script, it automatically attempts to find an error log that has not been deleted yet.</p>
 				
-			<h2>Compatibility Test</h2>
+			<h2 id="index-compatibility-test">Compatibility Test</h2>
 			
 				<p><b>Location: /tools/compatibility.php</b></p>
 				
@@ -163,7 +180,7 @@
 					<li>Filesystem folder write permissions</li>
 				</ul>
 			
-			<h2>Updater</h2>
+			<h2 id="index-updater">Updater</h2>
 			
 				<p><b>Location: /tools/updater.php</b></p>
 			
@@ -184,7 +201,7 @@
 				
 				<p>For the Updater to work correctly, the files included in the archive must follow the 'root' folder structure of Wave Framework installation and also include .version file. This version file is checked to make sure that update version numbers (for all listed entries in .version file) are at least equal or larger than the number in the archive for both Wave Framework and system. Version numbers should be listed as PHP standard version format, like X.X.X.</p>
 			
-			<h2>Test Suite</h2>
+			<h2 id="index-test-suite">Test Suite</h2>
 			
 				<p><b>Location: /tools/tester.php</b></p>
 				
@@ -230,7 +247,7 @@
 				
 				<p>After the tests are run, the Test Suite shows a summary of how many tests failed and gives detailed information about each failed test.</p>
 				
-			<h2>Calling Tools Through Wave Framework Factory</h2>
+			<h2 id="index-calling-tools-through-factory">Calling Tools Through Factory</h2>
 			
 				<p>If you are building models, views and controllers, then sometimes it's necessary to call some of the usual developer tools within those objects as well. This is especially useful if you wish to clean all cache through the system rather than developer tool, since it is recommended to remove the /tools/ directory entirely from a live project.</p>
 				

@@ -12,17 +12,25 @@
 	
 		<h1>JavaScript API Wrapper Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-javascript-factory-class">Using JavaScript Factory Class</a></li>
+				<li><a href="#index-javascript-factory-class-parameters">JavaScriptFactory Class Parameters</a></li>
+				<li><a href="#index-javascript-factory-class-methods">JavaScriptFactory Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-factory.js</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>JavaScript factory has very minimal use compared to the Wave Framework's own internal PHP Factory, but this class is still useful for dynamically loading JavaScript objects from /resources/classes/ folder or libraries from /resources/libraries/ subfolder and stylesheets from /resources/styles/ subfolder.</p>
 				
 				<p>Factory class loads class definitions through AJAX and attempts to create an object that is being requested. Libraries can also be loaded dynamically as well as functions called from that library with a single request. Stylesheet loading creates a new style resource in HTML head section.</p>
 				
-			<h2>Using JavaScript Factory Class</h2>
+			<h2 id="index-using-javascript-factory-class">Using JavaScript Factory Class</h2>
 
 				<p>By default the factory class loads scripts from '/resources/' folder and '/classes/' and '/libraries/' subfolders. For the dynamic object loading to work, the class name and filename must include the same keyword. If I create a new JavaScript class 'example', then I need to place a file 'class.example.js' to '/resources/classes/' subfolder and make sure that my class name is 'example'.</p>
 			
@@ -54,7 +62,7 @@
 
 				<p>Note that you have to be careful when loading functions to global namespace in the browser, such as when loading libraries and classes. It is useful to use some naming standard or prefixes for your classes and functions to reduce possible namespace conflicts.</p>
 
-			<h2>JavaScript Factory Class Parameters</h2>
+			<h2 id="index-javascript-factory-class-parameters">JavaScript Factory Class Parameters</h2>
 			
 				<h3>var classBase=document.baseURI+'resources/classes/'</h3>
 				
@@ -68,7 +76,7 @@
 				
 					<p>This variable simply holds information about which files have been already loaded to make sure that the same classes and libraries are not loaded multiple times.</p>
 					
-			<h2>JavaScript Factory Class Methods</h2>
+			<h2 id="index-javascript-factory-class-methods">JavaScript Factory Class Methods</h2>
 					
 				<h3>function WWW_Factory(base)</h3>
 				

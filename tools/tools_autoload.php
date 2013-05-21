@@ -13,7 +13,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.6
+ * @version    3.6.0
  */
 
 // Main configuration file is included from initialized temporary file if it exists

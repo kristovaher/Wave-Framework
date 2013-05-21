@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.2.1
+ * @version    3.6.0
  */
 
 // This initializes tools and authentication
@@ -28,15 +28,46 @@ header('Content-Type: text/html;charset=utf-8');
 // Checking if logger attempts to read internal log
 if(isset($_GET['internal'])){
 
-	// Actual log address
-	$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal.tmp';
+	// Debugger actions are based on whether signature and error are set
+	if(isset($_GET['signature'])){
 	
-	// If file is set for deletion
-	if(isset($_GET['delete']) && file_exists($logAddress)){
-		unlink($logAddress);
-		// Redirecting to link without delete flag set
-		header('Location: log-reader.php?internal');
-		die();
+		// Replacing potentially harmful characters
+		$signature=preg_replace('[^a-zA-Z0-9]','',$_GET['signature']);
+	
+		// Actual log address
+		$logAddress='..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal_'.$signature.'_data.tmp';
+	
+		// If file is set for deletion
+		if(isset($_GET['delete']) && file_exists($logAddress)){
+			// Removing the data file
+			unlink($logAddress);
+			// Removing signature file
+			$signatureAddress=str_replace('_data','_signature',$logAddress);
+			if(file_exists($signatureAddress)){
+				unlink($signatureAddress);
+			}
+			// Redirecting to link without delete flag set
+			header('Location: log-reader.php?internal');
+			die();
+		}
+		
+	} else {
+
+		// This array stores all the error developer signatures
+		$signatures=array();
+
+		// This is the list of all errors based on signatures
+		$files=fileIndex('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR,'filenames',false);
+		
+		// Looping over each folder that includes errors
+		foreach($files as $f){
+			// Making sure that the file is that of an internal log entry
+			$f=explode('_',$f);
+			if(count($f)==3 && $f[0]=='internal' && $f[2]=='signature.tmp'){
+				$signatures[$f[1]]=file_get_contents('..'.DIRECTORY_SEPARATOR.'filesystem'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'internal_'.$f[1].'_signature.tmp');
+			}
+		}
+		
 	}
 	
 } elseif(isset($_GET['api'])){
@@ -52,7 +83,7 @@ if(isset($_GET['internal'])){
 		die();
 	}
 
-} else {
+} elseif(isset($_GET['http'])){
 
 	// Log reader can access any log file created by the system
 	if(isset($_GET['log'])){
@@ -60,7 +91,7 @@ if(isset($_GET['internal'])){
 		$logFileName=preg_replace('/[^A-Za-z\-\_0-9\/]/i','',$_GET['log']);
 	} else {
 		// By default the results are returned from current hour
-		header('Location: log-reader.php?log='.date('Y-m-d-H'));
+		header('Location: log-reader.php?http&log='.date('Y-m-d-H'));
 		die();
 	}
 		
@@ -121,13 +152,18 @@ if(isset($_GET['internal'])){
 	<body>
 		<?php
 		
+		// Pops up an alert about default password
+		passwordNotification($config['http-authentication-password']);
+		
 		// Header
 		if(isset($_GET['internal'])){
 			echo '<h1>Internal Log</h1>';
 		} elseif(isset($_GET['api'])){
 			echo '<h1>API Log</h1>';
-		} else {
+		} elseif(isset($_GET['http'])) {
 			echo '<h1>HTTP Request Log</h1>';
+		} else {
+			echo '<h1>Log Entries</h1>';
 		}
 		echo '<h4 class="highlight">';
 		foreach($softwareVersions as $software=>$version){
@@ -137,9 +173,26 @@ if(isset($_GET['internal'])){
 		echo '</h4>';
 		
 		echo '<h2>Log</h2>';
-
-			// All logs are stored in /log/ folder, if a folder does not exist
-			if(file_exists($logAddress)){
+		
+			if(isset($_GET['internal']) && !isset($_GET['signature'])){
+				
+				echo '<h3>Available Signatures</h3>';
+				echo '<h4>Signature is a pair of IP address and user agent string that generated the log entries. This helps you keep different log entries separate from one another based on client. Click on signature to see relevant log entries.</h4>';
+				
+				// If there are error signatures found
+				if(!empty($signatures)){
+					foreach($signatures as $folder=>$signature){
+						if($signature==$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']){
+							echo '<a href="log-reader.php?internal&signature='.md5($signature).'">'.$signature.' <span class="orange">(this matches your signature)</span></a><br/>';
+						} else {
+							echo '<a href="log-reader.php?internal&signature='.md5($signature).'">'.$signature.'</a><br/>';
+						}
+					}
+				} else {
+					echo '<p class="bold">There are no logged messages</p>';
+				}
+			
+			} elseif(file_exists($logAddress)){
 			
 				// File delete link
 				echo '<h3 onclick="if(confirm(\'Are you sure?\')){ document.location.href=document.location.href+\'&delete\'; }" class="red bold" style="cursor:pointer;">Click to delete this log</h3>';
@@ -237,7 +290,7 @@ if(isset($_GET['internal'])){
 					if(isset($_GET['api'])){
 						
 						// Summary for 30 Days
-						echo '<h3>Lat 30 Days</h3>';
+						echo '<h3>Last 30 Days</h3>';
 						foreach($summary['30days'] as $profile=>$data){
 							echo '<h4><b>'.$profile.'</b></h4>';
 							echo '<ul>';
@@ -271,14 +324,18 @@ if(isset($_GET['internal'])){
 				echo $logContent;
 				
 			} else {
-				// Log information not found
-				echo '<p class="red bold">Cannot find log information</p>';
+				if(isset($_GET['internal']) || isset($_GET['api']) || isset($_GET['http'])){
+					// Log information not found
+					echo '<p class="red bold">Cannot find log information</p>';
+				} else {
+					echo '<p class="bold">Please select log type</p>';
+				}
 			}
 			
 		echo '<h2>Modes</h2>';
-		echo '<p><a href="log-reader.php">HTTP Request Log</a> - Log information about HTTP requests</p>';
-		echo '<p><a href="log-reader.php?internal">Internal Log</a> - Internal log entries</p>';
+		echo '<p><a href="log-reader.php?http">HTTP Request Log</a> - Log information about HTTP requests</p>';
 		echo '<p><a href="log-reader.php?api">API Log</a> - API profile call log</p>';
+		echo '<p><a href="log-reader.php?internal">Internal Log</a> - Internal log entries</p>';
 		
 		// Footer
 		echo '<p class="footer small bold">Generated at '.date('d.m.Y h:i').' GMT '.date('P').' for '.$_SERVER['HTTP_HOST'].'</p>';

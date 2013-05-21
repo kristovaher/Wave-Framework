@@ -12,7 +12,20 @@
 	
 		<h1>Version History</h1>
 		
-			<h2>Roadmap</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-roadmap">Roadmap</a></li>
+				<li><a href="#index-3xx">3.x.x</a></li>
+				<li><a href="#index-2xx">2.x.x</a></li>
+				<li><a href="#index-1xx">1.x.x</a></li>
+				<li><a href="#index-0xx">0.x.x</a></li>
+			</ul>
+			
+			<h2 id="index-introduction">Introduction</h2>
+			
+				<p>This document lists the roadmap of Wave Framework as well as the entire version history since the first public release in February 2012.</p>
+		
+			<h2 id="index-roadmap">Roadmap</h2>
 			
 				<ul>
 					<li><b>2013</b> - AJAX Tutorial</li>
@@ -22,9 +35,10 @@
 					<li><b>2013</b> - Java API Wrapper</li>
 				</ul>
 		
-			<h2>3.x.x</h2>
+			<h2 id="index-3xx">3.x.x</h2>
 			
 				<ul>
+					<li><b>3.6.0</b> - Made session starting configurations possible to be changed at runtime. Updated documentation with indexes and anchors. Added jQuery 2.0 as an alternative - to use the new version of jQuery that ignores Internet Explorer up to and including 8, then change jquery.js file to jquery2.js in the View Controller. Developer tools Debugger and Log Reader for internal log messages are now browser IP and session-based, allowing to separate messages from one another based on client that makes the request. Added a warning to developer tools when using the default password. Fixed bug with tester script that did not properly autoload certain PHP scripts. Implemented an improved getState() method that allows to return data better from nested arrays. Implemented an improved setState() that allows to set nested array values in State more easily. PNG images will also now get a background, if RGB setting is set in the dynamic image loading.</li>
 					<li><b>3.5.6</b> - Fixed a bug with JavaScript API Wrapper when making POST requests.</li>
 					<li><b>3.5.5</b> - Fixed a minor bug with State class redefining __ROOT__ incorrectly if it is used independently. Added callback parameters to callback methods in API Wrappers.</li>
 					<li><b>3.5.4</b> - Updated Adminer 3.6.3 developer tool. Fixed JavaScript API wrapper form-assignment through input variable. Added additional 'directory-filesystem' variable to State. System now also logs an error if inproper return type is requested from the API.</li>
@@ -68,7 +82,7 @@
 					<li><b>3.0.0</b> - Complete overhaul of documentation, Wave Framework now comes with an ~100 page documentation. Documentation files are also included in framework archive under /docs/ subfolder and they also include examples by default. This makes it easier to get all the required information from one place, as well as keep track of documentation changes independently from website or repository. Also includes multiple bug-fixes and code refactoring and minor new features. Entire framework has also passed through integrity testing of each of its features to detect logic flaws and other minor bugs.</li>
 				</ul>
 		
-			<h2>2.x.x</h2>
+			<h2 id="index-2xx">2.x.x</h2>
 		
 				<ul>
 					<li><b>2.6.3</b> - It's also possible to send set of commands with file upload by naming them www-xml or www-json. This is an alternative to sending the entire set of commands with input stream.</li>
@@ -118,7 +132,7 @@
 					<li><b>2.0.0</b> - Nginx supported, please look at .nginx file for recommended options. Apache .htaccess minimized, file handling through Index Gateway. Better error handling throughout the framework. Added API Wrapper class for PHP (JavaScript to be added soon) that allows to call API over HTTP without having to worry about API security specifics. Updated API validation methods for increased security against replay attacks. Performance has also been increased, benchmark increase of 5-10%, depending on conditions. Rjindael 256bit input and output encryption option added that increases security of API calls over network.</li>
 				</ul>
 			
-			<h2>1.x.x</h2>
+			<h2 id="index-1xx">1.x.x</h2>
 			
 				<ul>
 					<li><b>1.9.11</b> - Logger now tracks every request made through Index Gateway. Logger also includes data about returned content-length for approximate bandwidth tracking.</li>
@@ -158,7 +172,7 @@
 					<li><b>1.0.0</b> - Changed token creation and destruction method authentications to be more simple. Fixed a bug with HTTP authentication values in State object. Full documentation released, including the first tutorial. </li>
 				</ul>
 			
-			<h2>0.x.x</h2>
+			<h2 id="index-0xx">0.x.x</h2>
 			
 				<ul>
 					<li><b>0.9.9</b> - Hash validation options were missing when creating and destroying tokens. Added a configuration option to Index Gateway for API cache timeout setting. New Favicon picture and updated ReadMe. Various tweaks across the system. </li>

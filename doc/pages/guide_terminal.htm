@@ -12,13 +12,18 @@
 	
 		<h1>Making Terminal Calls</h1>
 		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-making-terminal-calls">Making Terminal Calls</a></li>
+			</ul>
+		
 			<p>This documentation covers functionality of objects that use a class that is extended from WWW_Factory class. Methods and calls in this documentation can be used when building your Models, Views and Controller classes and their functionality.</p>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>PHP has multiple methods for making terminal requests, depending on the server. To simplify this process, Wave Framework has a wrapper function that tries to find the most suitable function to use when making terminal calls. This terminal method is a wrapper to system(), passthru(), exec() and shell_exec() functions.</p>
 				
-			<h2>Making Terminal Calls</h2>
+			<h2 id="index-making-terminal-calls">Making Terminal Calls</h2>
 			
 				<p>To make a terminal call in an object that is extended from WWW_Factory class, you have to call terminal() method with a variable that is the command to be sent to terminal, like this:</p>
 				

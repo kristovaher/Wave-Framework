@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/imager.htm
  * @since      1.0.0
- * @version    3.2.0
+ * @version    3.6.0
  */
 
 class WWW_Imager {
@@ -565,9 +565,10 @@ class WWW_Imager {
 	 * @param integer $red amount of red color for background, from 0-255
 	 * @param integer $green amount of green color for background, from 0-255
 	 * @param integer $blue amount of blue color for background, from 0-255
+	 * @param boolean $alpha if alpha channel is used for PNG pictures
 	 * @return boolean
 	 */
-	public function resizeCrop($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0){
+	public function resizeCrop($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0,$alpha=true){
 	
 		// Canceling function if resizing is not needed
 		if($this->width==$width && $this->height==$height){
@@ -678,9 +679,10 @@ class WWW_Imager {
 	 * @param integer $red amount of red color for background, from 0-255
 	 * @param integer $green amount of green color for background, from 0-255
 	 * @param integer $blue amount of blue color for background, from 0-255
+	 * @param boolean $alpha if alpha channel is used for PNG pictures
 	 * @return boolean
 	 */
-	public function resizeFit($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0){
+	public function resizeFit($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0,$alpha=true){
 	
 		// Canceling function if resizing is not needed
 		if($this->width==$width && $this->height==$height){
@@ -762,7 +764,7 @@ class WWW_Imager {
 		$tmpImage=imagecreatetruecolor($width,$height);
 		
 		// Background color is transparent for PNG images
-		if($this->type!=IMAGETYPE_PNG){
+		if($this->type!=IMAGETYPE_PNG || !$alpha){
 			// Since the image might have a background color, the temporary image is filled with background color
 			imagefill($tmpImage,0,0,imagecolorallocate($tmpImage,$red,$green,$blue));
 		} else {
@@ -789,12 +791,7 @@ class WWW_Imager {
 	/**
 	 * This is a resize-algorithm method that resizes the current image simply by resizing the 
 	 * image to $width and $height and removing the dimensions that would otherwise be left for 
-	 * a background. This resize method crops the image by removing the parts of picture that are 
-	 * left out of $width and $height dimensions. Variables $left and $top can be used to set the 
-	 * position of the image on the new, resized canvas and accept both numeric (pixel) values as 
-	 * well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green 
-	 * and $blue are RGB values for background color in case background is required (not used for 
-	 * PNG images).
+	 * a background.
 	 *
 	 * @param integer $width width of resulting image
 	 * @param integer $height height of resulting image

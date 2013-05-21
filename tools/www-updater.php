@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.1.4
+ * @version    3.6.0
  */
 
 // It is always recommended to have this file return a plain-text log where each log entry is on a new line
@@ -26,11 +26,11 @@ error_reporting(0);
 
 // Updater script calls this function always with specific version numbers that can be used within the script
 if(isset($_GET['www-version'],$_GET['system-version'])){
-	// add here various functionality that is required for this version
-	echo 'Doing version update on Wave Framework version '.$_GET['www-version'].' and system version '.$_GET['system-version'];
+	// Add here various functionality that is required for this version based on version numbers
+	echo 'Applying version update on Wave Framework version '.$_GET['www-version'].' and system version '.$_GET['system-version'];
 } else {
 	// Version numbers are required
-	echo 'Cannot run updater without version numbers';
+	echo 'Unable to run updater without assigned version numbers';
 }
 
 ?>

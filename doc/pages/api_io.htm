@@ -12,13 +12,19 @@
 	
 		<h1>API Input and Output</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-api-inpupt-flags-and-configuration">API Input - Flags and Configuration</a></li>
+				<li><a href="#index-api-output-flags-and-values">API Output - Flags and Values</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>This document gives an overview of all of the settings and configuration that can be sent to Wave Framework API and how each of those settings affects the way the API works. It will also cover all of the possible variables that Wave Framework API may return as a response. This document here is a reference guide to Wave Framework API communication.</p>
 				
 				<p>This document covers all of the input and output variables of core Wave Framework API. There are additional variables that are API Wrapper specific, which you can read more about in PHP API Wrapper and JavaScript API Wrapper documentation.</p>
 				
-			<h2>API Input - Flags and Configuration</h2>
+			<h2 id="index-api-inpupt-flags-and-configuration">API Input - Flags and Configuration</h2>
 			
 				<p>Wave Framework expects API-specific configuration settings in a simple format. Every configuration flag or setting is prefixed with 'www-', which is called the Wave prefix since it resembles waves. When sending input data to Wave Framework API, then all of the data is sent as one input array. When HTTP request is made, then all of the POST and GET and other variables are merged into one input array the same way.</p>
 				
@@ -166,7 +172,7 @@
 				
 					<p>If this is set to 1, then 'www-response-code' and 'www-message' response keys will be sent in headers instead. This allows the output data array to be 'cleaner', but requires the developer to test the existence of these values if they are important for the system. PHP API Wrapper supports this internally, but JavaScript API Wrapper does not.</p>
 				
-			<h2>API Output - Flags and Values</h2>
+			<h2 id="index-api-output-flags-and-values">API Output - Flags and Values</h2>
 			
 				<p>API will return whatever data controller returns and in a format that was defined in input of 'www-return-type'. But there are some Wave Framework specific values that can be returned together with the response and these values can be checked for things like errors and response codes.</p> 
 				

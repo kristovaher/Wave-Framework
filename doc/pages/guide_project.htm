@@ -12,7 +12,20 @@
 	
 		<h1>Project Setup</h1>
 		
-			<h2>Files and Folders</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-files-and-folders">Files and Folders</a></li>
+				<li><a href="#index-configuration">Configuration</a></li>
+				<li><a href="#index-controllers">Controllers</a></li>
+				<li><a href="#index-models">Models</a></li>
+				<li><a href="#index-views">Views</a></li>
+				<li><a href="#index-resources">Resources</a></li>
+				<li><a href="#index-filesystem">Filesystem</a></li>
+				<li><a href="#index-overrides">Overrides</a></li>
+				<li><a href="#index-summary">Summary</a></li>
+			</ul>
+		
+			<h2 id="index-files-and-folders">Files and Folders</h2>
 			
 				<h3>/config.ini</h3>
 				<h3>/models/</h3>
@@ -22,13 +35,13 @@
 				<h3>/overrides/</h3>
 				<h3>/filesystem/</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 		
 				<p>Wave Framework is a small framework, but it still includes a lot of files that can make it confusing how to set up a project on Wave. The tutorials that are part of this documentation are already very helpful, but this documentation page here gives a detailed overview of what actually consists of a project when it is being set up on Wave Framework.</p>
 				
 				<p>This documentation is also useful for a developer who is not familiar with Wave, but who has to tweak something about a project that is built on Wave. So make sure you read this documentation through when you're either planning a new project or have to work on a project that already exists.</p>
 				
-			<h2>Configuration</h2>
+			<h2 id="index-configuration">Configuration</h2>
 			
 				<p>Configuration is stored in '/config.ini' file.</p>
 			
@@ -38,7 +51,7 @@
 				
 				<p>It is recommended that if you wish to add your own configuration settings, then you add them either to the top or the bottom of Wave Framework's own configuration settings, so that it is easier for other developers to tell apart which settings are yours and which are not.</p>
 				
-			<h2>Controllers</h2>
+			<h2 id="index-controllers">Controllers</h2>
 			
 				<p>Controllers are stored in '/controllers/' subfolder. Controller files should be in the format of 'controller.[name].php' in that folder and an example Controller is provided in that folder, but you can design the Controller however you want.</p>
 				
@@ -68,7 +81,7 @@
 					
 					<p>It is generally recommended to add only the HTML that is existing across all URL's that use this Controller in this file.</p>
 				
-			<h2>Models</h2>
+			<h2 id="index-models">Models</h2>
 			
 				<p>Models are stored in '/models/' subfolder. Model files should be in the format of 'model.[name].php' in that folder and an example Model is provided in that folder, but you can design the Model however you want.</p>
 				
@@ -78,7 +91,7 @@
 				
 				<p>Models are generally loaded through Factory with 'getModel()' method call.</p>
 				
-			<h2>Views</h2>
+			<h2 id="index-views">Views</h2>
 			
 				<p>Views are stored in '/views/' subfolder. View files should be in the format of 'view.{name}.php' in that folder and an example View is provided in that folder, but you can design the View however you want.</p>
 				
@@ -86,7 +99,7 @@
 				
 				<p>Views are generally loaded through View Controller by default, or through Factory with 'getView()' method call, which allows you to use nested Views.</p>
 				
-			<h2>Resources</h2>
+			<h2 id="index-resources">Resources</h2>
 			
 				<p>Resources folder should include all the resources - such as JavaScript, CSS stylesheets, translation files and class definitions - that are used by the project. This folder includes multiple sub-folders as well as the files themselves. Here's the list of files:</p>
 				
@@ -151,7 +164,7 @@
 					
 					<p>But note that the benefits may not outweigh the benefits of serving files through Wave Framework Handlers, since the control over caching and unifying requests may be better for the project in some cases.</p>
 				
-			<h2>Filesystem</h2>
+			<h2 id="index-filesystem">Filesystem</h2>
 			
 				<p>There are a multiple folders and subfolders stored in '/filesystem/' folder. This folder is required to be writable by Wave Framework, since this is the place where the system stores cache and other related files.</p>
 				
@@ -176,7 +189,7 @@
 					<li><b>userdata</b> - This is a folder that is suitable for various end-user file uploads and file storage.</li>
 				</ul>
 				
-			<h2>Overrides</h2>
+			<h2 id="index-overrides">Overrides</h2>
 			
 				<p>Overrides are a very useful part of Wave Framework. The idea behind overrides is that you have the ability to override any and every part of your systems functionality except the framework itself. This means that if you place a file with the same name and the same location in '/overrides/' folder or subfolders and a request is made to the original file over HTTP or from within Factory, then the override will be loaded instead.</p>
 				
@@ -184,7 +197,7 @@
 				
 				<p>Second benefit is that overrides allow you to have the same software in multiple servers, but with slight changes. For example, if you have built an intranet software on Wave Framework and one client wishes to use some functionality that they custom-ordered, then this can be stored in overrides folder. This is beneficial because the same software itself can still be updated through the core update cycle, since the updates would not overwrite the override.</p>
 				
-			<h2>Summary</h2>
+			<h2 id="index-summary">Summary</h2>
 			
 				<p>As you can see the structure of a project in filesystem follows only a few very easy to follow rules. If you start a new project with Wave Framework or inherit an existing one, then these are the folders that actually affect the software functionality that is built on top of Wave.</p>
 				

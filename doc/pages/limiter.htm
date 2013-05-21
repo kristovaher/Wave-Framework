@@ -12,11 +12,19 @@
 	
 		<h1>Limiter Class</h1>
 		
-			<h2>Files</h2>
+			<ul>
+				<li><a href="#index-files">Files</a></li>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-using-limiter-class">Using Limiter Class</a></li>
+				<li><a href="#index-limiter-class-parameters">Limiter Class Parameters</a></li>
+				<li><a href="#index-limiter-class-methods">Limiter Class Methods</a></li>
+			</ul>
+		
+			<h2 id="index-files">Files</h2>
 			
 				<h3>/engine/class.www-limiter.php</h3>
 		
-			<h2>Introduction</h2>
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>This is an optional class that is used to limit HTTP requests based on user agent, IP, server condition and other information. This class is loaded by <a href="gateway.htm">Index Gateway</a>. WWW_Limiter can be used to block IP's if they make too many requests per minute, block requests if server load is detected as too high, block the request if it comes from blacklist provided by the system, allow only whitelisted IP's to access, ask for HTTP authentication or force the user agent to use HTTPS. Note that some of this functionality can be achieved by Apache configuration and modules, but it is provided here for cases where the project developer might not have control over server configuration.</p>
 			
@@ -24,7 +32,7 @@
 				
 				<p>The rest of this document details the use of Limiter class in general, often outside the scope of how Wave Framework itself uses the class. This information is useful only to developers who intend to develop core of Wave Framework or use the class independently in another project.</p>
 				
-			<h2>Using Limiter class</h2>
+			<h2 id="index-using-limiter-class">Using Limiter class</h2>
 			
 				<p>To use Limiter class, it is recommended to load Limiter class and create a Limiter object as early as possible. This makes sure that the HTTP request limiter checks happen before actual code execution. Some Limiter functionality expects to be able to write to <a href="filesystem.htm">Filesystem</a> to keep track of certain HTTP requests, it is recommended to send this address as a parameter when creating the Limiter object.</p>
 				
@@ -100,7 +108,7 @@
 	</code>
 </pre>
 
-			<h2>Limiter Class Parameters</h2>
+			<h2 id="index-limiter-class-parameters">Limiter Class Parameters</h2>
 			
 				<h3>private $logDir='./'</h3>
 				
@@ -110,7 +118,7 @@
 				
 					<p>This holds the <a href="logger.htm">Logger</a> object, if it is used. This makes it possible for Limiter to write proper log files through <a href="logger.htm">Logger</a> in case requests are blocked.</p>
 				
-			<h2>Limiter Class Methods</h2>
+			<h2 id="index-limiter-class-methods">Limiter Class Methods</h2>
 				
 				<h3>public function __construct($logDir='./')</h3>
 				

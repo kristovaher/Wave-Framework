@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.5.1
- * @version    3.2.0
+ * @version    3.6.0
  */
 
 // This initializes tools and authentication
@@ -41,6 +41,9 @@ header('Content-Type: text/html;charset=utf-8');
 	<body>
 		<?php
 		
+		// Pops up an alert about default password
+		passwordNotification($config['http-authentication-password']);
+		
 		// Header
 		echo '<h1>System compatibility</h1>';
 		echo '<h4 class="highlight">';
@@ -66,7 +69,7 @@ header('Content-Type: text/html;charset=utf-8');
 			$phpVersion=phpversion();
 			if($phpVersion){
 				if(version_compare($phpVersion,'5.3.0')>=0){
-					$log[]='<span class="bold">SUCCESS</span>: PHP is running version 5.3 or newer';
+					$log[]='<span class="bold">SUCCESS</span>: PHP is version 5.3.0 or above (running '.$phpVersion.')';
 				} else {
 					$log[]='<span class="bold red"><span class="bold red">FAILURE</span></span>: PHP is running older version than 5.3, Wave Framework has not been tested on older versions of PHP';
 				}
@@ -189,7 +192,7 @@ header('Content-Type: text/html;charset=utf-8');
 			if(extension_loaded('memcache')){
 				$log[]='<span class="bold">SUCCESS</span>: Memcache is supported';
 			} else {
-				$log[]='<span class="bold orange">WARNING</span>: Memcache is not supported, this can be ignored if you do not intend to support memcache as a caching layer';
+				$log[]='<span class="bold orange">WARNING</span>: Memcache is not supported, this can be ignored if you do not intend to support Memcache as a caching layer';
 			}
 			
 		// GD LIBRARY

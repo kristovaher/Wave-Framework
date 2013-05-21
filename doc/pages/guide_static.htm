@@ -12,7 +12,12 @@
 	
 		<h1>Static Files</h1>
 		
-			<h2>Introduction</h2>
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-serving-resource-and-image-files-without-handlers">Serving Resource and Image Files Without Handlers</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
 			
 				<p>Static files are all the files that are not served by Robots, Image, Sitemap or <a href="handler_resource.htm">Resource Handlers</a>. Static files are served usually through <a href="handler_file.htm">File Handler</a> that is called by <a href="gateway.htm">Index Gateway</a>. If the HTTP request has a file extension that is not registered to <a href="handler_image.htm">Image Handler</a>, <a href="handler_resource.htm">Resource Handler</a> and is not one of the forbidden file extensions (*.tmp, *.log, *.ht, *.htaccess, *.pem, *.crt, *.db, *.sql, *.version, *.conf, *.ini), then Wave Framework serves the file through <a href="handler_file.htm">File Handler</a>.</p>
 				
@@ -34,7 +39,7 @@
 	</code>
 </pre>
 				
-			<h2>Serving Resource and Image Files Without Handlers</h2>
+			<h2 id="index-serving-resource-and-image-files-without-handlers">Serving Resource and Image Files Without Handlers</h2>
 			
 				<p>Sometimes it is necessary to also serve files directly to user agent without PHP and Wave Framework having anything to do with the file. This means that requests to those static files are not logged at all by Wave Framework.</p>
 				

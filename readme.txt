@@ -95,11 +95,11 @@ INSTALLATION
 HELP AND DOCUMENTATION
 ----------------------
 
-Official documentation about how to set up a system and use the API, as well as tutorials are available under /doc/ directory. To read documentation, open /doc/start.htm file with a web browser.
+Official documentation about how to set up a system and use the API, as well as tutorials are available under /doc/ directory. To read documentation, open /doc/start.htm file with a web browser. It is also possible to read the most recent documentation online at 'www.waveframework.com'.
 
 If you wish to participate in Wave Framework development and submit patches, fixes and new features, then it is recommended to do so through GitHub.
 
-I am also willing to answer questions regarding Wave Framework when contacted through info@waveframework.com e-mail address.
+I am also answering questions and receiving feedback and ideas regarding Wave Framework if contacted through info@waveframework.com e-mail address.
 
 REPOSITORIES
 ------------
@@ -117,8 +117,8 @@ kristo@waher.net
 http://www.waher.net
 http://plus.google.com/102632377636999004385/
 
-THANK YOU
----------
+CONTRIBUTORS
+------------
 
 Allan Davy
 Priit Perna

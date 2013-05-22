@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.6.0
+ * @version    3.6.2
  */
 
 class WWW_State	{
@@ -534,11 +534,7 @@ class WWW_State	{
 				// Setting the proper address of State to the newly set variable
 				$pointer=&$this->data;
 				foreach($input as $key){
-					if(!isset($pointer[$key])){
-						$pointer=&$pointer[$key];
-					} else {
-						trigger_error('State variable '.print_r($key,true).' does not exist and cannot be used as an address',E_USER_NOTICE);
-					}
+					$pointer=&$pointer[$key];
 				}
 				$pointer=$value;
 				

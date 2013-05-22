@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/imager.htm
  * @since      1.0.0
- * @version    3.6.0
+ * @version    3.6.2
  */
 
 class WWW_Imager {
@@ -223,6 +223,7 @@ class WWW_Imager {
 				$width=$this->width;
 				$height=$this->height;
 				$algorithm='fitcrop';
+				$alpha=true;
 				$red=0;
 				$green=0;
 				$blue=0;
@@ -305,6 +306,9 @@ class WWW_Imager {
 								$filters[]=$newFilter;
 								
 							} elseif(strpos($parameter,'rgb(')!==false){
+								
+								// This tells Imager that alpha channel won't be used since RGB is set
+								$alpha=false;
 							
 								// Background color setting is assumed if rgb is present
 								$colors=str_replace(array('rgb(',')'),'',$parameter);
@@ -322,11 +326,6 @@ class WWW_Imager {
 									$blue=$colors[2];
 								}
 								
-							} elseif(strpos($parameter,'@')!==false){
-							
-								// Quality setting is assumed if @ sign is present
-								$quality=str_replace('@','',$parameter);
-								
 							} elseif(strpos($parameter,'-')!==false){
 							
 								// Position setting is assumed if dash is present
@@ -341,6 +340,11 @@ class WWW_Imager {
 								if($positions[1]!=''){
 									$left=$positions[1];
 								}
+								
+							} elseif(strpos($parameter,'@')!==false){
+							
+								// Quality setting is assumed if @ sign is present
+								$quality=str_replace('@','',$parameter);
 								
 							} elseif(strpos($parameter,'x')!==false){
 							
@@ -396,13 +400,13 @@ class WWW_Imager {
 								break;
 							case 'crop':
 								// Crop algorithm places image in new dimensions box cutting the edges that do not fit
-								if(!$this->resizeCrop($width,$height,$left,$top,$red,$green,$blue)){
+								if(!$this->resizeCrop($width,$height,$left,$top,$red,$green,$blue,$alpha)){
 									trigger_error('Cannot resize image with crop algorithm',E_USER_ERROR);
 								}
 								break;
 							case 'fitwithbackground':
 								// This fits image inside the box and gives it certain color background (if applicable)
-								if(!$this->resizeFit($width,$height,$left,$top,$red,$green,$blue)){
+								if(!$this->resizeFit($width,$height,$left,$top,$red,$green,$blue,$alpha)){
 									trigger_error('Cannot resize image with fit-with-background algorithm',E_USER_ERROR);
 								}
 								break;
@@ -461,7 +465,9 @@ class WWW_Imager {
 	 * $height. This resize method crops the image by removing the parts of picture that are left 
 	 * out of $width and $height dimensions. Variables $left and $top can be used to set the 
 	 * position of the image on the new, resized canvas and accept both numeric (pixel) values 
-	 * as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'.
+	 * as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position 
+	 * values can also include a percentage for stretching the image in either direction by 
+	 * writing percentage after * symbol.
 	 *
 	 * @param integer $width width of resulting image
 	 * @param integer $height height of resulting image
@@ -487,46 +493,70 @@ class WWW_Imager {
 			}
 		}
 		
+		// Finding out fixed image size or percentages
+		$leftFixed=true;
+		$left=explode(',',$left);
+		if(!isset($left[1])){
+			$leftFixed=false;
+			// Percentages are defined by * symbol
+			$left=explode('*',$left[0]);
+			if(!isset($left[1])){
+				$left[1]=100;
+			}
+		}
+		
 		// Left position is calculated, if value is a string instead of a number
-		switch($left){
+		switch($left[0]){
 			case 'center':
 				// Calculating image left position based on positioning difference with new dimensions
-				$left=-(round(($this->width-$width)/2));
+				$left[0]=-(round(($this->width-$width)/2));
 				break;
 			case 'left':
 				// Left positioning is always 0
-				$left=0;
+				$left[0]=0;
 				break;
 			case 'right':
 				// Right position is simply the current image width subtracted from new width
-				$left=$width-$this->width;
+				$left[0]=$width-$this->width;
 				break;
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
-				if(!is_numeric($left)){
-					trigger_error('This left position is not supported',E_USER_ERROR);
+				if(!is_numeric($left[0])){
+					trigger_error('This left position ('.$left[0].') is not supported',E_USER_ERROR);
 				}
 				break;
 		}
 		
+		// Finding out fixed sprite size or percentages for size
+		$topFixed=true;
+		$top=explode(',',$top);
+		if(!isset($top[1])){
+			$topFixed=false;
+			// Percentages are defined by * symbol
+			$top=explode('*',$top[0]);
+			if(!isset($top[1])){
+				$top[1]=100;
+			}
+		}
+		
 		// Top position is calculated, if value is a string instead of a number
-		switch($top){
+		switch($top[0]){
 			case 'center':
 				// Calculating image top position based on positioning difference with new dimensions
-				$top=-(round(($this->height-$height)/2));
+				$top[0]=-(round(($this->height-$height)/2));
 				break;
 			case 'top':
 				// Top positioning is always 0
-				$top=0;
+				$top[0]=0;
 				break;
 			case 'bottom':
 				// Top position is simply the current image height subtracted from new height
-				$top=$height-$this->height;
+				$top[0]=$height-$this->height;
 				break;
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
-				if(!is_numeric($top)){
-					trigger_error('This top position is not supported',E_USER_ERROR);
+				if(!is_numeric($top[0])){
+					trigger_error('This top position ('.$top[0].') is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -537,7 +567,7 @@ class WWW_Imager {
 		imagealphablending($tmpImage,false);
 		imagesavealpha($tmpImage,true);
 		// Current image resource is placed on temporary resource
-		imagecopyresampled($tmpImage,$this->resource,$left,$top,0,0,$this->width,$this->height,$this->width,$this->height);
+		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->width)),$this->width,$this->height);
 		
 		// New dimensions and temporary image resource is assigned as resource of this object
 		$this->width=$width;
@@ -555,8 +585,10 @@ class WWW_Imager {
 	 * removing the parts of picture that are left out of $width and $height dimensions. 
 	 * Variables $left and $top can be used to set the position of the image on the new, 
 	 * resized canvas and accept both numeric (pixel) values as well as relative ones, such 
-	 * as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB values 
-	 * for background color in case background is required (not used for PNG images).
+	 * as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include a 
+	 * percentage for stretching the image in either direction by writing percentage 
+	 * after * symbol. $red, $green and $blue are RGB values for background color in case 
+	 * background is required (not used for PNG images).
 	 *
 	 * @param integer $width width of resulting image
 	 * @param integer $height height of resulting image
@@ -591,46 +623,70 @@ class WWW_Imager {
 			}
 		}
 	
+		// Finding out fixed image size or percentages
+		$leftFixed=true;
+		$left=explode(',',$left);
+		if(!isset($left[1])){
+			$leftFixed=false;
+			// Percentages are defined by * symbol
+			$left=explode('*',$left[0]);
+			if(!isset($left[1])){
+				$left[1]=100;
+			}
+		}
+		
 		// Left position is calculated, if value is a string instead of a number
-		switch($left){
+		switch($left[0]){
 			case 'center':
 				// Calculating image left position based on positioning difference with new dimensions
-				$left=-(round(($this->width-$width)/2));
+				$left[0]=-(round(($this->width-$width)/2));
 				break;
 			case 'left':
 				// Left positioning is always 0
-				$left=0;
+				$left[0]=0;
 				break;
 			case 'right':
 				// Right position is simply the current image width subtracted from new width
-				$left=$width-$this->width;
+				$left[0]=$width-$this->width;
 				break;
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
-				if(!is_numeric($left)){
-					trigger_error('This left position is not supported',E_USER_ERROR);
+				if(!is_numeric($left[0])){
+					trigger_error('This left position ('.$left[0].') is not supported',E_USER_ERROR);
 				}
 				break;
 		}
 		
+		// Finding out fixed sprite size or percentages for size
+		$topFixed=true;
+		$top=explode(',',$top);
+		if(!isset($top[1])){
+			$topFixed=false;
+			// Percentages are defined by * symbol
+			$top=explode('*',$top[0]);
+			if(!isset($top[1])){
+				$top[1]=100;
+			}
+		}
+		
 		// Top position is calculated, if value is a string instead of a number
-		switch($top){
+		switch($top[0]){
 			case 'center':
 				// Calculating image top position based on positioning difference with new dimensions
-				$top=-(round(($this->height-$height)/2));
+				$top[0]=-(round(($this->height-$height)/2));
 				break;
 			case 'top':
 				// Top positioning is always 0
-				$top=0;
+				$top[0]=0;
 				break;
 			case 'bottom':
 				// Top position is simply the current image height subtracted from new height
-				$top=$height-$this->height;
+				$top[0]=$height-$this->height;
 				break;
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
-				if(!is_numeric($top)){
-					trigger_error('This top position is not supported',E_USER_ERROR);
+				if(!is_numeric($top[0])){
+					trigger_error('This top position ('.$top[0].') is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -642,16 +698,24 @@ class WWW_Imager {
 		if($this->type!=IMAGETYPE_PNG){
 			// Since the image might have a background color, the temporary image is filled with background color
 			imagefill($tmpImage,0,0,imagecolorallocate($tmpImage,$red,$green,$blue));
+		} elseif(!$alpha){
+			// PNG images are filled with alpha background color
+			imagefill($tmpImage,0,0,imagecolorallocatealpha($tmpImage,$red,$green,$blue,0));
+			// This preserves alpha maps, if it exists (such as for PNG)
+			imagealphablending($tmpImage,true);
+			// Saving the alpha map
+			imagesavealpha($tmpImage,true);
 		} else {
 			// PNG images are filled with alpha background color
 			imagefill($tmpImage,0,0,imagecolorallocatealpha($tmpImage,0,0,0,127));
+			// This preserves alpha maps, if it exists (such as for PNG)
+			imagealphablending($tmpImage,false);
+			// Saving the alpha map
+			imagesavealpha($tmpImage,true);
 		}
 		
-		// This preserves alpha maps, if it exists (such as for PNG)
-		imagealphablending($tmpImage,false);
-		imagesavealpha($tmpImage,true);
 		// Current image resource is placed on temporary resource
-		imagecopyresampled($tmpImage,$this->resource,$left,$top,0,0,$this->width,$this->height,$this->width,$this->height);
+		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->width)),$this->width,$this->height);
 		
 		// New dimensions and temporary image resource is assigned as resource of this object
 		$this->width=$width;
@@ -669,8 +733,10 @@ class WWW_Imager {
 	 * resize method crops the image by removing the parts of picture that are left out of $width 
 	 * and $height dimensions. Variables $left and $top can be used to set the position of the 
 	 * image on the new, resized canvas and accept both numeric (pixel) values as well as relative 
-	 * ones, such as 'center', 'left', 'right' and 'top, 'bottom'. $red, $green and $blue are RGB 
-	 * values for background color in case background is required (not used for PNG images).
+	 * ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include 
+	 * a percentage for stretching the image in either direction by writing percentage after * symbol.
+	 * $red, $green and $blue are RGB values for background color in case background is required 
+	 * (not used for PNG images).
 	 * 
 	 * @param integer $width width of resulting image
 	 * @param integer $height height of resulting image
@@ -716,46 +782,70 @@ class WWW_Imager {
 			}
 		}
 		
+		// Finding out fixed image size or percentages
+		$leftFixed=true;
+		$left=explode(',',$left);
+		if(!isset($left[1])){
+			$leftFixed=false;
+			// Percentages are defined by * symbol
+			$left=explode('*',$left[0]);
+			if(!isset($left[1])){
+				$left[1]=100;
+			}
+		}
+		
 		// Left position is calculated, if value is a string instead of a number
-		switch($left){
+		switch($left[0]){
 			case 'center':
 				// Calculating image left position based on positioning difference with new dimensions
-				$left=-(round(($this->width-$width)/2));
+				$left[0]=-(round(($this->width-$width)/2));
 				break;
 			case 'left':
 				// Left positioning is always 0
-				$left=0;
+				$left[0]=0;
 				break;
 			case 'right':
 				// Right position is simply the current image width subtracted from new width
-				$left=$width-$this->width;
+				$left[0]=$width-$this->width;
 				break;
 			default:
 				// Numeric positioning is possible, but error is thrown when the left value is not numeric
-				if(!is_numeric($left)){
-					trigger_error('This left position is not supported',E_USER_ERROR);
+				if(!is_numeric($left[0])){
+					trigger_error('This left position ('.$left[0].') is not supported',E_USER_ERROR);
 				}
 				break;
 		}
 		
+		// Finding out fixed sprite size or percentages for size
+		$topFixed=true;
+		$top=explode(',',$top);
+		if(!isset($top[1])){
+			$topFixed=false;
+			// Percentages are defined by * symbol
+			$top=explode('*',$top[0]);
+			if(!isset($top[1])){
+				$top[1]=100;
+			}
+		}
+		
 		// Top position is calculated, if value is a string instead of a number
-		switch($top){
+		switch($top[0]){
 			case 'center':
 				// Calculating image top position based on positioning difference with new dimensions
-				$top=-(round(($this->height-$height)/2));
+				$top[0]=-(round(($this->height-$height)/2));
 				break;
 			case 'top':
 				// Top positioning is always 0
-				$top=0;
+				$top[0]=0;
 				break;
 			case 'bottom':
 				// Top position is simply the current image height subtracted from new height
-				$top=$height-$this->height;
+				$top[0]=$height-$this->height;
 				break;
 			default:
 				// Numeric positioning is possible, but error is thrown when the top value is not numeric
-				if(!is_numeric($top)){
-					trigger_error('This top position is not supported',E_USER_ERROR);
+				if(!is_numeric($top[0])){
+					trigger_error('This top position ('.$top[0].') is not supported',E_USER_ERROR);
 				}
 				break;
 		}
@@ -764,19 +854,27 @@ class WWW_Imager {
 		$tmpImage=imagecreatetruecolor($width,$height);
 		
 		// Background color is transparent for PNG images
-		if($this->type!=IMAGETYPE_PNG || !$alpha){
+		if($this->type!=IMAGETYPE_PNG){
 			// Since the image might have a background color, the temporary image is filled with background color
 			imagefill($tmpImage,0,0,imagecolorallocate($tmpImage,$red,$green,$blue));
+		} elseif(!$alpha){
+			// PNG images are filled with alpha background color
+			imagefill($tmpImage,0,0,imagecolorallocatealpha($tmpImage,$red,$green,$blue,0));
+			// This preserves alpha maps, if it exists (such as for PNG)
+			imagealphablending($tmpImage,true);
+			// Saving the alpha map
+			imagesavealpha($tmpImage,true);
 		} else {
 			// PNG images are filled with alpha background color
 			imagefill($tmpImage,0,0,imagecolorallocatealpha($tmpImage,0,0,0,127));
+			// This preserves alpha maps, if it exists (such as for PNG)
+			imagealphablending($tmpImage,false);
+			// Saving the alpha map
+			imagesavealpha($tmpImage,true);
 		}
 		
-		// This preserves alpha maps, if it exists (such as for PNG)
-		imagealphablending($tmpImage,false);
-		imagesavealpha($tmpImage,true);
 		// Current image resource is placed on temporary resource
-		imagecopyresampled($tmpImage,$this->resource,$left,$top,0,0,$this->width,$this->height,$this->width,$this->height);
+		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->width)),$this->width,$this->height);
 		
 		// New dimensions and temporary image resource is assigned as resource of this object
 		$this->width=$width;

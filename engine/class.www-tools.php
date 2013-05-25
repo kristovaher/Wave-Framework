@@ -14,7 +14,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/tools.htm
  * @since      3.4.2
- * @version    3.6.0
+ * @version    3.6.4
  */
 
 class WWW_Tools {
@@ -28,8 +28,8 @@ class WWW_Tools {
 	 * This creates the Tools object. If the filesystem is not sent during the object creation 
 	 * then it attempts to find one by default based on requesting script folder. 
 	 *
-	 * @param string $filesystemDirectory optional filesystem directory
-	 * @return object
+	 * @param boolean|string $filesystemDirectory optional filesystem directory
+	 * @return WWW_Tools
 	 */
 	public function __construct($filesystemDirectory=false){
 		if(!$filesystemDirectory){
@@ -48,8 +48,8 @@ class WWW_Tools {
 	 * tells the cleaner not to delete certain files if their modification timestamp is newer.
 	 *
 	 * @param string|array $mode keywords for folders that will be cleaned
-	 * @param integer $cutOff timestamp of last-modified on the files, after which the file will not be deleted
-	 * @return array as a log
+	 * @param boolean|integer $cutoff timestamp of last-modified on the files, after which the file will not be deleted
+	 * @return array
 	 */
 	public function cleaner($mode='maintenance',$cutoff=false){
 	
@@ -214,6 +214,7 @@ class WWW_Tools {
 	 * This function counts the amount of files in a folder
 	 *
 	 * @param string $directory location of directory in filesystem
+     * @return int
 	 */
 	public function counter($directory){
 

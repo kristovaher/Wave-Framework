@@ -20,7 +20,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.6.0
+ * @version    3.6.4
  */
 
 /**
@@ -137,6 +137,7 @@ function fileIndex($directory,$type='all',$recursive=true,$files=false){
  * This function counts the amount of files in a folder
  *
  * @param string $directory location of directory in filesystem
+ * @return int
  */
 function fileCount($directory){
 
@@ -305,9 +306,9 @@ function systemBackup($source,$archive,$filesystemBackup=false){
 }
 
 /**
- * This returns true IP
+ * This returns true IP based on user agent string
  *
- * @param array $trustedProxies array of trusted proxies
+ * @param boolean|array $trustedProxies array of trusted proxies
  * @return string
  */
 function getTrueIP($trustedProxies=false){

@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.6.2
+ * @version    3.6.4
  */
 
 class WWW_State	{
@@ -70,7 +70,7 @@ class WWW_State	{
 	 * loaded from XML or JSON strings, if sent with POST directly.
 	 *
 	 * @param array $config configuration array
-	 * @return object
+	 * @return WWW_State
 	 */
 	final public function __construct($config=array()){
 	
@@ -96,6 +96,7 @@ class WWW_State	{
 				'api-profile'=>'public',
 				'api-public-profile'=>'public',
 				'api-public-token'=>false,
+				'api-versions'=>array('v1'),
 				'cache-database'=>false,
 				'cache-database-address-column'=>'address',
 				'cache-database-data-column'=>'data',
@@ -666,9 +667,9 @@ class WWW_State	{
 		 * with that keyword from $language translations. If $keyword is an array, then $subkeyword
 		 * can be used to return specific translation from that keyword.
 		 *
-		 * @param string $language language keyword, if this is not set then returns current language translations
-		 * @param string $keyword if only single keyword needs to be returned
-		 * @param string $subkeyword if the $keyword is an array, then $subkeyword is the actual translation that is requested
+		 * @param boolean|string $language language keyword, if this is not set then returns current language translations
+		 * @param boolean|string $keyword if only single keyword needs to be returned
+		 * @param boolean|string $subkeyword if the $keyword is an array, then $subkeyword is the actual translation that is requested
 		 * @return array, string or false if failed
 		 */
 		final public function getTranslations($language=false,$keyword=false,$subkeyword=false){
@@ -740,7 +741,7 @@ class WWW_State	{
 		 * active language is used.
 		 *
 		 * @param string $name filename without language prefix
-		 * @param string $language language keyword
+		 * @param boolean|string $language language keyword
 		 * @return string
 		 */
 		final public function getContent($name,$language=false){
@@ -791,8 +792,8 @@ class WWW_State	{
 		 * sitemap node with that keyword from $language sitemap file. This method returns the 
 		 * original, non-modified sitemap that has not been parsed for use with URL controller.
 		 *
-		 * @param string $language language keyword, if this is not set then returns current language sitemap
-		 * @param string $keyword if only a single URL node needs to be returned
+		 * @param boolean|string $language language keyword, if this is not set then returns current language sitemap
+		 * @param boolean|string $keyword if only a single URL node needs to be returned
 		 * @return array or false if failed
 		 */
 		final public function getSitemapRaw($language=false,$keyword=false){
@@ -857,8 +858,8 @@ class WWW_State	{
 		 * parts of the system. It returns sitemap for current language or a language set with 
 		 * $language variable and can return a specific sitemap node based on $keyword.
 		 *
-		 * @param string $language language keyword, if this is not set then returns current language sitemap
-		 * @param string $keyword if only a single URL node needs to be returned
+		 * @param boolean|string $language language keyword, if this is not set then returns current language sitemap
+		 * @param boolean|string $keyword if only a single URL node needs to be returned
 		 * @return array or false if failed
 		 */
 		final public function getSitemap($language=false,$keyword=false){
@@ -1008,7 +1009,7 @@ class WWW_State	{
 		 * This method removes key from State messenger based on value of $key. If $key is not 
 		 * set, then the entire State messenger data is cleared.
 		 *
-		 * @param string $key key that will be removed, if set to false then removes the entire data
+		 * @param boolean|string $key key that will be removed, if set to false then removes the entire data
 		 * @return boolean
 		 */
 		final public function unsetMessengerData($key=false){
@@ -1035,7 +1036,7 @@ class WWW_State	{
 		 * initialized state messenger, or just a $key from it. If $remove is set, then data is 
 		 * also set for deletion after it has been accessed.
 		 *
-		 * @param string $key data keyword
+		 * @param boolean|string $key data keyword
 		 * @param boolean $remove true or false flag whether to delete the request data after returning it
 		 * @return mixed or false if failed
 		 */
@@ -1107,7 +1108,7 @@ class WWW_State	{
 		 * This method sets user data array in session. This is a simple helper function used 
 		 * for holding user-specific data for a web service. $data is an array of user data.
 		 *
-		 * @param array $data data array set to user
+		 * @param boolean|array $data data array set to user
 		 * @return boolean
 		 */
 		final public function setUser($data=false){
@@ -1130,7 +1131,7 @@ class WWW_State	{
 		 * This either returns the entire user data array or just a specific $key of user data 
 		 * from the session.
 		 *
-		 * @param string $key element returned from user data, if not set then returns the entire user data
+		 * @param boolean|string $key element returned from user data, if not set then returns the entire user data
 		 * @return mixed
 		 */
 		final public function getUser($key=false){
@@ -1180,7 +1181,7 @@ class WWW_State	{
 		 * This method sets an array of $permissions or a comma-separated string of permissions 
 		 * for the current user permissions session.
 		 *
-		 * @param array|string $permissions an array or a string of permissions
+		 * @param boolean|array|string $permissions an array or a string of permissions
 		 * @return boolean
 		 */
 		final public function setPermissions($permissions=false){
@@ -1354,20 +1355,21 @@ class WWW_State	{
 		/**
 		 * This method validates current session data and checks for lifetime as well as 
 		 * session fingerprint. It notifies session handler if any changes have to be made.
+         * Configuration array can have these keys:
+         * 'name' - session cookie name
+         * 'lifetime' - session cookie lifetime
+         * 'path' - URL path for session cookie
+         * 'domain' - domain for session cookie
+         * 'secure' - whether session cookie is for secure connections only
+         * 'http-only' - whether session cookie is for HTTP requests only and unavailable for scripts
+         * 'user-key' - session key for storing user data
+         * 'permissions-key' - session key for storing user permissions
+         * 'fingerprint-key' - session key for storing session fingerprint
+         * 'timestamp-key' - session key for storing session timestamp
+         * 'token-key' - session key for public request tokens for protecting against replay attacks
+         * 'fingerprint' - session key for session fingerprinting for protecting against replay attacks
 		 *
-		 * @param array $configuration list of session configuration options, keys below
-		 * 'name' - session cookie name
-		 * 'lifetime' - session cookie lifetime
-		 * 'path' - URL path for session cookie
-		 * 'domain' - domain for session cookie
-		 * 'secure' - whether session cookie is for secure connections only
-		 * 'http-only' - whether session cookie is for HTTP requests only and unavailable for scripts
-		 * 'user-key' - session key for storing user data
-		 * 'permissions-key' - session key for storing user permissions
-		 * 'fingerprint-key' - session key for storing session fingerprint
-		 * 'timestamp-key' - session key for storing session timestamp
-		 * 'token-key' - session key for public request tokens for protecting against replay attacks
-		 * 'fingerprint' - session key for session fingerprinting for protecting against replay attacks
+		 * @param boolean|array $configuration list of session configuration options
 		 * @return boolean
 		 */
 		final public function startSession($configuration=false){
@@ -1456,7 +1458,7 @@ class WWW_State	{
 		 * This method sets a session variable $key with a $value. If $key is an array of 
 		 * keys and values, then multiple session variables are set at once.
 		 *
-		 * @param array|string $key key of the variable or an array of keys and values
+		 * @param boolean|array|string $key key of the variable or an array of keys and values
 		 * @param mixed $value value to be set
 		 * @return boolean
 		 */
@@ -1487,7 +1489,7 @@ class WWW_State	{
 		 * it can return multiple variables from session at once. If $key is not set, then entire 
 		 * session array is returned.
 		 *
-		 * @param string|array $key key to return or an array of keys
+		 * @param boolean|string|array $key key to return or an array of keys
 		 * @return mixed
 		 */
 		final public function getSession($key=false){
@@ -1530,7 +1532,7 @@ class WWW_State	{
 		 * multiple variables can be unset at once. If $key is not set at all, then this simply 
 		 * destroys the entire session.
 		 *
-		 * @param string|array $key key of the value to be unset, or an array of keys
+		 * @param boolean|string|array $key key of the value to be unset, or an array of keys
 		 * @return boolean
 		 */
 		final public function unsetSession($key=false){

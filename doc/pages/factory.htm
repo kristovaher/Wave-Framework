@@ -87,9 +87,9 @@
 				
 					<p>This method loads <a href="imager.htm">Imager</a> class that is used for image editing. If $source is set, then it also automatically assigns a source image file for that <a href="imager.htm">Imager</a>.</p>
 			
-				<h3>final protected function applyImager($source,$command,$target=false)</h3>
+				<h3>final protected function applyImager($source,$parameters,$target=false)</h3>
 				
-					<p>This is a wrapper method for <a href="imager.htm">Imager</a> class method commands(). This method allows to load a file, edit a file and store a file in <a href="filesystem.htm">Filesystem</a> in just a single method call. $source should be the image file in <a href="filesystem.htm">Filesystem</a>, $command is the Wave Framework styled <a href="handler_image.htm">Image Handler</a> accepted parameter string, like '320x240&amp;filter(grayscale)' and $target should be the destination address for the file. If $target is missing then result is pushed to output buffer.</p>
+					<p>This is a wrapper method for <a href="imager.htm">Imager</a> class method commands(). This method allows to load a file, edit a file and store a file in <a href="filesystem.htm">Filesystem</a> in just a single method call. $source should be the image file in <a href="filesystem.htm">Filesystem</a>, $parameters is the Wave Framework styled <a href="handler_image.htm">Image Handler</a> accepted parameter string, like '320x240&amp;filter(grayscale)' and $target should be the destination address for the file. If $target is missing then result is pushed to output buffer.</p>
 			
 				<h3>final protected function applyMinifier($data,$type)</h3>
 				
@@ -138,6 +138,10 @@
 				<h3>final protected function getReturnType()</h3>
 				
 					<p>This returns the www-return-type of currently known <a href="guide_api.htm">API</a> request. This can be used to modify the request response based on what data is requested, if this is needed.</p>
+					
+				<h3>final protected function apiVersion()</h3>
+				
+					<p>This method returns the currently used API version number. These version numbers can be used for versioning or other checks.</p>
 					
 				<h3>final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$persistentConnection=false)</h3>
 				

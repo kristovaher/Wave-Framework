@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.5.6
+ * @version    3.6.4
  */
 
 class WWW_Wrapper {
@@ -47,6 +47,7 @@ class WWW_Wrapper {
 		'apiPublicToken'=>false,
 		'apiHashValidation'=>true,
 		'apiStateKey'=>false,
+		'apiVersion'=>false,
 		'headers'=>false,
 		'returnHash'=>false,
 		'returnTimestamp'=>false,
@@ -126,7 +127,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.5.6 (PHP)';
+	private $userAgent='WaveFramework/3.6.4 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -148,9 +149,9 @@ class WWW_Wrapper {
 	 * the system that API makes a connection with and is used whenever language-specific results 
 	 * are returned from API.
 	 * 
-	 * @param string $address API address, default value is current domain presumed API address
-	 * @param string $language language keyword, default value is current document language
-	 * @return object
+	 * @param boolean|string $address API address, default value is current domain presumed API address
+	 * @param boolean|string $language language keyword, default value is current document language
+	 * @return WWW_Wrapper
 	 */
 	public function __construct($address=false,$language=false){
 	
@@ -202,7 +203,7 @@ class WWW_Wrapper {
 		 * value of $implode is used as a character to implode the log with. Otherwise the 
 		 * log is returned as an array.
 		 * 
-		 * @param string $implode string to implode the log with
+		 * @param boolean|string $implode string to implode the log with
          * @return array/string depending if imploded
 		 */
 		public function returnLog($implode=false){
@@ -236,7 +237,7 @@ class WWW_Wrapper {
 		 * then cookies are not used at all. $location is the file that is used for cookie 
 		 * container, it is automatically created if the file does not exist.
 		 *
-		 * @param string $location cookie container file location in filesystem
+		 * @param boolean|string $location cookie container file location in filesystem
 		 * @return boolean
 		 */
 		public function setCookieContainer($location=false){
@@ -271,7 +272,7 @@ class WWW_Wrapper {
 		 * like http://curl.haxx.se/docs/caextract.html and can be used to verify host and 
 		 * peer data with cURL requests.
 		 *
-		 * @param string $location cookie container file location in filesystem
+		 * @param boolean|string $location cookie container file location in filesystem
 		 * @return boolean
 		 */
 		public function setCertificateContainer($location=false){
@@ -303,7 +304,7 @@ class WWW_Wrapper {
 		 * of any writable file if set in $location. If $location is not set, then it attempts 
 		 * to use the previously defined cookie container.
 		 *
-		 * @param string $location location of cookies file, if this is not set then uses current one
+		 * @param boolean|string $location location of cookies file, if this is not set then uses current one
 		 * @return boolean
 		 */
 		public function clearCookieContainer($location=false){
@@ -347,7 +348,7 @@ class WWW_Wrapper {
 		 * flags that might not actually be sent as an input to the API.
 		 * 
 		 * @param string|array $input key of the input data, or an array of keys and values
-		 * @param string $value value of the input data
+		 * @param boolean|string $value value of the input data
 		 * @return boolean
 		 */
 		public function setInput($input,$value=false){
@@ -403,6 +404,10 @@ class WWW_Wrapper {
 				case 'www-profile':
 					$this->apiState['apiProfile']=$value;
 					$this->log[]='API profile set to: '.$value;
+					break;
+				case 'www-version':
+					$this->apiState['apiVersion']=$value;
+					$this->log[]='API version set to: '.$value;
 					break;
 				case 'www-state':
 					$this->apiState['apiStateKey']=$value;
@@ -559,7 +564,7 @@ class WWW_Wrapper {
 		 * of keys and values.
 		 *
 		 * @param string|array $input input data key or an array of keys and values
-		 * @value string [$value] input data value
+		 * @param boolean|string $value input data value
 		 * @return boolean
 		 */
 		public function setCryptedInput($input,$value=false){
@@ -587,7 +592,7 @@ class WWW_Wrapper {
 		 * method also checks if the file actually exists.
 		 *
 		 * @param string|array $file file keyword or an array of keywords and file locations
-		 * @param string $file file location in filesystem
+		 * @param boolean|string $location file location in filesystem
 		 * @return boolean/error depending on whether file exists or not
 		 */
 		public function setFile($file,$location=false){
@@ -633,6 +638,7 @@ class WWW_Wrapper {
 				$this->apiState['apiToken']=false;
 				$this->apiState['apiPublicToken']=false;
 				$this->apiState['apiHashValidation']=true;
+				$this->apiState['apiVersion']=false;
 				$this->apiState['headers']=false;
 				$this->apiState['returnHash']=false;
 				$this->apiState['returnTimestamp']=false;
@@ -670,9 +676,9 @@ class WWW_Wrapper {
 		 * variables directly with a single call by supplying $variables, $fileVariables and 
 		 * $cryptedVariables arrays.
 		 * 
-		 * @param array $variables array of input variables
-		 * @param array $fileVariables array of filenames and locations to upload
-		 * @param array $cryptedVariables array of input data to be encrypted
+		 * @param boolean|array $variables array of input variables
+		 * @param boolean|array $fileVariables array of filenames and locations to upload
+		 * @param boolean|array $cryptedVariables array of input data to be encrypted
 		 * @return array/string depending on what is requested
 		 */
 		public function sendRequest($variables=false,$fileVariables=false,$cryptedVariables=false){
@@ -712,6 +718,10 @@ class WWW_Wrapper {
 			// Assigning authentication options that are sent with the request
 			if($thisApiState['apiProfile']!=false){
 				$thisInputData['www-profile']=$thisApiState['apiProfile'];
+			}
+			// Assigning API version, if it is set
+			if($thisApiState['apiVersion']!=false){
+				$thisInputData['www-version']=$thisApiState['apiVersion'];
 			}
 			// Assigning the state check key
 			if($thisApiState['apiStateKey']!=false){

@@ -303,6 +303,10 @@
 				
 				<p>This sets the default profile name of a public profile - when profile name itself is not set in the request. This profile must have profile settings set in /resources/api.profiles.ini file.</p>
 				
+				<p><b>api-versions</b></p>
+				
+				<p>This is a comma-separated list of API versions that are allowed to be accessed over API. By default this value is not set at all, which means that sending 'www-version' value with the request has no impact. API versions can only consist of latin characters and numbers. The first value in this list is the 'current' API version, which means that apiVersion() method will return 'false' if this version number is requested, since core files are used. The default value of this is 'v1', so v1 of API is considered the core files.</p>
+				
 				<p><b>api-public-token</b></p>
 				
 				<p>If this setting is set to 1, then public API requests require a 'www-public-token' as part of HTTP API requests that do not use an authenticated API profile. This token has to be generated to and submitted with all the forms on the website. This is set to 0 by default, but is recommended to be implemented on websites and services that implement user accounts and other similar systems as a protection for cross-site-request-forgery attacks. Note that this token is only actually checked if the user is 'logged in' (user session data is populated).</p>

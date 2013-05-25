@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.5.6
+ * @version    3.6.4
  */
 
 /*
@@ -76,6 +76,7 @@ function WWW_Wrapper(address,language){
 		apiPublicToken:false,
 		apiHashValidation:true,
 		apiStateKey:false,
+		apiVersion:false,
 		returnHash:false,
 		headers:false,
 		returnTimestamp:false,
@@ -118,7 +119,7 @@ function WWW_Wrapper(address,language){
 	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
 	 * defined for future purpose.
 	 */
-	var userAgent='WWWFramework/3.5.6 (JS)';
+	var userAgent='WWWFramework/3.6.4 (JS)';
 	
 	/*
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -251,6 +252,10 @@ function WWW_Wrapper(address,language){
 				case 'www-profile':
 					apiState.apiProfile=value;
 					log.push('API profile set to: '+value);
+					break;
+				case 'www-version':
+					apiState.apiVersion=value;
+					log.push('API version set to: '+value);
 					break;
 				case 'www-state':
 					apiState.apiStateKey=value;
@@ -452,6 +457,7 @@ function WWW_Wrapper(address,language){
 				apiState.apiToken=false;
 				apiState.apiPublicToken=false;
 				apiState.apiHashValidation=true;
+				apiState.apiVersion=false;
 				apiState.returnHash=false;
 				apiState.returnTimestamp=false;
 				apiState.timestampDuration=60;
@@ -519,6 +525,10 @@ function WWW_Wrapper(address,language){
 			// Assigning authentication options that are sent with the request
 			if(thisApiState.apiProfile!=false){
 				thisInputData['www-profile']=thisApiState.apiProfile;
+			}
+			// Assigning API version, if it is set
+			if(thisApiState.apiVersion!=false){
+				thisInputData['www-version']=thisApiState.apiVersion;
 			}
 			// Assigning the state check key
 			if(thisApiState.apiStateKey!=false){

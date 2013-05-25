@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.6.0
+ * @version    3.6.4
  */
 
 // SOLVING THE HTTP REQUEST
@@ -88,6 +88,11 @@
 		// API logging settings
 		if(isset($config['api-logging'])){
 			$config['api-logging']=explode(',',$config['api-logging']);
+		}
+		
+		// API versions
+		if(isset($config['api-versions'])){
+			$config['api-versions']=explode(',',$config['api-versions']);
 		}
 		
 		// File extensions and defaults

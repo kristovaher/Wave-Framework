@@ -98,21 +98,38 @@
 				
 					<p>This method stores the image in <a href="filesystem.htm">Filesystem</a> in $location folder and filename. If $location is not set, then image is returned to output buffer. $quality is used for the compression quality (from 0-100) and $format is used to define what file format the picture is returned. $format can be 'jpg', 'png' or 'gif'.</p>
 					
-				<h3>public function commands($source,$command,$target)</h3>
+				<h3>public function parseParameters($parameters)</h3>
 				
-					<p>This method is a shorthand method to apply series of $commands, similar to Wave Framework on-demand image loading parameters, to an image in $source folder and stored in $target folder. If $target is not set, then image is returned to output buffer.</p>
+					<p>This method parses parameter array and returns an array that can be used for image manipulation in applyParameters() method. This method returns an array or a false result in case the parameters were incorrect. $parameters is an array that is simlar to Wave Framework dynamic image loading parameter string, except exploded to &amp; character.</p>
+					
+				<h3>public function applyParameters($parameters)</h3>
+				
+					<p>This method applies series of parameters to the currently loaded image file. These parameters are either parsed through parseParameters() method or manually sent to the function. This is the list of parameters expected by the function:</p>
+					
+					<ul>
+						<li><b>width</b> - Width of the resulting image.</li>
+						<li><b>height</b> - Height of the resulting image.</li>
+						<li><b>algorithm</b> - Algorithm used for the image resize (fitcrop,crop,fitwithbackground,fitwithoutbackground,widthonly,heightonly).</li>
+						<li><b>alpha</b> - Whether alpha map is used, if possible, for background.</li>
+						<li><b>red</b> - 0-255 value for red color for background.</li>
+						<li><b>green</b> - 0-255 value for green color for background.</li>
+						<li><b>blue</b> - 0-255 value for blue color for background.</li>
+						<li><b>top</b> - Sprite position on canvas (top, bottom, center or pixel value).</li>
+						<li><b>left</b> - Sprite position on canvas (left, right, center or pixel value).</li>
+						<li><b>filters</b> - Array of filter data.</li>
+					</ul>
 					
 				<h3>public function resizeFitCrop($width,$height,$left='center',$top='center')</h3>
 				
-					<p>This is a resize-algorithm method that resizes the current image resource to $width and $height. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include a percentage for stretching the image in either direction by writing percentage after * symbol.</p>
+					<p>This is a resize-algorithm method that resizes the current image resource to $width and $height. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the  * position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include a percentage for stretching the image in either direction by writing percentage after * symbol.</p>
 					
 				<h3>public function resizeCrop($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0,$alpha=true;)</h3>
 				
-					<p>This is a resize-algorithm method that resizes the current image resource to $width and $height without resizing the actual image. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include a percentage for stretching the image in either direction by writing percentage after * symbol. $red, $green and $blue are RGB values for background color in case background is required (not used for PNG images).</p>
+					<p>This is a resize-algorithm method that resizes the current image resource to $width and $height without resizing the actual image. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include a percentage for stretching the image in either direction by writing percentage after * symbol. $red, $green and $blue are RGB values for background color in case background is required.</p>
 					
 				<h3>public function resizeFit($width,$height,$left='center',$top='center',$red=0,$green=0,$blue=0,$alpha=true)</h3>
 				
-					<p>This is a resize-algorithm method that resizes the current image simply by resizing the image to $width and $height and leaves the remaining space for background color. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include a percentage for stretching the image in either direction by writing percentage after * symbol. $red, $green and $blue are RGB values for background color in case background is required (not used for PNG images).</p>
+					<p>This is a resize-algorithm method that resizes the current image simply by resizing the image to $width and $height and leaves the remaining space for background color. This resize method crops the image by removing the parts of picture that are left out of $width and $height dimensions. Variables $left and $top can be used to set the position of the image on the new, resized canvas and accept both numeric (pixel) values as well as relative ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include a percentage for stretching the image in either direction by writing percentage after * symbol. $red, $green and $blue are RGB values for background color in case background is required.</p>
 					
 				<h3>public function resizeFitNoBackground($width,$height)</h3>
 				

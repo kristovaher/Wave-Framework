@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/database.htm
  * @since      1.1.2
- * @version    3.4.2
+ * @version    3.6.4
  */
 
 class WWW_Database {
@@ -88,7 +88,7 @@ class WWW_Database {
 	 * @param string $password password
 	 * @param boolean $showErrors whether database errors trigger PHP errors or not
 	 * @param boolean $persistent whether database connection is persistent or not (usually not recommended)
-	 * @return object
+	 * @return WWW_Database
 	 */
 	public function __construct($type='mysql',$host='localhost',$database='',$username='',$password='',$showErrors=true,$persistent=false){
 	
@@ -369,11 +369,11 @@ class WWW_Database {
 			// Closing the resource
 			$query->closeCursor();
 			unset($query);
-			// If, for some reason, the amount of affected rows was not returned, system simply returns true
-			if($rowCount){
-				return $rowCount;
-			} else {
+			// If, for some reason, the amount of affected rows was not returned, system simply returns true, since the query was a success
+			if($rowCount===false){
 				return true;
+			} else {
+				return $rowCount;
 			}
 		} else {
 			// Checking for an error, if there was one
@@ -433,7 +433,7 @@ class WWW_Database {
 	 * It returns a prepared query string.
 	 *
 	 * @param string $query query string
-	 * @param string $variables values sent to PDO
+	 * @param array $variables values sent to PDO
 	 * @return string
 	 */
 	public function dbDebug($query,$variables=array()){
@@ -631,7 +631,7 @@ class WWW_Database {
 	 * to rebuild the query sent to PDO using dbDebug() method.
 	 *
 	 * @param object $query query object from PDO
-	 * @param string $queryString query string
+	 * @param boolean|string $queryString query string
 	 * @param array $variables variables sent to query
 	 * @return boolean or throws error
 	 */

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>API Versioning - Wave Framework</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/> 
+		<link type="text/css" href="../style.css" rel="stylesheet" media="all"/>
+		<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+		<link rel="icon" href="../../favicon.ico" type="image/vnd.microsoft.icon"/>
+	</head>
+	<body>
+	
+		<h1>API Observers</h1>
+		
+			<ul>
+				<li><a href="#index-introduction">Introduction</a></li>
+				<li><a href="#index-versioning-classes">Versioning Classes</a></li>
+				<li><a href="#index-versioning-databases">Versioning Databases</a></li>
+				<li><a href="#index-complete-versioning">Complete Versioning</a></li>
+			</ul>
+		
+			<h2 id="index-introduction">Introduction</h2>
+			
+				<p>Wave Framework allows you to version your API so that when a new Controller, Model or View becomes available and causes potentially backward-compatible breaking situations, then you can tell the system to fall back to those files of the older version, rather than use the newer version files.</p>
+				
+				<p>An important thing to keep in mind is that it is necessary to sometimes make sure that your database is also versioned, especially if your Models become incompatible with your newer versions. THis document gives some ideas about to achieve this as well.</p>
+				
+			<h2 id="index-versioning-classes">Versioning Classes</h2>
+			
+				<p>Sometimes it is necessary to keep a Controller, Model or View file due to refactoring or backwards-compatibility-breaking changes in code. Wave Framework allows you to version your MVC classes by version numbers. To set up proper versioning you should first edit the configuration option 'api-versions'. For example, if you want to version your current 'controller.example.php' file from '/controllers/' folder, then you can change the configuration option to 'v2,v1'.</p>
+				
+				<p>The first value in the 'api-versions' setting is considered the most current API version and the other version numbers are allowed to be accessed over API. If you wish to disable some version entirely, then remove them from the list.</p>
+				
+				<p>By changing this value to 'v2,v1' you are telling Wave Framework that the files in the root folders of '/models/', '/views/' and '/controllers/' are considered 'v2' of your API. If you append 'v3' to the list, then automatically the files in the root are considered 'v3'. This means that the API will always fall back to the most recent version, if certain Controller, Model or View is not found for the requested version.</p>
+				
+				<p>Now in order to version your 'controllers.example.php' file, you should create a new folder in your '/controllers/' file, called 'v1' and add that file to that folder.</p>
+				
+				<p>This now means that if an API request is made that has 'www-version' set to 'v1', and that particular Controller is requested, then the system will load the Class from '/controllers/v1/controller.example.php' instead of '/controllers/controller.example.php'.</p>
+				
+				<p>Note that versioning is also supported for overrides folders.</p>
+			
+			<h2 id="index-versioning-databases">Versioning Databases</h2>
+			
+				<p>Database versioning is one of the more complicated parts of versioning, since it is often necessary to version different users of API that are all tied to the same core database, without breaking functionality. This is a tricky subject that depends highly upon how your system architecture is built, but Wave Framework does allow you to check the API version of your requests within Controllers, Models and Views and allows you to make changes accordingly, based on API version.</p>
+				
+				<p>To find out what version is currently being requested from the API, you can use the following method through the Factory:</p>
+				
+<pre>
+	<code>		
+	$this->apiVersion();
+	</code>
+</pre>
+				
+				<p>This returns the value that was sent with 'www-version' when making an API request, or just returns the current API version number.</p>
+			
+			<h2 id="index-complete-versioning">Complete Versioning</h2>
+			
+				<p>Sometimes it is necessary to version more than just your MVC files. For example, when your entire system gets massive changes in other folders too, such as from '/resources/' and '/engine/' folder. In this case it is recommended to make a full copy of the entire installation folder and set it either to a different subdomain or in a subfolder and accessed this way. So that your API requests that used to be 'www.example.com/json.api' will now go to 'www.example.com/old/json.api' instead.</p>
+			
+	</body>
+</html>

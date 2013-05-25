@@ -18,7 +18,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/logger.htm
  * @since      1.0.0
- * @version    3.6.0
+ * @version    3.6.4
  */
 
 class WWW_Logger {
@@ -50,8 +50,8 @@ class WWW_Logger {
 	 * of the script, if it is not defined then Logger defines it by itself.
 	 *
 	 * @param string $logDir location of directory to store log files at
-	 * @param float $microTime starting microtime
-	 * @return object
+	 * @param boolean|float $microTime starting microtime
+	 * @return WWW_Logger
 	 */
 	public function __construct($logDir='./',$microTime=false){
 	
@@ -85,6 +85,7 @@ class WWW_Logger {
 	 * of a string.
 	 *
 	 * @param string|array $key single key or array of log keys and values
+     * @param boolean|string $value this is the value written to the log
 	 * @return boolean
 	 */
 	public function setCustomLogData($key,$value=true){

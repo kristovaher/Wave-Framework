@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/sessions.htm
  * @since      3.2.0
- * @version    3.4.3
+ * @version    3.6.4
  */
  
 final class WWW_Sessions {
@@ -90,9 +90,9 @@ final class WWW_Sessions {
 	 *
 	 * @param string $sessionName session and cookie name
 	 * @param integer $sessionLifetime how long sessions last
-	 * @param object $databaseConnection database object
+	 * @param boolean|object $databaseConnection database object
 	 * @param boolean $noCommit whether databases will actually be commited
-	 * @return object
+	 * @return WWW_Sessions
 	 */
 	public function __construct($sessionName='PHPSESSID',$sessionLifetime=0,$databaseConnection=false,$noCommit=false){
 	
@@ -117,7 +117,7 @@ final class WWW_Sessions {
 	 * is set, then it attempts to populate session data from session storage if it finds a matching
 	 * session. If not, then it generates a new session ID and clears the session data array.
 	 *
-	 * @param string $sessionName if session name is sent, then sessions will be started with this name.
+	 * @param boolean|string $sessionName if session name is sent, then sessions will be started with this name.
 	 * @param integer $sessionLifetime the age of token file to be still considered a valid token
 	 * @return boolean
 	 */

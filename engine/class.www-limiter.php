@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/limiter.htm
  * @since      1.0.0
- * @version    3.2.3
+ * @version    3.6.4
  */
 
 class WWW_Limiter {
@@ -41,7 +41,7 @@ class WWW_Limiter {
 	 * limiter stores files for specific limiter methods. This folder should be writable by PHP.
 	 *
 	 * @param string $logDir location of directory to store log files at
-	 * @return object
+	 * @return WWW_Limiter
 	 */
 	public function __construct($logDir='./'){
 	

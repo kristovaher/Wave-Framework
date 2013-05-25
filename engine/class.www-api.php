@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.6.0
+ * @version    3.6.4
  */
 
 final class WWW_API {
@@ -105,6 +105,13 @@ final class WWW_API {
 	public $returnTypes=array();
 	
 	/**
+	 * This method stores version number for Models, Views and Controller files loaded through the API.
+	 * These files have to be set in the subfolders of /model/, /view/ and /controller folders. If files 
+	 * are not found, then the most recent version is used.
+	 */
+	public $version=false;
+	
+	/**
 	 * This holds configuration value from State and turns on internal logging, if configuration 
 	 * has internal logging enabled. If this remains false, then internal log entries will not 
 	 * be stored.
@@ -132,9 +139,9 @@ final class WWW_API {
 	 * construction, then API will attempt to load API profiles from the *.ini file. Same 
 	 * applies to observers.
 	 *
-	 * @param object $state WWW_State object
-	 * @param array $apiProfiles array of API profile data
-	 * @return object
+	 * @param boolean|object $state WWW_State object
+	 * @param boolean|array $apiProfiles array of API profile data
+	 * @return WWW_API
 	 */
 	final public function __construct($state=false,$apiProfiles=false){
 
@@ -343,7 +350,8 @@ final class WWW_API {
 					'commands'=>'*',
 					'token-file'=>false,
 					'token-directory'=>false,
-					'token-timeout'=>false
+					'token-timeout'=>false,
+					'version'=>false
 				);
 				
 				// Setting the return type to cache index
@@ -387,6 +395,21 @@ final class WWW_API {
 					// If result already exists in buffer then it is simply returned
 					if(isset($this->commandBuffer[$commandBufferAddress])){
 						return $this->commandBuffer[$commandBufferAddress];
+					}
+				}
+				
+				// If this is set, then models, controllers and views are all loaded from subfolders in their appropriate directories, if they are set
+				// If the file for that particular version is not found, then the most recent version is used
+				if(isset($apiInputData['www-version'])){
+					// Since API version is a folder, this escapes the illegal characters
+					$this->version=preg_replace('[^a-zA-Z0-9]','',$apiInputData['www-version']);
+					// This tests if this version number is allowed or if it included illegal characters
+					if($this->version!=$apiInputData['www-version'] || !in_array($this->version,$this->state->data['api-versions'])){
+						$this->version=false;
+						return $this->output(array('www-message'=>'API version cannot be used: '.$apiInputData['www-version'],'www-response-code'=>117),$apiState);
+					} elseif($this->version==$this->state->data['api-versions'][0]){
+						// The most recent version number is set to false, which disables folder checking for these versions for performance reasons
+						$this->version=false;
 					}
 				}
 				
@@ -803,7 +826,11 @@ final class WWW_API {
 					// Class is defined and loaded, if it is not already defined
 					if(!class_exists($className)){
 						// Overrides can be used for controllers
-						if(file_exists($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+						if($this->version && file_exists($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->version.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+							require($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->version.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
+						} elseif($this->version && file_exists($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->version.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+							require($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->version.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
+						} elseif(file_exists($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
 							require($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
 						} elseif(file_exists($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
 							require($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
@@ -1404,7 +1431,7 @@ final class WWW_API {
 		/**
 		 * This allows to simply return a string from an API.
 		 *
-		 * @param $stream text string to be returned
+		 * @param string $stream text string to be returned
 		 * @return void
 		 */
 		final public function resultStream($stream){
@@ -1425,8 +1452,8 @@ final class WWW_API {
 		 * for file downloads without revealing the actual file path in filesystem.
 		 *
 		 * @param string $location file location in filesystem
-		 * @param string $name name of the downloadable file, by default the name of the actual file
-		 * @param string $contentType this is set as a content type string in the response
+		 * @param boolean|string $name name of the downloadable file, by default the name of the actual file
+		 * @param boolean|string $contentType this is set as a content type string in the response
 		 * @return mixed
 		 */
 		final public function resultFile($location,$name=false,$contentType=false){
@@ -1484,7 +1511,7 @@ final class WWW_API {
 		 * returned. This is an internal method used by output() call.
 		 *
 		 * @param array $apiResult array data returned from API call
-		 * @param string $type If set to 'rss' or 'atom', then transforms to RSS tags, else as XML
+		 * @param boolean|string $type If set to 'rss' or 'atom', then transforms to RSS tags, else as XML
 		 * @return string
 		 */
 		final private function toXML($apiResult,$type=false){
@@ -1726,7 +1753,7 @@ final class WWW_API {
 		 *
 		 * @param string $data data to be encrypted
 		 * @param string $key key used for encryption
-		 * @param string $secretKey used for calculating initialization vector (IV)
+		 * @param boolean|string $secretKey used for calculating initialization vector (IV)
 		 * @return string
 		 */
 		final public function encryptData($data,$key,$secretKey=false){
@@ -1743,7 +1770,7 @@ final class WWW_API {
 		 *
 		 * @param string $data data to be decrypted
 		 * @param string $key key used for decryption
-		 * @param string $secretKey used for calculating initialization vector (IV)
+		 * @param boolean|string $secretKey used for calculating initialization vector (IV)
 		 * @return string
 		 */
 		final public function decryptData($data,$key,$secretKey=false){
@@ -1841,9 +1868,9 @@ final class WWW_API {
 		 * sending a keyword with $tags or an array of keywords.
 		 * 
 		 * @param string $keyAddress unique cache URL, name or key
-		 * @value mixed [$value] variable value to be stored
-		 * @param boolean $custom whether cache is stored in custom cache folder
-         * @param array|string $tags tags array or comma-separated list of tags to attach to cache
+		 * @param mixed $value variable value to be stored
+         * @param boolean|array|string $tags tags array or comma-separated list of tags to attach to cache
+         * @param boolean $custom whether cache is stored in custom cache folder
 		 * @return boolean
 		 */
 		final public function setCache($keyAddress,$value,$tags=false,$custom=false){
@@ -1908,7 +1935,7 @@ final class WWW_API {
 		 * $custom sets if the cache has been called by MVC Objects or not.
 		 *
 		 * @param string $keyAddress unique cache URL, name or key
-		 * @param integer $limit this is timestamp after which cache won't result an accepted value
+		 * @param boolean|integer $limit this is timestamp after which cache won't result an accepted value
 		 * @param boolean $custom whether cache is stored in custom cache folder
 		 * @return mixed or false if cache is not found
 		 */
@@ -2108,7 +2135,7 @@ final class WWW_API {
 		 *
 		 * @param string $string value to be filtered
 		 * @param string $type filtering type, can be 'integer', 'float', 'numeric', 'alpha' or 'alphanumeric'
-		 * @param string $exceptions is a regular expression character string of all characters used as additional exceptions
+		 * @param boolean|string $exceptions is a regular expression character string of all characters used as additional exceptions
 		 * @return string
 		 */
 		final public function filter($string,$type,$exceptions=false){

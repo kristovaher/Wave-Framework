@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.6.0
+ * @version    3.6.4
  */
 
 class WWW_Factory {
@@ -45,9 +45,9 @@ class WWW_Factory {
 	 * __initialize() method, if such a method is set in the class that is extended from 
 	 * Factory, as it is not allowed to overwrite __construct class itself.
 	 * 
-	 * @param object $api WWW_API object
+	 * @param boolean|object $api WWW_API object
 	 * @param integer $callIndex current level of depth in the API call
-	 * @return object
+	 * @return WWW_Factory
 	 */
 	final public function __construct($api=false,$callIndex=0){
 	
@@ -152,6 +152,22 @@ class WWW_Factory {
 			// This is returned from API
 			return $this->WWW_API->returnTypes[$this->WWW_API_callIndex];
 		}
+		
+		/** 
+		 * This method returns the currently used API version number. These version numbers can 
+		 * be used for versioning or other checks.
+		 *
+		 * return boolean|string
+		 */
+		final protected function apiVersion(){
+			if($this->WWW_API->version){
+				return $this->WWW_API->version;
+			} elseif(isset($this->WWW_API->state->data['api-versions'][0])){
+				return $this->WWW_API->state->data['api-versions'][0];
+			} else {
+				return false;
+			}
+		}
 	
 	// STATE DATA SET AND GET
 	
@@ -160,7 +176,7 @@ class WWW_Factory {
 		 * returns $variable from the current view settings or the entire view data array, 
 		 * if this is not set.
 		 *
-		 * @param string $variable key of view data to get
+		 * @param boolean|string $variable key of view data to get
 		 * @return mixed
 		 */
 		final protected function viewData($variable=false){
@@ -177,7 +193,7 @@ class WWW_Factory {
 		 * method returns $variable from the storage or the whole storage at once if this is 
 		 * not set.
 		 *
-		 * @param string $key key of view data to get
+		 * @param boolean|string $key key of view data to get
 		 * @return mixed
 		 */
 		final protected function getStorage($key=false){
@@ -194,7 +210,7 @@ class WWW_Factory {
 		 * not set.
 		 *
 		 * @param string $key key of storage data to set
-		 * @param string $value value of the key in storage
+		 * @param boolean|string $value value of the key in storage
 		 * @return mixed
 		 */
 		final protected function setStorage($key,$value=true){
@@ -235,9 +251,9 @@ class WWW_Factory {
 		 * with that keyword from $language translations. If $keyword is an array, then $subkeyword
 		 * can be used to return specific translation from that keyword.
 		 *
-		 * @param string $language language keyword, if this is not set then returns current language translations
-		 * @param string $keyword if only single keyword needs to be returned
-		 * @param string $subkeyword if the $keyword is an array, then $subkeyword is the actual translation that is requested
+		 * @param boolean|string $language language keyword, if this is not set then returns current language translations
+		 * @param boolean|string $keyword if only single keyword needs to be returned
+		 * @param boolean|string $subkeyword if the $keyword is an array, then $subkeyword is the actual translation that is requested
 		 * @return array, string or false if failed
 		 */
 		final protected function getTranslations($language=false,$keyword=false,$subkeyword=false){
@@ -251,7 +267,7 @@ class WWW_Factory {
 		 * active language is used.
 		 *
 		 * @param string $name filename without language prefix
-		 * @param string $language language keyword
+		 * @param boolean|string $language language keyword
 		 * @return string
 		 */
 		final public function getContent($name,$language=false){
@@ -263,9 +279,9 @@ class WWW_Factory {
 		 * parts of the system. It returns sitemap for current language or a language set with 
 		 * $language variable and can return a specific sitemap node based on $keyword.
 		 *
-		 * @param string $language language keyword, if this is not set then returns current language sitemap
-		 * @param string $keyword if only a single URL node needs to be returned
-		 * @return array or false if failed
+		 * @param boolean|string $language language keyword, if this is not set then returns current language sitemap
+		 * @param boolean|string $keyword if only a single URL node needs to be returned
+		 * @return mixed
 		 */
 		final protected function getSitemap($language=false,$keyword=false){
 			return $this->WWW_API->state->getSitemap($language,$keyword);
@@ -277,9 +293,9 @@ class WWW_Factory {
 		 * sitemap node with that keyword from $language sitemap file. This method returns the 
 		 * original, non-modified sitemap that has not been parsed for use with URL controller.
 		 *
-		 * @param string $language language keyword, if this is not set then returns current language sitemap
-		 * @param string $keyword if only a single URL node needs to be returned
-		 * @return array or false if failed
+		 * @param boolean|string $language language keyword, if this is not set then returns current language sitemap
+		 * @param boolean|string $keyword if only a single URL node needs to be returned
+		 * @return mixed
 		 */
 		final protected function getSitemapRaw($language=false,$keyword=false){
 			return $this->WWW_API->state->getSitemapRaw($language,$keyword);
@@ -297,7 +313,7 @@ class WWW_Factory {
 		 * 
 		 * @param string $content either file name or an entire header string
 		 * @param string $type assigns the type of header to load
-		 * @return true
+		 * @return boolean
 		 */
 		final protected function viewHeader($content,$type='other'){
 			
@@ -327,8 +343,8 @@ class WWW_Factory {
 		 * the input variable sent to $methodName.
 		 *
 		 * @param string $model name of the model
-		 * @param string $methodName name of the method called once the object is loaded
-		 * @param string $methodData input variable for the method that is called
+		 * @param boolean|string $methodName name of the method called once the object is loaded
+		 * @param array $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
 		final protected function getModel($model,$methodName=false,$methodData=array()){
@@ -338,8 +354,14 @@ class WWW_Factory {
 			
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
-				// Class file can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
+				// Class file can be loaded from version or /overrides/ directories, if set
+				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
+					// Requiring versioned override file
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
+				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
+					// Requiring version file
+					require($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
 					// Requiring override file
 					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
 				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
@@ -380,8 +402,8 @@ class WWW_Factory {
 		 * is also set, then this is the input variable sent to $methodName.
 		 *
 		 * @param string $controller name of the controller
-		 * @param string $methodName name of the method called once the object is loaded
-		 * @param string $methodData input variable for the method that is called
+		 * @param boolean|string $methodName name of the method called once the object is loaded
+		 * @param array $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
 		final protected function getController($controller,$methodName=false,$methodData=array()){
@@ -391,8 +413,14 @@ class WWW_Factory {
 			
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
-				// Class file can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
+				// Class file can be loaded from version or /overrides/ directories, if set
+				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
+					// Requiring versioned override file
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
+				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
+					// Requiring version file
+					require($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
 					// Requiring override file
 					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
 				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
@@ -433,8 +461,8 @@ class WWW_Factory {
 		 * the input variable sent to $methodName.
 		 *
 		 * @param string $view name of the view
-		 * @param string $methodName name of the method called once the object is loaded
-		 * @param string $methodData input variable for the method that is called
+		 * @param boolean|string $methodName name of the method called once the object is loaded
+		 * @param boolean|string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
 		final protected function getView($view,$methodName=false,$methodData=false){
@@ -444,8 +472,14 @@ class WWW_Factory {
 			
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
-				// Class file can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+				// Class file can be loaded from version or /overrides/ directories, if set
+				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+					// Requiring versioned override file
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
+				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+					// Requiring version file
+					require($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
 					// Requiring override file
 					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
 				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
@@ -486,8 +520,8 @@ class WWW_Factory {
 		 * $methodData is also set, then this is the input variable sent to $methodName.
 		 *
 		 * @param string $className name of the class
-		 * @param string $methodName name of the method called once the object is loaded
-		 * @param string $methodData input variable for the method that is called
+		 * @param boolean|string $methodName name of the method called once the object is loaded
+		 * @param boolean|string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
 		final protected function getObject($className,$methodName=false,$methodData=false){
@@ -536,8 +570,9 @@ class WWW_Factory {
 		 * of the functions in the file.
 		 *
 		 * @param string $libraryName this is the library identifying name
-		 * @param string $functionName this is the name of the function that can be called after libary is loaded
-		 * @param mixed $methodData this is the optional data that can be sent to the method
+		 * @param boolean|string $functionName this is the name of the function that can be called after libary is loaded
+		 * @param boolean|mixed $functionData this is the optional data that can be sent to the method
+         * @return boolean
 		 */
 		final protected function loadLibrary($libraryName,$functionName=false,$functionData=false){
 		
@@ -578,7 +613,7 @@ class WWW_Factory {
 		 * This method loads Imager class that is used for image editing. If $source is set, then 
 		 * it also automatically assigns a source image file for that imager.
 		 *
-		 * @param string $source filesystem location of the image to be loaded
+		 * @param boolean|string $source filesystem location of the image to be loaded
 		 * @return object
 		 */
 		final protected function getImager($source=false){
@@ -622,11 +657,11 @@ class WWW_Factory {
 		 * output buffer.
 		 *
 		 * @param string $source source file location
-		 * @param string $command series of commands that will be applied to the image
-		 * @param string $target target file location
+		 * @param string $parameters series of commands that will be applied to the image
+		 * @param boolean|string $target target file location
 		 * @return boolean
 		 */
-		final protected function applyImager($source,$command,$target=false){
+		final protected function applyImager($source,$parameters,$target=false){
 		
 			// Loading the Imager class
 			if(!class_exists('WWW_Imager')){
@@ -636,9 +671,27 @@ class WWW_Factory {
 			// Loading Imager object
 			$picture=new WWW_Imager();
 			
-			// Applying the image commands to the picture
-			return $picture->commands($source,$command,$target);
+			// Current image file is loaded into Imager
+			if(!$picture->input($source)){
+				trigger_error('Cannot load image from '.$source,E_USER_ERROR);
+			}
 			
+			// Parsing through the settings
+			$settings=$picture->parseParameters(explode('&',$parameters));
+			
+			// If settings are allowed and correct
+			if($settings){
+				// If the parameters are applied successfully
+				if($picture->applyParameters($settings)){
+					// If target is not set, then result is pushed to output buffer
+					return $picture->output($target,$settings['quality'],$settings['format']);
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+						
 		}
 		
 		/**
@@ -691,7 +744,7 @@ class WWW_Factory {
 		 * which is used for errors in Wave Framework.
 		 *
 		 * @param string $message message to be returned
-		 * @param array $customData additional data returned
+		 * @param boolean|array $customData additional data returned
 		 * @param integer $responseCode response code number
 		 * @return array
 		 */
@@ -716,7 +769,7 @@ class WWW_Factory {
 		 * is used for false results in Wave Framework.
 		 *
 		 * @param string $message message to be returned
-		 * @param array $customData additional data returned
+		 * @param boolean|array $customData additional data returned
 		 * @param integer $responseCode response code number
 		 * @return array
 		 */
@@ -740,7 +793,7 @@ class WWW_Factory {
 		 * 5XX namespace, which is used for successful results in Wave Framework.
 		 *
 		 * @param string $message message to be returned
-		 * @param array $customData additional data returned
+		 * @param boolean|array $customData additional data returned
 		 * @param integer $responseCode response code number
 		 * @return array
 		 */
@@ -758,7 +811,7 @@ class WWW_Factory {
 		/**
 		 * This allows to simply return a string from an API. It sets text headers in the response.
 		 *
-		 * @param $stream text string to be returned
+		 * @param string $stream text string to be returned
 		 * @return void
 		 */
 		final protected function resultStream($stream){
@@ -770,8 +823,8 @@ class WWW_Factory {
 		 * for file downloads without revealing the actual file path in filesystem.
 		 *
 		 * @param string $location file location in filesystem
-		 * @param string $name name of the downloadable file, by default the name of the actual file
-		 * @param string $contentType this is set as a content type string in the response
+		 * @param boolean|string $name name of the downloadable file, by default the name of the actual file
+		 * @param boolean|string $contentType this is set as a content type string in the response
 		 * @return mixed
 		 */
 		final protected function resultFile($location,$name=false,$contentType=false){
@@ -888,9 +941,9 @@ class WWW_Factory {
 		 * giving it a value of $value. Cache tagging can also be used with custom tag by 
 		 * sending a keyword with $tags or an array of keywords.
 		 * 
-		 * @param string $keyAddress unique cache URL, name or key
-		 * @value mixed [$value] variable value to be stored
-         * @param array|string $tags tags array or comma-separated list of tags to attach to cache
+		 * @param string $key unique cache URL, name or key
+		 * @param mixed $value variable value to be stored
+         * @param boolean|array|string $tags tags array or comma-separated list of tags to attach to cache
 		 * @return boolean
 		 */
 		final protected function setCache($key,$value,$tags=false){
@@ -901,9 +954,9 @@ class WWW_Factory {
 		 * This method fetches data from cache based on cache keyword $keyAddress, if cache exists. 
 		 * This should be the same keyword that was used in setCache() method, when storing cache.
 		 *
-		 * @param string $keyAddress unique cache URL, name or key
-		 * @param integer $limit this is timestamp after which cache won't result an accepted value
-		 * @return mixed or false if cache is not found
+		 * @param string $key unique cache URL, name or key
+		 * @param boolean|integer $limit this is timestamp after which cache won't result an accepted value
+		 * @return mixed
 		 */
 		final protected function getCache($key,$limit=false){
 			return $this->WWW_API->getCache($key,$limit,true);
@@ -913,7 +966,7 @@ class WWW_Factory {
 		 * This function returns the timestamp of when the cache of keyword $keyAddress, was created, 
 		 * if such a cache exists.
 		 *
-		 * @param string $keyAddress unique cache URL, name or key
+		 * @param string $key unique cache URL, name or key
 		 * @return integer or false if cache is not found
 		 */
 		final protected function cacheTime($key){
@@ -923,7 +976,7 @@ class WWW_Factory {
 		/**
 		 * This method removes cache that was stored with the keyword $keyAddress, if such a cache exists.
 		 *
-		 * @param string $keyAddress unique cache URL, name or key
+		 * @param string $key unique cache URL, name or key
 		 * @return boolean
 		 */
 		final protected function unsetCache($key){
@@ -939,7 +992,7 @@ class WWW_Factory {
 		 *
 		 * @param string $data data to be encrypted
 		 * @param string $key key used for encryption
-		 * @param string $secretKey used for calculating initialization vector (IV)
+		 * @param boolean|string $secretKey used for calculating initialization vector (IV)
 		 * @return string
 		 */
 		final protected function encryptData($data,$key,$secretKey=false){
@@ -952,7 +1005,7 @@ class WWW_Factory {
 		 *
 		 * @param string $data data to be decrypted
 		 * @param string $key key used for decryption
-		 * @param string $secretKey used for calculating initialization vector (IV)
+		 * @param boolean|string $secretKey used for calculating initialization vector (IV)
 		 * @return string
 		 */
 		final protected function decryptData($data,$key,$secretKey=false){
@@ -1031,7 +1084,7 @@ class WWW_Factory {
 		 * This method removes key from State messenger based on value of $key. If $key is not 
 		 * set, then the entire State messenger data is cleared.
 		 *
-		 * @param string $key key that will be removed, if set to false then removes the entire data
+		 * @param boolean|string $key key that will be removed, if set to false then removes the entire data
 		 * @return boolean
 		 */
 		final protected function unsetMessengerData($key=false){
@@ -1044,8 +1097,8 @@ class WWW_Factory {
 		 * also set for deletion after it has been accessed. Additionally using this function 
 		 * also turns off caching of the page which uses it.
 		 *
-		 * @param string $address messenger address
-		 * @param boolean $remove true or false flag whether to delete the request data after returning it
+		 * @param boolean|string $key messenger address
+		 * @param boolean|boolean $remove true or false flag whether to delete the request data after returning it
 		 * @return mixed or false if failed
 		 */
 		final protected function getMessengerData($key=false,$remove=true){
@@ -1067,20 +1120,21 @@ class WWW_Factory {
 		/**
 		 * This method validates current session data and checks for lifetime as well as 
 		 * session fingerprint. It notifies session handler if any changes have to be made.
+         * This is a list of configuration options in the configuration array:
+         *  'name' - session cookie name
+         *  'lifetime' - session cookie lifetime
+         *  'path' - URL path for session cookie
+         *  'domain' - domain for session cookie
+         *  'secure' - whether session cookie is for secure connections only
+         *  'http-only' - whether session cookie is for HTTP requests only and unavailable for scripts
+         *  'user-key' - session key for storing user data
+         *  'permissions-key' - session key for storing user permissions
+         *  'fingerprint-key' - session key for storing session fingerprint
+         *  'timestamp-key' - session key for storing session timestamp
+         *  'token-key' - session key for public request tokens for protecting against replay attacks
+         *  'fingerprint' - session key for session fingerprinting for protecting against replay attacks
 		 *
-		 * @param array $configuration list of session configuration options, keys below
-		 *  'name' - session cookie name
-		 *  'lifetime' - session cookie lifetime
-		 *  'path' - URL path for session cookie
-		 *  'domain' - domain for session cookie
-		 *  'secure' - whether session cookie is for secure connections only
-		 *  'http-only' - whether session cookie is for HTTP requests only and unavailable for scripts
-		 *  'user-key' - session key for storing user data
-		 *  'permissions-key' - session key for storing user permissions
-		 *  'fingerprint-key' - session key for storing session fingerprint
-		 *  'timestamp-key' - session key for storing session timestamp
-		 *  'token-key' - session key for public request tokens for protecting against replay attacks
-		 *  'fingerprint' - session key for session fingerprinting for protecting against replay attacks
+		 * @param boolean|array $configuration list of session configuration options, keys below
 		 * @return boolean
 		 */
 		final protected function startSession($configuration=false){
@@ -1116,7 +1170,7 @@ class WWW_Factory {
 		 * it can return multiple variables from session at once. If $key is not set, then entire 
 		 * session array is returned.
 		 *
-		 * @param string|array $key key to return or an array of keys
+		 * @param boolean|string|array $key key to return or an array of keys
 		 * @return mixed
 		 */
 		final protected function getSession($key=false){
@@ -1128,7 +1182,7 @@ class WWW_Factory {
 		 * multiple variables can be unset at once. If $key is not set at all, then this simply 
 		 * destroys the entire session.
 		 *
-		 * @param string|array $key key of the value to be unset, or an array of keys
+		 * @param boolean|string|array $key key of the value to be unset, or an array of keys
 		 * @return boolean
 		 */
 		final protected function unsetSession($key=false){
@@ -1193,7 +1247,7 @@ class WWW_Factory {
 		 * This either returns the entire user data array or just a specific $key of user data 
 		 * from the session.
 		 *
-		 * @param string $key element returned from user data, if not set then returns the entire user data
+		 * @param boolean|string $key element returned from user data, if not set then returns the entire user data
 		 * @return mixed
 		 */
 		final protected function getUser($key=false){
@@ -1331,9 +1385,9 @@ class WWW_Factory {
 		 * method returns the first row of the matching result, or it returns false, if the query 
 		 * failed. This method is mostly meant for SELECT queries that return a single row.
 		 *
-		 * @param string $queryString query string, a statement to prepare with PDO
+		 * @param string $query query string, a statement to prepare with PDO
 		 * @param array $variables array of variables to use in prepared statement
-		 * @return array or false if failed
+		 * @return array|boolean
 		 */
 		final protected function dbSingle($query,$variables=array()){
 			return $this->WWW_API->state->databaseConnection->dbSingle($query,$variables);
@@ -1451,7 +1505,7 @@ class WWW_Factory {
 		 * It returns a prepared query string.
 		 *
 		 * @param string $query query string
-		 * @param string $variables values sent to PDO
+		 * @param array $variables values sent to PDO
 		 * @return string
 		 */
 		final protected function dbDebug($query,$variables=array()){
@@ -1516,7 +1570,7 @@ class WWW_Factory {
 		 *
 		 * @param string $string value to be filtered
 		 * @param string $type filtering type, can be 'integer', 'float', 'numeric', 'alpha' or 'alphanumeric'
-		 * @param string $exceptions is a string of all characters used as exceptions
+		 * @param boolean|string $exceptions is a string of all characters used as exceptions
 		 * @return string
 		 */
 		final protected function filter($string,$type,$exceptions=false){

@@ -119,6 +119,10 @@
 				
 					<p>This holds the return type information of API calls. This can be later fetched by controllers to see what type of data is being requested from the API.</p>
 					
+				<h3>public $version=false</h3>
+				
+					<p>This method stores version number for Models, Views and Controller files loaded through the API. These files have to be set in the subfolders of /model/, /view/ and /controller folders. If files are not found, then the most recent version is used.</p>
+					
 				<h3>private $internalLogging=false</h3>
 				
 					<p>This holds configuration value from <a href="state.htm">State</a> and turns on internal logging, if configuration has internal logging enabled. If this remains false, then internal log entries will not be stored.</p>

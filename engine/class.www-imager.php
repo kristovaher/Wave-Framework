@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/imager.htm
  * @since      1.0.0
- * @version    3.6.2
+ * @version    3.6.4
  */
 
 class WWW_Imager {
@@ -51,47 +51,55 @@ class WWW_Imager {
 	 */
 	public function input($location){
 	
-		// Checking if file actually exists in file system
-		if($imageInfo=getimagesize($location)){
+		// This functionality only works if GD library is loaded
+		if(extension_loaded('gd')){
+	
+			// Checking if file actually exists in file system
+			if($imageInfo=getimagesize($location)){
 
-			// Assigning image parameters to object
-			$this->width=$imageInfo[0];
-			$this->height=$imageInfo[1];
-			$this->type=$imageInfo[2];
+				// Assigning image parameters to object
+				$this->width=$imageInfo[0];
+				$this->height=$imageInfo[1];
+				$this->type=$imageInfo[2];
 
-			// Creating image resource object based on file type
-			switch($this->type){
-				case IMAGETYPE_JPEG:
-					// Image is created from assumed JPEG file
-					if(!$this->resource=imagecreatefromjpeg($location)){
-						return false;
-					}
-					break;
-				case IMAGETYPE_PNG:
-					// Image is created from assumed PNG file
-					if(!$this->resource=imagecreatefrompng($location)){
-						return false;
-					}
-					// This saves the alpha settings of the image
-					imagealphablending($this->resource,false);
-					imagesavealpha($this->resource,true);
-					break;
-				case IMAGETYPE_GIF:
-					// Image is created from assumed GIF file
-					if(!$this->resource=imagecreatefromgif($location)){
-						return false;
-					}
-					break;
-				default:
-					trigger_error('File format not supported',E_USER_ERROR);
-					break;
+				// Creating image resource object based on file type
+				switch($this->type){
+					case IMAGETYPE_JPEG:
+						// Image is created from assumed JPEG file
+						if(!$this->resource=imagecreatefromjpeg($location)){
+							return false;
+						}
+						break;
+					case IMAGETYPE_PNG:
+						// Image is created from assumed PNG file
+						if(!$this->resource=imagecreatefrompng($location)){
+							return false;
+						}
+						// This saves the alpha settings of the image
+						imagealphablending($this->resource,false);
+						imagesavealpha($this->resource,true);
+						break;
+					case IMAGETYPE_GIF:
+						// Image is created from assumed GIF file
+						if(!$this->resource=imagecreatefromgif($location)){
+							return false;
+						}
+						break;
+					default:
+						trigger_error('File format not supported',E_USER_ERROR);
+						break;
+				}
+			
+				// Image has been loaded
+				return true;
+				
+			} else {
+				// File was not found
+				return false;
 			}
-		
-			// Image has been loaded
-			return true;
 			
 		} else {
-			// File was not found
+			// GD library is not enabled
 			return false;
 		}
 		
@@ -103,9 +111,9 @@ class WWW_Imager {
 	 * quality (from 0-100) and $format is used to define what file format the picture is 
 	 * returned. $format can be 'jpg', 'png' or 'gif'.
 	 *
-	 * @param string $location new file location in file system. If not set, then returns file data to output
+	 * @param boolean|string $location new file location in file system. If not set, then returns file data to output
 	 * @param integer $quality quality percentage, higher is better
-	 * @param string $format output file extension or type, 'png', 'jpg' or 'gif'
+	 * @param boolean|string $format output file extension or type, 'png', 'jpg' or 'gif'
 	 * @return boolean
 	 */
 	public function output($location=false,$quality=90,$format=false){
@@ -199,265 +207,260 @@ class WWW_Imager {
 	}
 	
 	/**
-	 * This method is a shorthand method to apply series of $commands, similar to Wave Framework 
-	 * on-demand image loading parameters, to an image in $source folder and stored in $target 
-	 * folder. If $target is not set, then image is returned to output buffer.
+	 * This method parses parameter array and returns an array that can be used for image 
+	 * manipulation in applyParameters() method. This method returns an array or a false 
+	 * result in case the parameters were incorrect. $parameters is an array that is simlar 
+	 * to Wave Framework dynamic image loading parameter string, except exploded to & character.
+	 * 
+	 * @param array $parameters array of parameters to be parsed
+	 * @return mixed
+	 */
+	public function parseParameters($parameters){
+		
+		// These are the default settings
+		// This array will be returned after parsing all of the parameters
+		$settings=array(
+			'width'=>$this->width,
+			'height'=>$this->height,
+			'algorithm'=>'fitcrop',
+			'alpha'=>true,
+			'red'=>0,
+			'green'=>0,
+			'blue'=>0,
+			'top'=>'center',
+			'left'=>'center',
+			'quality'=>90,
+			'filters'=>array(),
+			'format'=>false
+		);
+		
+		// Looping over the data bits to find additional parameters
+		foreach($parameters as $parameter){
+			switch($parameter){
+				case 'fitcrop':
+					// This is a resize algorithm flag
+					$settings['algorithm']='fitcrop';
+					break;
+				case 'crop':
+					// This is a resize algorithm flag
+					$settings['algorithm']='crop';
+					break;
+				case 'fitwithbackground':
+					// This is a resize algorithm flag
+					$settings['algorithm']='fitwithbackground';
+					break;
+				case 'fitwithoutbackground':
+					// This is a resize algorithm flag
+					$settings['algorithm']='fitwithoutbackground';
+					break;
+				case 'widthonly':
+					// This is a resize algorithm flag
+					$settings['algorithm']='widthonly';
+					break;
+				case 'heightonly':
+					// This is a resize algorithm flag
+					$settings['algorithm']='heightonly';
+					break;
+				case 'jpg':
+					// This is a file format flag
+					$settings['format']='jpg';
+					break;
+				case 'png':
+					// This is a file format flag
+					$settings['format']='png';
+					break;
+				default:
+					// If any of the resize algorithm and cache flags were not hit, the parameter is matched for other conditions
+					if(strpos($parameter,'filter(')!==false){
+					
+						// Background color setting is assumed if rgb is present
+						$filterSettings=str_replace(array('filter(',')'),'',$parameter);
+						$filterSettings=explode(',',$filterSettings);
+						
+						// Storing data of new filter
+						$filter=array();
+						// First number is the filter type
+						if($filterSettings[0]!=''){
+							// Filter type can also have parameters
+							$typeSettings=explode('@',$filterSettings[0]);
+							// First parameter is the filter type
+							$filter['type']=$typeSettings[0];
+							// It is possible to 'layer' the effect by defining alpha level as the second parameter
+							if(isset($typeSettings[1])){
+								$filter['alpha']=$typeSettings[1];
+							} else {
+								// Filter effect is 100% if alpha was not defined
+								$filter['alpha']=100;
+							}
+						}
+						
+						// Storing data of new filters settings
+						$filter['settings']=array();
+						// Storing other filter variables
+						for($i=1;isset($filterSettings[$i]);$i++){
+							$filter['settings'][]=$filterSettings[$i];
+						}
+						
+						// Adding filter to list of filters
+						$settings['filters'][]=$filter;
+						
+					} elseif(strpos($parameter,'rgb(')!==false){
+					
+						// This tells Imager that alpha channel won't be used since RGB is set
+						$settings['alpha']=false;
+					
+						// Background color setting is assumed if rgb is present
+						$colors=str_replace(array('rgb(',')'),'',$parameter);
+						$colors=explode(',',$colors);
+						// First number in parameter is red color amount
+						if($colors[0]!=''){
+							$settings['red']=$colors[0];
+						}
+						// Second number in parameter is green color amount
+						if(isset($colors[1]) && $colors[1]!=''){
+							$settings['green']=$colors[1];
+						}
+						// Third number in parameter is blue color amount
+						if(isset($colors[2]) && $colors[2]!=''){
+							$settings['blue']=$colors[2];
+						}
+						
+					} elseif(strpos($parameter,'-')!==false){
+					
+						// Position setting is assumed if dash is present
+						$positions=explode('-',$parameter);
+						// First value is top position
+						// This can be 'top', 'center', 'bottom' or a number in pixels
+						// It can also include the size of the sprite set on the canvas
+						if($positions[0]!=''){
+							$settings['top']=$positions[0];
+						}
+						// Second value is left position
+						// This can be 'left', 'center', 'right' or a number in pixels
+						// It can also include the size of the sprite set on the canvas
+						if($positions[1]!=''){
+							$settings['left']=$positions[1];
+						}
+						
+					} elseif(strpos($parameter,'@')!==false){
+					
+						// Quality setting is assumed if @ sign is present
+						$settings['quality']=str_replace('@','',$parameter);
+						
+					} elseif(strpos($parameter,'x')!==false){
+					
+						// It is assumed that the remaining parameter is for image dimensions
+						$dimensions=explode('x',$parameter);
+						// First number is width
+						if($dimensions[0]!=''){
+							$settings['width']=$dimensions[0];
+						}
+						// Second number, if defined, is height
+						if(isset($dimensions[1]) && $dimensions[1]!=''){
+							$settings['height']=$dimensions[1];
+						} else {
+							// If height is not defined then height is considered to be as long as width
+							$settings['height']=$settings['width'];
+						}
+						
+					} else {
+					
+						// An incorrect parameter was sent
+						return false;
+			
+					}
+					break;
+			}
+		}
+		
+		// Returning the parsed parameters
+		return $settings;
+	
+	}
+	
+	/**
+	 * This method applies series of parameters to the currently loaded image file.
+	 * These parameters are either parsed through parseParameters() method or manually 
+	 * sent to the function. This is the list of parameters expected by the function:
+	 *  'width' - Width of the resulting image
+	 *  'height' - Height of the resulting image
+	 *  'algorithm' - Algorithm used for the image resize (fitcrop,crop,fitwithbackground,fitwithoutbackground,widthonly,heightonly)
+	 *  'alpha' - Whether alpha map is used, if possible, for background
+	 *  'red' - 0-255 value for red color for background
+	 *  'green' - 0-255 value for green color for background
+	 *  'blue' - 0-255 value for blue color for background
+	 *  'top' - Sprite position on canvas (top, bottom, center or pixel value)
+	 *  'left' - Sprite position on canvas (left, right, center or pixel value)
+	 *  'filters' - Array of filter data
 	 *
-	 * @param string $source source file location
-	 * @param string $command series of commands that will be applied to the image
-	 * @param string $target target file location
+	 * @param array $parameters an array of parameters that are applied to the image
 	 * @return boolean
 	 */
-	public function commands($source,$command,$target=false){
+	public function applyParameters($parameters){
 		
-		// This attempts to load the source image
-		if($this->input($source)){
+		// If algorithm is set
+		if(isset($parameters['algorithm'])){
 		
-			// Exploding the command string
-			$parameters=explode('&',$command);
+			// Image is filtered through resize algorithm and saved in cache directory
+			switch($parameters['algorithm']){
+				case 'fitcrop':
+					// Crop algorithm fits the image into set dimensions, cutting the edges that do not fit
+					if(!$this->resizeFitCrop($parameters['width'],$parameters['height'],$parameters['left'],$parameters['top'])){
+						trigger_error('Cannot resize image with fit-crop algorithm',E_USER_ERROR);
+					}
+					break;
+				case 'crop':
+					// Crop algorithm places image in new dimensions box cutting the edges that do not fit
+					if(!$this->resizeCrop($parameters['width'],$parameters['height'],$parameters['left'],$parameters['top'],$parameters['red'],$parameters['green'],$parameters['blue'],$parameters['alpha'])){
+						trigger_error('Cannot resize image with crop algorithm',E_USER_ERROR);
+					}
+					break;
+				case 'fitwithbackground':
+					// This fits image inside the box and gives it certain color background (if applicable)
+					if(!$this->resizeFit($parameters['width'],$parameters['height'],$parameters['left'],$parameters['top'],$parameters['red'],$parameters['green'],$parameters['blue'],$parameters['alpha'])){
+						trigger_error('Cannot resize image with fit-with-background algorithm',E_USER_ERROR);
+					}
+					break;
+				case 'fitwithoutbackground':
+					// This simply resizes the image to fit specific dimensions
+					if(!$this->resizeFitNoBackground($parameters['width'],$parameters['height'])){
+						trigger_error('Cannot resize image with fit-without-background algorithm',E_USER_ERROR);
+					}
+					break;
+				case 'widthonly':
+					// This resizes the image to fixed width
+					if(!$this->resizeWidth($parameters['width'])){
+						trigger_error('Cannot resize image with width-only algorithm',E_USER_ERROR);
+					}
+					break;
+				case 'heightonly':
+					// This resizes the image to fixed height
+					if(!$this->resizeHeight($parameters['height'])){
+						trigger_error('Cannot resize image with height-only algorithm',E_USER_ERROR);
+					}
+					break;
+			}
 		
-			// DEFAULT SETTINGS
-			
-				// Default settings for dynamically resized image
-				// This values will be changed based on if parameters are set
-				$width=$this->width;
-				$height=$this->height;
-				$algorithm='fitcrop';
-				$alpha=true;
-				$red=0;
-				$green=0;
-				$blue=0;
-				$top='center';
-				$left='center';
-				$quality=90;
-				$filters=array();
-				$format=false;
-				
-			// FINDING SETTINGS FROM SET PARAMETERS
-			
-				// Looping over the data bits to find additional parameters
-				foreach($parameters as $parameter){
-					switch($parameter){
-						case 'fitcrop':
-							// This is a resize algorithm flag
-							$algorithm='fitcrop';
-							break;
-						case 'crop':
-							// This is a resize algorithm flag
-							$algorithm='crop';
-							break;
-						case 'fitwithbackground':
-							// This is a resize algorithm flag
-							$algorithm='fitwithbackground';
-							break;
-						case 'fitwithoutbackground':
-							// This is a resize algorithm flag
-							$algorithm='fitwithoutbackground';
-							break;
-						case 'widthonly':
-							// This is a resize algorithm flag
-							$algorithm='widthonly';
-							break;
-						case 'jpg':
-							// This is a resize algorithm flag
-							$format='jpg';
-							break;
-						case 'png':
-							// This is a resize algorithm flag
-							$format='png';
-							break;
-						case 'heightonly':
-							// This is a resize algorithm flag
-							$algorithm='heightonly';
-							break;
-						default:
-							// If any of the resize algorithm and cache flags were not hit, the parameter is matched for other conditions
-							if(strpos($parameter,'filter(')!==false){
-							
-								// Background color setting is assumed if rgb is present
-								$settings=str_replace(array('filter(',')'),'',$parameter);
-								$settings=explode(',',$settings);
-								
-								// Storing data of new filter
-								$newFilter=array();
-								// First number is the filter type
-								if($settings[0]!=''){
-									// Filter type can also have parameters
-									$typeSettings=explode('@',$settings[0]);
-									// First parameter is the filter type
-									$newFilter['type']=$typeSettings[0];
-									// It is possible to 'layer' the effect by defining alpha level as the second parameter
-									if(isset($typeSettings[1])){
-										$newFilter['alpha']=$typeSettings[1];
-									} else {
-										// Filter effect is 100% if alpha was not defined
-										$newFilter['alpha']=100;
-									}
-								}
-								
-								// Storing data of new filters settings
-								$newFilter['settings']=array();
-								// Storing other filter variables
-								for($i=1;isset($settings[$i]);$i++){
-									$newFilter['settings'][]=$settings[$i];
-								}
-								
-								// Adding filter to list of filters
-								$filters[]=$newFilter;
-								
-							} elseif(strpos($parameter,'rgb(')!==false){
-								
-								// This tells Imager that alpha channel won't be used since RGB is set
-								$alpha=false;
-							
-								// Background color setting is assumed if rgb is present
-								$colors=str_replace(array('rgb(',')'),'',$parameter);
-								$colors=explode(',',$colors);
-								// First number in parameter is red color amount
-								if($colors[0]!=''){
-									$red=$colors[0];
-								}
-								// Second number in parameter is green color amount
-								if(isset($colors[1]) && $colors[1]!=''){
-									$green=$colors[1];
-								}
-								// Third number in parameter is blue color amount
-								if(isset($colors[2]) && $colors[2]!=''){
-									$blue=$colors[2];
-								}
-								
-							} elseif(strpos($parameter,'-')!==false){
-							
-								// Position setting is assumed if dash is present
-								$positions=explode('-',$parameter);
-								// First value is top position
-								// This can be 'top', 'center', 'bottom' or a number in pixels
-								if($positions[0]!=''){
-									$top=$positions[0];
-								}
-								// Second value is left position
-								// This can be 'left', 'center', 'right' or a number in pixels
-								if($positions[1]!=''){
-									$left=$positions[1];
-								}
-								
-							} elseif(strpos($parameter,'@')!==false){
-							
-								// Quality setting is assumed if @ sign is present
-								$quality=str_replace('@','',$parameter);
-								
-							} elseif(strpos($parameter,'x')!==false){
-							
-								// It is assumed that the remaining parameter is for image dimensions
-								$dimensions=explode('x',$parameter);
-								// First number is width
-								if($dimensions[0]!=''){
-									$width=$dimensions[0];
-								}
-								// Second number, if defined, is height
-								if(isset($dimensions[1]) && $dimensions[1]!=''){
-									$height=$dimensions[1];
-								} else {
-									// If height is not defined then height is considered to be as long as width
-									$height=$width;
-								}
-								// If algorithm is still undefined, it is given a default value
-								// This is needed when size is set, but algorithm is not
-								if(!$algorithm){
-									$algorithm='fitcrop';
-								}
-								
-							} elseif($parameter!='nocache'){
-							
-								// Adding log entry	
-								if(isset($logger)){
-									$logger->setCustomLogData(array('response-code'=>404,'category'=>'image'));
-									$logger->writeLog();
-								}
-								// Returning 404 header
-								header('HTTP/1.1 404 Not Found');
-								die();
-					
-							}
-							break;
+			// As long as there are set filters
+			if(!empty($parameters['filters'])){
+				// Each filter is applied, one by one
+				foreach($parameters['filters'] as $filter){
+					if(!$this->applyFilter($filter['type'],$filter['alpha'],$filter['settings'])){
+						trigger_error('Cannot apply filter '.$filter['type'],E_USER_ERROR);
 					}
 				}
-				
-			// IMAGE EDITING
-				
-				// If algorithm, quality setting or a filter is set
-				if($algorithm || $quality || !empty($filters)){
-						
-					// IMAGE RESIZES
-				
-						// Image is filtered through resize algorithm and saved in cache directory
-						switch($algorithm){
-							case 'fitcrop':
-								// Crop algorithm fits the image into set dimensions, cutting the edges that do not fit
-								if(!$this->resizeFitCrop($width,$height,$left,$top)){
-									trigger_error('Cannot resize image with fit-crop algorithm',E_USER_ERROR);
-								}
-								break;
-							case 'crop':
-								// Crop algorithm places image in new dimensions box cutting the edges that do not fit
-								if(!$this->resizeCrop($width,$height,$left,$top,$red,$green,$blue,$alpha)){
-									trigger_error('Cannot resize image with crop algorithm',E_USER_ERROR);
-								}
-								break;
-							case 'fitwithbackground':
-								// This fits image inside the box and gives it certain color background (if applicable)
-								if(!$this->resizeFit($width,$height,$left,$top,$red,$green,$blue,$alpha)){
-									trigger_error('Cannot resize image with fit-with-background algorithm',E_USER_ERROR);
-								}
-								break;
-							case 'fitwithoutbackground':
-								// This simply resizes the image to fit specific dimensions
-								if(!$this->resizeFitNoBackground($width,$height)){
-									trigger_error('Cannot resize image with fit-without-background algorithm',E_USER_ERROR);
-								}
-								break;
-							case 'widthonly':
-								// This resizes the image to fixed width
-								if(!$this->resizeWidth($width)){
-									trigger_error('Cannot resize image with width-only algorithm',E_USER_ERROR);
-								}
-								break;
-							case 'heightonly':
-								// This resizes the image to fixed height
-								if(!$this->resizeHeight($height)){
-									trigger_error('Cannot resize image with height-only algorithm',E_USER_ERROR);
-								}
-								break;
-						}
-					
-					// IMAGE FILTERS
-					
-						// As long as there are set filters
-						if(!empty($filters)){
-							// Each filter is applied, one by one
-							foreach($filters as $filter){
-								if(!$this->applyFilter($filter['type'],$filter['alpha'],$filter['settings'])){
-									trigger_error('Cannot apply filter '.$filter['type'],E_USER_ERROR);
-								}
-							}
-						}
-						
-					// STORING THE RESULTING IMAGE
-				
-				}
-				
-			// IMAGE OUTPUT
-				
-				// Resulting image is saved to cache
-				if(!$this->output($target,$quality,$format)){
-					trigger_error('Cannot output image file',E_USER_ERROR);
-				}
-				
-			return true;
+			}
 		
 		} else {
+		
+			// Some of the parameters were missing
 			return false;
+			
 		}
+				
+		// Processing is complete
+		return true;
+		
 	}
 	
 	/**
@@ -567,7 +570,7 @@ class WWW_Imager {
 		imagealphablending($tmpImage,false);
 		imagesavealpha($tmpImage,true);
 		// Current image resource is placed on temporary resource
-		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->width)),$this->width,$this->height);
+		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->height)),$this->width,$this->height);
 		
 		// New dimensions and temporary image resource is assigned as resource of this object
 		$this->width=$width;
@@ -588,7 +591,7 @@ class WWW_Imager {
 	 * as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include a 
 	 * percentage for stretching the image in either direction by writing percentage 
 	 * after * symbol. $red, $green and $blue are RGB values for background color in case 
-	 * background is required (not used for PNG images).
+	 * background is required.
 	 *
 	 * @param integer $width width of resulting image
 	 * @param integer $height height of resulting image
@@ -715,7 +718,7 @@ class WWW_Imager {
 		}
 		
 		// Current image resource is placed on temporary resource
-		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->width)),$this->width,$this->height);
+		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->height)),$this->width,$this->height);
 		
 		// New dimensions and temporary image resource is assigned as resource of this object
 		$this->width=$width;
@@ -735,13 +738,12 @@ class WWW_Imager {
 	 * image on the new, resized canvas and accept both numeric (pixel) values as well as relative 
 	 * ones, such as 'center', 'left', 'right' and 'top, 'bottom'. Position values can also include 
 	 * a percentage for stretching the image in either direction by writing percentage after * symbol.
-	 * $red, $green and $blue are RGB values for background color in case background is required 
-	 * (not used for PNG images).
+	 * $red, $green and $blue are RGB values for background color in case background is required.
 	 * 
 	 * @param integer $width width of resulting image
 	 * @param integer $height height of resulting image
-	 * @param integer $left position from the left edge. Can be 'center', 'left', 'right' or a pixel value
-	 * @param integer $top position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value
+	 * @param string|integer $left position from the left edge. Can be 'center', 'left', 'right' or a pixel value
+	 * @param string|integer $top position from the top edge. Can be 'center', 'top', 'bottom' or a pixel value
 	 * @param integer $red amount of red color for background, from 0-255
 	 * @param integer $green amount of green color for background, from 0-255
 	 * @param integer $blue amount of blue color for background, from 0-255
@@ -874,7 +876,7 @@ class WWW_Imager {
 		}
 		
 		// Current image resource is placed on temporary resource
-		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->width)),$this->width,$this->height);
+		imagecopyresampled($tmpImage,$this->resource,$left[0],$top[0],0,0,(($leftFixed)?$left[1]:round($left[1]/100*$this->width)),(($topFixed)?$top[1]:round($top[1]/100*$this->height)),$this->width,$this->height);
 		
 		// New dimensions and temporary image resource is assigned as resource of this object
 		$this->width=$width;
@@ -1012,7 +1014,7 @@ class WWW_Imager {
 	 *
 	 * @param integer $type filtering type
 	 * @param integer $alpha level of alpha layering to use on top of original image
-	 * @param integer $settings filter settings is an array that carries up to three variables
+	 * @param array $settings filter settings is an array that carries up to three variables
 	 * @return boolean
 	 */
 	public function applyFilter($type,$alpha=100,$settings=array()){

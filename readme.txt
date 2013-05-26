@@ -47,14 +47,15 @@ FEATURES
  * API wrapper classes that make browser and server communication easy
  * 256bit Rijndael encrypted data transmission
  * API Observers for creating event-specific listeners
+ * API versioning and version updates
  * Autoloader and installation-specific MVC class and resource overrides
  * Custom on-demand session handling
- * Request limiter that can block HTTP requests under certain conditions
+ * Security layer against MitM, XSS, CSRF and DoS attacks
  * Request logger that can be used for detailed performance reports
  * Debugging, backup, update and filesystem maintenance tools
  * Compatibility script that tests support for server setup
  * Supports Apache and Nginx servers in Linux and Windows environments
- * Test Suite for API Testing
+ * Test Suite for API testing
  * Filesystem caching, database cache, APC and Memcache supported
  * 100+ pages of detailed documentation and tutorials
  * Licensed under GNU Lesser General Public License Version 3

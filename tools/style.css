@@ -11,7 +11,7 @@
 * @copyright  Copyright (c) 2012, Kristo Vaher
 * @license    GNU Lesser General Public License Version 3
 * @since      2.2.5
-* @version    3.1.9
+* @version    3.6.5
 */
 
 html,body {
@@ -66,6 +66,10 @@ a {
 
 a:hover {
 	color:#4d8cbd;
+}
+
+.blue {
+	color: #2a2e36; 
 }
 
 .red, .red:hover {
@@ -126,4 +130,8 @@ li {
 	text-align:right;
 	color:#788296;
 	margin:20px 10px 10px 10px;
+}
+
+.right {
+	float:right;
 }

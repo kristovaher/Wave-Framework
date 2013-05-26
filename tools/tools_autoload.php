@@ -13,7 +13,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_tools.htm
  * @since      1.0.0
- * @version    3.6.0
+ * @version    3.6.5
  */
 
 // Main configuration file is included from initialized temporary file if it exists
@@ -50,6 +50,13 @@ if($config){
 	}
 	if(!isset($config['http-authentication-ip'])){
 		$config['http-authentication-ip']='*';
+	}
+
+	// If the configuration has not been loaded yet
+	if(isset($config['api-versions']) && !is_array($config['api-versions'])){
+		$config['api-versions']=explode(',',$config['api-versions']);
+	} elseif(!isset($config['api-versions'])){
+		$config['api-versions']=array('v1');
 	}
 	
 	// Exploding comma-separated lists

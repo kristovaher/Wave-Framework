@@ -531,8 +531,14 @@ class WWW_Factory {
 			
 			// It's made sure that the class has not already been defined
 			if(!class_exists($className)){
-				// Class file can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+				// Class file can be loaded from version or /overrides/ directories, if set
+				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+					// Requiring versioned override file
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
+				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+					// Requiring version file
+					require($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
 					// Requiring override file
 					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
 				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
@@ -578,8 +584,14 @@ class WWW_Factory {
 		
 			// Making sure that the library is not already loaded
 			if(!isset($WWW_Libraries[$libraryName])){
-				// Library can be loaded from /overrides/ directories, if set
-				if(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+				// Library file can be loaded from version or /overrides/ directories, if set
+				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+					// Requiring versioned override file
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.$libraryName.'.php');
+				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+					// Requiring version file
+					require($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.$libraryName.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
 					// Requiring override file
 					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php');
 				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){

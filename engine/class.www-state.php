@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.6.4
+ * @version    3.6.7
  */
 
 class WWW_State	{
@@ -140,6 +140,9 @@ class WWW_State	{
 				'dynamic-size-whitelist'=>'',
 				'enforce-first-language-url'=>true,
 				'enforce-url-end-slash'=>true,
+				'errors-reporting'=>'full',
+				'errors-trace'=>false,
+				'errors-verbose'=>false,
 				'file-robots'=>'noindex,nocache,nofollow,noarchive,noimageindex,nosnippet',
 				'fingerprint'=>false,
 				'forbidden-extensions'=>array('tmp','log','ht','htaccess','pem','crt','db','sql','version','conf','ini','empty'),
@@ -226,7 +229,6 @@ class WWW_State	{
 				'testing'=>false,
 				'time-limit'=>false,
 				'timezone'=>false,
-				'trace-errors'=>false,
 				'translations'=>array(),
 				'true-request'=>false,
 				'trusted-proxies'=>array('*'),
@@ -234,7 +236,6 @@ class WWW_State	{
 				'url-web'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 				'user-data'=>false,
 				'user-permissions'=>false,
-				'verbose-errors'=>false,
 				'version'=>'1.0.0',
 				'view'=>array(),
 				'view-headers'=>array()

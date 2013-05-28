@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.6.4
+ * @version    3.6.7
  */
 
 // SOLVING THE HTTP REQUEST
@@ -241,92 +241,97 @@
 			if(in_array($errorCheck['type'],array(E_ERROR,E_USER_ERROR,E_CORE_ERROR,E_PARSE))){
 				$fatalError=true;
 			}
+			
+			// Testing the configuration option for error-reporting
+			if(!isset($config['errors-reporting']) || $config['errors-reporting']=='full' || ($fatalerror && $config['errors-reporting']=='critical')){
 					
-			// Error report will be stored in this array
-			$errorReport=array();
-			// Setting GMT as the error-reporting timezone
-			$errorReport[]=date('d.m.Y H:i:s');
-			
-			// Input data to error report
-			$error=array();
-			if(!empty($_GET)){
-				$error['get']=$_GET;
-			}
-			if(!empty($_POST)){
-				$error['post']=$_POST;
-			}
-			if(!empty($_FILES)){
-				$error['files']=$_FILES;
-			}
-			if(!empty($_COOKIE)){
-				$error['cookies']=$_COOKIE;
-			}
-			if(!empty($_SERVER)){
-				$error['server']=$_SERVER;
-			}
-			// Add to error array
-			$errorReport[]=$error;
-			
-			//Adding backtrace
-			if(isset($config['trace-errors']) && $config['trace-errors']==1){
-				$errorReport[]=debug_backtrace();
-			}
-			
-			// Writing current error and file to the array as well
-			$error=array();
-			$error['url']=$_SERVER['REQUEST_URI'];
-			$error['type']=$errorCheck['type'];
-			$error['file']=$errorCheck['file'];
-			$error['line']=$errorCheck['line'];
-			$error['message']=$errorCheck['message'];
-			$errorReport[]=$error;
-			
-			// This is the signature used for storing developer sessions
-			$signatureFolder=md5($_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
-			
-			// If error folder does not yet exist
-			if(!is_dir(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR)){
-				if(!mkdir(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR,0755)){
-					trigger_error('Cannot create error folder',E_USER_ERROR);
-				}
-				file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR.'signature.tmp',$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
-			}
-			
-			// Logging the error, the error filename is calculated from current error message (this makes sure there are no duplicates, if the error message is the same).
-			file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR.md5($error['file'].$error['message']).'.tmp',json_encode($errorReport)."\n",FILE_APPEND);
-
-			// As long as the error level is set to display errors of this type				
-			if($fatalError){
-			
-				// Cleaning output buffer, if it exists
-				if(ob_get_level()>=1){
-					ob_end_clean();
-				}
-
-				// There was an error in code
-				// System returns 500 header even as a server error (possible bug in code)
-				header('HTTP/1.1 500 Internal Server Error');
+				// Error report will be stored in this array
+				$errorReport=array();
+				// Setting GMT as the error-reporting timezone
+				$errorReport[]=date('d.m.Y H:i:s');
 				
-				// Regular users will be shown a friendly error message
-				if(isset($config['verbose-errors']) && $config['verbose-errors']==1){
-					echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">CRITICAL ERROR ENCOUNTERED</div>';
-					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>TYPE</b>: '.htmlspecialchars($errorCheck['type']).'</div>';
-					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>FILE</b>: '.htmlspecialchars($errorCheck['file']).'</div>';
-					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>LINE</b>: '.htmlspecialchars($errorCheck['line']).'</div>';
-					echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>MESSAGE</b>: '.htmlspecialchars($errorCheck['message']).'</div>';
-					if(isset($config['trace-errors']) && $config['trace-errors']==1){
-						echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">FULL STACK TRACE AVAILABLE FROM DEBUGGER SCRIPT</div>';
-					} else {
-						echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">FULL STACK TRACE IS NOT LOGGED BY DEBUGGER</div>';
+				// Input data to error report
+				$error=array();
+				if(!empty($_GET)){
+					$error['get']=$_GET;
+				}
+				if(!empty($_POST)){
+					$error['post']=$_POST;
+				}
+				if(!empty($_FILES)){
+					$error['files']=$_FILES;
+				}
+				if(!empty($_COOKIE)){
+					$error['cookies']=$_COOKIE;
+				}
+				if(!empty($_SERVER)){
+					$error['server']=$_SERVER;
+				}
+				// Add to error array
+				$errorReport[]=$error;
+				
+				//Adding backtrace
+				if(isset($config['errors-trace']) && $config['errors-trace']==1){
+					$errorReport[]=debug_backtrace();
+				}
+				
+				// Writing current error and file to the array as well
+				$error=array();
+				$error['url']=$_SERVER['REQUEST_URI'];
+				$error['type']=$errorCheck['type'];
+				$error['file']=$errorCheck['file'];
+				$error['line']=$errorCheck['line'];
+				$error['message']=$errorCheck['message'];
+				$errorReport[]=$error;
+				
+				// This is the signature used for storing developer sessions
+				$signatureFolder=md5($_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
+				
+				// If error folder does not yet exist
+				if(!is_dir(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR)){
+					if(!mkdir(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR,0755)){
+						trigger_error('Cannot create error folder',E_USER_ERROR);
 					}
-				} else {
-					echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST</div>';
-					echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">ERROR HAS BEEN LOGGED FOR FURTHER INVESTIGATION</div>';
+					file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR.'signature.tmp',$_SERVER['REMOTE_ADDR'].' '.$_SERVER['HTTP_USER_AGENT']);
 				}
 				
-				// Closing the entire request
-				die();
+				// Logging the error, the error filename is calculated from current error message (this makes sure there are no duplicates, if the error message is the same).
+				file_put_contents(__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'errors'.DIRECTORY_SEPARATOR.$signatureFolder.DIRECTORY_SEPARATOR.md5($error['file'].$error['message']).'.tmp',json_encode($errorReport)."\n",FILE_APPEND);
+
+				// As long as the error level is set to display errors of this type				
+				if($fatalError){
 				
+					// Cleaning output buffer, if it exists
+					if(ob_get_level()>=1){
+						ob_end_clean();
+					}
+
+					// There was an error in code
+					// System returns 500 header even as a server error (possible bug in code)
+					header('HTTP/1.1 500 Internal Server Error');
+					
+					// Regular users will be shown a friendly error message
+					if(isset($config['errors-verbose']) && $config['errors-verbose']==1){
+						echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">CRITICAL ERROR ENCOUNTERED</div>';
+						echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>TYPE</b>: '.htmlspecialchars($errorCheck['type']).'</div>';
+						echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>FILE</b>: '.htmlspecialchars($errorCheck['file']).'</div>';
+						echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>LINE</b>: '.htmlspecialchars($errorCheck['line']).'</div>';
+						echo '<div style="font:12px Tahoma;width:500px;margin:auto;padding:5px 50px 5px 50px;"><b>MESSAGE</b>: '.htmlspecialchars($errorCheck['message']).'</div>';
+						if(isset($config['errors-trace']) && $config['errors-trace']==1){
+							echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">FULL STACK TRACE AVAILABLE FROM DEBUGGER SCRIPT</div>';
+						} else {
+							echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">FULL STACK TRACE IS NOT LOGGED BY DEBUGGER</div>';
+						}
+					} else {
+						echo '<div style="font:18px Tahoma; text-align:center;padding:100px 50px 10px 50px;">WE ARE CURRENTLY EXPERIENCING A PROBLEM WITH YOUR REQUEST</div>';
+						echo '<div style="font:14px Tahoma; text-align:center;padding:10px 50px 100px 50px;">ERROR HAS BEEN LOGGED FOR FURTHER INVESTIGATION</div>';
+					}
+					
+					// Closing the entire request
+					die();
+					
+				}
+			
 			}
 			
 		}

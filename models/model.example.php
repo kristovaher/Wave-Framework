@@ -100,7 +100,7 @@ class WWW_model_example extends WWW_Factory {
 		}
 	
 		// Total row calculation is not necessary, but can be sometimes useful
-		$query='SELECT SQL_CALC_FOUND_ROWS '.$fields.' FROM tags ';
+		$query='SELECT SQL_CALC_FOUND_ROWS '.$fields.' FROM table ';
 		
 		// Filtering data
 		$filters=array();
@@ -165,9 +165,9 @@ class WWW_model_example extends WWW_Factory {
 		// Update if ID exists, otherwise insert
 		if($this->id){
 			$data[]=$this->id;
-			$save=$this->dbCommand('UPDATE table SET '.implode(',',$query).' WHERE id=?;',array($data));
+			$save=$this->dbCommand('UPDATE table SET '.implode(',',$query).' WHERE id=?;',$data);
 		} else {
-			$save=$this->dbCommand('INSERT INTO table SET '.implode(',',$query).';',array($data));
+			$save=$this->dbCommand('INSERT INTO table SET '.implode(',',$query).';',$data);
 			$this->id=$this->dbLastId();
 		}
 		

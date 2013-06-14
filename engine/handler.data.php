@@ -99,7 +99,7 @@
 
 	// This uses current request URI to find out which view should be loaded, by default it uses the request set by State
 	// API check is turned off, since index.php is considered a public gateway
-	$view=$api->command(array('url'=>$state->data['true-request'],'www-command'=>'url-solve','www-output'=>0,'www-return-type'=>'php','www-cache-timeout'=>$config['index-url-cache-timeout'],'www-cache-load-timeout'=>$cacheLoad),false,false,true);
+	$view=$api->command(array('url'=>$state->data['request-true'],'www-command'=>'url-solve','www-output'=>0,'www-return-type'=>'php','www-cache-timeout'=>$config['index-url-cache-timeout'],'www-cache-load-timeout'=>$cacheLoad),false,false,true);
 
 // CALLING DEFAULT VIEW CONTROLLER IF URL DID NOT ORDER A REDIRECTION
 
@@ -136,7 +136,7 @@
 		}
 		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command(array('www-command'=>$view['controller'].'-'.$view['controller-method'],'www-request'=>$state->data['true-request'],'www-return-type'=>'html','www-cache-tags'=>((isset($view['cache-tag']))?$view['cache-tag']:''),'www-cache-timeout'=>$config['index-view-cache-timeout'],'www-cache-load-timeout'=>$cacheLoad)+$inputData,false,false,true);
+		$api->command(array('www-command'=>$view['controller'].'-'.$view['controller-method'],'www-request'=>$state->data['request-true'],'www-return-type'=>'html','www-cache-tags'=>((isset($view['cache-tag']))?$view['cache-tag']:''),'www-cache-timeout'=>$config['index-view-cache-timeout'],'www-cache-load-timeout'=>$cacheLoad)+$inputData,false,false,true);
 
 	}
 	

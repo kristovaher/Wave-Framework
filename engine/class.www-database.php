@@ -278,7 +278,7 @@ class WWW_Database {
 		$result=$query->execute($variables);
 		
 		// If there is a result then it is fetched and returned
-		if($result){
+		if($result!==false){
 			// All data is returned as associative array
 			$return=$query->fetchAll(PDO::FETCH_ASSOC);
 			// Closing the resource
@@ -320,7 +320,7 @@ class WWW_Database {
 		$result=$query->execute($variables);
 		
 		// If there is a result then it is fetched and returned
-		if($result){
+		if($result!==false){
 			// All data is returned as associative array
 			$return=$query->fetch(PDO::FETCH_ASSOC);
 			// Closing the resource
@@ -363,7 +363,7 @@ class WWW_Database {
 		$result=$query->execute($variables);
 		
 		// If there is a result then it is fetched and returned
-		if($result){
+		if($result!==false){
 			// Result of this query is the amount of rows affected by it
 			$rowCount=$query->rowCount();
 			// Closing the resource

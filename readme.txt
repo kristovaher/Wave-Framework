@@ -21,7 +21,7 @@ http://www.waveframework.com
 
 Social networks for latest news: 
 Google+ - http://plus.google.com/106969835456865671988 
-Facebook - http://www.facebook.com/WWWFramework 
+Facebook - http://www.facebook.com/waveframework 
 Twitter - http://www.twitter.com/WWWFramework
 
 FEATURES
@@ -122,9 +122,9 @@ CONTRIBUTORS
 ------------
 
 Allan Davy
-Priit Perna
-Ando David Roots
-Jaak Kütt
+Priit Perna (https://www.facebook.com/priit.perna)
+Ando David Roots (http://sqroot.eu/)
+Jaak Kütt (http://jaak.kytt.ee/)
 
 LICENSE
 -------

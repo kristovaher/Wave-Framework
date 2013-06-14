@@ -192,6 +192,7 @@ class WWW_State	{
 				'project-title'=>false,
 				'request-id'=>((isset($_SERVER['UNIQUE_ID']))?$_SERVER['UNIQUE_ID']:false),
 				'request-time'=>$_SERVER['REQUEST_TIME'],
+				'request-true'=>false,
 				'request-uri'=>$_SERVER['REQUEST_URI'],
 				'resource-cache-timeout'=>31536000,
 				'resource-extensions'=>array('css','js','txt','csv','xml','html','htm','rss','vcard'),
@@ -230,7 +231,6 @@ class WWW_State	{
 				'time-limit'=>false,
 				'timezone'=>false,
 				'translations'=>array(),
-				'true-request'=>false,
 				'trusted-proxies'=>array('*'),
 				'url-base'=>false,
 				'url-web'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
@@ -345,9 +345,9 @@ class WWW_State	{
 			}
 			
 			// If configuration has not sent a request string then State solves it using request-uri
-			if(!$this->data['true-request']){
+			if(!$this->data['request-true']){
 				// If install is at www.example.com/w/ subfolder and user requests www.example.com/w/en/page/ then this would be parsed to 'en/page/'
-				$this->data['true-request']=preg_replace('/(^'.preg_quote($this->data['url-web'],'/').')/ui','',$this->data['request-uri']);
+				$this->data['request-true']=preg_replace('/(^'.preg_quote($this->data['url-web'],'/').')/ui','',$this->data['request-uri']);
 			}
 			
 			// This sets the developer flag to either true or false depending on configuration

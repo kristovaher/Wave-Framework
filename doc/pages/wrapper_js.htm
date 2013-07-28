@@ -122,6 +122,7 @@
 					<li>www-return-timestamp</li>
 					<li>www-timestamp-duration</li>
 					<li>www-version</li>
+					<li>www-jsonp</li>
 				</ul>
 				
 				<p>In case you need to reset these settings, then you can reset them one by one individually (which overwrites the previous values) or call clearInput(true) method.</p>
@@ -315,9 +316,9 @@
 				
 					<p>This method unsets the attached form from the API request.</p>
 					
-				<h3>this.clearInput=function(clearAuth)</h3>
+				<h3>this.clearInput=function(reset)</h3>
 				
-					<p>This method resets the state of API. It is called after each API request with 'clearAuth' set to false. To entirely reset the state of API 'clearAuth' should be set to true and this will reset everything except the log file.</p>
+					<p>This method resets the state of API. It is called after each API request with 'reset' set to false. To entirely reset the state of API 'reset' should be set to true and this will reset everything except the log file.</p>
 					
 				<h3>this.sendRequest=function(variables,formId)</h3>
 				

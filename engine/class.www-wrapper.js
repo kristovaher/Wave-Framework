@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_js.htm
  * @since      2.0.1
- * @version    3.6.4
+ * @version    3.6.9
  */
 
 /*
@@ -87,9 +87,12 @@ function WWW_Wrapper(address,language){
 		falseCallbackParameters:false,
 		timestampDuration:60,
 		hiddenWindowCounter:0,
+		hiddenScriptCounter:0,
 		apiSubmitFormId:false,
 		asynchronous:false,
-		unserialize:true
+		unserialize:true,
+		JSONP:false,
+		JSONV:false
 	}
 	
 	/*
@@ -119,7 +122,7 @@ function WWW_Wrapper(address,language){
 	 * set custom headers with AJAX requests, so this variable is unused in the class and only 
 	 * defined for future purpose.
 	 */
-	var userAgent='WWWFramework/3.6.4 (JS)';
+	var userAgent='WWWFramework/3.6.9 (JS)';
 	
 	/*
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -256,6 +259,24 @@ function WWW_Wrapper(address,language){
 				case 'www-version':
 					apiState.apiVersion=value;
 					log.push('API version set to: '+value);
+					break;
+				case 'www-jsonp':
+					if(value){
+						apiState.JSONP=value;
+						log.push('Request is made using JSONP');
+					} else {
+						apiState.JSONP=false;
+						log.push('JSONP is not used for the request');
+					}
+					break;
+				case 'www-jsonv':
+					if(value){
+						apiState.JSONV=value;
+						log.push('Request is made using JSONV');
+					} else {
+						apiState.JSONV=false;
+						log.push('JSONV is not used for the request');
+					}
 					break;
 				case 'www-state':
 					apiState.apiStateKey=value;
@@ -444,13 +465,13 @@ function WWW_Wrapper(address,language){
 		/*
 		 * This function simply deletes current input values
 		 *
-		 * @param boolean $clearAuth whether to also reset authentication and state data
+		 * @param boolean $reset whether to also reset authentication and other state data
 		 * @return boolean
 		 */
-		this.clearInput=function(clearAuth){
+		this.clearInput=function(reset){
 		
 			// If authentication was also set for deletion
-			if(clearAuth!=null && clearAuth==true){
+			if(reset!=null && reset==true){
 				// Settings
 				apiState.apiProfile=false;
 				apiState.apiSecretKey=false;
@@ -461,6 +482,8 @@ function WWW_Wrapper(address,language){
 				apiState.returnHash=false;
 				apiState.returnTimestamp=false;
 				apiState.timestampDuration=60;
+				apiState.JSONP=false;
+				apiState.JSONV=false;
 			}
 			
 			// Resetting the API state test key
@@ -549,6 +572,22 @@ function WWW_Wrapper(address,language){
 			// If language is set
 			if(apiLanguage!=null && apiLanguage!=false){
 				thisInputData['www-language']=apiLanguage;
+			}
+			// If JSONP is used, then assigning the JSONP function name that will be called
+			if(thisApiState.JSONP==true){
+				if(typeof thisApiState.JSONP=='string'){
+					thisInputData['www-jsonp']=thisApiState.JSONP;
+				} else {
+					thisInputData['www-jsonp']='wwwJSONP';
+				}
+				log.push('JSONP return method is set as '+thisInputData['www-jsonp']);
+			} else if(thisApiState.JSONV==true){
+				if(typeof thisApiState.JSONV=='string'){
+					thisInputData['www-jsonv']=thisApiState.JSONV;
+				} else {
+					thisInputData['www-jsonv']='wwwJSONV';
+				}
+				log.push('JSONV variable name is set as '+thisInputData['www-jsonv']);
 			}
 
 			// Clearing input data
@@ -662,10 +701,59 @@ function WWW_Wrapper(address,language){
 						// Log entries
 						log.push('More than '+getLimit+' bytes would be sent, POST request will be used');
 						method='POST';
+						// JSONP cannot be used to submit a form
+						if(thisApiState.JSONP==true || thisApiState.JSONV==true){
+							return errorHandler(thisInputData,218,'JSONP/JSONV cannot be used for POST requests',thisApiState.errorCallback);
+						}
 					}
-				
-					// Separate functionality for synchronous and asynchronous requests
-					if(thisApiState.asynchronous){
+					
+					// Separate functionality for JSONP, JSONV, synchronous and asynchronous requests
+					if(thisApiState.JSONP==true){
+						
+						// Hidden JSONP script that makes the request
+						apiState.hiddenScriptCounter++;
+						var hiddenScript=document.createElement('script');
+						var hiddenScriptName='WWW_API_Wrapper_Hidden_JSONP_'+apiState.hiddenScriptCounter;
+						hiddenScript.type='text/javascript';
+						hiddenScript.id=hiddenScriptName;
+						hiddenScript.name=hiddenScriptName;
+						hiddenScript.src=requestString;
+						// This cleans up after itself and removes both new script tags
+						hiddenScript.onload=function(){
+							log.push('JSONP temporary script has been removed');
+							document.head.removeChild(hiddenScript);
+						};
+						// This creates the script which makes the request and parses the result
+						document.head.appendChild(hiddenScript);
+						// Adding a log entry
+						log.push('Making the JSONP request to URL: '+apiAddress);
+						// Returning true, since the rest is out of the hands of this class
+						return true;
+						
+					} else if(thisApiState.JSONV==true){
+					
+						// Hidden JSONP script that makes the request
+						apiState.hiddenScriptCounter++;
+						var hiddenScript=document.createElement('script');
+						var hiddenScriptName='WWW_API_Wrapper_Hidden_JSONV_'+apiState.hiddenScriptCounter;
+						hiddenScript.type='text/javascript';
+						hiddenScript.id=hiddenScriptName;
+						hiddenScript.name=hiddenScriptName;
+						hiddenScript.src=requestString;
+						// This cleans up after itself and removes both new script tags
+						hiddenScript.onload=function(){
+							eval('parseResult('+thisInputData['www-jsonv']+',thisInputData,thisApiState);');
+							eval('delete '+thisInputData['www-jsonv']+';');
+							document.head.removeChild(hiddenScript);
+						};
+						// This creates the script which makes the request and parses the result
+						document.head.appendChild(hiddenScript);
+						// Adding a log entry
+						log.push('Making the JSONV request to URL: '+apiAddress);
+						// Returning true, since the rest is out of the hands of this class
+						return true;
+						
+					} else if(thisApiState.asynchronous){
 						
 						// Log entry
 						log.push('Making '+method+' request to URL: '+apiAddress);
@@ -729,6 +817,11 @@ function WWW_Wrapper(address,language){
 					}
 					
 				} else {
+				
+					// JSONP cannot be used to submit a form
+					if(thisApiState.JSONP==true){
+						return errorHandler(thisInputData,217,'JSONP cannot be used to submit a form',thisApiState.errorCallback);
+					}
 				
 					// Getting the hidden form
 					var apiSubmitForm=document.getElementById(thisApiState.apiSubmitFormId);
@@ -860,22 +953,25 @@ function WWW_Wrapper(address,language){
 				
 				// PARSING REQUEST RESULT
 			
-					// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
-					if(thisInputData['www-return-type']==null || thisInputData['www-return-type']=='json'){
-						// JSON support is required
-						if(typeof(JSON)!=='undefined'){
-							resultData=JSON.parse(resultData);
-						} else if(typeof(jQuery)!=='undefined'){
-							// Attempting to unserialize with jQuery
-							resultData=jQuery.parseJSON(resultData);
-						} else {
-							// Could not unserialize
+					// The result is only parsed if it is not already an object
+					if(typeof(resultData)!=='object'){
+						// If unserialize command was set and the data type was JSON or serialized array, then it is returned as serialized
+						if(thisInputData['www-return-type']==null || thisInputData['www-return-type']=='json'){
+							// JSON support is required
+							if(typeof(JSON)!=='undefined'){
+								resultData=JSON.parse(resultData);
+							} else if(typeof(jQuery)!=='undefined'){
+								// Attempting to unserialize with jQuery
+								resultData=jQuery.parseJSON(resultData);
+							} else {
+								// Could not unserialize
+								return errorHandler(thisInputData,207,'Cannot unserialize returned data',thisApiState.errorCallback);
+							}
+							log.push('Returning JSON object');
+						} else if(thisApiState.unserialize){
+							// Every other unserialization attempt fails
 							return errorHandler(thisInputData,207,'Cannot unserialize returned data',thisApiState.errorCallback);
 						}
-						log.push('Returning JSON object');
-					} else if(thisApiState.unserialize){
-						// Every other unserialization attempt fails
-						return errorHandler(thisInputData,207,'Cannot unserialize returned data',thisApiState.errorCallback);
 					}
 					
 					// If error was detected
@@ -970,7 +1066,7 @@ function WWW_Wrapper(address,language){
 								return thisCallback.call(this,resultData);
 							}
 						} else {
-							return errorHandler(thisInputData,216,'Callback method not found',thisApiState.errorCallback);
+							return errorHandler(thisInputData,216,'Callback method not found: '+thisApiState.trueCallback+'()',thisApiState.errorCallback);
 						}
 					} else {
 						// Returning data from callback
@@ -994,7 +1090,7 @@ function WWW_Wrapper(address,language){
 								return thisCallback.call(this,resultData);
 							}
 						} else {
-							return errorHandler(thisInputData,216,'Callback method not found',thisApiState.errorCallback);
+							return errorHandler(thisInputData,216,'Callback method not found: '+thisApiState.falseCallback+'()',thisApiState.errorCallback);
 						}
 					} else {
 						// Returning data from callback
@@ -1042,7 +1138,7 @@ function WWW_Wrapper(address,language){
 						// Callback execution
 						return thisCallback.call(this,{'www-input':thisInputData,'www-response-code':responseCode,'www-message':errorMessage});
 					} else {
-						responseCode=217;
+						responseCode=216;
 						errorMessage='Callback method not found: '+thisErrorCallback+'()';
 						log.push(errorMessage);
 						return false;

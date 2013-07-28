@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/wrapper_php.htm
  * @since      2.0.0
- * @version    3.6.4
+ * @version    3.6.9
  */
 
 class WWW_Wrapper {
@@ -127,7 +127,7 @@ class WWW_Wrapper {
 	 * when cURL is not supported and file_get_contents() makes the request, then user agent is 
 	 * not sent with the request.
 	 */
-	private $userAgent='WaveFramework/3.6.4 (PHP)';
+	private $userAgent='WaveFramework/3.6.9 (PHP)';
 	
 	/**
 	 * This is the GET string maximum length. Most servers should easily be able to deal with 
@@ -623,16 +623,16 @@ class WWW_Wrapper {
 		
 		/**
 		 * This method resets the state of API. It is called after each API request with 
-		 * $clearAuth set to false. To entirely reset the state of API $clearAuth should be 
+		 * $reset set to false. To entirely reset the state of API $reset should be 
 		 * set to true and this will reset everything except the log file.
 		 * 
-		 * @param boolean $clearAuth whether to also reset authentication and state data
+		 * @param boolean $reset whether to also reset authentication and other state data
 		 * @return boolean
 		 */
-		public function clearInput($clearAuth=false){
+		public function clearInput($reset=false){
 		
 			// If authentication should also be cleared
-			if($clearAuth){
+			if($reset){
 				$this->apiState['apiProfile']=false;
 				$this->apiState['apiSecretKey']=false;
 				$this->apiState['apiToken']=false;
@@ -1257,7 +1257,7 @@ class WWW_Wrapper {
 								return call_user_func($thisApiState['trueCallback'],$resultData);
 							}
 						} else {
-							return $this->errorHandler($thisInputData,216,'Callback method not found',$thisApiState['errorCallback']);
+							return $this->errorHandler($thisInputData,216,'Callback method not found: '.$thisApiState['trueCallback'].'()',$thisApiState['errorCallback']);
 						}
 					} else {
 						// Returning data from callback
@@ -1280,7 +1280,7 @@ class WWW_Wrapper {
 								return call_user_func($thisApiState['falseCallback'],$resultData);
 							}
 						} else {
-							return $this->errorHandler($thisInputData,216,'Callback method not found',$thisApiState['falseCallback']);
+							return $this->errorHandler($thisInputData,216,'Callback method not found: '.$thisApiState['falseCallback'].'()',$thisApiState['falseCallback']);
 						}
 					} else {
 						// Returning data from callback
@@ -1371,7 +1371,7 @@ class WWW_Wrapper {
 						// Callback execution
 						return call_user_func($errorCallback,array('www-input'=>$inputData,'www-response-code'=>$responseCode,'www-message'=>$errorMessage));
 					} else {
-						$this->responseCode=217;
+						$this->responseCode=216;
 						$this->errorMessage='Callback method not found: '.$errorCallback.'()';
 						$this->log[]=$this->errorMessage;
 						return false;

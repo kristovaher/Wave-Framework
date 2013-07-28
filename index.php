@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.6.7
+ * @version    3.6.9
  */
 
 // SOLVING THE HTTP REQUEST
@@ -105,6 +105,11 @@
 			$config['resource-extensions']=explode(',',$config['resource-extensions']);
 		} else {
 			$config['resource-extensions']=array('css','js','txt','csv','xml','html','htm','rss','vcard','appcache');
+		}
+		if(isset($config['file-extensions'])){
+			$config['file-extensions']=explode(',',$config['file-extensions']);
+		} else {
+			$config['file-extensions']=array('pdf','doc','docx','xls','xlsx','ppt','pptx','zip','rar');
 		}
 		if(isset($config['forbidden-extensions'])){
 			$config['forbidden-extensions']=explode(',',$config['forbidden-extensions']);
@@ -373,6 +378,11 @@
 				require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.resource.php');
 			}
 			
+		} elseif(in_array($resourceExtension,$config['file-extensions'])){
+		
+			// File Handler is loaded for every other file request case
+			require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.file.php');
+			
 		} elseif(in_array($resourceExtension,$config['forbidden-extensions'])){
 		
 			// These file extensions are not allowed, thus 403 error is returned
@@ -390,6 +400,9 @@
 			
 			// Replacing the extension in the request to find handler filename
 			$apiHandler=str_replace('.api','',$resourceFile);
+			
+			// Replacing all potentially sensitive characters from API handler name
+			$apiHandler=preg_replace('/[^0-9a-z\-\_]/i','',$apiHandler);
 			
 			// If the file exists then system loads the new API, otherwise 404 is returned
 			if(file_exists(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.api-'.$apiHandler.'.php')){
@@ -413,8 +426,10 @@
 			}
 			
 		} else {
-			// File Handler is loaded for every other file request case
-			require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.file.php');
+		
+			// Every other extension is handled by Data Handler, which loads URL and View controllers for website views
+			require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'handler.data.php');
+			
 		}
 		
 	} else {

@@ -183,6 +183,14 @@
 				
 					<p>This means that callback method was not found after the request, despite being defined.</p>
 					
+				<h3>217 - JSONP/JSONV cannot be used to submit a form</h3>
+				
+					<p>This JavaScript API Wrapper specific error is returned when JSONP/JSONV is used together with defined form.</p>
+					
+				<h3>218 - JSONP/JSONV cannot be used for POST requests</h3>
+				
+					<p>This JavaScript API Wrapper specific error is returned when JSONP/JSONV is used while making a POST request. Usually this means that there is too much data being sent.</p>
+					
 			<h2 id="index-custom-error-code-namespaces-3xx-4xx-5xx">Custom Error Code Namespaces 3XX/4XX/5XX</h2>
 			
 				<p>It is not necessary to return specific error codes from controllers, but Wave Framework API comes with helper functions to format proper error messages in an array that can be expected as a response by systems that communicate with Wave Framework API.</p>

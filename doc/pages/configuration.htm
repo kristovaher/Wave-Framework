@@ -156,7 +156,11 @@
 
 				<p><b>resource-extensions</b></p>
 				
-				<p>This is a comma-separated list of static resource file extensions that are routed through <a href="handler_resource.htm">Resource Handler</a>. If static resource file extension is not listed here, then this will be served through <a href="handler_file.htm">File Handler</a> instead - which is used to serve any file that has an extension, but no handler. <a href="handler_resource.htm">Resource Handler</a> can serve these files as combined on-demand. If you add new extensions here, then it is recommended to also update <a href="handler_image.htm">Image Handler</a> code at /engine/handler.image.php to support that new file extension. Default extensions are css, js, txt, csv, xml, html, htm, rss, vcard.</p>
+				<p>This is a comma-separated list of static resource file extensions that are routed through Resource Handler. Resource Handler can serve these files as combined on-demand. If you add new extensions here, then it is recommended to also update Resource Handler code at /engine/handler.resource.php to support that new file extension. Default extensions are css, js, txt, csv, xml, html, htm, rss, vcard.</p>
+
+				<p><b>file-extensions</b></p>
+				
+				<p>This is a comma-separated list of filename extensions that are routed through File Handler. If a file extension is not listed here and it is not a forbidden extension, then it will be served through Data Handler instead and acts like a web page request. Default extensions are pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar.</p>
 
 				<p><b>forbidden-extensions</b></p>
 				
@@ -236,7 +240,7 @@
 				
 				<p><b>apc</b></p>
 				
-				<p>APC extension is not officially part of PHP, but if web server supports APC, then this can speed up caching and performance. If this setting is set to 1 and APC is supported on the server, then Wave Framework will use APC for caching rather than filesystem folders in some cases. This setting is set to 0 by default.</p>
+				<p>APC extension is not officially part of PHP, but if web server supports APC, then this can speed up caching and performance. If this setting is set to 1 and APC is supported on the server, then Wave Framework will use APC for caching rather than filesystem folders in some cases. This setting is set to 0 by default. If cache-database-type is set to 'any' and generic database configuration is also set, then the same database connection is used as in the main application rather than creating a new connection.</p>
 				
 				<p><b>cache-database<br/>
 				cache-database-type<br/>

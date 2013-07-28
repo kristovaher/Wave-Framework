@@ -357,9 +357,9 @@
 					
 					<p>This method sets files that will be uploaded with the API request. $file is the name of the file and $location is the address of the file in <a href="filesystem.htm">Filesystem</a>. Multiple files can be attached at once by sending $file as an array of filenames and locations. This method also checks if the file actually exists.</p>
 			
-				<h3>public function clearInput($clearAuth=false)</h3>
+				<h3>public function clearInput($reset=false)</h3>
 					
-					<p>This method resets the state of API. It is called after each API request with $clearAuth set to false. To entirely reset the state of API $clearAuth should be set to true and this will reset everything except the log file.</p>
+					<p>This method resets the state of API. It is called after each API request with $reset set to false. To entirely reset the state of API $reset should be set to true and this will reset everything except the log file.</p>
 			
 				<h3>public function sendRequest($variables=false,$fileVariables,$cryptedVariables=false)</h3>
 					

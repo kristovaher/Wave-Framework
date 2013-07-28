@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.6.4
+ * @version    3.6.9
  */
 
 final class WWW_API {
@@ -172,7 +172,8 @@ final class WWW_API {
 		}
 		
 		// If Memcache is enabled
-		if(extension_loaded('memcache') && $this->state->data['memcache']){
+		if($this->state->data['memcache'] && extension_loaded('memcache')){
+		
 			// New memcache element
 			$this->memcache=new Memcache;
 			// Connecting to memcache
@@ -180,34 +181,45 @@ final class WWW_API {
 				trigger_error('Memcache connection failed, reverting to other caching methods',E_USER_WARNING);
 				$this->memcache=false;
 			}
-		} elseif($this->state->data['cache-database']){
 			
-			// If cache database settings are not set, then loading configuration from main database settings
-			if(!$this->state->data['cache-database-name']){ $this->state->data['cache-database-name']=$this->state->data['database-name']; }
-			if(!$this->state->data['cache-database-type']){ $this->state->data['cache-database-type']=$this->state->data['database-type']; }
-			if(!$this->state->data['cache-database-host']){ $this->state->data['cache-database-host']=$this->state->data['database-host']; }
-			if(!$this->state->data['cache-database-username']){ $this->state->data['cache-database-username']=$this->state->data['database-username']; }
-			if(!$this->state->data['cache-database-password']){ $this->state->data['cache-database-password']=$this->state->data['database-password']; }
-			if(!$this->state->data['cache-database-errors']){ $this->state->data['cache-database-errors']=$this->state->data['database-errors']; }
-			if(!$this->state->data['cache-database-persistent']){ $this->state->data['cache-database-persistent']=$this->state->data['database-persistent']; }
+		} elseif($this->state->data['cache-database']){
 		
-			// Checking if database configuration is valid
-			if(isset($this->state->data['cache-database-name'],$this->state->data['cache-database-type'],$this->state->data['cache-database-host'],$this->state->data['cache-database-username'],$this->state->data['cache-database-password'])){
-				// If database object is already used by State and it is exactly the same as the one assigned for caching, then that same link will be used
-				if($this->state->databaseConnection && $this->state->data['cache-database-host']==$this->state->data['database-host'] && $this->state->data['cache-database-username']==$this->state->data['database-username'] && $this->state->data['cache-database-password']==$this->state->data['database-password'] && $this->state->data['cache-database-name']==$this->state->data['database-name']){
-					// State file has the correct cache if the Configuration options were loaded
-					$this->databaseCache=$this->state->databaseConnection;
-				} else {
-					// If the class has not been defined yet
-					if(!class_exists('WWW_Database')){
-						require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
-					}
-					// This object will be used for caching functions later on
-					$this->databaseCache=new WWW_Database($this->state->data['cache-database-type'],$this->state->data['cache-database-host'],$this->state->data['cache-database-name'],$this->state->data['cache-database-username'],$this->state->data['cache-database-password'],((isset($this->state->data['cache-database-errors']))?$this->state->data['cache-database-errors']:false),((isset($this->state->data['cache-database-persistent']))?$this->state->data['cache-database-persistent']:false));
-				}
+			// If database type is set to 'any' and regular database connection is used, then cache database uses the regular connection as well
+			if($this->state->data['cache-database-type']=='any' && $this->state->databaseConnection!=false){
+			
+				// Assigning the general database to also act as cache database connection
+				$this->databaseCache=&$this->state->databaseConnection;
+			
 			} else {
-				// Some of the settings were incorrect or missing, so database caching won't be used
-				trigger_error('Database caching configuration incorrect, reverting to other caching methods',E_USER_WARNING);
+			
+				// If cache database settings are not set, then loading configuration from main database settings
+				if(!$this->state->data['cache-database-name']){ $this->state->data['cache-database-name']=$this->state->data['database-name']; }
+				if(!$this->state->data['cache-database-type']){ $this->state->data['cache-database-type']=$this->state->data['database-type']; }
+				if(!$this->state->data['cache-database-host']){ $this->state->data['cache-database-host']=$this->state->data['database-host']; }
+				if(!$this->state->data['cache-database-username']){ $this->state->data['cache-database-username']=$this->state->data['database-username']; }
+				if(!$this->state->data['cache-database-password']){ $this->state->data['cache-database-password']=$this->state->data['database-password']; }
+				if(!$this->state->data['cache-database-errors']){ $this->state->data['cache-database-errors']=$this->state->data['database-errors']; }
+				if(!$this->state->data['cache-database-persistent']){ $this->state->data['cache-database-persistent']=$this->state->data['database-persistent']; }
+			
+				// Checking if database configuration is valid
+				if(isset($this->state->data['cache-database-name'],$this->state->data['cache-database-type'],$this->state->data['cache-database-host'],$this->state->data['cache-database-username'],$this->state->data['cache-database-password'])){
+					// If database object is already used by State and it is exactly the same as the one assigned for caching, then that same link will be used
+					if($this->state->databaseConnection && $this->state->data['cache-database-host']==$this->state->data['database-host'] && $this->state->data['cache-database-username']==$this->state->data['database-username'] && $this->state->data['cache-database-password']==$this->state->data['database-password'] && $this->state->data['cache-database-name']==$this->state->data['database-name']){
+						// State file has the correct cache if the Configuration options were loaded
+						$this->databaseCache=$this->state->databaseConnection;
+					} else {
+						// If the class has not been defined yet
+						if(!class_exists('WWW_Database')){
+							require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
+						}
+						// This object will be used for caching functions later on
+						$this->databaseCache=new WWW_Database($this->state->data['cache-database-type'],$this->state->data['cache-database-host'],$this->state->data['cache-database-name'],$this->state->data['cache-database-username'],$this->state->data['cache-database-password'],((isset($this->state->data['cache-database-errors']))?$this->state->data['cache-database-errors']:false),((isset($this->state->data['cache-database-persistent']))?$this->state->data['cache-database-persistent']:false));
+					}
+				} else {
+					// Some of the settings were incorrect or missing, so database caching won't be used
+					trigger_error('Database caching configuration incorrect, reverting to other caching methods',E_USER_WARNING);
+				}
+			
 			}
 			
 		}
@@ -341,6 +353,8 @@ final class WWW_API {
 					'crypt-output'=>false,
 					'profile'=>$this->state->data['api-public-profile'],
 					'push-output'=>(isset($apiInputData['www-output']))?$apiInputData['www-output']:1,
+					'jsonp'=>(isset($apiInputData['www-jsonp']) && $apiInputData['www-jsonp']!='')?$apiInputData['www-jsonp']:false,
+					'jsonv'=>(isset($apiInputData['www-jsonv']) && $apiInputData['www-jsonv']!='')?$apiInputData['www-jsonv']:false,
 					'return-hash'=>(isset($apiInputData['www-return-hash']))?$apiInputData['www-return-hash']:false,
 					'return-timestamp'=>(isset($apiInputData['www-return-timestamp']))?$apiInputData['www-return-timestamp']:false,
 					'return-type'=>(isset($apiInputData['www-return-type']))?$apiInputData['www-return-type']:'json',
@@ -547,7 +561,7 @@ final class WWW_API {
 						if(isset($this->apiProfiles[$apiState['profile']]['access-control'])){
 							$this->state->setHeader('Access-Control-Allow-Origin: '.$this->apiProfiles[$apiState['profile']]['access-control']);
 						} elseif($this->state->data['access-control']){
-							$this->state->setHeader('Access-Control-Allow-Origin: '.$config['access-control']);
+							$this->state->setHeader('Access-Control-Allow-Origin: '.$this->state->data['access-control']);
 						}
 						
 					} else {
@@ -1099,6 +1113,16 @@ final class WWW_API {
 						default:							
 							trigger_error('Return type not set or incorrect',E_USER_ERROR);
 							break;
+					}
+					
+					// If JSONP function wrapper name is set
+					if($apiState['jsonp']){
+						$apiResult=$apiState['jsonp'].'('.$apiResult.');';
+					}
+					
+					// If JSONV variable name is set
+					if($apiState['jsonv']){
+						$apiResult='var '.$apiState['jsonv'].'='.$apiResult.';';
 					}
 				
 				}

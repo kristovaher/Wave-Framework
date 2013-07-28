@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.6.7
+ * @version    3.6.9
  */
 
 class WWW_State	{
@@ -484,7 +484,7 @@ class WWW_State	{
 		 * one or more key variables to this method to return a specific key from State. If you 
 		 * send multiple parameters then this method attempts to find keys of a key in case the 
 		 * State variable is an array itself. $input variable is only used within State class 
-		 * itself.
+		 * itself. Method returns null for keys that have not been set.
 		 *
 		 * @param array $input input variables sent to the function
 		 * @return mixed
@@ -500,7 +500,7 @@ class WWW_State	{
 			foreach($input as $key){
 				if(!isset($return[$key])){
 					trigger_error('State variable '.implode(',',$input).' does not exist',E_USER_NOTICE);
-					return false;
+					return null;
 				}
 				$return=&$return[$key];
 			}
@@ -1488,7 +1488,7 @@ class WWW_State	{
 		/**
 		 * This method returns $key value from session data. If $key is an array of keys, then 
 		 * it can return multiple variables from session at once. If $key is not set, then entire 
-		 * session array is returned.
+		 * session array is returned. Method returns null for keys that have not been set.
 		 *
 		 * @param boolean|string|array $key key to return or an array of keys
 		 * @return mixed
@@ -1504,13 +1504,12 @@ class WWW_State	{
 			if(is_array($key)){
 				// This array will hold multiple values
 				$return=array();
-				// This array will hold multiple values
 				foreach($key as $val){
 					// Getting value based on key
 					if(isset($this->data['session-data'][$val])){
 						$return[$val]=$this->data['session-data'][$val];
 					} else {
-						$return[$val]=false;
+						$return[$val]=null;
 					}
 				}
 				return $return;
@@ -1519,7 +1518,7 @@ class WWW_State	{
 				if(isset($this->data['session-data'][$key])){
 					return $this->data['session-data'][$key];
 				} else {
-					return false;
+					return null;
 				}
 			} else {
 				// Return entire session data, if key was not set
@@ -1640,7 +1639,8 @@ class WWW_State	{
 		
 		/**
 		 * This method returns a cookie value with the set $key. $key can also be an array of 
-		 * keys, in which case multiple cookie values are returned in an array.
+		 * keys, in which case multiple cookie values are returned in an array. Method returns null 
+		 * for keys that have not been set.
 		 *
 		 * @param string $key key of the value to be returned, can be an array
 		 * @return mixed
@@ -1664,7 +1664,7 @@ class WWW_State	{
 				if(isset($_COOKIE[$key])){
 					return $_COOKIE[$key];
 				} else {
-					return false;
+					return null;
 				}
 			}
 			

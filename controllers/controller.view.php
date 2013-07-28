@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_view.htm
  * @since      1.0.0
- * @version    3.5.0
+ * @version    3.6.9
  */
 
 class WWW_controller_view extends WWW_Factory {
@@ -227,15 +227,6 @@ class WWW_controller_view extends WWW_Factory {
 							<?=$other?>
 						<?php } ?>
 					<?php } ?>
-					<script type="text/javascript">
-						var WWW=new WWW_Wrapper('json.api');
-						WWW.setInput({
-							'www-command':'example-get'
-						});
-						console.log(WWW.returnLog());
-						console.log(WWW.sendRequest());
-						console.log(WWW.returnLog());
-					</script>
 				</head>
 				<body>
 					<?php

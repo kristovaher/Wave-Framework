@@ -281,7 +281,7 @@
 				
 				<h3>final public function getState($input)</h3>
 				
-					<p>This is the basic call to return a State variable from the object. If this method is called without any variables, then the entire State array is returned. You can send one or more key variables to this method to return a specific key from State. If you send multiple parameters then this method attempts to find keys of a key in case the State variable is an array itself. $input variable is only used within State class itself.</p>
+					<p>This is the basic call to return a State variable from the object. If this method is called without any variables, then the entire State array is returned. You can send one or more key variables to this method to return a specific key from State. If you send multiple parameters then this method attempts to find keys of a key in case the State variable is an array itself. $input variable is only used within State class itself. Method returns null for keys that have not been set.</p>
 				
 				<h3>final public function setState($input)</h3>
 				
@@ -392,7 +392,7 @@
 				
 				<h3>final public function getSession($key=false)</h3>
 				
-					<p>This method returns $key value from session data. If $key is an array of keys, then it can return multiple variables from session at once. If $key is not set, then entire session array is returned.</p>
+					<p>This method returns $key value from session data. If $key is an array of keys, then it can return multiple variables from session at once. If $key is not set, then entire session array is returned. Method returns null for keys that have not been set.</p>
 				
 				<h3>final public function unsetSession($key=false)</h3>
 				
@@ -413,7 +413,7 @@
 				
 				<h3>final public function getCookie($key)</h3>
 				
-					<p>This method returns a cookie value with the set $key. $key can also be an array of keys, in which case multiple cookie values are returned in an array.</p>
+					<p>This method returns a cookie value with the set $key. $key can also be an array of keys, in which case multiple cookie values are returned in an array. Method returns null for keys that have not been set.</p>
 				
 				<h3>final public function unsetCookie($key)</h3>
 				

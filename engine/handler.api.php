@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_api.htm
  * @since      1.5.0
- * @version    3.4.5
+ * @version    3.7.0
  */
 
 //INITIALIZATION
@@ -130,7 +130,7 @@
 	}
 	
 	// API command is executed with all the data that was sent by the user agent, along with other www-* settings
-	$apiResult=$api->command($inputData,false,((!empty($validationExceptions))?$validationExceptions:true),true);
+	$api->command($inputData,false,((!empty($validationExceptions))?$validationExceptions:true),true);
 	
 // LOGGER
 	

@@ -75,6 +75,10 @@
 				
 					<p>This is one of the core methods of Factory class. This method is used to return a new Wave Framework view. View name is $view and it should exist as a file in /models/ or /overrides/models/ subfolder as view.[$view].php file. If $methodName is set, then this method will also automatically call that method and return result of that method instead of the view object itself. If $methodData is also set, then this is the input variable sent to $methodName.</p>
 			
+				<h3>final private function getMVC($type,$mvc,$methodName=false,$methodData=false)</h3>
+				
+					<p>This is one of the core methods of Factory class. This method is used to return a new Wave Framework MVC object. Object name is $mvc and it should exist as a file in /models/, /views/ or /controllers/ subfolders (or the /overrides/ folders). If $methodName is set, then this method will also automatically call that method and return result of that method instead of the object itself. If $methodData is also set, then this is the input variable sent to $methodName.</p>
+			
 				<h3>final protected function getObject($className,$methodName=false,$methodData=array())</h3>
 				
 					<p>This method loads and returns a new object for a class $className. Factory attempts to load this class definition from a file in /resources/classes/ or /overrides/resources/classes/ folder and file name should be written in format class.[$className].php in that folder. If $methodName is set, then this method will also automatically call that method and return result of that method instead of the view object itself. If $methodData is also set, then this is the input variable sent to $methodName.</p>

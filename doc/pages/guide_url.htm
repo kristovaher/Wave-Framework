@@ -75,7 +75,7 @@
 				<p>All possible variables are:</p>
 				
 				<ul>
-					<li><b>view</b> - This is the View that will be loaded. This View has to exist as /views/view.[view].php file. This is the only required parameter in Sitemap.</li>
+					<li><b>view</b> - This is the View that will be loaded. This View has to exist as /views/view.[view].php file. Unless 'return-type' is set, then this is the only required parameter in Sitemap.</li>
 					<li><b>meta-title</b> - This is used by <a href="guide_view.htm">View Controller</a> to set the meta title for the page.</li>
 					<li><b>meta-description</b> - This is used by <a href="guide_view.htm">View Controller</a> to set the meta description for the page.</li>
 					<li><b>meta-keywords</b> - This is used by <a href="guide_view.htm">View Controller</a> to set meta keywords for the page.</li>
@@ -104,6 +104,7 @@
 					<li><b>external-css</b> - This is a comma-separated list of URL's where additional stylesheets are loaded from, such as external libraries.</li>
 					<li><b>appcache</b> - If set to 1, the URL will be served with cache manifest either from root or with Appcache Handler.</li>
 					<li><b>user-agent</b> - This defines the user agent that also has to match in order for the URL to be accessed with the request.</li>
+					<li><b>return-type</b> - This is 'html' by default and if it is HTML, then View is loaded as expected. However if it is any other supported return type, then the Data handler </li>
 				</ul>
 				
 				<p>General rule is to create one Sitemap file for each language that is defined in configuration and then add your basic URL's to your Sitemap file. Please note that you should also add your View files to /views/ folder, that are referenced in Sitemap, otherwise Wave Framework is unable to load the appropriate views.</p>				

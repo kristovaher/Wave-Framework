@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.6.4
+ * @version    3.7.0
  */
 
 class WWW_Factory {
@@ -118,7 +118,7 @@ class WWW_Factory {
 		
 			// Address is required
 			if($address && $address!=''){
-				if(!class_exists('WWW_Wrapper') && file_exists(__DIR__.DIRECTORY_SEPARATOR.'class.www-factory.php')){
+				if(!class_exists('WWW_Wrapper',false) && file_exists(__DIR__.DIRECTORY_SEPARATOR.'class.www-wrapper.php')){
 					require(__DIR__.DIRECTORY_SEPARATOR.'class.www-wrapper.php');
 				}
 				// Returning new Wrapper object
@@ -160,10 +160,10 @@ class WWW_Factory {
 		 * return boolean|string
 		 */
 		final protected function apiVersion(){
-			if($this->WWW_API->version){
-				return $this->WWW_API->version;
-			} elseif(isset($this->WWW_API->state->data['api-versions'][0])){
-				return $this->WWW_API->state->data['api-versions'][0];
+			if($this->WWW_API->requestedVersion){
+				return $this->WWW_API->requestedVersion;
+			} elseif(isset($this->WWW_API->state->data['version'])){
+				return $this->WWW_API->state->data['version'];
 			} else {
 				return false;
 			}
@@ -349,47 +349,8 @@ class WWW_Factory {
 		 */
 		final protected function getModel($model,$methodName=false,$methodData=array()){
 		
-			// Dynamically creating class name
-			$className='WWW_model_'.str_replace('-','_',$model);
-			
-			// It's made sure that the class has not already been defined
-			if(!class_exists($className)){
-				// Class file can be loaded from version or /overrides/ directories, if set
-				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
-					// Requiring versioned override file
-					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
-				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
-					// Requiring version file
-					require($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
-					// Requiring override file
-					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php')){
-					// Requiring original file
-					require($this->WWW_API->state->data['directory-system'].'models'.DIRECTORY_SEPARATOR.'model.'.$model.'.php');
-				} else {
-					// Error is thrown if class was not found
-					trigger_error('Model ['.$model.'] does not exist',E_USER_ERROR);
-				}
-			}
-			
-			// Object is returned if no specific method name is called
-			if(!$methodName){
-				// If method name was not defined then this function returns the entire class with current State and API set
-				return new $className($this->WWW_API,$this->WWW_API_callIndex);
-			} else {
-				// Replacing dashes with underscores
-				$methodName=str_replace('-','_',$methodName);
-				// If method name was set, then this function creates a new temporary object
-				$tempObject=new $className($this->WWW_API,$this->WWW_API_callIndex);
-				// If method exists, then the result of this method is returned as a result
-				if(method_exists($tempObject,$methodName)){
-					return $tempObject->$methodName($methodData);
-				} else {
-					// Error is thrown if method was not found
-					trigger_error('Model ['.$model.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
-				}
-			}
+			// Returning the object or result, if possible
+			return $this->getMVC('model',$model,$methodName,$methodData);
 			
 		}
 		
@@ -408,47 +369,8 @@ class WWW_Factory {
 		 */
 		final protected function getController($controller,$methodName=false,$methodData=array()){
 		
-			// Dynamically creating class name
-			$className='WWW_controller_'.str_replace('-','_',$controller);
-			
-			// It's made sure that the class has not already been defined
-			if(!class_exists($className)){
-				// Class file can be loaded from version or /overrides/ directories, if set
-				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
-					// Requiring versioned override file
-					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
-				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
-					// Requiring version file
-					require($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
-					// Requiring override file
-					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php')){
-					// Requiring original file
-					require($this->WWW_API->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$controller.'.php');
-				} else {
-					// Error is thrown if class was not found
-					trigger_error('Controller ['.$controller.'] does not exist',E_USER_ERROR);
-				}
-			}
-			
-			// Object is returned if no specific method name is called
-			if(!$methodName){
-				// If method name was not defined then this function returns the entire class with current State and API set
-				return new $className($this->WWW_API,$this->WWW_API_callIndex);
-			} else {
-				// Replacing dashes with underscores
-				$methodName=str_replace('-','_',$methodName);
-				// If method name was set, then this function creates a new temporary object
-				$tempObject=new $className($this->WWW_API,$this->WWW_API_callIndex);
-				// If method exists, then the result of this method is returned as a result
-				if(method_exists($tempObject,$methodName)){
-					return $tempObject->$methodName($methodData);
-				} else {
-					// Error is thrown if method was not found
-					trigger_error('Controller ['.$controller.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
-				}
-			}
+			// Returning the object or result, if possible
+			return $this->getMVC('controller',$controller,$methodName,$methodData);
 			
 		}
 		
@@ -467,27 +389,48 @@ class WWW_Factory {
 		 */
 		final protected function getView($view,$methodName=false,$methodData=false){
 		
+			// Returning the object or result, if possible
+			return $this->getMVC('view',$view,$methodName,$methodData);
+			
+		}
+		
+		/**
+		 * This is one of the core methods of Factory class. This method is used to return a new 
+		 * Wave Framework MVC object. Object name is $mvc and it should exist as a file in /models/, 
+		 * /views/ or /controllers/ subfolders (or the /overrides/ folders). If $methodName is set, 
+		 * then this method will also automatically call that method and return result of that 
+		 * method instead of the object itself. If $methodData is also set, then this is the input 
+		 * variable sent to $methodName.
+		 *
+		 * @param string $type either 'model', 'view' or 'controller'
+		 * @param string $view name of the view
+		 * @param boolean|string $methodName name of the method called once the object is loaded
+		 * @param boolean|string $methodData input variable for the method that is called
+		 * @return object or mixed if function called
+		 */
+		final private function getMVC($type,$mvc,$methodName=false,$methodData=false){
+		
 			// Dynamically creating class name
-			$className='WWW_view_'.str_replace('-','_',$view);
+			$className='WWW_'.$type.'_'.str_replace('-','_',$mvc);
 			
 			// It's made sure that the class has not already been defined
-			if(!class_exists($className)){
+			if(!class_exists($className,false)){
 				// Class file can be loaded from version or /overrides/ directories, if set
-				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+				if($this->WWW_API->requestedVersion && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.$type.'s'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.$type.'.'.$mvc.'.php')){
 					// Requiring versioned override file
-					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
-				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.$type.'s'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.$type.'.'.$mvc.'.php');
+				} elseif($this->WWW_API->requestedVersion && file_exists($this->WWW_API->state->data['directory-system'].$type.'s'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.$type.'.'.$mvc.'.php')){
 					// Requiring version file
-					require($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+					require($this->WWW_API->state->data['directory-system'].$type.'s'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.$type.'.'.$mvc.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.$type.'s'.DIRECTORY_SEPARATOR.$type.'.'.$mvc.'.php')){
 					// Requiring override file
-					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
-				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.$type.'s'.DIRECTORY_SEPARATOR.$type.'.'.$mvc.'.php');
+				} elseif(file_exists($this->WWW_API->state->data['directory-system'].$type.'s'.DIRECTORY_SEPARATOR.$type.'.'.$mvc.'.php')){
 					// Requiring original file
-					require($this->WWW_API->state->data['directory-system'].'views'.DIRECTORY_SEPARATOR.'view.'.$view.'.php');
+					require($this->WWW_API->state->data['directory-system'].$type.'s'.DIRECTORY_SEPARATOR.$type.'.'.$mvc.'.php');
 				} else {
 					// Error is thrown if class was not found
-					trigger_error('View ['.$view.'] does not exist',E_USER_ERROR);
+					trigger_error(ucfirst($type).' ['.$mvc.'] does not exist',E_USER_ERROR);
 				}
 			}
 			
@@ -505,7 +448,7 @@ class WWW_Factory {
 					return $tempObject->$methodName($methodData);
 				} else {
 					// Error is thrown if method was not found
-					trigger_error('View ['.$view.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
+					trigger_error(ucfirst($type).' ['.$mvc.'] method ['.$methodName.'] does not exist',E_USER_ERROR);
 				}
 			}
 			
@@ -530,14 +473,14 @@ class WWW_Factory {
 			$className=str_replace('-','_',$className);
 			
 			// It's made sure that the class has not already been defined
-			if(!class_exists($className)){
+			if(!class_exists($className,false)){
 				// Class file can be loaded from version or /overrides/ directories, if set
-				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+				if($this->WWW_API->requestedVersion && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
 					// Requiring versioned override file
-					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
-				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
+				} elseif($this->WWW_API->requestedVersion && file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
 					// Requiring version file
-					require($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
+					require($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
 				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php')){
 					// Requiring override file
 					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.'class.'.$className.'.php');
@@ -585,12 +528,12 @@ class WWW_Factory {
 			// Making sure that the library is not already loaded
 			if(!isset($WWW_Libraries[$libraryName])){
 				// Library file can be loaded from version or /overrides/ directories, if set
-				if($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+				if($this->WWW_API->requestedVersion && file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.$libraryName.'.php')){
 					// Requiring versioned override file
-					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.$libraryName.'.php');
-				} elseif($this->WWW_API->version && file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.$libraryName.'.php')){
+					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.$libraryName.'.php');
+				} elseif($this->WWW_API->requestedVersion && file_exists($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.$libraryName.'.php')){
 					// Requiring version file
-					require($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->version.DIRECTORY_SEPARATOR.$libraryName.'.php');
+					require($this->WWW_API->state->data['directory-system'].'resources'.DIRECTORY_SEPARATOR.'classes'.DIRECTORY_SEPARATOR.$this->WWW_API->requestedVersion.DIRECTORY_SEPARATOR.$libraryName.'.php');
 				} elseif(file_exists($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php')){
 					// Requiring override file
 					require($this->WWW_API->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'resources'.DIRECTORY_SEPARATOR.'libraries'.DIRECTORY_SEPARATOR.$libraryName.'.php');
@@ -631,7 +574,7 @@ class WWW_Factory {
 		final protected function getImager($source=false){
 		
 			// Loading the Imager class
-			if(!class_exists('WWW_Imager')){
+			if(!class_exists('WWW_Imager',false)){
 				require($this->WWW_API->state->data['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-imager.php');
 			}
 			
@@ -676,7 +619,7 @@ class WWW_Factory {
 		final protected function applyImager($source,$parameters,$target=false){
 		
 			// Loading the Imager class
-			if(!class_exists('WWW_Imager')){
+			if(!class_exists('WWW_Imager',false)){
 				require($this->WWW_API->state->data['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-imager.php');
 			}
 			
@@ -719,7 +662,7 @@ class WWW_Factory {
 		final protected function applyMinifier($data,$type){
 		
 			// Loading the Minifier class
-			if(!class_exists('WWW_Minifier')){
+			if(!class_exists('WWW_Minifier',false)){
 				require($this->WWW_API->state->data['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-minifier.php');
 			}
 			
@@ -1380,7 +1323,7 @@ class WWW_Factory {
 		final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$persistentConnection=false){
 		
 			// Requiring database class files, if class has not been defined
-			if(!class_exists('WWW_Database')){
+			if(!class_exists('WWW_Database',false)){
 				// Including the required class and creating the object
 				require($this->WWW_API->state['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
 			}
@@ -1402,7 +1345,13 @@ class WWW_Factory {
 		 * @return array|boolean
 		 */
 		final protected function dbSingle($query,$variables=array()){
-			return $this->WWW_API->state->databaseConnection->dbSingle($query,$variables);
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbSingle($query,$variables);
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1418,7 +1367,13 @@ class WWW_Factory {
 		 * @return array or false if failed
 		 */
 		final protected function dbMultiple($query,$variables=array()){
-			return $this->WWW_API->state->databaseConnection->dbMultiple($query,$variables);
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbMultiple($query,$variables);
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1434,7 +1389,13 @@ class WWW_Factory {
 		 * @return boolean or integer of affected rows
 		 */
 		final protected function dbCommand($query,$variables=array()){
-			return $this->WWW_API->state->databaseConnection->dbCommand($query,$variables);
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbCommand($query,$variables);
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1444,7 +1405,13 @@ class WWW_Factory {
 		 * @return integer or false if not found
 		 */
 		final protected function dbLastId(){
-			return $this->WWW_API->state->databaseConnection->dbLastId();
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbLastId();
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1454,7 +1421,13 @@ class WWW_Factory {
 		 * @return boolean
 		 */
 		final protected function dbTransaction(){
-			return $this->WWW_API->state->databaseConnection->dbTransaction();
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbTransaction();
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1465,7 +1438,13 @@ class WWW_Factory {
 		 * @return boolean
 		 */
 		final protected function dbRollback(){
-			return $this->WWW_API->state->databaseConnection->dbRollback();
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbRollback();
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1475,7 +1454,13 @@ class WWW_Factory {
 		 * @return boolean
 		 */
 		final protected function dbCommit(){
-			return $this->WWW_API->state->databaseConnection->dbCommit();
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbCommit();
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1492,7 +1477,13 @@ class WWW_Factory {
 		 * @return string
 		 */
 		final protected function dbQuote($value,$type='escape',$stripQuotes=false){
-			return $this->WWW_API->state->databaseConnection->dbQuote($value,$type,$stripQuotes);
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbQuote($value,$type,$stripQuotes);
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1507,7 +1498,13 @@ class WWW_Factory {
 		 * @return array or mixed if source is not an array
 		 */
 		final protected function dbArray($array,$key,$unique=false){
-			return $this->WWW_API->state->databaseConnection->dbArray($array,$key,$unique);
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbArray($array,$key,$unique);
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1521,7 +1518,13 @@ class WWW_Factory {
 		 * @return string
 		 */
 		final protected function dbDebug($query,$variables=array()){
-			return $this->WWW_API->state->databaseConnection->dbDebug($query,$variables);
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->dbDebug($query,$variables);
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 		/**
@@ -1530,7 +1533,13 @@ class WWW_Factory {
 		 * @return object
 		 */
 		final protected function dbPDO(){
-			return $this->WWW_API->state->databaseConnection->pdo;
+			// If database configuration is not set then databaseConnection is not defined
+			if($this->WWW_API->state->databaseConnection){
+				return $this->WWW_API->state->databaseConnection->pdo;
+			} else {
+				trigger_error('Database is not used, configuration missing',E_USER_WARNING);
+				return false;
+			}
 		}
 		
 	// HEADERS

@@ -121,10 +121,14 @@ http://plus.google.com/102632377636999004385/
 CONTRIBUTORS
 ------------
 
-Allan Davy
+Allan Davy (Koala-Zone)
 Priit Perna (https://www.facebook.com/priit.perna)
-Ando David Roots (http://sqroot.eu/)
 Jaak Kütt (http://jaak.kytt.ee/)
+Nicolas Rabier (http://www.nicolasrabier.com/)
+
+SPECIAL THANKS
+--------------
+Ando David Roots (http://sqroot.eu/)
 
 LICENSE
 -------

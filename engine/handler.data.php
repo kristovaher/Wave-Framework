@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/handler_data.htm
  * @since      1.5.0
- * @version    3.6.0
+ * @version    3.7.0
  */
 
 // INITIALIZATION
@@ -104,10 +104,10 @@
 // CALLING DEFAULT VIEW CONTROLLER IF URL DID NOT ORDER A REDIRECTION
 
 	// If view data includes flags for redirection then the view itself will be ignored
-	if(isset($view['view']) && !isset($view['www-temporary-redirect']) && !isset($view['www-permanent-redirect'])){
+	if(!isset($view['www-temporary-redirect']) && !isset($view['www-permanent-redirect'])){
 			
 		// Notifying State of View data
-		$state->setState(array(array('view'=>$view,'language'=>$view['language'])));
+		$state->setState(array(array('view'=>$view,'language'=>((isset($view['language']))?$view['language']:'en'))));
 		
 		// All the data sent by the user agent is stored in this variable
 		$inputData=array();
@@ -136,7 +136,7 @@
 		}
 		
 		// API check is turned off, since index.php is considered a public gateway
-		$api->command(array('www-command'=>$view['controller'].'-'.$view['controller-method'],'www-request'=>$state->data['request-true'],'www-return-type'=>'html','www-cache-tags'=>((isset($view['cache-tag']))?$view['cache-tag']:''),'www-cache-timeout'=>$config['index-view-cache-timeout'],'www-cache-load-timeout'=>$cacheLoad)+$inputData,false,false,true);
+		$api->command(array('www-command'=>((isset($view['controller']))?$view['controller']:'view').'-'.((isset($view['controller-method']))?$view['controller-method']:'load'),'www-request'=>$state->data['request-true'],'www-return-type'=>((isset($view['return-type']))?$view['return-type']:'html'),'www-cache-tags'=>((isset($view['cache-tag']))?$view['cache-tag']:''),'www-cache-timeout'=>$config['index-view-cache-timeout'],'www-cache-load-timeout'=>$cacheLoad)+$inputData,false,false,true);
 
 	}
 	

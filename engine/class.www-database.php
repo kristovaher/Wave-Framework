@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/database.htm
  * @since      1.1.2
- * @version    3.6.4
+ * @version    3.7.0
  */
 
 class WWW_Database {
@@ -236,7 +236,7 @@ class WWW_Database {
 	public function dbDisconnect($resetQueryCounter=false){
 	
 		// This is only executed if existing connection is detected
-		if($this->connected==1 && !$this->persistent){
+		if($this->connected && !$this->persistent){
 			// Resetting the query counter
 			if($resetQueryCounter){
 				$this->queryCounter=0;
@@ -266,7 +266,7 @@ class WWW_Database {
 	public function dbMultiple($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
-		if($this->connected!=1){
+		if(!$this->connected){
 			$this->dbConnect();
 		}
 		
@@ -308,7 +308,7 @@ class WWW_Database {
 	public function dbSingle($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
-		if($this->connected!=1){
+		if(!$this->connected){
 			$this->dbConnect();
 		}
 		
@@ -351,7 +351,7 @@ class WWW_Database {
 	public function dbCommand($queryString,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
-		if($this->connected!=1){
+		if(!$this->connected){
 			$this->dbConnect();
 		}
 		
@@ -439,7 +439,7 @@ class WWW_Database {
 	public function dbDebug($query,$variables=array()){
 	
 		// Attempting to connect to database, if not connected
-		if($this->connected!=1){
+		if(!$this->connected){
 			$this->dbConnect();
 		}
 		
@@ -452,10 +452,7 @@ class WWW_Database {
 		
 		// Making sure that variables are not empty
 		if(!empty($variables)){
-			// This method requires database connection
-			if($this->connected!=1){
-				$this->dbConnect();
-			}
+		
 			// Looping over each of the input variables
 			foreach($variables as $key=>$value){
 				// Finding out the prepared statement type
@@ -495,7 +492,7 @@ class WWW_Database {
 	public function dbLastId(){
 	
 		// This method requires database to be connected
-		if($this->connected==1){
+		if($this->connected){
 			// Query total is being counted for performance review
 			$this->queryCounter++;
 			// Checks for last existing inserted row's unique ID
@@ -522,7 +519,7 @@ class WWW_Database {
 	public function dbTransaction(){
 	
 		// Attempting to connect to database, if not connected
-		if($this->connected!=1){
+		if(!$this->connected){
 			$this->dbConnect();
 		}
 		// Query total is being counted for performance review
@@ -545,7 +542,7 @@ class WWW_Database {
 	public function dbCommit(){
 	
 		// This method requires database to be connected
-		if($this->connected==1){
+		if($this->connected){
 			// Query total is being counted for performance review
 			$this->queryCounter++;
 			// Commits transaction
@@ -570,7 +567,7 @@ class WWW_Database {
 	public function dbRollback(){
 	
 		// This method requires database to be connected
-		if($this->connected==1){
+		if($this->connected){
 			// Query total is being counted for performance review
 			$this->queryCounter++;
 			// Rolls back transaction
@@ -600,6 +597,11 @@ class WWW_Database {
 	 */
 	public function dbQuote($value,$type='escape',$stripQuotes=false){
 	
+		// Attempting to connect to database, if not connected
+		if(!$this->connected){
+			$this->dbConnect();
+		}
+		
 		// Filtering is done based on filter type
 		switch($type){
 			case 'escape':
@@ -638,8 +640,8 @@ class WWW_Database {
 	private function dbErrorCheck($query,$queryString=false,$variables=array()){
 	
 		// This method requires database to be connected
-		if($this->connected==1){
-			if($this->showErrors==1){
+		if($this->connected){
+			if($this->showErrors){
 				// Checking if there is error information stored for this request
 				$errors=$query->errorInfo();
 				if($errors && !empty($errors)){

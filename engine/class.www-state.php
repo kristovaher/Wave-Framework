@@ -19,7 +19,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/state.htm
  * @since      1.0.0
- * @version    3.6.9
+ * @version    3.7.0
  */
 
 class WWW_State	{
@@ -1787,7 +1787,7 @@ class WWW_State	{
 			if(!$this->tools){
 		
 				// Loading the Imager class
-				if(!class_exists('WWW_Tools')){
+				if(!class_exists('WWW_Tools',false)){
 					require($this->data['directory-system'].'engine'.DIRECTORY_SEPARATOR.'class.www-tools.php');
 				}
 				

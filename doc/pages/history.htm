@@ -38,6 +38,7 @@
 			<h2 id="index-3xx">3.x.x</h2>
 			
 				<ul>
+					<li><b>3.7.0</b> - It is now possible to define a sitemap URL that does not return a View or even HTML. This is useful for API requests that require a specific target URL without GET parameters. It is now also possible to synchronize timestamps when creating an API session. Factory MVC loading now uses a wrapper method that reduces near-duplicate code. Version numbers of API and system version are now consistent with one another.</li>
 					<li><b>3.6.9</b> - Fixed a problem where access-control header settings were not set properly. Removed code that was used for testing purposes and accidentally submitted to live. Added JSONP support for JavaScript wrapper as well as JSONV support (which is like JSONP, except it defines a variable instead of callback). Added a new 'file-extensions' configuration setting that is used when routing a request to File Handler. This allows to use '.' symbol in regular website URL's, since File Handler requests are whitelisted with configuration now. Methods getState(), getCookie() and getSession() now return 'null' values, if they have not been set, instead of false.</li>
 					<li><b>3.6.8</b> - Updated jQuery to 2.0.2 and 1.10.1 versions and changed 'true-request' State variable to 'request-true'. This is done for consistancy reasons.</li>
 					<li><b>3.6.7</b> - Added an errors-reporting setting to Configuration, which allows to turn off Debugger and stop the framework from logging errors. This setting is recommended only for very specific situations.</li>

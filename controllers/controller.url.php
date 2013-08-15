@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/guide_url.htm
  * @since      1.0.0
- * @version    3.5.0
+ * @version    3.7.0
  */
 
 class WWW_controller_url extends WWW_Factory {
@@ -430,8 +430,8 @@ class WWW_controller_url extends WWW_Factory {
 			
 		}
 		
-		// Returning a 404 if no view was defined
-		if(!isset($siteMapInfo['view'])){
+		// Returning custom data if no view setting was declared in sitemap URL file
+		if(!isset($siteMapInfo['view']) && !isset($siteMapInfo['return-type'])){
 			return $this->returnViewData(array('view'=>$view404,'language'=>$language,'header'=>'HTTP/1.1 404 Not Found'));
 		}
 			
@@ -455,7 +455,8 @@ class WWW_controller_url extends WWW_Factory {
 				'controller-method'=>'load',
 				'view-method'=>'render',
 				'subview'=>'',
-				'hidden'=>0
+				'hidden'=>0,
+				'return-type'=>'html'
 			);
 	
 		// DEFAULTS FOR VIEW DATA

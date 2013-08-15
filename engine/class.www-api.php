@@ -17,7 +17,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/api.htm
  * @since      1.0.0
- * @version    3.6.9
+ * @version    3.7.0
  */
 
 final class WWW_API {
@@ -107,9 +107,10 @@ final class WWW_API {
 	/**
 	 * This method stores version number for Models, Views and Controller files loaded through the API.
 	 * These files have to be set in the subfolders of /model/, /view/ and /controller folders. If files 
-	 * are not found, then the most recent version is used.
+	 * are not found, then the most recent version is used. If this is set to false, then core files
+	 * are used instead.
 	 */
-	public $version=false;
+	public $requestedVersion=false;
 	
 	/**
 	 * This holds configuration value from State and turns on internal logging, if configuration 
@@ -150,7 +151,7 @@ final class WWW_API {
 			$this->state=$state;
 		} else {
 			// If State object does not exist, it is defined and loaded as State
-			if(!class_exists('WWW_State')){
+			if(!class_exists('WWW_State',false)){
 				require(__DIR__.DIRECTORY_SEPARATOR.'class.www-state.php');
 			}
 			$this->state=new WWW_State();
@@ -162,7 +163,7 @@ final class WWW_API {
 		}
 		
 		// Factory class is loaded, if it doesn't already exist, since MVC classes require it
-		if(!class_exists('WWW_Factory')){
+		if(!class_exists('WWW_Factory',false)){
 			require(__DIR__.DIRECTORY_SEPARATOR.'class.www-factory.php');
 		}
 		
@@ -209,7 +210,7 @@ final class WWW_API {
 						$this->databaseCache=$this->state->databaseConnection;
 					} else {
 						// If the class has not been defined yet
-						if(!class_exists('WWW_Database')){
+						if(!class_exists('WWW_Database',false)){
 							require(__ROOT__.'engine'.DIRECTORY_SEPARATOR.'class.www-database.php');
 						}
 						// This object will be used for caching functions later on
@@ -416,14 +417,14 @@ final class WWW_API {
 				// If the file for that particular version is not found, then the most recent version is used
 				if(isset($apiInputData['www-version'])){
 					// Since API version is a folder, this escapes the illegal characters
-					$this->version=preg_replace('[^a-zA-Z0-9]','',$apiInputData['www-version']);
+					$this->requestedVersion=preg_replace('[^a-zA-Z0-9]','',$apiInputData['www-version']);
 					// This tests if this version number is allowed or if it included illegal characters
-					if($this->version!=$apiInputData['www-version'] || !in_array($this->version,$this->state->data['api-versions'])){
-						$this->version=false;
+					if($this->requestedVersion!=$apiInputData['www-version'] || !in_array($this->requestedVersion,$this->state->data['api-versions'])){
+						$this->requestedVersion=false;
 						return $this->output(array('www-message'=>'API version cannot be used: '.$apiInputData['www-version'],'www-response-code'=>117),$apiState);
-					} elseif($this->version==$this->state->data['api-versions'][0]){
+					} elseif($this->requestedVersion==$this->state->data['version']){
 						// The most recent version number is set to false, which disables folder checking for these versions for performance reasons
-						$this->version=false;
+						$this->requestedVersion=false;
 					}
 				}
 				
@@ -506,16 +507,6 @@ final class WWW_API {
 						
 						// These options only affect non-public profiles
 						if($apiState['profile']!=$this->state->data['api-public-profile']){
-						
-							// Returns an error if timestamp validation is required but www-timestamp is not provided						
-							if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout'])){
-								// Timestamp value has to be set and not be empty
-								if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
-									return $this->output(array('www-message'=>'API request validation timestamp is missing','www-response-code'=>107),$apiState);
-								} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-$apiInputData['www-timestamp'])){
-									return $this->output(array('www-message'=>'API request timestamp is too old: '.($this->state->data['request-time']-$apiInputData['www-timestamp']).' seconds, '.$this->apiProfiles[$apiState['profile']]['timestamp-timeout'].' allowed','www-response-code'=>108),$apiState);
-								}
-							}
 							
 							// If hash validation is turned off
 							if(isset($this->apiProfiles[$apiState['profile']]['hash-validation']) && $this->apiProfiles[$apiState['profile']]['hash-validation']==0){
@@ -570,7 +561,7 @@ final class WWW_API {
 
 				}
 				
-			// API PROFILE HASH AND TOKEN VALIDATION
+			// API PROFILE TOKEN, TIMESTAMP, HASH VALIDATION, CRYPTED INPUT HANDLING AND SESSION CREATION
 			
 				// API profile validation happens only if non-public profile is actually set
 				if($apiValidation && $apiState['profile'] && $apiState['profile']!=$this->state->data['api-public-profile']){
@@ -588,8 +579,11 @@ final class WWW_API {
 						// It is possible that the token was created with linked IP, which is checked here
 						if(file_exists($apiState['token-directory-ip'].$apiState['token-file-ip']) && (!$apiState['token-timeout'] || filemtime($apiState['token-directory-ip'].$apiState['token-file-ip'])>=($this->state->data['request-time']-$apiState['token-timeout']))){
 						
-							// Loading contents of current token file to API state
-							$apiState['token']=file_get_contents($apiState['token-directory-ip'].$apiState['token-file-ip']);
+							// Loading contents of current token file and timestamp sync to API state
+							$tmp=explode(':',file_get_contents($apiState['token-directory-ip'].$apiState['token-file-ip']));
+							// Assigning token and timestamp sync numbers
+							$apiState['token']=$tmp[0];
+							$apiState['token-timestamp-sync']=$tmp[1];
 							// This updates the last-modified time, thus postponing the time how long the token is considered valid
 							touch($apiState['token-directory-ip'].$apiState['token-file-ip']);
 							// Setting the IP directories to regular addresses
@@ -598,8 +592,11 @@ final class WWW_API {
 						
 						} elseif(file_exists($apiState['token-directory'].$apiState['token-file']) && (!$apiState['token-timeout'] || filemtime($apiState['token-directory'].$apiState['token-file'])>=($this->state->data['request-time']-$apiState['token-timeout']))){
 							
-							// Loading contents of current token file to API state
-							$apiState['token']=file_get_contents($apiState['token-directory'].$apiState['token-file']);
+							// Loading contents of current token file and timestamp sync to API state
+							$tmp=explode(':',file_get_contents($apiState['token-directory-ip'].$apiState['token-file']));
+							// Assigning token and timestamp sync numbers
+							$apiState['token']=$tmp[0];
+							$apiState['token-timestamp-sync']=$tmp[1];
 							// This updates the last-modified time, thus postponing the time how long the token is considered valid
 							touch($apiState['token-directory'].$apiState['token-file']);
 							
@@ -609,12 +606,26 @@ final class WWW_API {
 							// Setting the IP directories to regular addresses
 							$apiState['token-file']=$apiState['token-file-ip'];
 							$apiState['token-directory']=$apiState['token-directory-ip'];
+							// This is used for timestamp synchronization
+							$apiState['token-timestamp-sync']=(isset($apiInputData['www-timestamp']) && $apiInputData['www-timestamp']!='')?($this->state->data['request-time']-$apiInputData['www-timestamp']):0;
 							
 						} elseif($apiState['command']!='www-create-session'){
 						
 							// Token is not required for commands that create or destroy existing tokens
 							return $this->output(array('www-message'=>'API session token does not exist or is timed out','www-response-code'=>111),$apiState);
 							
+						}
+						
+					// TIMESTAMP VALIDATION
+					
+						// Returns an error if timestamp validation is required but www-timestamp is not provided
+						if(isset($this->apiProfiles[$apiState['profile']]['timestamp-timeout']) && $apiState['command']!='www-create-session'){
+							// Timestamp value has to be set and not be empty
+							if(!isset($apiInputData['www-timestamp']) || $apiInputData['www-timestamp']==''){
+								return $this->output(array('www-message'=>'API request validation timestamp is missing','www-response-code'=>107),$apiState);
+							} elseif($this->apiProfiles[$apiState['profile']]['timestamp-timeout']<($this->state->data['request-time']-($apiInputData['www-timestamp']+$apiState['token-timestamp-sync']))){
+								return $this->output(array('www-message'=>'API request timestamp is too old: '.($this->state->data['request-time']-($apiInputData['www-timestamp']+$apiState['token-timestamp-sync'])).' seconds, '.$this->apiProfiles[$apiState['profile']]['timestamp-timeout'].' allowed','www-response-code'=>108),$apiState);
+							}
 						}
 						
 					// TOKEN AND HASH VALIDATION
@@ -714,7 +725,7 @@ final class WWW_API {
 							// Token for API access is generated simply from current profile name and request time
 							$apiState['token']=md5($apiState['profile'].$this->state->data['request-time'].$this->state->data['server-ip'].$this->state->data['request-id'].microtime());
 							// Session token file is created and token itself is returned to the user agent as a successful request
-							if(file_put_contents($apiState['token-directory'].$apiState['token-file'],$apiState['token'])){
+							if(file_put_contents($apiState['token-directory'].$apiState['token-file'],$apiState['token'].':'.$apiState['token-timestamp-sync'])){
 								// Token is returned to user agent together with current token timeout setting
 								if($apiState['token-timeout']){
 									// Returning current IP together with the session
@@ -781,7 +792,7 @@ final class WWW_API {
 				if($apiState['cache-load-timeout']){
 					
 					// If cache file exists, it will be parsed and set as API value
-					if(file_exists($cacheFolder.$cacheFile)){
+					if($this->cacheTime($cacheFolder.$cacheFile)){
 					
 						// Setting the path of cache file, since it exists
 						$this->cacheIndex[$this->callIndex]=$cacheFolder.$cacheFile;
@@ -838,12 +849,12 @@ final class WWW_API {
 					// Class name is found based on command
 					$className='WWW_controller_'.$commandBits[0];
 					// Class is defined and loaded, if it is not already defined
-					if(!class_exists($className)){
+					if(!class_exists($className,false)){
 						// Overrides can be used for controllers
-						if($this->version && file_exists($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->version.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
-							require($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->version.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
-						} elseif($this->version && file_exists($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->version.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
-							require($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->version.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
+						if($this->requestedVersion && file_exists($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->requestedVersion.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+							require($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.$this->requestedVersion.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
+						} elseif($this->requestedVersion && file_exists($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->requestedVersion.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
+							require($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.$this->requestedVersion.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
 						} elseif(file_exists($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
 							require($this->state->data['directory-system'].'overrides'.DIRECTORY_SEPARATOR.'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php');
 						} elseif(file_exists($this->state->data['directory-system'].'controllers'.DIRECTORY_SEPARATOR.'controller.'.$commandBits[0].'.php')){
@@ -904,7 +915,7 @@ final class WWW_API {
 						if(!isset($this->noCache[$apiState['call-index']]) || $this->noCache[$apiState['call-index']]==false){
 						
 							// If cache subdirectory does not exist, it is created
-							if(!is_dir($cacheFolder)){
+							if(!$this->memcache && !$this->apc && !$this->databaseCache &&!is_dir($cacheFolder)){
 								if(!mkdir($cacheFolder,0755)){
 									return $this->output(array('www-message'=>'Server configuration error: cannot create cache folder at '.$cacheFolder,'www-response-code'=>100),$apiState);
 								}
@@ -1133,7 +1144,7 @@ final class WWW_API {
 				if($apiState['minify-output']==1){
 				
 					// Including minification class if it is not yet defined
-					if(!class_exists('WWW_Minify')){
+					if(!class_exists('WWW_Minify',false)){
 						require(__DIR__.DIRECTORY_SEPARATOR.'class.www-minifier.php');
 					}
 					
@@ -1843,7 +1854,7 @@ final class WWW_API {
 		 * method and should be used only of a lot of API calls are made that might fill the 
 		 * memory allocated to PHP. What this method does is that it tells API object to empty 
 		 * the internal variable that stores the results of all API calls that have already been 
-		 * sent to API.
+		 * sent to API during this single request.
 		 * 
 		 * @return boolean
 		 */

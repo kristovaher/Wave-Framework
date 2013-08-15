@@ -119,9 +119,9 @@
 				
 					<p>This holds the return type information of API calls. This can be later fetched by controllers to see what type of data is being requested from the API.</p>
 					
-				<h3>public $version=false</h3>
+				<h3>public $requestedVersion=false</h3>
 				
-					<p>This method stores version number for Models, Views and Controller files loaded through the API. These files have to be set in the subfolders of /model/, /view/ and /controller folders. If files are not found, then the most recent version is used.</p>
+					<p>This method stores version number for Models, Views and Controller files loaded through the API. These files have to be set in the subfolders of /model/, /view/ and /controller folders. If files are not found, then the most recent version is used. If this is set to false, then core files are used instead.</p>
 					
 				<h3>private $internalLogging=false</h3>
 				

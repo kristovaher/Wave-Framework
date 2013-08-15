@@ -16,7 +16,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/gateway.htm
  * @since      1.0.0
- * @version    3.6.9
+ * @version    3.7.0
  */
 
 // SOLVING THE HTTP REQUEST
@@ -90,9 +90,20 @@
 			$config['api-logging']=explode(',',$config['api-logging']);
 		}
 		
+		// If version number is not set
+		if(!isset($config['version'])){
+			$config['version']='v1';
+		}
+		
 		// API versions
 		if(isset($config['api-versions'])){
+			// This also makes sure that the most recent version number exists in API versions list
 			$config['api-versions']=explode(',',$config['api-versions']);
+			if(!in_array($config['version'],$config['api-versions'])){
+				$config['api-versions'][]=$config['version'];
+			}
+		} else {
+			$config['api-versions']=array($config['version']);
 		}
 		
 		// File extensions and defaults
@@ -121,11 +132,6 @@
 		if(!isset($config['timezone'])){
 			// Setting GMT as the default timezone
 			$config['timezone']='Europe/London';
-		}
-		
-		// If version number is not set
-		if(!isset($config['version'])){
-			$config['version']='1.0.0';
 		}
 	
 		// Trusted proxies and IP address
@@ -239,6 +245,7 @@
 		// If there is an error and it is not a deprecated Line 0 error (which sporadically is thrown in PHP 5.3.4)
 		if($errorCheck && ($errorCheck['line']!=0 || $errorCheck['type']<E_DEPRECATED)){
 		
+			// Using the global to access configuration settings beyond the scope of this method
 			global $config;
 		
 			// Detecting if error is fatal - thus if error message should be shown to the user

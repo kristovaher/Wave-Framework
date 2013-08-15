@@ -24,6 +24,7 @@
 				<li><a href="#index-how-can-i-implement-my-own-session-handler">How Can I Implement My Own Session Handler?</a></li>
 				<li><a href="#index-my-requests-fail-and-decompression-error-is-returned-by-the-browser">My Requests Fail and Decompression Error is Returned By the Browser?</a></li>
 				<li><a href="#index-i-am-using-page-caching-and-i-have-a-problem-caching-pages-with-and-without-active-sessions-what-can-i-do">I am using page caching and I have a problem caching pages with and without active sessions, what can I do?</a></li>
+				<li><a href="#it-seems-that-my-post-variables-get-lost-on-my-requests-what-happened">It seems that my POST variables get lost on my requests, what happened?</a></li>
 			</ul>
 			
 			<h3 id="index-why-is-wave-framework-called-micro-framework">Why is Wave Framework called a 'micro-framework'? Do I have to do more work?</h3>
@@ -145,6 +146,10 @@
 				<p>There is a little-known bug in both Safari and Opera web browsers that ignore 'Vary' header from response HTTP request headers. 'Vary' header tells caching engines what header components to take into account when writing cache and validating cache in the storage. While Firefox, Chrome and Internet Explorer browsers all listen to this 'Vary' header as expected, Safari and Opera don't which means that sometimes these browsers may display cached content from time when there was no session cookie.</p>
 				
 				<p>What is recommended is to not cache any pages (by setting www-cache-timestamp to 0 in Sitemap file or not defining it at all) that have user-specific information or simply wait until user reloads the page manually.</p>
+			
+			<h3 id="it-seems-that-my-post-variables-get-lost-on-my-requests-what-happened">It seems that my POST variables get lost on my requests, what happened?</h3>
+			
+				<p>It is highly likely that the reason your POST variables get lost is due to a redirect. If you use the 'enforce-url-end-slash' configuration setting, then a request that is made to an URL is checked for a slash in the end of the request. And if the slash does not exist then the request is redirected to one that has a slash. While it is a common good practice to end your URL's with a slash, sometimes it can be easy to forget and if this setting is turned on then the POST variables are lost in the redirection. To avoid this problem you either have to turn the setting off, or make sure you always make your form submit happen to the proper URL that has a slash at the end of it.</p>
 			
 	</body>
 </html>

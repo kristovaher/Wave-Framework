@@ -25,6 +25,10 @@
 				
 				<p>An important thing to keep in mind is that it is necessary to sometimes make sure that your database is also versioned, especially if your Models become incompatible with your newer versions. THis document gives some ideas about to achieve this as well.</p>
 				
+				<p>There are three types of version numbers for Wave Framework. First is the version of Wave Framework itself, written in PHP version number style, like 1.0.0, 3.7.1 and so on. Second version number is 'system' version number, which is used to define version numbers for your own software. This second version number is written the same way as PHP version number and is 1.0.0 in default installation. The third version number is for API and is written as 'v1', 'v2' and so on. This is because this version number is for API specification and can be used to request different versions over API.</p>
+				
+				<p>Version numbers are stored in '.version' file in the root folder of your installation. There is also a configuration setting 'api-versions', which lists the version numbers which are allowed to be accessed over API. Note that API versions can have any kind of name, including 'beta' and more, but only latin characters and numbers are allowed. Character of '.' is also not allowed as part of an API spec version number.</p>
+				
 			<h2 id="index-versioning-classes">Versioning Classes</h2>
 			
 				<p>Sometimes it is necessary to keep a Controller, Model or View file due to refactoring or backwards-compatibility-breaking changes in code. Wave Framework allows you to version your MVC classes by version numbers. To set up proper versioning you should first edit the configuration option 'api-versions'. For example, if you want to version your current 'controller.example.php' file from '/controllers/' folder, then you can change the configuration option to 'v2,v1'.</p>

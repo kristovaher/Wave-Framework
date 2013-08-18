@@ -154,16 +154,17 @@ class WWW_Factory {
 		}
 		
 		/** 
-		 * This method returns the currently used API version number. These version numbers can 
-		 * be used for versioning or other checks.
+		 * This method returns the currently used version numbers for API, system and
+		 * Wave Framework itself.
 		 *
+		 * @param $type either 'system', 'www' or 'api'
 		 * return boolean|string
 		 */
-		final protected function apiVersion(){
-			if($this->WWW_API->requestedVersion){
+		final protected function getVersion($type='api'){
+			if($type=='api' && $this->WWW_API->requestedVersion){
 				return $this->WWW_API->requestedVersion;
-			} elseif(isset($this->WWW_API->state->data['version'])){
-				return $this->WWW_API->state->data['version'];
+			} elseif(isset($this->WWW_API->state->data['version-'.$type])){
+				return $this->WWW_API->state->data['version-'.$type];
 			} else {
 				return false;
 			}

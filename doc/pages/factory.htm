@@ -143,9 +143,9 @@
 				
 					<p>This returns the www-return-type of currently known <a href="guide_api.htm">API</a> request. This can be used to modify the request response based on what data is requested, if this is needed.</p>
 					
-				<h3>final protected function apiVersion()</h3>
+				<h3>final protected function getVersion($type='api')</h3>
 				
-					<p>This method returns the currently used API version number. These version numbers can be used for versioning or other checks.</p>
+					<p>This method returns the currently used version numbers for API, system and Wave Framework itself.</p>
 					
 				<h3>final protected function dbNew($type,$host,$database,$username,$password,$showErrors=false,$persistentConnection=false)</h3>
 				

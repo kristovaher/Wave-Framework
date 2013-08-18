@@ -236,7 +236,9 @@ class WWW_State	{
 				'url-web'=>str_replace('index.php','',$_SERVER['SCRIPT_NAME']),
 				'user-data'=>false,
 				'user-permissions'=>false,
-				'version'=>'1.0.0',
+				'version-api'=>'v1',
+				'version-system'=>'1.0.0',
+				'version-www'=>'1.0.0',
 				'view'=>array(),
 				'view-headers'=>array()
 			);			

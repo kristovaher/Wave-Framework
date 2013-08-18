@@ -70,6 +70,14 @@
 		// Configuration is parsed from INI file in the root of the system
 		$config=parse_ini_file(__ROOT__.'config.ini',false,INI_SCANNER_RAW);
 		
+		// Loading version numbers
+		$versionsRaw=explode("\n",str_replace("\r",'',file_get_contents(__ROOT__.'.version')));
+		foreach($versionsRaw as $ver){
+			// Versions are separated by colon in the version file
+			$tmp=explode(':',$ver);
+			$config['version-'.$tmp[0]]=$tmp[1];
+		}
+		
 		// List of logger IP's
 		if(isset($config['logger-ip'])){
 			$config['logger-ip']=explode(',',$config['logger-ip']);
@@ -90,20 +98,15 @@
 			$config['api-logging']=explode(',',$config['api-logging']);
 		}
 		
-		// If version number is not set
-		if(!isset($config['version'])){
-			$config['version']='v1';
-		}
-		
 		// API versions
 		if(isset($config['api-versions'])){
 			// This also makes sure that the most recent version number exists in API versions list
 			$config['api-versions']=explode(',',$config['api-versions']);
-			if(!in_array($config['version'],$config['api-versions'])){
-				$config['api-versions'][]=$config['version'];
+			if(!in_array($config['version-api'],$config['api-versions'])){
+				$config['api-versions'][]=$config['version-api'];
 			}
 		} else {
-			$config['api-versions']=array($config['version']);
+			$config['api-versions']=array($config['version-api']);
 		}
 		
 		// File extensions and defaults

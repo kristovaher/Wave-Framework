@@ -406,7 +406,7 @@ final class WWW_API {
 				
 				// Existing response is checked from buffer if it exists
 				if($useBuffer){
-					$commandBufferAddress=md5($apiState['command'].serialize($apiInputData));
+					$commandBufferAddress=md5($apiState['command'].'&'.serialize($apiInputData).'&'.$this->requestedVersion);
 					// If result already exists in buffer then it is simply returned
 					if(isset($this->commandBuffer[$commandBufferAddress])){
 						return $this->commandBuffer[$commandBufferAddress];
@@ -422,7 +422,7 @@ final class WWW_API {
 					if($this->requestedVersion!=$apiInputData['www-version'] || !in_array($this->requestedVersion,$this->state->data['api-versions'])){
 						$this->requestedVersion=false;
 						return $this->output(array('www-message'=>'API version cannot be used: '.$apiInputData['www-version'],'www-response-code'=>117),$apiState);
-					} elseif($this->requestedVersion==$this->state->data['version']){
+					} elseif($this->requestedVersion==$this->state->data['version-api']){
 						// The most recent version number is set to false, which disables folder checking for these versions for performance reasons
 						$this->requestedVersion=false;
 					}
@@ -489,6 +489,12 @@ final class WWW_API {
 							// If profile is set to be disabled
 							return $this->output(array('www-message'=>'API profile is disabled: '.$apiState['profile'],'www-response-code'=>104),$apiState);
 						} 
+						
+						// Making sure that the API profile is allowed to request this version API
+						if($this->requestedVersion && isset($this->apiProfiles[$apiState['profile']]['versions']) && $this->apiProfiles[$apiState['profile']]['versions']!='*' && !in_array($this->requestedVersion,explode(',',$this->apiProfiles[$apiState['profile']]['versions']))){
+							// If version number is allowed for this profile
+							return $this->output(array('www-message'=>'API version cannot be used: '.$this->requestedVersion,'www-response-code'=>117),$apiState);
+						}
 						
 						// Testing if IP is in valid range
 						if(isset($this->apiProfiles[$apiState['profile']]['ip']) && $this->apiProfiles[$apiState['profile']]['ip']!='*' && !in_array($this->state->data['client-ip'],explode(',',$this->apiProfiles[$apiState['profile']]['ip']))){
@@ -779,7 +785,7 @@ final class WWW_API {
 					unset($cacheValidator[$this->state->data['session-name']],$cacheValidator['www-headers'],$cacheValidator['www-cache-tags'],$cacheValidator['www-hash'],$cacheValidator['www-state'],$cacheValidator['www-timestamp'],$cacheValidator['www-crypt-output'],$cacheValidator['www-cache-timeout'],$cacheValidator['www-cache-load-timeout'],$cacheValidator['www-return-type'],$cacheValidator['www-output'],$cacheValidator['www-return-hash'],$cacheValidator['www-return-timestamp'],$cacheValidator['www-content-type'],$cacheValidator['www-minify'],$cacheValidator['www-ip-session'],$cacheValidator['www-disable-callbacks'],$cacheValidator[$this->state->data['session-token-key']]);
 
 					// MD5 is used for slight performance benefits over sha1() when calculating cache validation hash string
-					$cacheValidator=md5($apiState['command'].serialize($cacheValidator).$apiState['return-type'].$apiState['push-output'].$this->state->data['version']);
+					$cacheValidator=md5($apiState['command'].'&'.serialize($cacheValidator).'&'.$apiState['return-type'].'&'.$apiState['push-output'].'&'.$this->state->data['version-system'].'&'.$this->requestedVersion);
 					
 					// Cache filename consists of API command, serialized input data, return type and whether API output is used.
 					$cacheFile=$cacheValidator.'.tmp';
@@ -920,17 +926,11 @@ final class WWW_API {
 									return $this->output(array('www-message'=>'Server configuration error: cannot create cache folder at '.$cacheFolder,'www-response-code'=>100),$apiState);
 								}
 							}
-							// Cache is stored in serialized form
-							$this->setCache($cacheFolder.$cacheFile,$apiResult);
-							
-							// If cache tag is set then system stores link to cache file
-							if(isset($apiInputData['www-cache-tags'],$cacheFolder,$cacheFile) && $apiInputData['www-cache-tags']!=''){
-								$cacheTags=explode(',',$apiInputData['www-cache-tags']);
-								foreach($cacheTags as $tag){
-									if(!file_put_contents($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp',$cacheFolder.$cacheFile."\n",FILE_APPEND)){
-										return $this->output(array('www-message'=>'Server configuration error: cannot create cache tag index at '.$this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($tag).'.tmp','www-response-code'=>100),$apiState);
-									}
-								}
+							// Cache is stored together with tags, if requested
+							if(isset($apiInputData['www-cache-tags']) && $apiInputData['www-cache-tags']!=''){
+								$this->setCache($cacheFolder.$cacheFile,$apiResult,$apiInputData['www-cache-tags']);
+							} else {
+								$this->setCache($cacheFolder.$cacheFile,$apiResult);
 							}
 							
 						} else {
@@ -1913,16 +1913,17 @@ final class WWW_API {
 			// User cache does not have an address
 			if($custom){
 				// User cache location
-				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.$this->state->data['version']).'.tmp';
-				// If tag is attached to cache
-				if($tags){
-					if(!is_array($tags)){
-                        $tags=explode(',',$tags);
-					}
-					foreach($tags as $t){
-						if(!file_put_contents($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($t).'.tmp',$keyAddress."\n",FILE_APPEND)){
-							trigger_error('Cannot store cache tag at '.$keyAddress,E_USER_ERROR);
-						}
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.'&'.$this->state->data['version-system']).'.tmp';
+			}
+			
+			// If tag is attached to cache
+			if($tags){
+				if(!is_array($tags)){
+					$tags=explode(',',$tags);
+				}
+				foreach($tags as $t){
+					if(!file_put_contents($this->state->data['directory-system'].'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'tags'.DIRECTORY_SEPARATOR.md5($t).'.tmp',$keyAddress."\n",FILE_APPEND)){
+						trigger_error('Cannot store cache tag at '.$keyAddress,E_USER_ERROR);
 					}
 				}
 			}
@@ -1978,7 +1979,7 @@ final class WWW_API {
 		
 			// User cache does not have an address
 			if($custom){
-				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.$this->state->data['version']).'.tmp';
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.'&'.$this->state->data['version-system']).'.tmp';
 			}
 			
 			// If limit is used
@@ -2023,7 +2024,7 @@ final class WWW_API {
 		
 			// User cache does not have an address
 			if($custom){
-				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.$this->state->data['version']).'.tmp';
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.'&'.$this->state->data['version-system']).'.tmp';
 			}
 			
 			// Accessing cache
@@ -2064,7 +2065,7 @@ final class WWW_API {
 		
 			// User cache does not have an address
 			if($custom){
-				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.$this->state->data['version']).'.tmp';
+				$keyAddress=__ROOT__.'filesystem'.DIRECTORY_SEPARATOR.'cache'.DIRECTORY_SEPARATOR.'custom'.DIRECTORY_SEPARATOR.md5($keyAddress.'&'.$this->state->data['version-system']).'.tmp';
 			}
 			
 			// Accessing cache

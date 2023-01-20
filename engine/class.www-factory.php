@@ -15,7 +15,7 @@
  * @license    GNU Lesser General Public License Version 3
  * @tutorial   /doc/pages/factory.htm
  * @since      1.0.0
- * @version    3.7.0
+ * @version    3.7.2
  */
 
 class WWW_Factory {
@@ -409,7 +409,7 @@ class WWW_Factory {
 		 * @param boolean|string $methodData input variable for the method that is called
 		 * @return object or mixed if function called
 		 */
-		final private function getMVC($type,$mvc,$methodName=false,$methodData=false){
+		private function getMVC($type,$mvc,$methodName=false,$methodData=false){
 		
 			// Dynamically creating class name
 			$className='WWW_'.$type.'_'.str_replace('-','_',$mvc);

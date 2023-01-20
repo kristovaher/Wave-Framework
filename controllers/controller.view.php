@@ -147,7 +147,8 @@ class WWW_controller_view extends WWW_Factory {
 		
 		// Rendering the view object and capturing the output
 		ob_start();
-		$viewObject->$view['view-method']($input);
+		$method=$view['view-method'];
+		$viewObject->$method($input);
 		$viewContent=ob_get_clean();
 		
 		// Header collector data for view
@@ -237,7 +238,7 @@ class WWW_controller_view extends WWW_Factory {
 			</html>
 		<?php
 		
-		// API Will load result data from output buffer
+		// API will load result data from output buffer
 		return null;
 	
 	}

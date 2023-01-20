@@ -1261,10 +1261,11 @@ class WWW_Wrapper {
 						}
 					} else {
 						// Returning data from callback
+						$method=$thisApiState['trueCallback'];
 						if($thisApiState['trueCallbackParameters']!=false){
-							return $thisApiState['trueCallback']($resultData,$thisApiState['trueCallbackParameters']);
+							return $method($resultData,$thisApiState['trueCallbackParameters']);
 						} else {
-							return $thisApiState['trueCallback']($resultData);
+							return $method($resultData);
 						}
 					}
 				} elseif($thisApiState['falseCallback'] && $responseCode<500){

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Log Reader
  *
  * This is a simple script that is used to read log files stored by WWW_Logger class. 

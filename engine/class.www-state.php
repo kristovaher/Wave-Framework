@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * State Class
  *
  * State is always required by Wave Framework. It is used by API and some handlers. State is used 

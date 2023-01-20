@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Limiter Class
  *
  * This is an optional class that is used to limit HTTP requests based on user agent, IP, 

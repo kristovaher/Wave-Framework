@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Self-Executed Updater Script
  *
  * This is an update script template, if file with this name is added to root archive of update zip 

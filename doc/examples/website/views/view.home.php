@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Website Tutorial <http://www.waveframework.com>
+ * Website Tutorial <http://github.com/kristovaher/Wave-Framework>
  * Tutorial Home View
  *
  * It is recommended to extend View classes from WWW_Factory in order to 

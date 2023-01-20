@@ -1,6 +1,6 @@
 
 /*
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * JavaScript Factory Class
  *
  * JavaScript factory has very minimal use compared to the Wave Framework's own internal PHP 

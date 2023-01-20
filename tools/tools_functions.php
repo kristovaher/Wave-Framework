@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Tools Functions Library
  *
  * This script includes various general-use functions that are used by developer tools in Wave Framework 

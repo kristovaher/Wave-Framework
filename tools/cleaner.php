@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Filesystem Cleaner
  *
  * This script is used to clear Wave Framework system generated filesystem. It should be used 

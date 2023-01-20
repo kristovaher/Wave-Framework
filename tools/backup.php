@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * System Backup Archiver
  *
  * This script creates backup of entire system together with filesystem or just a backup of the main core 

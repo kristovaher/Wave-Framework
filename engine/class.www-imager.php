@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Imager Class
  *
  * Imager is a class that acts as a wrapper to PHP GD library and has a number of methods to 

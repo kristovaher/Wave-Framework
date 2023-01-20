@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Test Suite
  *
  * Wave Framework includes a full test suite for writing tests for API's and running said 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Tools Class
  *
  * This class holds various functionality that also the /tools/ folder has itself. This allows 

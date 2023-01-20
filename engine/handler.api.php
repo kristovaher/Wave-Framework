@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * API Handler
  *
  * API Handler is loaded whenever a HTTP request is made to *.api extension. API Handler takes all 

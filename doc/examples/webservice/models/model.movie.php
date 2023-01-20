@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Web Service Tutorial <http://www.waveframework.com>
+ * Web Service Tutorial <http://github.com/kristovaher/Wave-Framework>
  * Tutorial Movie Model
  *
  * It is recommended to extend View classes from WWW_Factory in order to 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * PHP API Wrapper Class
  *
  * Main purpose of an API Wrapper is to make it easier to make API requests over HTTP to a system 

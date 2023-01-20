@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * API Class
  *
  * API class is one of the core classes of Wave Framework. Every command and function in Wave 
@@ -1558,7 +1558,7 @@ final class WWW_API {
 			if($type=='rss' || $type=='atom'){
 				// If namespace is not set, then default Wave Framework namespace is used
 				if(!isset($apiResult['www-xml-namespace'])){
-					$namespace='xmlns:www="http://www.waveframework.com"';
+					$namespace='xmlns:www="http://github.com/kristovaher/Wave-Framework"';
 				} else {
 					// Finding the namespace from the namespace URL
 					$namespace=str_replace('xmlns:','',$apiResult['www-xml-namespace']);

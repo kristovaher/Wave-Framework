@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Data Handler
  *
  * Data Handler is loaded in situations when other handlers were not used, which is most commonly for 

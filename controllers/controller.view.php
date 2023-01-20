@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * View Controller
  *
  * Wave Framework comes with a View Controller and a translations system that is used to build 

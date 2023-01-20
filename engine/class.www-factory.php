@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Factory Class
  *
  * Factory class is the base class for a lot of Wave Framework dynamically loaded model, view 

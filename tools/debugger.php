@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Errors and Warnings Debugger
  *
  * This is a script that collects error messages that have been written to filesystem. It also provides method 

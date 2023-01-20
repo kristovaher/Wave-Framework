@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Minifier Class
  *
  * Minifier is used to minify text data without breaking functionality of that text. This is 

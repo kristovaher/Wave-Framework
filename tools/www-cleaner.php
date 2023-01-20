@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Cleaner Script for the Server
  *
  * This is a maintenance script template. It works similarly to Cleaner tool, but is intended 

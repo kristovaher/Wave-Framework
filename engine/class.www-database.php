@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Database Class
  *
  * Simple database class that acts as a wrapper to PDO. It is not required to use WWW_Database 

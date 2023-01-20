@@ -17,7 +17,7 @@ Wave is a PHP micro-framework that is built loosely following model-view-control
 Mercurial and Git repositories is available for developers who are interested in following the development.
 
 Official website and documentation:
-http://www.waveframework.com
+http://github.com/kristovaher/Wave-Framework
 
 Social networks for latest news: 
 Google+ - http://plus.google.com/106969835456865671988 
@@ -96,7 +96,7 @@ INSTALLATION
 HELP AND DOCUMENTATION
 ----------------------
 
-Official documentation about how to set up a system and use the API, as well as tutorials are available under /doc/ directory. To read documentation, open /doc/start.htm file with a web browser. It is also possible to read the most recent documentation online at 'www.waveframework.com'.
+Official documentation about how to set up a system and use the API, as well as tutorials are available under /doc/ directory. To read documentation, open /doc/index.htm file with a web browser.
 
 If you wish to participate in Wave Framework development and submit patches, fixes and new features, then it is recommended to do so through GitHub.
 
@@ -106,9 +106,6 @@ REPOSITORIES
 ------------
 
 GitHub - https://github.com/kristovaher/Wave-Framework
-SourceForge - https://sourceforge.net/projects/www-php/
-Google Code - http://code.google.com/p/www-framework/
-BitBucket - https://bitbucket.org/kristovaher/wave-framework
 
 AUTHOR
 ------
@@ -116,7 +113,6 @@ AUTHOR
 Kristo Vaher
 kristo@waher.net
 http://www.waher.net
-http://plus.google.com/102632377636999004385/
 
 CONTRIBUTORS
 ------------

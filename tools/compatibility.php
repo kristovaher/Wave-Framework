@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * System Compatibility Script
  *
  * This script checks if installation is ready for Wave Framework. It checks for PHP version, whether 

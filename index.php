@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * Index Gateway
  *
  * Index Gateway is an index/bootstrap file of Wave Framework that will serve almost every HTTP 

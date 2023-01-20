@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Wave Framework <http://www.waveframework.com>
+ * Wave Framework <http://github.com/kristovaher/Wave-Framework>
  * URL Controller
  *
  * Wave Framework comes with a URL Controller and a sitemap system that is used to build a 
